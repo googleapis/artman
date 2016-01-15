@@ -1,0 +1,34 @@
+"""One-line documentation for backend_helper module.
+
+A detailed description of backend_helper.
+"""
+
+from taskflow.jobs import backends as job_backends
+from taskflow.persistence import backends as persistence_backends
+
+# Default host/port of ZooKeeper service.
+ZK_HOST = '104.197.150.171:2181'
+
+# Default jobboard configuration.
+JB_CONF = {
+    'hosts': ZK_HOST,
+    'board': 'zookeeper',
+    'path': '/taskflow/99-bottles-demo',
+}
+
+# Default persistence configuration.
+PERSISTENCE_CONF = {
+    'connection': 'zookeeper',
+    'hosts': ZK_HOST,
+    'path': '/taskflow/persistence',
+}
+
+
+def default_persistence_backend():
+  return persistence_backends.fetch(PERSISTENCE_CONF)
+
+
+def default_jobboard_backend(name):
+  return job_backends.fetch(name,
+                            JB_CONF,
+                            persistence=default_persistence_backend())

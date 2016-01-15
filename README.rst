@@ -20,3 +20,25 @@ Once done developing, deactivate the development environment:
 
   ::
      $(develop) deactivate
+
+
+Try it out
+----------
+
+To execute the pipeline locally, try the following example command:
+
+   $python execute_pipeline.py --pipeline_kwargs={\'sleep_secs\':2} SamplePipeline
+
+To execute with pipeline remotely, start two consoles and run the following command
+in one console:
+
+    $python start_conductor.py
+
+And then run the following command for multiple times with different parameter:
+
+    $python execute_pipeline.py --pipeline_kwargs={\'sleep_secs\':2} --remote_mode SamplePipeline
+
+Please note, there is no guarantee that your pipeline job will be claimed by the
+conductor running on your machine. It can also be picked up by other conductor
+processes. You can run the second command for multiple times, and chances are
+good that your conductor will pick up one job at least.
