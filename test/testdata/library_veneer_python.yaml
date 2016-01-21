@@ -1,3 +1,0 @@
-type: io.gapi.vgen.ConfigProto
-language_provider: io.gapi.vgen.py.PythonLanguageProvider
-snippet_files: main.snip

@@ -51,13 +51,15 @@ To run the Python pipeline:
 
 ::
     $ python execute_pipeline.py \
-       --pipeline_kwargs="{'service_protos':
-       ['test/testdata/proto/google/example/library/v1/library.proto'],
-                      'proto_path': 'test/testdata/proto',
-                      'core_proto_path': '../gapi-core-proto/src/main/proto/',
-                      'gapi_tools_path': '../gapi-tools',
-                      'service_yaml': ['test/testdata/library.yaml'],
-                      'veneer_yaml': ['test/testdata/library_veneer.yaml',
-                                      'test/testdata/library_veneer_python.yaml'],
-                      'output_dir': 'test/output'}" \
+       --pipeline_kwargs="(
+       {'service_protos':
+            ['test/testdata/gapi-example-library-proto/src/main/proto/google/example/library/v1/library.proto'],
+        'proto_path': 'test/testdata/gapi-example-library-proto/src/main/proto',
+        'core_proto_path': '../gapi-core-proto/src/main/proto/',
+        'gapi_tools_path': '../gapi-tools',
+        'service_yaml': ['test/testdata/gapi-example-library-proto/src/main/proto/google/example/library/library.yaml'],
+        'veneer_yaml':
+            ['test/testdata/gapi-example-library-proto/src/main/proto/google/example/library/library_veneer.yaml',
+             'test/testdata/gapi-example-library-proto/src/main/proto/google/example/library/python_veneer.yaml'],
+        'output_dir': 'test/output'})" \
   PythonCodeGenPipeline
