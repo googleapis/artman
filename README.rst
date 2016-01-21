@@ -12,7 +12,7 @@ Install tox if it has not already been installed:
 Create, then activate the tox development environment:
 
   ::
-     $ tox -e py27
+     $ tox -e devenv
      $ . .tox/develop/bin/activate
      $(develop) ...
 

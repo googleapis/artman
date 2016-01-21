@@ -35,7 +35,7 @@ class ProtoDescriptorGenTask(task_base.TaskBase):
         return os.path.join(output_dir, out_file)
 
     def requires():
-        return [grpc_requirement.GrpcRequirement]
+        return [grpc_requirements.GrpcRequirement]
 
 
 class GrpcCodeGenTask(task_base.TaskBase):
@@ -53,4 +53,14 @@ class GrpcCodeGenTask(task_base.TaskBase):
             print 'Running protoc on {0}'.format(proto)
 
     def requires():
-        return [grpc_requirement.GrpcRequirements]
+        return [grpc_requirements.GrpcRequirements]
+
+class PackmanTask(task_base.TaskBase):
+    """Checks packman requirements"""
+    def execute(self, plugin, proto_path, core_proto_path, output_dir):
+        subprocess.call(
+            ['gen-api-package', '--api_name=logging/v2',
+             '-l', 'python', '-o', output_dir])
+
+    def requires():
+        return [packman_requirements.PackmanRequirements]
