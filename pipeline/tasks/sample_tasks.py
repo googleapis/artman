@@ -5,11 +5,11 @@ import subprocess
 import sys
 import time
 
-from task_base import TaskBase
-from requirements.sample_requirement import SampleRequirement
+from pipeline.tasks import task_base
+from requirements import sample_requirement
 
 
-class SampleTask(TaskBase):
+class SampleTask(task_base.TaskBase):
   """A sample task"""
 
   def execute(self, sleep_secs):
@@ -18,4 +18,4 @@ class SampleTask(TaskBase):
 
   @staticmethod
   def requires():
-    return [SampleRequirement]
+    return [sample_requirement.SampleRequirement]

@@ -3,34 +3,14 @@
 import os
 import subprocess
 from taskflow import task
-from pipeline.tasks import prerequesites
+from pipeline.tasks import task_base
+from pipeline.tasks.requirements import grpc_requirements
 
 
-class ProtocCheckTask(task.Task):
-    """Checks whether protoc is on the system path"""
-    def execute(self):
-        try:
-            with open(os.devnull, 'wb') as devnull:
-                subprocess.check_call(['which', 'protoc'], stdout=devnull)
-        except subprocess.CalledProcessError:
-            raise prerequesites.PrerequesiteError(
-                'protoc', 'Ensure protoc is installed.')
-
-
-class ProtocPluginCheckTask(task.Task):
-    """Checks whether the specified protoc plugin is on the system path"""
-    def execute(self, plugin):
-        try:
-            with open(os.devnull, 'wb') as devnull:
-                subprocess.check_call(['which', plugin], stdout=devnull)
-        except subprocess.CalledProcessError:
-            raise prerequesites.PrerequesiteError(
-                'protoc', 'Ensure protoc is installed.')
-
-
-class ProtoDescriptorGenTask(task.Task):
+class ProtoDescriptorGenTask(task_base.TaskBase):
     """Generates proto descriptor set"""
     default_provides = 'descriptor_set'
+
     def execute(self, proto_path, service_protos, core_proto_path, output_dir):
         print 'Compiling descriptors {0}'.format(service_protos)
         out_file = 'descriptor.desc'
@@ -44,8 +24,11 @@ class ProtoDescriptorGenTask(task.Task):
                         + service_protos)
         return os.path.join(output_dir, out_file)
 
+    def requires():
+        return [grpc_requirement.GrpcRequirement]
 
-class GrpcCodeGenTask(task.Task):
+
+class GrpcCodeGenTask(task_base.TaskBase):
     """Generates the gRPC client library"""
     def execute(self, plugin, proto_path, core_proto_path, output_dir):
         protos = []
@@ -60,3 +43,6 @@ class GrpcCodeGenTask(task.Task):
                  subprocess.check_output(['which', plugin])[:-1],
                  '--grpc_out=' + output_dir, proto])
             print 'Running protoc on {0}'.format(proto)
+
+    def requires():
+        return [grpc_requirement.GrpcRequirements]

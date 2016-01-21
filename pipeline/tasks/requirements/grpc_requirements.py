@@ -1,11 +1,11 @@
-"""protoc requirement class."""
+"""protoc requirements class."""
 
 import subprocess
 
-from task_requirement_base import TaskRequirementBase
+from pipeline.tasks.requirements import task_requirement_base
 
 
-class GrpcRequirement(TaskRequirementBase):
+class GrpcRequirements(task_requirement_base.TaskRequirementBase):
 
   @classmethod
   def require(cls):

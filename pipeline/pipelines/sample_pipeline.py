@@ -1,12 +1,11 @@
 """A canonical example of a flow class supported by vkit pipeline"""
 
-from pipeline_base import PipelineBase
-
+from pipeline.pipelines import pipeline_base
 from pipeline.tasks import sample_tasks
 from taskflow.patterns import linear_flow
 
 
-class SamplePipeline(PipelineBase):
+class SamplePipeline(pipeline_base.PipelineBase):
 
   def __init__(self, **kwargs):
     super(SamplePipeline, self).__init__(**kwargs)
