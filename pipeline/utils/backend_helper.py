@@ -13,7 +13,7 @@ ZK_HOST = '104.197.150.171:2181'
 JB_CONF = {
     'hosts': ZK_HOST,
     'board': 'zookeeper',
-    'path': '/taskflow/99-bottles-demo',
+    'path': '/taskflow/dev',
 }
 
 # Default persistence configuration.
