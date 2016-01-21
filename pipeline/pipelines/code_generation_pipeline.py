@@ -21,9 +21,8 @@ class CodeGenPipeline(pipeline_base.PipelineBase):
         return flow
 
     def validate_kwargs(self, **kwargs):
-        required = ['service_protos',
-                    'proto_path',
-                    'core_proto_path',
+        required = ['service_proto_path',
+                    'import_proto_path',
                     'gapi_tools_path',
                     'service_yaml',
                     'veneer_yaml',
