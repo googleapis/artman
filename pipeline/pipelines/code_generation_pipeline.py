@@ -28,7 +28,7 @@ class CodeGenPipeline(pipeline_base.PipelineBase):
                     'service_yaml',
                     'veneer_yaml',
                     'output_dir',
-                    'plugin']
+                    'grpc_plugin']
         pipeline_util.validate_exists(required, **kwargs)
         if not (os.path.isfile(
                     os.path.join(kwargs['gapi_tools_path'], 'gradlew')) and
@@ -43,5 +43,5 @@ class CodeGenPipeline(pipeline_base.PipelineBase):
 class PythonCodeGenPipeline(CodeGenPipeline):
 
     def __init__(self, **kwargs):
-        kwargs['plugin'] = 'grpc_python_plugin'
+        kwargs['grpc_plugin'] = 'grpc_python_plugin'
         super(PythonCodeGenPipeline, self).__init__(**kwargs)
