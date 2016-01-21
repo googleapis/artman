@@ -17,6 +17,7 @@ class CodeGenPipeline(pipeline_base.PipelineBase):
         flow.add(protoc_tasks.ProtoDescriptorGenTask('ProtoCompilation',
                                                      inject=kwargs),
                  protoc_tasks.GrpcCodeGenTask('GrpcCodegen', inject=kwargs),
+                 protoc_tasks.PackmanTask('Packman', inject=kwargs),
                  veneer_tasks.VeneerCodeGenTask('VeneerCodegen', inject=kwargs))
         return flow
 
