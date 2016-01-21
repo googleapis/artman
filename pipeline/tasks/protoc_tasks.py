@@ -1,10 +1,21 @@
 """Tasks related to protoc"""
 
+import collections
 import os
 import subprocess
 from taskflow import task
 from pipeline.tasks import task_base
 from pipeline.tasks.requirements import grpc_requirements
+
+
+_GrpcPluginSettings = collections.namedtuple(
+    'GrpcPluginSettings',
+    ['output_parameter', 'plugin_name'])
+
+_GRPC_PLUGIN_MAP = {
+    'python': _GrpcPluginSettings(
+        'python_out',
+        subprocess.check_output(['which', 'grpc_python_plugin'])[:-1])}
 
 
 def _find_protos(proto_paths):
@@ -40,15 +51,18 @@ class ProtoDescriptorGenTask(task_base.TaskBase):
 
 class GrpcCodeGenTask(task_base.TaskBase):
     """Generates the gRPC client library"""
-    def execute(self, plugin, service_proto_path, import_proto_path, output_dir):
+    def execute(self, language, service_proto_path, import_proto_path,
+                output_dir):
+        grpc_plugin = _GRPC_PLUGIN_MAP[language]
         for proto in _find_protos(service_proto_path):
             subprocess.call(
                 ['protoc'] +
                 ['--proto_path=' + path
                      for path in (import_proto_path + service_proto_path)] +
-                ['--python_out=' + output_dir,
+                ['--{0}='.format(grpc_plugin.output_parameter) +
+                 output_dir,
                  '--plugin=protoc-gen-grpc=' +
-                 subprocess.check_output(['which', plugin])[:-1],
+                 subprocess.check_output(grpc_plugin.plugin_name),
                  '--grpc_out=' + output_dir, proto])
             print 'Running protoc on {0}'.format(proto)
 
@@ -57,7 +71,7 @@ class GrpcCodeGenTask(task_base.TaskBase):
 
 class PackmanTask(task_base.TaskBase):
     """Checks packman requirements"""
-    def execute(self, plugin, proto_path, core_proto_path, output_dir):
+    def execute(self, output_dir):
         subprocess.call(
             ['gen-api-package', '--api_name=logging/v2',
              '-l', 'python', '-o', output_dir])
