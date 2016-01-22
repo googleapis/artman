@@ -1,6 +1,5 @@
 """One-line documentation for backend_helper module.
 
-A detailed description of backend_helper.
 """
 
 from taskflow.jobs import backends as job_backends
@@ -25,10 +24,10 @@ PERSISTENCE_CONF = {
 
 
 def default_persistence_backend():
-  return persistence_backends.fetch(PERSISTENCE_CONF)
+    return persistence_backends.fetch(PERSISTENCE_CONF)
 
 
 def default_jobboard_backend(name):
-  return job_backends.fetch(name,
-                            JB_CONF,
-                            persistence=default_persistence_backend())
+    return job_backends.fetch(name,
+                              JB_CONF,
+                              persistence=default_persistence_backend())

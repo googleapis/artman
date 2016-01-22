@@ -8,30 +8,35 @@ different tasks."""
 
 import subprocess
 
+
 class TaskRequirementBase(object):
 
-  @classmethod
-  def require(cls):
-    """Abstract method, which returns the list of required files or exectuables.
+    @classmethod
+    def require(cls):
+        """Abstract method, which returns the list of required files or
+        executables.
 
-    Subclass must implment this method.
-    """
-    raise NotImplementedError("Subclass must implement abstract method")
+        Subclass must implment this method.
 
-  @classmethod
-  def install(cls):
-    """Abstract method, which installs all required bits this tasks will need.
+        """
+        raise NotImplementedError("Subclass must implement abstract method")
 
-    Subclass must implment this method.
-    """
-    raise NotImplementedError("Subclass must implement abstract method")
+    @classmethod
+    def install(cls):
+        """Abstract method, which installs all required bits this tasks will
+        need.
 
-  @classmethod
-  def is_installed(cls):
-    """Return True if all requirements have been installed."""
-    for exe in cls.require():
-      # TODO(cbao): Use shutil.which() if running with Python 3.3 and above.
-      return_code = subprocess.call(["which", exe])
-      if return_code:
-        return False
-    return True
+        Subclass must implment this method.
+        """
+        raise NotImplementedError("Subclass must implement abstract method")
+
+    @classmethod
+    def is_installed(cls):
+        """Return True if all requirements have been installed."""
+        for exe in cls.require():
+            # TODO(cbao): Use shutil.which() if running with Python 3.3 and
+            # above.
+            return_code = subprocess.call(["which", exe])
+            if return_code:
+                return False
+        return True

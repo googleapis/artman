@@ -3,9 +3,9 @@
 import collections
 import os
 import subprocess
-from taskflow import task
 from pipeline.tasks import task_base
 from pipeline.tasks.requirements import grpc_requirements
+from pipeline.tasks.requirements import packman_requirements
 
 
 _GrpcPluginSettings = collections.namedtuple(
@@ -25,7 +25,7 @@ def _find_protos(proto_paths):
     for path in proto_paths:
         for root, _, files in os.walk(path):
             protos += [os.path.join(root, proto) for proto in files
-                if os.path.splitext(proto)[1] == '.proto']
+                       if os.path.splitext(proto)[1] == '.proto']
     return protos
 
 
@@ -34,19 +34,20 @@ class ProtoDescriptorGenTask(task_base.TaskBase):
     default_provides = 'descriptor_set'
 
     def execute(self, service_proto_path, import_proto_path, output_dir):
-        print 'Compiling descriptors {0}'.format(_find_protos(service_proto_path))
+        print 'Compiling descriptors {0}'.format(
+            _find_protos(service_proto_path))
         out_file = 'descriptor.desc'
         subprocess.call(['mkdir', '-p', output_dir])
         subprocess.call(['protoc', '--include_imports'] +
                         ['--proto_path=' + path for path in
-                             (service_proto_path + import_proto_path)] +
+                         (service_proto_path + import_proto_path)] +
                         ['--include_source_info',
                          '-o', os.path.join(output_dir, out_file)] +
                         _find_protos(service_proto_path))
         return os.path.join(output_dir, out_file)
 
-    def requires():
-        return [grpc_requirements.GrpcRequirement]
+    def validate(self):
+        return [grpc_requirements.GrpcRequirements]
 
 
 class GrpcCodeGenTask(task_base.TaskBase):
@@ -58,7 +59,7 @@ class GrpcCodeGenTask(task_base.TaskBase):
             subprocess.call(
                 ['protoc'] +
                 ['--proto_path=' + path
-                     for path in (import_proto_path + service_proto_path)] +
+                 for path in (import_proto_path + service_proto_path)] +
                 ['--{0}='.format(grpc_plugin.output_parameter) +
                  output_dir,
                  '--plugin=protoc-gen-grpc=' +
@@ -66,8 +67,9 @@ class GrpcCodeGenTask(task_base.TaskBase):
                  '--grpc_out=' + output_dir, proto])
             print 'Running protoc on {0}'.format(proto)
 
-    def requires():
+    def validate(self):
         return [grpc_requirements.GrpcRequirements]
+
 
 class PackmanTask(task_base.TaskBase):
     """Checks packman requirements"""
@@ -76,5 +78,5 @@ class PackmanTask(task_base.TaskBase):
             ['gen-api-package', '--api_name=' + package_name,
              '-l', 'python', '-o', output_dir])
 
-    def requires():
+    def validate(self):
         return [packman_requirements.PackmanRequirements]

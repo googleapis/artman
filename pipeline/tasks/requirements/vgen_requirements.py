@@ -1,7 +1,5 @@
 """Requirements to run VGen"""
 
-import subprocess
-
 from pipeline.tasks.requirements import task_requirement_base
 
 

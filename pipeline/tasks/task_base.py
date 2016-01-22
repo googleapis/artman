@@ -8,11 +8,10 @@ from taskflow.task import Task
 
 class TaskBase(Task):
 
-  @staticmethod
-  def requires():
-    """Abstract method, which returns list of task requirements.
+    def validate(self):
+        """Abstract method, which returns list of task requirements.
 
-    Subclass must implment this method, and return list of task requirements
-    classes.
-    """
-    raise NotImplementedError("Subclass must implement abstract method")
+        Subclass must implment this method and return list of task requirements
+        classes.
+        """
+        raise NotImplementedError("Subclass must implement abstract method")

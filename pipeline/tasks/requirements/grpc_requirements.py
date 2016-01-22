@@ -7,24 +7,23 @@ from pipeline.tasks.requirements import task_requirement_base
 
 class GrpcRequirements(task_requirement_base.TaskRequirementBase):
 
-  @classmethod
-  def require(cls):
-    """Grpc requires protoc and grpc plugins.
+    @classmethod
+    def require(cls):
+        """Grpc requires protoc and grpc plugins.
 
-    TODO(cbao): List more grpc plugins.
-    """
-    return ['protoc', 'grpc_java_plugin', 'grpc_python_plugin']
+        TODO(cbao): List more grpc plugins.
+        """
+        return ['protoc', 'grpc_java_plugin', 'grpc_python_plugin']
 
-  @classmethod
-  def install(cls):
-    """Install protoc and grpc plugins via a installation shell script."""
-    curl_process = subprocess.Popen(
-        ["curl", "-s", "https://raw.githubusercontent.com/grpc/homebrew-grpc/master/scripts/install"],
-        stdout=subprocess.PIPE)
-    bash_process = subprocess.Popen(
-        ["bash", "-s", "--"],
-        stdin=curl_process.stdout,
-        stdout=subprocess.PIPE)
-    curl_process.stdout.close()
-    return bash_process.communicate()[0]
-
+    @classmethod
+    def install(cls):
+        """Install protoc and grpc plugins via a installation shell script."""
+        curl_process = subprocess.Popen(
+            ["curl", "-s", "http://goo.gl/getrpc"],
+            stdout=subprocess.PIPE)
+        bash_process = subprocess.Popen(
+            ["bash", "-s", "--"],
+            stdin=curl_process.stdout,
+            stdout=subprocess.PIPE)
+        curl_process.stdout.close()
+        return bash_process.communicate()[0]

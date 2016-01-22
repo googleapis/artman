@@ -1,7 +1,5 @@
 """packman requirements class."""
 
-import subprocess
-
 from pipeline.tasks.requirements import task_requirement_base
 
 

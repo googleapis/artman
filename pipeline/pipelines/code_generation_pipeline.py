@@ -17,7 +17,8 @@ class CodeGenPipeline(pipeline_base.PipelineBase):
         flow.add(protoc_tasks.ProtoDescriptorGenTask('ProtoCompilation',
                                                      inject=kwargs),
                  protoc_tasks.GrpcCodeGenTask('GrpcCodegen', inject=kwargs),
-                 veneer_tasks.VeneerCodeGenTask('VeneerCodegen', inject=kwargs))
+                 veneer_tasks.VeneerCodeGenTask(
+                     'VeneerCodegen', inject=kwargs))
         return flow
 
     def validate_kwargs(self, **kwargs):
@@ -38,7 +39,6 @@ class CodeGenPipeline(pipeline_base.PipelineBase):
                 'at {0}'.format(kwargs['gapi_tools_path']))
 
 
-
 class PythonCodeGenPipeline(CodeGenPipeline):
     def __init__(self, **kwargs):
         kwargs['language'] = 'python'
@@ -53,6 +53,6 @@ class PythonCodeGenPipeline(CodeGenPipeline):
                                                      inject=kwargs),
                  protoc_tasks.GrpcCodeGenTask('GrpcCodegen', inject=kwargs),
                  protoc_tasks.PackmanTask('Packman', inject=kwargs),
-                 veneer_tasks.VeneerCodeGenTask('VeneerCodegen', inject=kwargs))
+                 veneer_tasks.VeneerCodeGenTask(
+                     'VeneerCodegen', inject=kwargs))
         return flow
-
