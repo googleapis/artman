@@ -2,8 +2,9 @@
 kwargs."""
 
 from pipeline.pipelines import pipeline_base
-from pipeline.pipelines import sample_pipeline
-from pipeline.pipelines import code_generation_pipeline
+# These are required to list the subclasses of pipeline_base
+from pipeline.pipelines import sample_pipeline  # noqa
+from pipeline.pipelines import code_generation_pipeline  # noqa
 
 
 def make_pipeline_flow(pipeline_name, **kwargs):
