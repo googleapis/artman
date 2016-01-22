@@ -71,9 +71,9 @@ class GrpcCodeGenTask(task_base.TaskBase):
 
 class PackmanTask(task_base.TaskBase):
     """Checks packman requirements"""
-    def execute(self, output_dir):
+    def execute(self, package_name, output_dir):
         subprocess.call(
-            ['gen-api-package', '--api_name=logging/v2',
+            ['gen-api-package', '--api_name=' + package_name,
              '-l', 'python', '-o', output_dir])
 
     def requires():

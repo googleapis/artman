@@ -17,7 +17,6 @@ class CodeGenPipeline(pipeline_base.PipelineBase):
         flow.add(protoc_tasks.ProtoDescriptorGenTask('ProtoCompilation',
                                                      inject=kwargs),
                  protoc_tasks.GrpcCodeGenTask('GrpcCodegen', inject=kwargs),
-                 protoc_tasks.PackmanTask('Packman', inject=kwargs),
                  veneer_tasks.VeneerCodeGenTask('VeneerCodegen', inject=kwargs))
         return flow
 
@@ -43,4 +42,17 @@ class CodeGenPipeline(pipeline_base.PipelineBase):
 class PythonCodeGenPipeline(CodeGenPipeline):
     def __init__(self, **kwargs):
         kwargs['language'] = 'python'
+        kwargs['plugin'] = 'grpc_python_plugin'
+        # TODO: Make generic.
+        kwargs['package_name'] = 'logging/v2'
         super(PythonCodeGenPipeline, self).__init__(**kwargs)
+
+    def do_build_flow(self, **kwargs):
+        flow = linear_flow.Flow('codegen')
+        flow.add(protoc_tasks.ProtoDescriptorGenTask('ProtoCompilation',
+                                                     inject=kwargs),
+                 protoc_tasks.GrpcCodeGenTask('GrpcCodegen', inject=kwargs),
+                 protoc_tasks.PackmanTask('Packman', inject=kwargs),
+                 veneer_tasks.VeneerCodeGenTask('VeneerCodegen', inject=kwargs))
+        return flow
+
