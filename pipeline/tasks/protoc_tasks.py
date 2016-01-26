@@ -63,7 +63,7 @@ class GrpcCodeGenTask(task_base.TaskBase):
                 ['--{0}='.format(grpc_plugin.output_parameter) +
                  output_dir,
                  '--plugin=protoc-gen-grpc=' +
-                 subprocess.check_output(grpc_plugin.plugin_name),
+                 grpc_plugin.plugin_name,
                  '--grpc_out=' + output_dir, proto])
             print 'Running protoc on {0}'.format(proto)
 
