@@ -2,7 +2,7 @@
 
 import os
 from pipeline.pipelines import pipeline_base
-from pipeline.tasks import protoc_tasks, veneer_tasks
+from pipeline.tasks import protoc_tasks, veneer_tasks, format_tasks
 from pipeline.utils import pipeline_util
 from taskflow.patterns import linear_flow
 
@@ -11,15 +11,6 @@ class CodeGenPipeline(pipeline_base.PipelineBase):
 
     def __init__(self, **kwargs):
         super(CodeGenPipeline, self).__init__(**kwargs)
-
-    def do_build_flow(self, **kwargs):
-        flow = linear_flow.Flow('codegen')
-        flow.add(protoc_tasks.ProtoDescriptorGenTask('ProtoCompilation',
-                                                     inject=kwargs),
-                 protoc_tasks.GrpcCodeGenTask('GrpcCodegen', inject=kwargs),
-                 veneer_tasks.VeneerCodeGenTask(
-                     'VeneerCodegen', inject=kwargs))
-        return flow
 
     def validate_kwargs(self, **kwargs):
         required = ['service_proto_path',
@@ -40,9 +31,9 @@ class CodeGenPipeline(pipeline_base.PipelineBase):
 
 
 class PythonCodeGenPipeline(CodeGenPipeline):
+
     def __init__(self, **kwargs):
         kwargs['language'] = 'python'
-        kwargs['plugin'] = 'grpc_python_plugin'
         # TODO: Make generic.
         kwargs['package_name'] = 'logging/v2'
         super(PythonCodeGenPipeline, self).__init__(**kwargs)
@@ -55,4 +46,20 @@ class PythonCodeGenPipeline(CodeGenPipeline):
                  protoc_tasks.PackmanTask('Packman', inject=kwargs),
                  veneer_tasks.VeneerCodeGenTask(
                      'VeneerCodegen', inject=kwargs))
+        return flow
+
+class JavaCodeGenPipeline(CodeGenPipeline):
+
+    def __init__(self, **kwargs):
+        kwargs['language'] = 'java'
+        super(JavaCodeGenPipeline, self).__init__(**kwargs)
+
+    def do_build_flow(self, **kwargs):
+        flow = linear_flow.Flow('codegen')
+        flow.add(protoc_tasks.ProtoDescriptorGenTask('ProtoCompilation',
+                                                     inject=kwargs),
+                 protoc_tasks.GrpcCodeGenTask('GrpcCodegen', inject=kwargs),
+                 veneer_tasks.VeneerCodeGenTask(
+                     'VeneerCodegen', inject=kwargs),
+                 format_tasks.JavaFormatTask('JavaFormat', inject=kwargs))
         return flow

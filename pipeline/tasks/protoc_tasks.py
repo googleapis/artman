@@ -10,13 +10,16 @@ from pipeline.tasks.requirements import packman_requirements
 
 _GrpcPluginSettings = collections.namedtuple(
     'GrpcPluginSettings',
-    ['output_parameter', 'plugin_name'])
+    ['output_parameter', 'plugin_path'])
 
 _GRPC_PLUGIN_MAP = {
     'python': _GrpcPluginSettings(
         'python_out',
-        subprocess.check_output(['which', 'grpc_python_plugin'])[:-1])}
-
+        subprocess.check_output(['which', 'grpc_python_plugin'])[:-1]),
+    'java': _GrpcPluginSettings(
+        'java_out',
+        # TODO(shinfan): Figure out a way to install java plugin automatically
+        subprocess.check_output(['which', 'protoc-gen-grpc-java'])[:-1])}
 
 def _find_protos(proto_paths):
     """Searches along `proto_path` for .proto files and returns a list of
@@ -62,8 +65,7 @@ class GrpcCodeGenTask(task_base.TaskBase):
                  for path in (import_proto_path + service_proto_path)] +
                 ['--{0}='.format(grpc_plugin.output_parameter) +
                  output_dir,
-                 '--plugin=protoc-gen-grpc=' +
-                 grpc_plugin.plugin_name,
+                 '--plugin=protoc-gen-grpc=' + grpc_plugin.plugin_path,
                  '--grpc_out=' + output_dir, proto])
             print 'Running protoc on {0}'.format(proto)
 
