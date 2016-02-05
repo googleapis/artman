@@ -26,7 +26,7 @@ class CodeGenPipeline(pipeline_base.PipelineBase):
                 os.path.isfile(
                     os.path.join(kwargs['gapi_tools_path'], 'build.gradle'))):
             raise ValueError(
-                'gapi-tools does not contain `gradlew` or' '`build.gradle`'
+                'gapi-tools does not contain `gradlew` or `build.gradle`'
                 'at {0}'.format(kwargs['gapi_tools_path']))
 
 

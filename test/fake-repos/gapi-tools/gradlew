@@ -1,0 +1,25 @@
+#!/bin/bash
+# A fake stand-in for the gradle wrapper for pipeline testing
+
+main() {
+  # We expect args of form: gradlew -p <REPO> RunVGen -Pclargs=<ARGS>
+  # so we must extract the -Pclargs
+  local _args=$(echo $4 | sed 's/-Pclargs=//g' | sed 's/,/ /g')
+
+  # Compute the directory to output to
+  local _out_dir=""
+  for arg in $_args; do
+    if [[ $arg == --output* ]]; then
+      _out_dir=$(echo $arg | sed 's/--output=\(.*\)/\1/g')
+    fi
+  done
+
+
+  if [ ! -z "$_out_dir" ]; then
+    mkdir -p $_out_dir
+    echo "VGen called with args: $_args" >> "$_out_dir/gradlew_out.txt"
+  fi
+}
+
+main $@
+
