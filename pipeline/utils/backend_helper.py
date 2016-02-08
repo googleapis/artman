@@ -6,13 +6,13 @@ from taskflow.jobs import backends as job_backends
 from taskflow.persistence import backends as persistence_backends
 
 # Default host/port of ZooKeeper service.
-ZK_HOST = '104.197.150.171:2181'
+ZK_HOST = '104.197.10.180:2181'
 
 # Default jobboard configuration.
 JB_CONF = {
     'hosts': ZK_HOST,
     'board': 'zookeeper',
-    'path': '/taskflow/dev',
+    'path': '/dev/jobs',
 }
 
 # Default persistence configuration.
