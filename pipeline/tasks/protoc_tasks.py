@@ -8,23 +8,41 @@ from pipeline.tasks.requirements import grpc_requirements
 from pipeline.tasks.requirements import packman_requirements
 
 
-_GrpcPluginSettings = collections.namedtuple(
-    'GrpcPluginSettings',
-    ['output_parameter', 'plugin_path'])
+class _GrpcPythonPlugin:
+    def __init__(self):
+        self.path = None
+
+    def output_parameter(self):
+        return 'python_out'
+
+    def plugin_path(self):
+        if self.path is None:
+            self.path = subprocess.check_output(['which', 'grpc_python_plugin'])[:-1]
+        return self.path
+
+
+class _GrpcJavaPlugin:
+    def __init__(self):
+        self.path = None
+
+    def output_parameter(self):
+        return 'java_out'
+
+    def plugin_path(self):
+        if self.path is None:
+            self.path = subprocess.check_output(['which', 'protoc-gen-grpc-java'])[:-1]
+        return self.path
 
 _GRPC_PLUGIN_MAP = {
-    'python': _GrpcPluginSettings(
-        'python_out',
-        subprocess.check_output(['which', 'grpc_python_plugin'])[:-1]),
-    'java': _GrpcPluginSettings(
-        'java_out',
-        # TODO(shinfan): Figure out a way to install java plugin automatically
-        subprocess.check_output(['which', 'protoc-gen-grpc-java'])[:-1])}
+    'python': _GrpcPythonPlugin(),
+    'java': _GrpcJavaPlugin()}
 
 def _find_protos(proto_paths):
     """Searches along `proto_path` for .proto files and returns a list of
     paths"""
     protos = []
+    if type(proto_paths) is not list:
+        raise ValueError("proto_paths must be a list")
     for path in proto_paths:
         for root, _, files in os.walk(path):
             protos += [os.path.join(root, proto) for proto in files
@@ -63,9 +81,9 @@ class GrpcCodeGenTask(task_base.TaskBase):
                 ['protoc'] +
                 ['--proto_path=' + path
                  for path in (import_proto_path + service_proto_path)] +
-                ['--{0}='.format(grpc_plugin.output_parameter) +
+                ['--{0}='.format(grpc_plugin.output_parameter()) +
                  output_dir,
-                 '--plugin=protoc-gen-grpc=' + grpc_plugin.plugin_path,
+                 '--plugin=protoc-gen-grpc=' + grpc_plugin.plugin_path(),
                  '--grpc_out=' + output_dir, proto])
             print 'Running protoc on {0}'.format(proto)
 

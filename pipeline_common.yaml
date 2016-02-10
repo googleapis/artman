@@ -1,0 +1,2 @@
+default:
+  gapi_tools_path: ${REPOROOT}/gapi-tools
