@@ -14,13 +14,16 @@ class JavaFormatTask(task_base.TaskBase):
         # the pipeline instead of having to do a download.
         path = os.path.join(format_requirements.JavaFormatRequirement.DIR,
                             format_requirements.JavaFormatRequirement.FILENAME)
+        targetFiles = []
         for root, dirs, files in os.walk(output_dir):
             for filename in files:
                 if filename.endswith('.java'):
-                    output = os.path.abspath(os.path.join(root, filename))
-                    # TODO: Store both intermediate and final output.
-                    subprocess.call(
-                        ['java', '-jar', path, '--replace', output])
+                    targetFile = os.path.abspath(os.path.join(root, filename))
+                    targetFiles.append(targetFile)
+
+        # TODO: Store both intermediate and final output.
+        subprocess.call(
+            ['java', '-jar', path, '--replace', " ".join(targetFiles)])
         return
 
     def requires():
