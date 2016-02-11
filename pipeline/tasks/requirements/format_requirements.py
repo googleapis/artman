@@ -1,9 +1,10 @@
 """formatting requirements class."""
 
-import subprocess
+import os
 
 from pipeline.utils import pipeline_util
 from task_requirement_base import TaskRequirementBase
+
 
 class JavaFormatRequirement(TaskRequirementBase):
 
@@ -13,9 +14,9 @@ class JavaFormatRequirement(TaskRequirementBase):
     @classmethod
     def install(cls):
         pipeline_util.download(
-            'http://github.com/google/google-java-format/releases/download/' \
-            'google-java-format-0.1-alpha/' + FILENAME,
-            DIR)
+            'http://github.com/google/google-java-format/releases/download/'
+            'google-java-format-0.1-alpha/' + cls.FILENAME,
+            cls.DIR)
 
     @classmethod
     def require(cls):
@@ -24,5 +25,4 @@ class JavaFormatRequirement(TaskRequirementBase):
     @classmethod
     def is_installed(cls):
         return os.path.isfile(
-            os.path.join(DIR, FILENAME))
-
+            os.path.join(cls.DIR, cls.FILENAME))

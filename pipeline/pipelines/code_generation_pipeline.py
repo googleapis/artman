@@ -48,6 +48,7 @@ class PythonCodeGenPipeline(CodeGenPipeline):
                      'VeneerCodegen', inject=kwargs))
         return flow
 
+
 class JavaCodeGenPipeline(CodeGenPipeline):
 
     def __init__(self, **kwargs):

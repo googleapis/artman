@@ -21,6 +21,7 @@ _GRPC_PLUGIN_MAP = {
         # TODO(shinfan): Figure out a way to install java plugin automatically
         subprocess.check_output(['which', 'protoc-gen-grpc-java'])[:-1])}
 
+
 def _find_protos(proto_paths):
     """Searches along `proto_path` for .proto files and returns a list of
     paths"""
