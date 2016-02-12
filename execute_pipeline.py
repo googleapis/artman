@@ -21,6 +21,8 @@ Example:
 
 import argparse
 import ast
+import os
+import yaml
 
 from taskflow import engines, task
 from pipeline.pipelines import pipeline_factory
@@ -28,7 +30,7 @@ from pipeline.utils import job_util
 
 
 def main():
-  pipeline_name, pipeline_kwargs, remote_mode = _ParseArgs()
+  pipeline_name, pipeline_kwargs, remote_mode = _parse_args()
   pipeline = pipeline_factory.make_pipeline(pipeline_name, **pipeline_kwargs)
 
   if remote_mode:
@@ -51,17 +53,64 @@ def _CreateArgumentParser():
   parser.add_argument(
       "--pipeline_kwargs",
       type=str,
+      default="{}",
       help=
       "pipeline_kwargs string, e.g. {\'sleep_secs\':3, \'type\':\'sample\'}")
-  # TODO(cbao): Support passing the pipeline kwargs via a config file.
+  parser.add_argument(
+      "--config",
+      type=str,
+      help="Comma-delimited list of the form "
+          + "/path/to/config.yaml:config_section")
+  parser.add_argument(
+      "--reporoot",
+      type=str,
+      default="..",
+      help="Root directory where the input, output, and tool repositories live")
   return parser
 
 
-def _ParseArgs():
+def _var_replace(in_str, repl_vars):
+  new_str = in_str
+  for (k, v) in repl_vars.iteritems():
+    new_str = new_str.replace('${' + k + '}', v)
+  return new_str
+
+
+def _load_config_spec(config_spec, repl_vars):
+  (config_path, config_section) = config_spec.strip().split(':')
+  with open(config_path) as config_file:
+    all_config_data = yaml.load(config_file)
+  data = all_config_data[config_section]
+
+  repl_vars["THISDIR"] = os.path.dirname(config_path)
+  for (k, v) in data.items():
+    if type(v) is list:
+      data[k] = [_var_replace(lv, repl_vars) for lv in v]
+    else:
+      data[k] = _var_replace(v, repl_vars)
+  del repl_vars["THISDIR"]
+  return data
+
+
+def _parse_args():
   parser = _CreateArgumentParser()
   flags = parser.parse_args()
+
+  pipeline_args = {}
+  repl_vars = {"REPOROOT": flags.reporoot}
+  if flags.config:
+    for config_spec in flags.config.split(','):
+      config_args = _load_config_spec(config_spec, repl_vars)
+      pipeline_args.update(config_args)
+
+  cmd_args = ast.literal_eval(flags.pipeline_kwargs)
+  pipeline_args.update(cmd_args)
+  print "Final args:"
+  for (k, v) in pipeline_args.iteritems():
+    print " ", k, ":", v
+
   return (flags.pipeline_name,
-          ast.literal_eval(flags.pipeline_kwargs),
+          pipeline_args,
           flags.remote_mode)
 
 
