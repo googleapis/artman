@@ -59,7 +59,7 @@ To run the Python pipeline:
 ::
     $ python execute_pipeline.py \
        --pipeline_kwargs="(
-       {'service_proto_path':
+       {'src_proto_path':
             ['test/testdata/gapi-example-library-proto/src/main/proto'],
         'import_proto_path':
             ['../gapi-core-proto/src/main/proto/'],
@@ -68,5 +68,7 @@ To run the Python pipeline:
         'veneer_yaml':
             ['test/testdata/gapi-example-library-proto/src/main/proto/google/example/library/library_veneer.yaml',
              'test/testdata/gapi-example-library-proto/src/main/proto/google/example/library/python_veneer.yaml'],
-        'output_dir': 'test/output'})" \
+        'output_dir': 'test/output',
+        'api_name': 'library',
+        'vgen_output_dir': 'test/output/library'})" \
   PythonCodeGenPipeline

@@ -9,14 +9,14 @@ from pipeline.tasks.requirements import format_requirements
 # TODO: Store both intermediate and final output in all format tasks.
 
 class JavaFormatTask(task_base.TaskBase):
-    def execute(self, output_dir):
-        print 'Formatting files in ' + os.path.abspath(output_dir)
+    def execute(self, code_dir):
+        print 'Formatting files in ' + os.path.abspath(code_dir)
         # TODO(shinfan): figure out how to get this distributed and made
         # available to the pipeline instead of having to do a download.
         path = os.path.join(format_requirements.JavaFormatRequirement.DIR,
                             format_requirements.JavaFormatRequirement.FILENAME)
         targetFiles = []
-        for root, dirs, files in os.walk(output_dir):
+        for root, dirs, files in os.walk(code_dir):
             for filename in files:
                 if filename.endswith('.java'):
                     targetFile = os.path.abspath(os.path.join(root, filename))

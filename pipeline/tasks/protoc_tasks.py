@@ -1,36 +1,48 @@
 """Tasks related to protoc"""
 
-import collections
 import os
 import subprocess
 from pipeline.tasks import task_base
 from pipeline.tasks.requirements import grpc_requirements
 from pipeline.tasks.requirements import packman_requirements
+from pipeline.utils import lang_params
 
 
-class _GrpcPythonPlugin:
+class _PythonProtoParams:
     def __init__(self):
         self.path = None
+        self.params = lang_params.LANG_PARAMS_MAP['python']
 
-    def output_parameter(self):
-        return 'python_out'
+    def code_root(self, output_dir):
+        return self.params.code_root(output_dir)
 
-    def plugin_path(self, dummy_gapi_tools_path):
+    def lang_out_param(self, output_dir):
+        return '--python_out=' + self.code_root(output_dir)
+
+    def grpc_plugin_path(self, dummy_gapi_tools_path):
         if self.path is None:
-            self.path = subprocess.check_output(['which', 'grpc_python_plugin'])[:-1]
+            self.path = subprocess.check_output(
+                ['which', 'grpc_python_plugin'])[:-1]
         return self.path
 
+    def grpc_out_param(self, output_dir):
+        return '--grpc_out=' + self.code_root(output_dir)
 
-class _GrpcJavaPlugin:
+
+class _JavaProtoParams:
     def __init__(self):
         self.path = None
+        self.params = lang_params.LANG_PARAMS_MAP['java']
 
-    def output_parameter(self):
-        return 'java_out'
+    def code_root(self, output_dir):
+        return self.params.code_root(output_dir)
 
-    def plugin_path(self, gapi_tools_path):
+    def lang_out_param(self, output_dir):
+        return '--java_out=' + self.code_root(output_dir)
+
+    def grpc_plugin_path(self, gapi_tools_path):
         if self.path is None:
-            print 'start gradle process to locate GRPC Java plugin'
+            print 'starting gradle process to locate GRPC Java plugin'
             output = subprocess.check_output(
                 ['./gradlew', 'showGrpcJavaPluginPath'],
                 cwd=gapi_tools_path)
@@ -40,9 +52,12 @@ class _GrpcJavaPlugin:
                     break
         return self.path
 
-_GRPC_PLUGIN_MAP = {
-    'python': _GrpcPythonPlugin(),
-    'java': _GrpcJavaPlugin()
+    def grpc_out_param(self, output_dir):
+        return '--grpc_out=' + self.code_root(output_dir)
+
+_PROTO_PARAMS_MAP = {
+    'python': _PythonProtoParams(),
+    'java': _JavaProtoParams()
 }
 
 
@@ -59,22 +74,67 @@ def _find_protos(proto_paths):
     return protos
 
 
-class ProtoDescriptorGenTask(task_base.TaskBase):
+def _protoc_header_params(import_proto_path, src_proto_path):
+    return (['protoc'] +
+            ['--proto_path=' + path for path in
+             (import_proto_path + src_proto_path)])
+
+
+def _protoc_desc_params(output_dir, desc_out_file):
+    return (['--include_imports',
+             '--include_source_info',
+             '-o', os.path.join(output_dir, desc_out_file)])
+
+
+def _protoc_proto_params(proto_params, pkg_dir):
+    return [proto_params.lang_out_param(pkg_dir)]
+
+
+def _protoc_grpc_params(proto_params, pkg_dir, gapi_tools_path):
+    return (['--plugin=protoc-gen-grpc=' +
+             proto_params.grpc_plugin_path(gapi_tools_path),
+             proto_params.grpc_out_param(pkg_dir)])
+
+
+def _prepare_pkg_dir(output_dir, api_name, language):
+    proto_params = _PROTO_PARAMS_MAP[language]
+    pkg_dir = os.path.join(output_dir, api_name + '-gen-' + language)
+    subprocess.call(['mkdir', '-p', proto_params.code_root(pkg_dir)])
+    return pkg_dir
+
+
+class ProtoDescGenTask(task_base.TaskBase):
     """Generates proto descriptor set"""
     default_provides = 'descriptor_set'
 
-    def execute(self, service_proto_path, import_proto_path, output_dir):
+    def execute(self, src_proto_path, import_proto_path, output_dir,
+                api_name):
         print 'Compiling descriptors {0}'.format(
-            _find_protos(service_proto_path))
-        out_file = 'descriptor.desc'
+            _find_protos(src_proto_path))
+        desc_out_file = api_name + '.desc'
         subprocess.call(['mkdir', '-p', output_dir])
-        subprocess.call(['protoc', '--include_imports'] +
-                        ['--proto_path=' + path for path in
-                         (service_proto_path + import_proto_path)] +
-                        ['--include_source_info',
-                         '-o', os.path.join(output_dir, out_file)] +
-                        _find_protos(service_proto_path))
-        return os.path.join(output_dir, out_file)
+        subprocess.call(
+            _protoc_header_params(import_proto_path, src_proto_path) +
+            _protoc_desc_params(output_dir, desc_out_file) +
+            _find_protos(src_proto_path))
+        return os.path.join(output_dir, desc_out_file)
+
+    def validate(self):
+        return [grpc_requirements.GrpcRequirements]
+
+
+class ProtoCodeGenTask(task_base.TaskBase):
+    """Generates protos"""
+    def execute(self, language, src_proto_path, import_proto_path,
+                output_dir, api_name):
+        print 'Generating protos {0}'.format(
+            _find_protos(src_proto_path))
+        proto_params = _PROTO_PARAMS_MAP[language]
+        pkg_dir = _prepare_pkg_dir(output_dir, api_name, language)
+        subprocess.call(
+            _protoc_header_params(import_proto_path, src_proto_path) +
+            _protoc_proto_params(proto_params, pkg_dir) +
+            _find_protos(src_proto_path))
 
     def validate(self):
         return [grpc_requirements.GrpcRequirements]
@@ -82,20 +142,32 @@ class ProtoDescriptorGenTask(task_base.TaskBase):
 
 class GrpcCodeGenTask(task_base.TaskBase):
     """Generates the gRPC client library"""
-    def execute(self, language, service_proto_path, import_proto_path,
-                gapi_tools_path, output_dir):
-        grpc_plugin = _GRPC_PLUGIN_MAP[language]
-        for proto in _find_protos(service_proto_path):
-            subprocess.call(
-                ['protoc'] +
-                ['--proto_path=' + path
-                 for path in (import_proto_path + service_proto_path)] +
-                ['--{0}='.format(grpc_plugin.output_parameter()) +
-                 output_dir,
-                 '--plugin=protoc-gen-grpc=' +
-                 grpc_plugin.plugin_path(gapi_tools_path),
-                 '--grpc_out=' + output_dir, proto])
-            print 'Running protoc on {0}'.format(proto)
+    def execute(self, language, src_proto_path, import_proto_path,
+                gapi_tools_path, output_dir, api_name):
+        print 'Running protoc with grpc plugin on {0}'.format(src_proto_path)
+        proto_params = _PROTO_PARAMS_MAP[language]
+        pkg_dir = _prepare_pkg_dir(output_dir, api_name, language)
+        subprocess.call(
+            _protoc_header_params(import_proto_path, src_proto_path) +
+            _protoc_grpc_params(proto_params, pkg_dir, gapi_tools_path) +
+            _find_protos(src_proto_path))
+
+    def validate(self):
+        return [grpc_requirements.GrpcRequirements]
+
+
+class ProtoAndGrpcCodeGenTask(task_base.TaskBase):
+    """Generates protos and the gRPC client library"""
+    def execute(self, language, src_proto_path, import_proto_path,
+                gapi_tools_path, output_dir, api_name):
+        print 'Running protoc and grpc plugin on {0}'.format(src_proto_path)
+        proto_params = _PROTO_PARAMS_MAP[language]
+        pkg_dir = _prepare_pkg_dir(output_dir, api_name, language)
+        subprocess.call(
+            _protoc_header_params(import_proto_path, src_proto_path) +
+            _protoc_proto_params(proto_params, pkg_dir) +
+            _protoc_grpc_params(proto_params, pkg_dir, gapi_tools_path) +
+            _find_protos(src_proto_path))
 
     def validate(self):
         return [grpc_requirements.GrpcRequirements]
