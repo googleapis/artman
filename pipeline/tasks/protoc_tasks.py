@@ -15,7 +15,7 @@ class _GrpcPythonPlugin:
     def output_parameter(self):
         return 'python_out'
 
-    def plugin_path(self):
+    def plugin_path(self, dummy_gapi_tools_path):
         if self.path is None:
             self.path = subprocess.check_output(['which', 'grpc_python_plugin'])[:-1]
         return self.path
@@ -28,14 +28,22 @@ class _GrpcJavaPlugin:
     def output_parameter(self):
         return 'java_out'
 
-    def plugin_path(self):
+    def plugin_path(self, gapi_tools_path):
         if self.path is None:
-            self.path = subprocess.check_output(['which', 'protoc-gen-grpc-java'])[:-1]
+            print 'start gradle process to locate GRPC Java plugin'
+            output = subprocess.check_output(
+                ['./gradlew', 'showGrpcJavaPluginPath'],
+                cwd=gapi_tools_path)
+            for line in output.split('\n'):
+                if 'protoc-gen-grpc-java' in line:
+                    self.path = line
+                    break
         return self.path
 
 _GRPC_PLUGIN_MAP = {
     'python': _GrpcPythonPlugin(),
-    'java': _GrpcJavaPlugin()}
+    'java': _GrpcJavaPlugin()
+}
 
 
 def _find_protos(proto_paths):
@@ -75,7 +83,7 @@ class ProtoDescriptorGenTask(task_base.TaskBase):
 class GrpcCodeGenTask(task_base.TaskBase):
     """Generates the gRPC client library"""
     def execute(self, language, service_proto_path, import_proto_path,
-                output_dir):
+                gapi_tools_path, output_dir):
         grpc_plugin = _GRPC_PLUGIN_MAP[language]
         for proto in _find_protos(service_proto_path):
             subprocess.call(
@@ -84,7 +92,8 @@ class GrpcCodeGenTask(task_base.TaskBase):
                  for path in (import_proto_path + service_proto_path)] +
                 ['--{0}='.format(grpc_plugin.output_parameter()) +
                  output_dir,
-                 '--plugin=protoc-gen-grpc=' + grpc_plugin.plugin_path(),
+                 '--plugin=protoc-gen-grpc=' +
+                 grpc_plugin.plugin_path(gapi_tools_path),
                  '--grpc_out=' + output_dir, proto])
             print 'Running protoc on {0}'.format(proto)
 
