@@ -45,7 +45,8 @@ class PythonCodeGenPipeline(CodeGenPipeline):
                  protoc_tasks.GrpcCodeGenTask('GrpcCodegen', inject=kwargs),
                  protoc_tasks.PackmanTask('Packman', inject=kwargs),
                  veneer_tasks.VeneerCodeGenTask(
-                     'VeneerCodegen', inject=kwargs))
+                     'VeneerCodegen', inject=kwargs),
+                 format_tasks.PythonFormatTask('PythonFormat', inject=kwargs))
         return flow
 
 
