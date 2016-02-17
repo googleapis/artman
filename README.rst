@@ -78,13 +78,13 @@ of googleapis/):
 
 ::
     $ python execute_pipeline.py \
-        --config "../googleapis/pipeline_core.yaml:core,pipeline_common.yaml:default" \
+        --config "../googleapis/pipeline_config/pipeline_core.yaml:core,pipeline_common.yaml:default" \
         JavaCorePipeline
 
     $ python execute_pipeline.py \
-        --config "../googleapis/pipeline_pubsub.yaml:pubsub_java,pipeline_common.yaml:default" \
+        --config "../googleapis/pipeline_config/pipeline_pubsub.yaml:pubsub_java,pipeline_common.yaml:default" \
         JavaGrpcClientPipeline
 
     $ python execute_pipeline.py \
-        --config "../googleapis/pipeline_pubsub.yaml:pubsub_java,pipeline_common.yaml:default" \
+        --config "../googleapis/pipeline_config/pipeline_pubsub.yaml:pubsub_java,pipeline_common.yaml:default" \
         JavaVkitClientPipeline
