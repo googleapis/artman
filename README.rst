@@ -72,3 +72,19 @@ To run the Python pipeline:
         'api_name': 'library',
         'vgen_output_dir': 'test/output/library'})" \
   PythonCodeGenPipeline
+
+To run the Java pipeline (Note: This depends on the pubsub-beta branch
+of googleapis/):
+
+::
+    $ python execute_pipeline.py \
+        --config "../googleapis/pipeline_core.yaml:core,pipeline_common.yaml:default" \
+        JavaCorePipeline
+
+    $ python execute_pipeline.py \
+        --config "../googleapis/pipeline_pubsub.yaml:pubsub_java,pipeline_common.yaml:default" \
+        JavaGrpcClientPipeline
+
+    $ python execute_pipeline.py \
+        --config "../googleapis/pipeline_pubsub.yaml:pubsub_java,pipeline_common.yaml:default" \
+        JavaVkitClientPipeline
