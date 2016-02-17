@@ -1,0 +1,1 @@
+protoc --proto_path=test/fake-repos/gapi-core-proto/src/main/proto/ --proto_path={OUTPUT}/proto --go_out=plugins=grpc:{OUTPUT} {OUTPUT}/proto/fake.proto

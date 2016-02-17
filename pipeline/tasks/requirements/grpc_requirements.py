@@ -12,8 +12,10 @@ class GrpcRequirements(task_requirement_base.TaskRequirementBase):
         """Grpc requires protoc and grpc plugins.
 
         TODO(cbao): List more grpc plugins.
+        TODO(mukai): Take care of the installation of grpc_go_plugin.
         """
-        return ['protoc', 'grpc_java_plugin', 'grpc_python_plugin']
+        return ['protoc', 'grpc_java_plugin', 'grpc_python_plugin',
+                'grpc_go_plugin']
 
     @classmethod
     def install(cls):

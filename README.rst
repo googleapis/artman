@@ -88,6 +88,46 @@ To run the Java pipeline:
         pipeline_common.yaml:default" \
         JavaVkitClientPipeline
 
+To run the Go pipeline, first the core protos have to be compiled into the output directory.
+Note: this won't be necessary once a public repository for core proto pb.go files.
+
+::
+    $ python execute_pipeline.py \
+       --pipeline_kwargs="{
+         'src_proto_path': ['../gapi-core-proto/src/main/proto'],
+         'import_proto_path': ['$GOPATH/src'],
+         'gapi_tools_path': '../gapi-tools',
+         'output_dir': '$GOPATH/src/google.golang.org/cloud/library',
+         'api_name': 'library'}" \
+       GoCoreProtoPipeline
+
+The actual Go pipeline is as follows:
+
+::
+    $ python execute_pipeline.py \
+       --pipeline_kwargs="{
+         'src_proto_path': ['test/testdata/gapi-example-library-proto/src/main/proto'],
+         'import_proto_path': ['$GOPATH/src'],
+         'gapi_tools_path': '../gapi-tools',
+         'output_dir': '$GOPATH/src/google.golang.org/cloud/library',
+         'api_name': 'library'}" \
+       GoGrpcClientPipeline
+
+    $ python execute_pipeline.py \
+       --pipeline_kwargs="{
+         'src_proto_path': ['$RGOPATH/src/google.golang.org/cloud/library/proto'],
+         'import_proto_path': ['$GOPATH/src'],
+         'gapi_tools_path': '../gapi-tools',
+         'service_yaml': ['test/testdata/gapi-example-library-proto/src/main/proto/google/example/library/library.yaml'],
+         'veneer_yaml': [
+             '../gapi-tools/vgen/src/main/resources/io/gapi/vgen/go/go_veneer.yaml',
+             'test/testdata/gapi-example-library-proto/src/main/proto/google/example/library/library_veneer.yaml',
+             'test/testdata/gapi-example-library-proto/src/main/proto/google/example/library/go_library_veneer.yaml'],
+         'output_dir': '$GOPATH/src/google.golang.org/cloud/library',
+         'vgen_output_dir': '$GOPATH/src/google.golang.org/cloud/library',
+         'api_name': 'library'}" \
+       GoVkitClientPipeline
+
 Running tests
 -------------
 
