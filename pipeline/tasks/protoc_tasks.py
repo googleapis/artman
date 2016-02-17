@@ -6,6 +6,7 @@ from pipeline.tasks import task_base
 from pipeline.tasks.requirements import grpc_requirements
 from pipeline.tasks.requirements import packman_requirements
 from pipeline.utils import lang_params
+from pipeline.utils import task_utils
 
 
 class _PythonProtoParams:
@@ -42,14 +43,9 @@ class _JavaProtoParams:
 
     def grpc_plugin_path(self, gapi_tools_path):
         if self.path is None:
-            print 'starting gradle process to locate GRPC Java plugin'
-            output = subprocess.check_output(
-                ['./gradlew', 'showGrpcJavaPluginPath'],
-                cwd=gapi_tools_path)
-            for line in output.split('\n'):
-                if 'protoc-gen-grpc-java' in line:
-                    self.path = line
-                    break
+            print 'start gradle process to locate GRPC Java plugin'
+            self.path = task_utils.runGradleTask(
+                'showGrpcJavaPluginPath', gapi_tools_path, 'protoc-gen-grpc-java')
         return self.path
 
     def grpc_out_param(self, output_dir):

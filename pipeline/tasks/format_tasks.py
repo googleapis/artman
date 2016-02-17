@@ -3,18 +3,17 @@
 import os
 import subprocess
 from pipeline.tasks import task_base
-from pipeline.tasks.requirements import format_requirements
+from pipeline.utils import task_utils
 
 
 # TODO: Store both intermediate and final output in all format tasks.
 
 class JavaFormatTask(task_base.TaskBase):
-    def execute(self, code_dir):
+    def execute(self, code_dir, gapi_tools_path):
         print 'Formatting files in ' + os.path.abspath(code_dir)
-        # TODO(shinfan): figure out how to get this distributed and made
-        # available to the pipeline instead of having to do a download.
-        path = os.path.join(format_requirements.JavaFormatRequirement.DIR,
-                            format_requirements.JavaFormatRequirement.FILENAME)
+        # TODO(shinfan): Move gradle task into requirement
+        path = task_utils.runGradleTask(
+                'showJavaFormatterPath', gapi_tools_path, 'google-java-format')
         targetFiles = []
         for root, dirs, files in os.walk(code_dir):
             for filename in files:
@@ -25,7 +24,7 @@ class JavaFormatTask(task_base.TaskBase):
             ['java', '-jar', path, '--replace'] + targetFiles)
 
     def validate(self):
-        return [format_requirements.JavaFormatRequirement]
+        return []
 
 
 class PythonFormatTask(task_base.TaskBase):
