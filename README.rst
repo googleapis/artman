@@ -34,7 +34,8 @@ Try it out
 
 To execute the pipeline locally, try the following example command:
 
-   $python execute_pipeline.py --pipeline_kwargs={\'sleep_secs\':2} SamplePipeline
+::
+    $ python execute_pipeline.py --pipeline_kwargs={\'sleep_secs\':2} SamplePipeline
 
 To execute with pipeline remotely, start two consoles and run the following command
 in one console:
@@ -88,3 +89,13 @@ of googleapis/):
     $ python execute_pipeline.py \
         --config "../googleapis/pipeline_config/pipeline_pubsub.yaml:pubsub_java,pipeline_common.yaml:default" \
         JavaVkitClientPipeline
+
+Running tests
+-------------
+
+To run tests and the linter, run this command:
+
+::
+    $ tox
+
+Please always run this command before submitting changes.

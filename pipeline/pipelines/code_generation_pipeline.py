@@ -7,6 +7,10 @@ from pipeline.utils import pipeline_util
 from taskflow.patterns import linear_flow
 
 
+# kwargs required by veneer code gen
+_VGEN_REQUIRED = ['service_yaml', 'veneer_yaml', 'vgen_output_dir']
+
+
 def _validate_gapi_tools_path(gapi_tools_path):
     if not (os.path.isfile(
                 os.path.join(gapi_tools_path, 'gradlew')) and
@@ -25,7 +29,8 @@ def _validate_codegen_kwargs(extra_args, **kwargs):
                 'import_proto_path',
                 'gapi_tools_path',
                 'output_dir',
-                'language']
+                'language',
+                'api_name']
     pipeline_util.validate_exists(required + extra_args, **kwargs)
     _validate_gapi_tools_path(kwargs['gapi_tools_path'])
 
@@ -50,7 +55,7 @@ class PythonCodeGenPipeline(pipeline_base.PipelineBase):
         return flow
 
     def validate_kwargs(self, **kwargs):
-        _validate_codegen_kwargs(['service_yaml', 'veneer_yaml'], **kwargs)
+        _validate_codegen_kwargs(_VGEN_REQUIRED, **kwargs)
 
 
 class JavaCorePipeline(pipeline_base.PipelineBase):
@@ -99,4 +104,4 @@ class JavaVkitClientPipeline(pipeline_base.PipelineBase):
         return flow
 
     def validate_kwargs(self, **kwargs):
-        _validate_codegen_kwargs(['service_yaml', 'veneer_yaml'], **kwargs)
+        _validate_codegen_kwargs(_VGEN_REQUIRED, **kwargs)

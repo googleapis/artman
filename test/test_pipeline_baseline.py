@@ -59,7 +59,7 @@ class TestPipelineBaseline(unittest2.TestCase):
 
         # Pipeline kwargs
         kwargs_ = {
-            'service_proto_path':
+            'src_proto_path':
                 ['test/testdata/gapi-example-library-proto/src/main/proto'],
             'import_proto_path':
                 ['test/fake-repos/gapi-core-proto/src/main/proto/'],
@@ -72,7 +72,9 @@ class TestPipelineBaseline(unittest2.TestCase):
                     'example/library/library_veneer.yaml',
                 'test/testdata/gapi-example-library-proto/src/main/proto/google/'
                     'example/library/python_veneer.yaml'],
-            'output_dir': output_dir}
+            'output_dir': output_dir,
+            'api_name': 'library',
+            'vgen_output_dir': output_dir + '/library-vgen-python'}
 
         # Sequences to sanitize from the actual output, here, the location of
         # this repo, which is user-specific
