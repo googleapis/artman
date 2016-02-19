@@ -81,6 +81,8 @@ class TestPipelineBaseline(unittest2.TestCase):
         to_ignore = (subprocess.check_output(['pwd'])[:-1],)
 
         subprocess.call(['rm', '-rf', output_dir])
+        subprocess.call(['mkdir', '-p', output_dir])
+        subprocess.call(['touch', os.path.join(output_dir, 'fake_output_api.py')])
 
         # Run pipeline
         pipeline = pipeline_factory.make_pipeline(
