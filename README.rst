@@ -83,11 +83,13 @@ of googleapis/):
         JavaCorePipeline
 
     $ python execute_pipeline.py \
-        --config "../googleapis/pipeline_config/pipeline_pubsub.yaml:pubsub_java,pipeline_common.yaml:default" \
+        --config "../googleapis/pipeline_config/pipeline_pubsub.yaml:pubsub_common|pubsub_java \
+                  pipeline_common.yaml:default" \
         JavaGrpcClientPipeline
 
     $ python execute_pipeline.py \
-        --config "../googleapis/pipeline_config/pipeline_pubsub.yaml:pubsub_java,pipeline_common.yaml:default" \
+        --config "../googleapis/pipeline_config/pipeline_pubsub.yaml:pubsub_common|pubsub_java, \
+                  pipeline_common.yaml:default"  \
         JavaVkitClientPipeline
 
 Running tests

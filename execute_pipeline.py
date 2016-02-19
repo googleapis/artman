@@ -77,10 +77,13 @@ def _var_replace(in_str, repl_vars):
 
 
 def _load_config_spec(config_spec, repl_vars):
-  (config_path, config_section) = config_spec.strip().split(':')
+  (config_path, config_sections) = config_spec.strip().split(':')
+  config_sections = config_sections.split('|')
+  data = {}
   with open(config_path) as config_file:
     all_config_data = yaml.load(config_file)
-  data = all_config_data[config_section]
+  for section in config_sections:
+    data.update(all_config_data[section])
 
   repl_vars["THISDIR"] = os.path.dirname(config_path)
   for (k, v) in data.items():
