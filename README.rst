@@ -55,41 +55,38 @@ conductor running on your machine. It can also be picked up by other conductor
 processes. You can run the second command for multiple times, and chances are
 good that your conductor will pick up one job at least.
 
-To run the Python pipeline:
+To run the Python pipeline for logging:
 
 ::
     $ python execute_pipeline.py \
-       --pipeline_kwargs="(
-       {'src_proto_path':
-            ['test/testdata/gapi-example-library-proto/src/main/proto'],
-        'import_proto_path':
-            ['../gapi-core-proto/src/main/proto/'],
-        'gapi_tools_path': '../gapi-tools',
-        'service_yaml': ['test/testdata/gapi-example-library-proto/src/main/proto/google/example/library/library.yaml'],
-        'veneer_yaml':
-            ['test/testdata/gapi-example-library-proto/src/main/proto/google/example/library/library_veneer.yaml',
-             'test/testdata/gapi-example-library-proto/src/main/proto/google/example/library/python_veneer.yaml'],
-        'output_dir': 'test/output',
-        'api_name': 'library',
-        'vgen_output_dir': 'test/output/library'})" \
-  PythonCodeGenPipeline
+        --config "../googleapis/pipeline_config/pipeline_logging.yaml\
+        :logging_common|logging_python,\
+        pipeline_common.yaml:default" \
+        PythonGrpcClientPipeline
+
+    $ python execute_pipeline.py \
+        --config "../googleapis/pipeline_config/pipeline_logging.yaml\
+        :logging_common|logging_python,\
+        pipeline_common.yaml:default" \
+        PythonVkitClientPipeline
 
 To run the Java pipeline (Note: This depends on the pubsub-beta branch
 of googleapis/):
 
 ::
     $ python execute_pipeline.py \
-        --config "../googleapis/pipeline_config/pipeline_core.yaml:core,pipeline_common.yaml:default" \
+        --config "../googleapis/pipeline_config/pipeline_core.yaml:core,\
+        pipeline_common.yaml:default" \
         JavaCorePipeline
 
     $ python execute_pipeline.py \
-        --config "../googleapis/pipeline_config/pipeline_pubsub.yaml:pubsub_common|pubsub_java \
+        --config "../googleapis/pipeline_config/pipeline_pubsub.yaml:pubsub_common|pubsub_java,\
                   pipeline_common.yaml:default" \
         JavaGrpcClientPipeline
 
     $ python execute_pipeline.py \
-        --config "../googleapis/pipeline_config/pipeline_pubsub.yaml:pubsub_common|pubsub_java, \
-                  pipeline_common.yaml:default"  \
+        --config "../googleapis/pipeline_config/pipeline_pubsub.yaml:pubsub_common|pubsub_java,\
+        pipeline_common.yaml:default" \
         JavaVkitClientPipeline
 
 Running tests

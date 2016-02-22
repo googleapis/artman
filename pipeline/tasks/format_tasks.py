@@ -28,10 +28,10 @@ class JavaFormatTask(task_base.TaskBase):
 
 
 class PythonFormatTask(task_base.TaskBase):
-    def execute(self, output_dir):
-        print 'Formatting files in ' + os.path.abspath(output_dir)
+    def execute(self, code_dir):
+        print 'Formatting files in ' + os.path.abspath(code_dir)
         targetFiles = []
-        for root, dirs, files in os.walk(output_dir):
+        for root, dirs, files in os.walk(code_dir):
             for filename in files:
                 # TODO(jgeiger): change to `endswith('.py')` once the packman
                 # task is functioning. Currently, it takes too long to run the
@@ -39,7 +39,6 @@ class PythonFormatTask(task_base.TaskBase):
                 if filename.endswith('api.py'):
                     targetFile = os.path.abspath(os.path.join(root, filename))
                     targetFiles.append(targetFile)
-
         subprocess.call(['yapf', '-i'] + targetFiles)
 
     # yapf is installed by tox for the entire pipeline project's virtualenv,

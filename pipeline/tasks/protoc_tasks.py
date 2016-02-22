@@ -45,7 +45,8 @@ class _JavaProtoParams:
         if self.path is None:
             print 'start gradle process to locate GRPC Java plugin'
             self.path = task_utils.runGradleTask(
-                'showGrpcJavaPluginPath', gapi_tools_path, 'protoc-gen-grpc-java')
+                'showGrpcJavaPluginPath', gapi_tools_path,
+                'protoc-gen-grpc-java')
         return self.path
 
     def grpc_out_param(self, output_dir):
@@ -152,28 +153,13 @@ class GrpcCodeGenTask(task_base.TaskBase):
         return [grpc_requirements.GrpcRequirements]
 
 
-class ProtoAndGrpcCodeGenTask(task_base.TaskBase):
-    """Generates protos and the gRPC client library"""
-    def execute(self, language, src_proto_path, import_proto_path,
-                gapi_tools_path, output_dir, api_name):
-        print 'Running protoc and grpc plugin on {0}'.format(src_proto_path)
-        proto_params = _PROTO_PARAMS_MAP[language]
-        pkg_dir = _prepare_pkg_dir(output_dir, api_name, language)
-        subprocess.call(
-            _protoc_header_params(import_proto_path, src_proto_path) +
-            _protoc_proto_params(proto_params, pkg_dir) +
-            _protoc_grpc_params(proto_params, pkg_dir, gapi_tools_path) +
-            _find_protos(src_proto_path))
-
-    def validate(self):
-        return [grpc_requirements.GrpcRequirements]
-
-
-class PackmanTask(task_base.TaskBase):
+class GrpcPackmanTask(task_base.TaskBase):
     """Checks packman requirements"""
-    def execute(self, package_name, output_dir):
+    def execute(self, api_name, output_dir):
+        # Fix the api_name convention (ex. logging-v2) for packman.
+        api_name = api_name.replace('-', '/')
         subprocess.call(
-            ['gen-api-package', '--api_name=' + package_name,
+            ['gen-api-package', '--api_name=' + api_name,
              '-l', 'python', '-o', output_dir])
 
     def validate(self):

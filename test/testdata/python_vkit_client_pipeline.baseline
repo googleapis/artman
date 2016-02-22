@@ -1,0 +1,7 @@
+============== file: fake_output_api.py ==============
+============== file: gradlew_out.txt ==============
+VGen called with args: --descriptor_set=/var/tmp/python_vkit_client_pipeline/library-v1.desc --output=/var/tmp/python_vkit_client_pipeline --service_yaml=[...]/test/testdata/gapi-example-library-proto/src/main/proto/google/example/library/library.yaml --veneer_yaml=[...]/test/testdata/gapi-example-library-proto/src/main/proto/google/example/library/library_veneer.yaml --veneer_yaml=[...]/test/testdata/gapi-example-library-proto/src/main/proto/google/example/library/python_veneer.yaml
+============== file: library-v1.desc/protoc_out.txt ==============
+protoc invoked with args: --proto_path=test/fake-repos/gapi-core-proto/src/main/proto/ --proto_path=test/testdata/gapi-example-library-proto/src/main/proto --include_imports --include_source_info -o /var/tmp/python_vkit_client_pipeline/library-v1.desc test/testdata/gapi-example-library-proto/src/main/proto/google/example/library/v1/library.proto
+============== file: yapf_out.txt ==============
+yapf called with args: -i /var/tmp/python_vkit_client_pipeline/fake_output_api.py
