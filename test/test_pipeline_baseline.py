@@ -49,13 +49,10 @@ def compile_output(output_dir):
 
 class TestPipelineBaseline(unittest2.TestCase):
 
-    def test_python_baseline(self):
-
-        # Used to locate the .baseline file
-        test_name = 'python_pipeline'
+    def _test_python_baseline(self, task_name, test_name):
 
         # The real output location of running the pipeline
-        output_dir = '/var/tmp/pipeline-baseline-test'
+        output_dir = '/var/tmp/' + test_name
 
         # Pipeline kwargs
         kwargs_ = {
@@ -73,8 +70,8 @@ class TestPipelineBaseline(unittest2.TestCase):
                 'test/testdata/gapi-example-library-proto/src/main/proto/google/'
                     'example/library/python_veneer.yaml'],
             'output_dir': output_dir,
-            'api_name': 'library',
-            'vgen_output_dir': output_dir + '/library-vgen-python'}
+            'api_name': 'library-v1',
+            'vgen_output_dir': output_dir}
 
         # Sequences to sanitize from the actual output, here, the location of
         # this repo, which is user-specific
@@ -86,7 +83,7 @@ class TestPipelineBaseline(unittest2.TestCase):
 
         # Run pipeline
         pipeline = pipeline_factory.make_pipeline(
-            'PythonCodeGenPipeline', **kwargs_)
+            task_name, **kwargs_)
         engine = engines.load(pipeline.flow, engine='serial')
         engine.run()
 
@@ -98,3 +95,9 @@ class TestPipelineBaseline(unittest2.TestCase):
         msg = 'Test output located at: {0}\n\n{1}'.format(
             output_dir, '\n'.join(diff))
         self.assertEquals(len(diff), 0, msg=msg)
+
+    def test_python_grpc_client_baseline(self):
+        self._test_python_baseline('PythonGrpcClientPipeline', 'python_grpc_client_pipeline')
+
+    def test_python_vkit_client_baseline(self):
+        self._test_python_baseline('PythonVkitClientPipeline', 'python_vkit_client_pipeline')

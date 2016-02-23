@@ -35,20 +35,30 @@ def _validate_codegen_kwargs(extra_args, **kwargs):
     _validate_gapi_tools_path(kwargs['gapi_tools_path'])
 
 
-class PythonCodeGenPipeline(pipeline_base.PipelineBase):
+class PythonGrpcClientPipeline(pipeline_base.PipelineBase):
 
     def __init__(self, **kwargs):
         kwargs['language'] = 'python'
-        # TODO: Make generic.
-        kwargs['package_name'] = 'logging/v2'
-        super(PythonCodeGenPipeline, self).__init__(**kwargs)
+        super(PythonGrpcClientPipeline, self).__init__(**kwargs)
 
     def do_build_flow(self, **kwargs):
-        flow = linear_flow.Flow('codegen')
-        flow.add(protoc_tasks.ProtoAndGrpcCodeGenTask('GrpcCodegen',
-                                                      inject=kwargs),
-                 protoc_tasks.ProtoDescGenTask('ProtoDesc', inject=kwargs),
-                 protoc_tasks.PackmanTask('Packman', inject=kwargs),
+        flow = linear_flow.Flow('grpc-codegen')
+        flow.add(protoc_tasks.GrpcPackmanTask('Packman', inject=kwargs))
+        return flow
+
+    def validate_kwargs(self, **kwargs):
+        _validate_codegen_kwargs([], **kwargs)
+
+
+class PythonVkitClientPipeline(pipeline_base.PipelineBase):
+
+    def __init__(self, **kwargs):
+        kwargs['language'] = 'python'
+        super(PythonVkitClientPipeline, self).__init__(**kwargs)
+
+    def do_build_flow(self, **kwargs):
+        flow = linear_flow.Flow('vkit-codegen')
+        flow.add(protoc_tasks.ProtoDescGenTask('ProtoDesc', inject=kwargs),
                  veneer_tasks.VeneerCodeGenTask('VeneerCodegen',
                                                 inject=kwargs),
                  format_tasks.PythonFormatTask('PythonFormat', inject=kwargs))
