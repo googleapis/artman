@@ -9,13 +9,13 @@ from pipeline.utils import task_utils
 # TODO: Store both intermediate and final output in all format tasks.
 
 class JavaFormatTask(task_base.TaskBase):
-    def execute(self, code_dir, gapi_tools_path):
-        print 'Formatting files in ' + os.path.abspath(code_dir)
+    def execute(self, intermediate_code_dir, gapi_tools_path):
+        print 'Formatting files in ' + os.path.abspath(intermediate_code_dir)
         # TODO(shinfan): Move gradle task into requirement
         path = task_utils.runGradleTask(
                 'showJavaFormatterPath', gapi_tools_path, 'google-java-format')
         targetFiles = []
-        for root, dirs, files in os.walk(code_dir):
+        for root, dirs, files in os.walk(intermediate_code_dir):
             for filename in files:
                 if filename.endswith('.java'):
                     targetFile = os.path.abspath(os.path.join(root, filename))
@@ -28,10 +28,10 @@ class JavaFormatTask(task_base.TaskBase):
 
 
 class PythonFormatTask(task_base.TaskBase):
-    def execute(self, code_dir):
-        print 'Formatting files in ' + os.path.abspath(code_dir)
+    def execute(self, intermediate_code_dir):
+        print 'Formatting files in ' + os.path.abspath(intermediate_code_dir)
         targetFiles = []
-        for root, dirs, files in os.walk(code_dir):
+        for root, dirs, files in os.walk(intermediate_code_dir):
             for filename in files:
                 # TODO(jgeiger): change to `endswith('.py')` once the packman
                 # task is functioning. Currently, it takes too long to run the

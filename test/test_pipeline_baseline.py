@@ -45,11 +45,17 @@ def _test_python_baseline(task_name, test_name, tmpdir, mock_call):
                 'google/example/library/python_veneer.yaml'],
         'output_dir': output_dir,
         'api_name': 'library-v1',
-        'vgen_output_dir': output_dir}
+        'auto_merge': True,
+        'auto_resolve': True,
+        'ignore_base': False,
+        'final_repo_dir': output_dir}
 
     # Create an empty 'fake_output_api.py' in the output_dir. Do not invoke
     #  'touch' command with subprocess.call() because it's mocked.
-    with open(os.path.join(output_dir, 'fake_output_api.py'), 'w'):
+    final_output_dir = os.path.join(output_dir, 'library-v1-veneer-gen-python')
+    if not os.path.exists(final_output_dir):
+        os.makedirs(final_output_dir)
+    with open(os.path.join(final_output_dir, 'fake_output_api.py'), 'w'):
         pass
 
     # Run pipeline

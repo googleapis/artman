@@ -8,7 +8,12 @@ from taskflow.patterns import linear_flow
 
 
 # kwargs required by veneer code gen
-_VGEN_REQUIRED = ['service_yaml', 'veneer_yaml', 'vgen_output_dir']
+_VGEN_REQUIRED = ['service_yaml',
+                  'veneer_yaml',
+                  'auto_merge',
+                  'auto_resolve',
+                  'ignore_base',
+                  'final_repo_dir']
 
 
 def _validate_gapi_tools_path(gapi_tools_path):
@@ -61,7 +66,9 @@ class PythonVkitClientPipeline(pipeline_base.PipelineBase):
         flow.add(protoc_tasks.ProtoDescGenTask('ProtoDesc', inject=kwargs),
                  veneer_tasks.VeneerCodeGenTask('VeneerCodegen',
                                                 inject=kwargs),
-                 format_tasks.PythonFormatTask('PythonFormat', inject=kwargs))
+                 format_tasks.PythonFormatTask('PythonFormat', inject=kwargs)
+                 # TODO(shinfan): Add merge task for python here.
+                )
         return flow
 
     def validate_kwargs(self, **kwargs):
@@ -110,7 +117,8 @@ class JavaVkitClientPipeline(pipeline_base.PipelineBase):
         flow.add(protoc_tasks.ProtoDescGenTask('ProtoDesc', inject=kwargs),
                  veneer_tasks.VeneerCodeGenTask('VeneerCodegen',
                                                 inject=kwargs),
-                 format_tasks.JavaFormatTask('JavaFormat', inject=kwargs))
+                 format_tasks.JavaFormatTask('JavaFormat', inject=kwargs),
+                 veneer_tasks.VeneerMergeTask('VeneerMerge', inject=kwargs))
         return flow
 
     def validate_kwargs(self, **kwargs):
