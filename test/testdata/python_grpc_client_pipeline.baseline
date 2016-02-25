@@ -1,3 +1,1 @@
-============== file: fake_output_api.py ==============
-============== file: gen-api-package_out.txt ==============
-gen-api-package called with args: --api_name=library/v1 -l python -o /var/tmp/python_grpc_client_pipeline
+gen-api-package --api_name=library/v1 -l python -o {OUTPUT}
