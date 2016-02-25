@@ -70,8 +70,7 @@ To run the Python pipeline for logging:
         pipeline_common.yaml:default" \
         PythonVkitClientPipeline
 
-To run the Java pipeline (Note: This depends on the pubsub-beta branch
-of googleapis/):
+To run the Java pipeline:
 
 ::
     $ python execute_pipeline.py \
