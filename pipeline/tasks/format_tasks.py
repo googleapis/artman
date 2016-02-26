@@ -34,10 +34,7 @@ class PythonFormatTask(task_base.TaskBase):
         targetFiles = []
         for root, dirs, files in os.walk(intermediate_code_dir):
             for filename in files:
-                # TODO(jgeiger): change to `endswith('.py')` once the packman
-                # task is functioning. Currently, it takes too long to run the
-                # formatter on the gRPC codegen output.
-                if filename.endswith('api.py'):
+                if filename.endswith('.py'):
                     targetFile = os.path.abspath(os.path.join(root, filename))
                     targetFiles.append(targetFile)
         subprocess.check_call(['yapf', '-i'] + targetFiles)
