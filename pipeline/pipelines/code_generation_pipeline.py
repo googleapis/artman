@@ -78,7 +78,7 @@ class PythonVkitClientPipeline(pipeline_base.PipelineBase):
                                                 inject=kwargs),
                  format_tasks.PythonFormatTask('PythonFormat', inject=kwargs)
                  # TODO(shinfan): Add merge task for python here.
-                )
+                 )
         return flow
 
     def validate_kwargs(self, **kwargs):
