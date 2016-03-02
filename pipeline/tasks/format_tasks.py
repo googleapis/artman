@@ -3,6 +3,7 @@
 import os
 import subprocess
 from pipeline.tasks import task_base
+from pipeline.tasks.requirements import go_requirements
 from pipeline.utils import task_utils
 
 
@@ -45,3 +46,12 @@ class PythonFormatTask(task_base.TaskBase):
     # so we shouldn't need a separate validation task.
     def validate(self):
         return []
+
+
+class GoFormatTask(task_base.TaskBase):
+    def execute(self, intermediate_code_dir):
+        print 'Formatting files in ' + os.path.abspath(intermediate_code_dir)
+        subprocess.call(['gofmt', '-w', intermediate_code_dir])
+
+    def validate(self):
+        return [go_requirements.GoFormatRequirements]

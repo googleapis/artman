@@ -20,10 +20,8 @@ class JavaParams(LanguageParams):
 
 
 class GoParams(LanguageParams):
-    def code_root(self, base_dir):
-        gopath = os.environ['GOPATH']
-        assert os.path.realpath(base_dir).startswith(os.path.realpath(gopath))
-        return base_dir
+    pass
+
 
 LANG_PARAMS_MAP = {
     'python': PythonParams(),

@@ -40,15 +40,6 @@ def _validate_codegen_kwargs(extra_args, **kwargs):
     _validate_gapi_tools_path(kwargs['gapi_tools_path'])
 
 
-def _validate_gopath(output_dir):
-    if 'GOPATH' not in os.environ:
-        raise ValueError('GOPATH must be set for Go codegen.')
-    gopathsrc = os.path.realpath(os.path.join(os.environ['GOPATH'], 'src'))
-    if not os.path.realpath(output_dir).startswith(gopathsrc):
-        raise ValueError(
-            'output_dir must be under $GOPATH for Go codegen.')
-
-
 class PythonGrpcClientPipeline(pipeline_base.PipelineBase):
 
     def __init__(self, **kwargs):
@@ -72,8 +63,7 @@ class PythonVkitClientPipeline(pipeline_base.PipelineBase):
 
     def do_build_flow(self, **kwargs):
         flow = linear_flow.Flow('vkit-codegen')
-        flow.add(protoc_tasks.ProtoPathTask('ProtoPath', inject=kwargs),
-                 protoc_tasks.ProtoDescGenTask('ProtoDesc', inject=kwargs),
+        flow.add(protoc_tasks.ProtoDescGenTask('ProtoDesc', inject=kwargs),
                  veneer_tasks.VeneerCodeGenTask('VeneerCodegen',
                                                 inject=kwargs),
                  format_tasks.PythonFormatTask('PythonFormat', inject=kwargs)
@@ -93,8 +83,7 @@ class JavaCorePipeline(pipeline_base.PipelineBase):
 
     def do_build_flow(self, **kwargs):
         flow = linear_flow.Flow('core-codegen')
-        flow.add(protoc_tasks.ProtoPathTask('ProtoPath', inject=kwargs),
-                 protoc_tasks.ProtoCodeGenTask('ProtoGen', inject=kwargs))
+        flow.add(protoc_tasks.ProtoCodeGenTask('ProtoGen', inject=kwargs))
         return flow
 
     def validate_kwargs(self, **kwargs):
@@ -109,8 +98,7 @@ class JavaGrpcClientPipeline(pipeline_base.PipelineBase):
 
     def do_build_flow(self, **kwargs):
         flow = linear_flow.Flow('grpc-codegen')
-        flow.add(protoc_tasks.ProtoPathTask('ProtoPath', inject=kwargs),
-                 protoc_tasks.ProtoCodeGenTask('ProtoGen', inject=kwargs),
+        flow.add(protoc_tasks.ProtoCodeGenTask('ProtoGen', inject=kwargs),
                  protoc_tasks.GrpcCodeGenTask('GrpcCodegen', inject=kwargs))
         return flow
 
@@ -126,8 +114,7 @@ class JavaVkitClientPipeline(pipeline_base.PipelineBase):
 
     def do_build_flow(self, **kwargs):
         flow = linear_flow.Flow('vkit-codegen')
-        flow.add(protoc_tasks.ProtoPathTask('ProtoPath', inject=kwargs),
-                 protoc_tasks.ProtoDescGenTask('ProtoDesc', inject=kwargs),
+        flow.add(protoc_tasks.ProtoDescGenTask('ProtoDesc', inject=kwargs),
                  veneer_tasks.VeneerCodeGenTask('VeneerCodegen',
                                                 inject=kwargs),
                  format_tasks.JavaFormatTask('JavaFormat', inject=kwargs),
@@ -157,15 +144,18 @@ class GoCoreProtoPipeline(pipeline_base.PipelineBase):
     def do_build_flow(self, **kwargs):
         flow = linear_flow.Flow('core-protogen')
         flow.add(
-            protoc_tasks.GoLangUpdateProtoImportsTask('UpdateProtoImports',
-                                                      inject=kwargs),
             protoc_tasks.ProtoCodeGenTask('CoreProtoGen',
-                                          inject=kwargs))
+                                          inject=kwargs),
+            veneer_tasks.GoExtractImportBaseTask('ExtractGoPackageName',
+                                                 inject=kwargs),
+            protoc_tasks.GoLangUpdateImportsTask('UpdateImports',
+                                                 inject=kwargs))
         return flow
 
     def validate_kwargs(self, **kwargs):
-        _validate_codegen_kwargs([], **kwargs)
-        _validate_gopath(kwargs['output_dir'])
+        # veneer_yaml is required by GoExtractImportBaseTask to provide
+        # the import path base needed by GoLangUpdateImportsTask.
+        _validate_codegen_kwargs(['veneer_yaml', 'final_repo_dir'], **kwargs)
 
 
 class GoGrpcClientPipeline(pipeline_base.PipelineBase):
@@ -184,15 +174,18 @@ class GoGrpcClientPipeline(pipeline_base.PipelineBase):
     def do_build_flow(self, **kwargs):
         flow = linear_flow.Flow('grpc-protogen')
         flow.add(
-            protoc_tasks.GoLangUpdateProtoImportsTask('UpdateProtoImports',
-                                                      inject=kwargs),
             protoc_tasks.ProtoAndGrpcCodeGenTask('GrpcCodegen',
+                                                 inject=kwargs),
+            veneer_tasks.GoExtractImportBaseTask('ExtractGoPackageName',
+                                                 inject=kwargs),
+            protoc_tasks.GoLangUpdateImportsTask('UpdateImports',
                                                  inject=kwargs))
         return flow
 
     def validate_kwargs(self, **kwargs):
-        _validate_codegen_kwargs([], **kwargs)
-        _validate_gopath(kwargs['output_dir'])
+        # veneer_yaml is required by GoExtractImportBaseTask to provide
+        # the import path base needed by GoLangUpdateImportsTask.
+        _validate_codegen_kwargs(['veneer_yaml', 'final_repo_dir'], **kwargs)
 
 
 class GoVkitClientPipeline(pipeline_base.PipelineBase):
@@ -203,14 +196,13 @@ class GoVkitClientPipeline(pipeline_base.PipelineBase):
 
     def do_build_flow(self, **kwargs):
         flow = linear_flow.Flow('vkit-codegen')
-        flow.add(protoc_tasks.ProtoPathTask('ProtoPath', inject=kwargs),
-                 protoc_tasks.ProtoDescGenTask('ProtoDescGen',
+        flow.add(protoc_tasks.ProtoDescGenTask('ProtoDescGen',
                                                inject=kwargs),
                  veneer_tasks.VeneerCodeGenTask('VeneerCodegen',
-                                                inject=kwargs))
+                                                inject=kwargs),
+                 format_tasks.GoFormatTask('GoFormat', inject=kwargs),
+                 veneer_tasks.VeneerMergeTask('VeneerMerge', inject=kwargs))
         return flow
 
     def validate_kwargs(self, **kwargs):
         _validate_codegen_kwargs(_VGEN_REQUIRED, **kwargs)
-        _validate_gopath(kwargs['output_dir'])
-        _validate_gopath(kwargs['final_repo_dir'])

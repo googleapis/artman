@@ -1,8 +1,0 @@
-// This is a fake proto file for testing.
-
-syntax = "proto3";
-
-package google.fake
-
-import "proto/google/api/annotations.proto"
-import "proto/google/protobuf/empty.proto"

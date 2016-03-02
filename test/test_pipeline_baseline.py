@@ -82,17 +82,12 @@ def test_python_vkit_client_baseline(tmpdir):
 
 
 def _test_go_baseline(task_name, test_name, tmpdir):
-    os.environ['GOPATH'] = str(tmpdir)
-    _test_baseline(task_name, test_name, 'go', str(tmpdir.mkdir('src')))
+    _test_baseline(task_name, test_name, 'go', str(tmpdir))
 
 
 def test_go_grpc_client_baseline(tmpdir):
     _test_go_baseline('GoGrpcClientPipeline', 'go_grpc_client_pipeline',
                       tmpdir)
-    with open(os.path.join(
-            'test', 'testdata', 'go_grpc_expected_fake.proto')) as f:
-        expected = f.read()
-    assert expected == tmpdir.join('src', 'proto', 'fake.proto').read()
 
 
 def test_go_vkit_client_baseline(tmpdir):

@@ -20,3 +20,14 @@ class GoPathRequirements(TaskRequirementBase):
     @classmethod
     def is_installed(cls):
         return 'GOPATH' in os.environ
+
+
+class GoFormatRequirements(TaskRequirementBase):
+
+    @classmethod
+    def install(cls):
+        pass
+
+    @classmethod
+    def require(cls):
+        return ['gofmt']

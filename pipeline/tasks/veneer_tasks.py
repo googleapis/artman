@@ -2,12 +2,14 @@
 
 import os
 import subprocess
-from taskflow import task
+import yaml
+
+from pipeline.tasks import task_base
 from pipeline.tasks.requirements import vgen_requirements
 from pipeline.utils import lang_params
 
 
-class VeneerCodeGenTask(task.Task):
+class VeneerCodeGenTask(task_base.TaskBase):
     """Generates Veneer wrappers"""
     default_provides = 'intermediate_code_dir'
 
@@ -34,7 +36,7 @@ class VeneerCodeGenTask(task.Task):
         return [vgen_requirements.VGenRequirements]
 
 
-class VeneerMergeTask(task.Task):
+class VeneerMergeTask(task_base.TaskBase):
     def execute(self, language, gapi_tools_path, final_repo_dir,
                 intermediate_code_dir, auto_merge, auto_resolve, ignore_base):
         params = lang_params.LANG_PARAMS_MAP[language]
@@ -47,14 +49,35 @@ class VeneerMergeTask(task.Task):
             '--baseline_path=' + baseline_root,
             ]
         if auto_merge:
-            args += '--auto_merge'
+            args.append('--auto_merge')
         if auto_resolve:
-            args += '--auto_resolve'
+            args.append('--auto_resolve')
         if ignore_base:
-            args += '--ignore_base'
+            args.append('--ignore_base')
         clargs = '-Pclargs=' + ','.join(args)
         subprocess.call([os.path.join(gapi_tools_path, 'gradlew'),
                          '-p', gapi_tools_path, 'runSynchronizer', clargs])
 
     def validate(self):
         return [vgen_requirements.MergeRequirements]
+
+
+class GoExtractImportBaseTask(task_base.TaskBase):
+    default_provides = 'go_import_base'
+
+    def execute(self, veneer_yaml):
+        for yaml_file in veneer_yaml:
+            if not os.path.exists(yaml_file):
+                continue
+            with open(yaml_file) as f:
+                veneer_config = yaml.load(f)
+            if not veneer_config:
+                continue
+            language_settings = veneer_config.get('language_settings')
+            if not language_settings:
+                continue
+            go_settings = language_settings.get('go')
+            if not go_settings:
+                continue
+            if 'package_name' in go_settings:
+                return go_settings.get('package_name')
