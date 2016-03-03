@@ -46,8 +46,7 @@ class _JavaProtoParams:
         if self.path is None:
             print 'start gradle process to locate GRPC Java plugin'
             self.path = task_utils.runGradleTask(
-                'showGrpcJavaPluginPath', gapi_tools_path,
-                'protoc-gen-grpc-java')
+                'showGrpcJavaPluginPath', gapi_tools_path)
         return self.path
 
     def grpc_out_param(self, output_dir):
@@ -86,6 +85,13 @@ _PROTO_PARAMS_MAP = {
 }
 
 
+def _find_protobuf_path(gapi_tools_path):
+    """Fetch and locate protobuf source"""
+    print 'Searching for latest protobuf source'
+    return task_utils.runGradleTask(
+        'showProtobufPath', gapi_tools_path)
+
+
 def _find_protos(proto_paths):
     """Searches along `proto_path` for .proto files and returns a list of
     paths"""
@@ -116,10 +122,12 @@ def _group_by_dirname(protos):
     return dirs
 
 
-def _protoc_header_params(import_proto_path, src_proto_path):
+def _protoc_header_params(import_proto_path, src_proto_path,
+                          gapi_tools_path):
+    proto_path = import_proto_path + src_proto_path
+    proto_path.append(_find_protobuf_path(gapi_tools_path))
     return (['protoc'] +
-            ['--proto_path=' + path for path in
-             (import_proto_path + src_proto_path)])
+            ['--proto_path=' + path for path in proto_path])
 
 
 def _protoc_desc_params(output_dir, desc_out_file):
@@ -152,7 +160,7 @@ class ProtoDescGenTask(task_base.TaskBase):
     default_provides = 'descriptor_set'
 
     def execute(self, src_proto_path, import_proto_path, output_dir,
-                api_name):
+                api_name, gapi_tools_path):
         print 'Compiling descriptors {0}'.format(
             _find_protos(src_proto_path))
         desc_out_file = api_name + '.desc'
@@ -161,7 +169,8 @@ class ProtoDescGenTask(task_base.TaskBase):
         #   - it doesn't have to
         #   - and multiple invocation will overwrite the desc_out_file
         subprocess.call(
-            _protoc_header_params(import_proto_path, src_proto_path) +
+            _protoc_header_params(
+                import_proto_path, src_proto_path, gapi_tools_path) +
             _protoc_desc_params(output_dir, desc_out_file) +
             _find_protos(src_proto_path))
         return os.path.join(output_dir, desc_out_file)
@@ -173,7 +182,7 @@ class ProtoDescGenTask(task_base.TaskBase):
 class ProtoCodeGenTask(task_base.TaskBase):
     """Generates protos"""
     def execute(self, language, src_proto_path, import_proto_path,
-                output_dir, api_name):
+                output_dir, api_name, gapi_tools_path):
         proto_params = _PROTO_PARAMS_MAP[language]
         pkg_dir = _prepare_pkg_dir(output_dir, api_name, language)
         # protoc-gen-go must compile all protos in a package at the same time,
@@ -183,7 +192,8 @@ class ProtoCodeGenTask(task_base.TaskBase):
                 _find_protos(src_proto_path)).items():
             print 'Generating protos {0}'.format(dirname)
             subprocess.call(
-                _protoc_header_params(import_proto_path, src_proto_path) +
+                _protoc_header_params(
+                    import_proto_path, src_proto_path, gapi_tools_path) +
                 _protoc_proto_params(proto_params, pkg_dir, with_grpc=False) +
                 protos)
 
@@ -203,7 +213,8 @@ class GrpcCodeGenTask(task_base.TaskBase):
                 _find_protos(src_proto_path)).items():
             print 'Running protoc with grpc plugin on {0}'.format(dirname)
             subprocess.call(
-                _protoc_header_params(import_proto_path, src_proto_path) +
+                _protoc_header_params(
+                    import_proto_path, src_proto_path, gapi_tools_path) +
                 _protoc_grpc_params(proto_params, pkg_dir, gapi_tools_path) +
                 protos)
 
@@ -223,7 +234,8 @@ class ProtoAndGrpcCodeGenTask(task_base.TaskBase):
                 _find_protos(src_proto_path)).items():
             print 'Running protoc and grpc plugin on {0}'.format(dirname)
             subprocess.call(
-                _protoc_header_params(import_proto_path, src_proto_path) +
+                _protoc_header_params(
+                    import_proto_path, src_proto_path, gapi_tools_path) +
                 _protoc_proto_params(proto_params, pkg_dir, with_grpc=True) +
                 _protoc_grpc_params(proto_params, pkg_dir, gapi_tools_path) +
                 protos)
