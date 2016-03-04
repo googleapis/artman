@@ -12,4 +12,5 @@ class CleanUpTask(task.Task):
         print 'Cleaning up temporary files'
         for entry in os.listdir(output_dir):
             if entry not in saved_dirs:
-                subprocess.call(['rm', '-rf', os.path.join(output_dir, entry)])
+                subprocess.check_call(
+                    ['rm', '-rf', os.path.join(output_dir, entry)])

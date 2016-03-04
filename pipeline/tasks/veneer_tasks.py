@@ -27,8 +27,8 @@ class VeneerCodeGenTask(task_base.TaskBase):
             '--output=' + os.path.abspath(code_root)
             ] + service_args + veneer_args
         clargs = '-Pclargs=' + ','.join(args)
-        subprocess.call([os.path.join(gapi_tools_path, 'gradlew'),
-                         '-p', gapi_tools_path, 'runVGen', clargs])
+        subprocess.check_call([os.path.join(gapi_tools_path, 'gradlew'),
+                               '-p', gapi_tools_path, 'runVGen', clargs])
 
         return code_root
 
@@ -55,8 +55,9 @@ class VeneerMergeTask(task_base.TaskBase):
         if ignore_base:
             args.append('--ignore_base')
         clargs = '-Pclargs=' + ','.join(args)
-        subprocess.call([os.path.join(gapi_tools_path, 'gradlew'),
-                         '-p', gapi_tools_path, 'runSynchronizer', clargs])
+        subprocess.check_call([os.path.join(gapi_tools_path, 'gradlew'),
+                               '-p', gapi_tools_path, 'runSynchronizer',
+                               clargs])
 
     def validate(self):
         return [vgen_requirements.MergeRequirements]

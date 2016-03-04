@@ -21,7 +21,7 @@ class JavaFormatTask(task_base.TaskBase):
                 if filename.endswith('.java'):
                     targetFile = os.path.abspath(os.path.join(root, filename))
                     targetFiles.append(targetFile)
-        subprocess.call(
+        subprocess.check_call(
             ['java', '-jar', path, '--replace'] + targetFiles)
 
     def validate(self):
@@ -40,7 +40,7 @@ class PythonFormatTask(task_base.TaskBase):
                 if filename.endswith('api.py'):
                     targetFile = os.path.abspath(os.path.join(root, filename))
                     targetFiles.append(targetFile)
-        subprocess.call(['yapf', '-i'] + targetFiles)
+        subprocess.check_call(['yapf', '-i'] + targetFiles)
 
     # yapf is installed by tox for the entire pipeline project's virtualenv,
     # so we shouldn't need a separate validation task.
@@ -51,7 +51,7 @@ class PythonFormatTask(task_base.TaskBase):
 class GoFormatTask(task_base.TaskBase):
     def execute(self, intermediate_code_dir):
         print 'Formatting files in ' + os.path.abspath(intermediate_code_dir)
-        subprocess.call(['gofmt', '-w', intermediate_code_dir])
+        subprocess.check_call(['gofmt', '-w', intermediate_code_dir])
 
     def validate(self):
         return [go_requirements.GoFormatRequirements]

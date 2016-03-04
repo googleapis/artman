@@ -21,9 +21,9 @@ def get_expected_calls(baseline, binding):
                 token.format(**binding) for token in tokens]))
     return commands
 
-
-@mock.patch('subprocess.call')
-def _test_baseline(task_name, test_name, language, output_dir, mock_call):
+@mock.patch('pipeline.utils.task_utils.runGradleTask')
+@mock.patch('subprocess.check_call')
+def _test_baseline(task_name, test_name, language, output_dir, mock_call, mock_gradle_task):
     # Pipeline kwargs
     kwargs_ = {
         'src_proto_path': ['test/fake-repos/fake-proto'],
@@ -44,6 +44,9 @@ def _test_baseline(task_name, test_name, language, output_dir, mock_call):
         'auto_resolve': True,
         'ignore_base': False,
         'final_repo_dir': output_dir}
+
+    # Mock output value of gradle tasks
+    mock_gradle_task.return_value = 'MOCK_GRADLE_TASK_OUTPUT'
 
     # Run pipeline
     pipeline = pipeline_factory.make_pipeline(task_name, **kwargs_)

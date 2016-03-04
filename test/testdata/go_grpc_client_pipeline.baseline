@@ -1,1 +1,1 @@
-protoc --proto_path=test/fake-repos/gapi-core-proto/src/main/proto/ --proto_path=test/fake-repos/fake-proto --go_out=plugins=grpc:{OUTPUT}/library-v1-gen-go test/fake-repos/fake-proto/fake.proto
+protoc --proto_path=test/fake-repos/gapi-core-proto/src/main/proto/ --proto_path=test/fake-repos/fake-proto --proto_path=MOCK_GRADLE_TASK_OUTPUT --go_out=plugins=grpc:{OUTPUT}/library-v1-gen-go test/fake-repos/fake-proto/fake.proto

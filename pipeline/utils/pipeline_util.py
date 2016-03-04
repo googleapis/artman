@@ -14,8 +14,8 @@ def validate_exists(required, **kwargs):
 def download(url, directory):
     filename = os.path.basename(urlparse.urlsplit(url).path)
     if not os.path.isfile(os.path.join(directory, filename)):
-        subprocess.call(['mkdir', '-p', directory])
+        subprocess.check_call(['mkdir', '-p', directory])
         print 'Downloading file from URL:' + url
-        subprocess.call(
+        subprocess.check_call(
             ['curl', '-o', directory + filename, '-sL', url])
     return directory + filename
