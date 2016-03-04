@@ -5,7 +5,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     man-db \
     pkg-config \
-    curl
+    curl \
+    kdiff3
 
 # Install runtime packages.
 RUN apt-get install -y ruby python python-dev python-pip openjdk-7-jre-headless nodejs npm
