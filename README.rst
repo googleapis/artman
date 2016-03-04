@@ -61,13 +61,13 @@ To run the Python pipeline for logging:
     $ python execute_pipeline.py \
         --config "../googleapis/pipeline_config/pipeline_logging.yaml\
         :logging_common|logging_python,\
-        pipeline_common.yaml:default" \
+        ../googleapis/pipeline_config/pipeline_common.yaml:default|python" \
         PythonGrpcClientPipeline
 
     $ python execute_pipeline.py \
         --config "../googleapis/pipeline_config/pipeline_logging.yaml\
         :logging_common|logging_python,\
-        pipeline_common.yaml:default" \
+        ../googleapis/pipeline_config/pipeline_common.yaml:default|python" \
         PythonVkitClientPipeline
 
 To run the Java pipeline:
@@ -75,17 +75,17 @@ To run the Java pipeline:
 ::
     $ python execute_pipeline.py \
         --config "../googleapis/pipeline_config/pipeline_core.yaml:core,\
-        pipeline_common.yaml:default" \
+        ../googleapis/pipeline_config/pipeline_common.yaml:default|java" \
         JavaCorePipeline
 
     $ python execute_pipeline.py \
         --config "../googleapis/pipeline_config/pipeline_pubsub.yaml:pubsub_common|pubsub_java,\
-                  pipeline_common.yaml:default" \
+        ../googleapis/pipeline_config/pipeline_common.yaml:default|java" \
         JavaGrpcClientPipeline
 
     $ python execute_pipeline.py \
         --config "../googleapis/pipeline_config/pipeline_pubsub.yaml:pubsub_common|pubsub_java,\
-        pipeline_common.yaml:default" \
+        ../googleapis/pipeline_config/pipeline_common.yaml:default|java" \
         JavaVkitClientPipeline
 
 To run the Go pipeline, first the core protos have to be compiled into the output directory.
@@ -95,7 +95,7 @@ Note: this won't be necessary once a public repository for core proto pb.go file
     $ python execute_pipeline.py \
        --config "../googleapis/pipeline_config/pipeline_core.yaml:core,\
        ../googleapis/pipeline_config/pipeline_logging.yaml:logging_go,\
-       pipeline_common.yaml:default" \
+       ../googleapis/pipeline_config/pipeline_common.yaml:default|go" \
        GoCoreProtoPipeline
 
 The actual Go pipeline is as follows:
@@ -103,17 +103,17 @@ The actual Go pipeline is as follows:
 ::
     $ python execute_pipeline.py \
        --config "../googleapis/pipeline_config/pipeline_logging.yaml:logging_common|logging_go|logging_type,\
-       pipeline_common.yaml:default" \
+       ../googleapis/pipeline_config/pipeline_common.yaml:default|go" \
        GoCoreProtoPipeline
 
     $ python execute_pipeline.py \
        --config "../googleapis/pipeline_config/pipeline_logging.yaml:logging_common|logging_go,\
-       pipeline_common.yaml:default" \
+       ../googleapis/pipeline_config/pipeline_common.yaml:default|go" \
        GoGrpcClientPipeline
 
     $ python execute_pipeline.py \
        --config "../googleapis/pipeline_config/pipeline_logging.yaml:logging_common|logging_go,\
-       pipeline_common.yaml:default" \
+       ../googleapis/pipeline_config/pipeline_common.yaml:default|go" \
        GoVkitClientPipeline
 
 Running tests
@@ -125,3 +125,19 @@ To run tests and the linter, run this command:
     $ tox
 
 Please always run this command before submitting changes.
+
+
+Pipeline config files
+-------------
+
+Pipeline config files contains configuration data to run pipeline tasks.
+
+googleapis/pipeline_config/pipeline_common.yaml
+
+- default: Default configuration for all pipelines
+- {language}: Language specific configuration
+
+googleapis/pipeline_config/pipeline_{API}.yaml
+
+- {API}_common: cross language API specific configuration
+- {API}_{language}: API x language configurations

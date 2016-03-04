@@ -9,7 +9,8 @@ from taskflow.patterns import linear_flow
 
 # kwargs required by veneer code gen
 _VGEN_REQUIRED = ['service_yaml',
-                  'veneer_yaml',
+                  'veneer_language_yaml',
+                  'veneer_api_yaml',
                   'auto_merge',
                   'auto_resolve',
                   'ignore_base',
