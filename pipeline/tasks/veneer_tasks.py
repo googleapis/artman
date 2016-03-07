@@ -14,10 +14,11 @@ class VeneerCodeGenTask(task_base.TaskBase):
     default_provides = 'intermediate_code_dir'
 
     def execute(self, language, gapi_tools_path, descriptor_set, service_yaml,
-                veneer_yaml, output_dir, api_name):
+                veneer_api_yaml, veneer_language_yaml, output_dir, api_name):
         params = lang_params.LANG_PARAMS_MAP[language]
         code_root = params.code_root(
             os.path.join(output_dir, api_name + '-veneer-gen-' + language))
+        veneer_yaml = veneer_api_yaml + veneer_language_yaml
         veneer_args = ['--veneer_yaml=' + os.path.abspath(yaml)
                        for yaml in veneer_yaml]
         service_args = ['--service_yaml=' + os.path.abspath(yaml)
