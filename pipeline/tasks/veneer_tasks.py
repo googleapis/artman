@@ -56,9 +56,14 @@ class VeneerMergeTask(task_base.TaskBase):
         if ignore_base:
             args.append('--ignore_base')
         clargs = '-Pclargs=' + ','.join(args)
+        print 'Running synchronizer with args: ' + str(args)
         subprocess.check_call([os.path.join(gapi_tools_path, 'gradlew'),
                                '-p', gapi_tools_path, 'runSynchronizer',
                                clargs])
+        for root, subdirs, files in os.walk(final_code_root):
+          for file in files:
+             if file.endswith('.orig'):
+                os.remove(os.path.join(root,file))
 
     def validate(self):
         return [vgen_requirements.MergeRequirements]
