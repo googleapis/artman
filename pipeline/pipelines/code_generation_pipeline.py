@@ -154,9 +154,10 @@ class GoCoreProtoPipeline(pipeline_base.PipelineBase):
         return flow
 
     def validate_kwargs(self, **kwargs):
-        # veneer_yaml is required by GoExtractImportBaseTask to provide
+        # veneer_api_yaml is required by GoExtractImportBaseTask to provide
         # the import path base needed by GoLangUpdateImportsTask.
-        _validate_codegen_kwargs(['veneer_yaml', 'final_repo_dir'], **kwargs)
+        _validate_codegen_kwargs(['veneer_api_yaml', 'final_repo_dir'],
+                                 **kwargs)
 
 
 class GoGrpcClientPipeline(pipeline_base.PipelineBase):
@@ -184,9 +185,10 @@ class GoGrpcClientPipeline(pipeline_base.PipelineBase):
         return flow
 
     def validate_kwargs(self, **kwargs):
-        # veneer_yaml is required by GoExtractImportBaseTask to provide
+        # veneer_api_yaml is required by GoExtractImportBaseTask to provide
         # the import path base needed by GoLangUpdateImportsTask.
-        _validate_codegen_kwargs(['veneer_yaml', 'final_repo_dir'], **kwargs)
+        _validate_codegen_kwargs(['veneer_api_yaml', 'final_repo_dir'],
+                                 **kwargs)
 
 
 class GoVkitClientPipeline(pipeline_base.PipelineBase):

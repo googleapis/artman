@@ -72,8 +72,8 @@ class VeneerMergeTask(task_base.TaskBase):
 class GoExtractImportBaseTask(task_base.TaskBase):
     default_provides = 'go_import_base'
 
-    def execute(self, veneer_yaml):
-        for yaml_file in veneer_yaml:
+    def execute(self, veneer_api_yaml):
+        for yaml_file in veneer_api_yaml:
             if not os.path.exists(yaml_file):
                 continue
             with open(yaml_file) as f:
