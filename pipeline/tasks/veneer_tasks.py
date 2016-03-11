@@ -61,9 +61,9 @@ class VeneerMergeTask(task_base.TaskBase):
                                '-p', gapi_tools_path, 'runSynchronizer',
                                clargs])
         for root, subdirs, files in os.walk(final_code_root):
-          for file in files:
-             if file.endswith('.orig'):
-                os.remove(os.path.join(root,file))
+            for file in files:
+                if file.endswith('.orig'):
+                    os.remove(os.path.join(root, file))
 
     def validate(self):
         return [vgen_requirements.MergeRequirements]

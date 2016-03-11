@@ -6,7 +6,8 @@ from taskflow import engines
 
 
 def get_expected_calls(baseline, binding):
-    """Returns the list of expected subprocess calls.
+    """Returns the list of expected calls of subprocess.check_call() and
+    subprocess.call().
 
     The expected commandlines are listed in the baseline files located
     under test/testdata, with placeholders of {OUTPUT} for the output dir and
@@ -14,16 +15,22 @@ def get_expected_calls(baseline, binding):
     binding parameter.
     """
     commands = []
-    with open(os.path.join('test', 'testdata', baseline + '.baseline')) as f:
+    filename = os.path.join('test', 'testdata', baseline + '.baseline')
+    if not os.path.exists(filename):
+        return commands
+    with open(filename) as f:
         for line in f:
             tokens = line.strip().split()
             commands.append(mock.call([
                 token.format(**binding) for token in tokens]))
     return commands
 
+
 @mock.patch('pipeline.utils.task_utils.runGradleTask')
+@mock.patch('subprocess.call')
 @mock.patch('subprocess.check_call')
-def _test_baseline(task_name, test_name, language, output_dir, mock_call, mock_gradle_task):
+def _test_baseline(task_name, test_name, language, output_dir, mock_check_call,
+                   mock_call, mock_gradle_task):
     # Pipeline kwargs
     kwargs_ = {
         'src_proto_path': ['test/fake-repos/fake-proto'],
@@ -33,11 +40,12 @@ def _test_baseline(task_name, test_name, language, output_dir, mock_call, mock_g
         'service_yaml': [
             'test/testdata/gapi-example-library-proto/src/main/proto/'
             'google/example/library/library.yaml'],
-        'veneer_yaml': [
-            'test/testdata/gapi-example-library-proto/src/main/proto/'
-                'google/example/library/library_veneer.yaml',
+        'veneer_language_yaml': [
             'test/testdata/gapi-example-library-proto/src/main/proto/'
                 'google/example/library/' + language + '_veneer.yaml'],
+        'veneer_api_yaml': [
+            'test/testdata/gapi-example-library-proto/src/main/proto/'
+                'google/example/library/library_veneer.yaml'],
         'output_dir': output_dir,
         'api_name': 'library-v1',
         'auto_merge': True,
@@ -47,6 +55,7 @@ def _test_baseline(task_name, test_name, language, output_dir, mock_call, mock_g
 
     # Mock output value of gradle tasks
     mock_gradle_task.return_value = 'MOCK_GRADLE_TASK_OUTPUT'
+    mock_call.return_value = 0
 
     # Run pipeline
     pipeline = pipeline_factory.make_pipeline(task_name, **kwargs_)
@@ -54,8 +63,15 @@ def _test_baseline(task_name, test_name, language, output_dir, mock_call, mock_g
     engine.run()
 
     # Compare with the expected subprocess calls.
-    mock_call.assert_has_calls(get_expected_calls(
+    mock_check_call.assert_has_calls(get_expected_calls(
         test_name, {'CWD': os.getcwd(), 'OUTPUT': output_dir}))
+
+    # Some tasks can use subprocess.call() instead of check_call(), they are
+    # tracked separately.
+    expected_subprocess_call = get_expected_calls(
+        test_name + '.call', {'CWD': os.getcwd(), 'OUTPUT': output_dir})
+    if expected_subprocess_call:
+        mock_call.assert_has_calls(expected_subprocess_call)
 
 
 def _test_python_baseline(task_name, test_name, tmpdir):

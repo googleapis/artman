@@ -39,7 +39,7 @@ class PythonFormatTask(task_base.TaskBase):
                     targetFiles.append(targetFile)
         # yapf returns code 2 when it formats, so we can't use `check_call`.
         exit_code = subprocess.call(['yapf', '-i'] + targetFiles)
-        if not exit_code in [0, 2]:
+        if exit_code not in [0, 2]:
             raise subprocess.CalledProcessError(exit_code, 'yapf')
 
     # yapf is installed by tox for the entire pipeline project's virtualenv,
