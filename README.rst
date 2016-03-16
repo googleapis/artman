@@ -59,14 +59,12 @@ To run the Python pipeline for logging:
 
 ::
     $ python execute_pipeline.py \
-        --config "../googleapis/pipeline_config/pipeline_logging.yaml\
-        :logging_common|logging_python,\
+        --config "../googleapis/pipeline_config/pipeline_logging.yaml:logging_common|logging_python,\
         ../googleapis/pipeline_config/pipeline_common.yaml:default|python" \
         PythonGrpcClientPipeline
 
     $ python execute_pipeline.py \
-        --config "../googleapis/pipeline_config/pipeline_logging.yaml\
-        :logging_common|logging_python,\
+        --config "../googleapis/pipeline_config/pipeline_logging.yaml:logging_common|logging_python,\
         ../googleapis/pipeline_config/pipeline_common.yaml:default|python" \
         PythonVkitClientPipeline
 
