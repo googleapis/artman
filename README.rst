@@ -21,6 +21,12 @@ Installation
 
 *N.B., at the moment, this library is under development, and has not been published to pypi*
 
+Clone this repository:
+
+  ::
+     $ git clone sso://gapi/pipeline
+     $ cd pipeline
+
 Install tox if it has not already been installed:
 
   ::
@@ -38,7 +44,13 @@ Once done developing, deactivate the development environment:
   ::
      $(develop) deactivate
 
+Install nvm if it has not already been installed:
+
+  ::
+     $ npm install -g nvm
+
 Install packman:
+
   ::
      $ curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.30.2/install.sh | bash
      $ nvm install 5.0
