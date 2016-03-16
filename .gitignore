@@ -64,3 +64,4 @@ target/
 
 # Project-specific
 .tox/*
+output/*
