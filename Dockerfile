@@ -23,7 +23,15 @@ RUN brew doctor || true
 
 # Install protoc and grpc.
 RUN curl -s https://raw.githubusercontent.com/grpc/homebrew-grpc/master/scripts/install | bash -s
+
+# Install Go1.6 from linuxbrew.
+RUN brew install go
+
 USER root
+
+ENV GOPATH /go
+ENV PATH $GOPATH/bin:/home/linuxbrew/.linuxbrew/opt/go/libexec/bin:$PATH
+RUN mkdir -p "$GOPATH/src" "$GOPATH/bin" && chmod -R 777 "$GOPATH"
 
 # Install Node.js.
 RUN npm install -g googleapis-packman
