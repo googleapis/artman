@@ -84,6 +84,7 @@ def _test_baseline(task_name, test_name, language, output_dir, mock_check_call,
     # tracked separately.
     expected_subprocess_call = get_expected_calls(
         test_name + '.call', {'CWD': os.getcwd(), 'OUTPUT': output_dir})
+
     if expected_subprocess_call:
         mock_call.assert_has_calls(expected_subprocess_call)
 
@@ -126,3 +127,17 @@ def test_go_grpc_client_baseline(tmpdir):
 def test_go_vkit_client_baseline(tmpdir):
     _test_go_baseline('GoVkitClientPipeline', 'go_vkit_client_pipeline',
                       tmpdir)
+
+
+def _test_java_baseline(task_name, test_name, tmpdir):
+    _test_baseline(task_name, test_name, 'java', str(tmpdir))
+
+
+def test_java_grpc_client_baseline(tmpdir):
+    _test_java_baseline('JavaGrpcClientPipeline', 'java_grpc_client_pipeline',
+                        tmpdir)
+
+
+def test_java_vkit_client_baseline(tmpdir):
+    _test_java_baseline('JavaVkitClientPipeline', 'java_vkit_client_pipeline',
+                        tmpdir)

@@ -32,6 +32,7 @@ class VeneerCodeGenTask(task_base.TaskBase):
         params = lang_params.LANG_PARAMS_MAP[language]
         code_root = params.code_root(
             os.path.join(output_dir, api_name + '-veneer-gen-' + language))
+        subprocess.check_call(['rm', '-rf', code_root])
         veneer_yaml = veneer_api_yaml + veneer_language_yaml
         veneer_args = ['--veneer_yaml=' + os.path.abspath(yaml)
                        for yaml in veneer_yaml]
