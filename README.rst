@@ -19,145 +19,20 @@ from the protobuf source IDL and additional configuration in yaml files.
 Installation
 ------------
 
-*N.B., at the moment, this library is under development, and has not been published to pypi*
+At the moment, this library is under development, so please see
+`using a development checkout`_ for installation instructions
 
-Clone this repository:
-
-  ::
-     $ git clone sso://gapi/pipeline
-     $ cd pipeline
-
-Install tox if it has not already been installed:
-
-  ::
-     $ sudo pip install tox  # done once, installed globally
-
-Create, then activate the tox development environment:
-
-  ::
-     $ tox -e devenv
-     $ . .tox/develop/bin/activate
-     $(develop) ...
-
-Once done developing, deactivate the development environment:
-
-  ::
-     $(develop) deactivate
-
-Install nvm if it has not already been installed:
-
-  ::
-     $ npm install -g nvm
-
-Install packman:
-
-  ::
-     $ curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.30.2/install.sh | bash
-     $ nvm install 5.0
-     $ nvm use 5.0
-     $ npm install -g googleapis-packman
+.. _`using a development checkout`: https://github.com/googleapis/artman/blob/master/CONTRIBUTING.rst#using-a-development-checkout
 
 
-Try it out
-----------
+Usage
+-----
 
-To execute a build pipeline locally, try the following example command:
+Currently, this tool can only be run in the development environment of the
+development team, as some dependencies are yet to be published. See USAGE_ for
+details.
 
-::
-    $ python execute_pipeline.py --pipeline_kwargs={\'sleep_secs\':2} SamplePipeline
-
-To execute a build pipeline remotely, start two consoles and run the following command
-in one console:
-
-::
-    $ python start_conductor.py
-
-
-And then run the following command for multiple times with different parameter:
-
-::
-    $ python execute_pipeline.py --pipeline_kwargs={\'sleep_secs\':2} --remote_mode SamplePipeline
-
-
-Please note, there is no guarantee that your pipeline job will be claimed by the
-conductor running on your machine. It can also be picked up by other conductor
-processes. You can run the second command for multiple times, and chances are
-good that your conductor will pick up one job at least.
-
-To run the Python pipeline for logging:
-
-::
-    $ python execute_pipeline.py \
-        --config "../googleapis/pipeline_config/pipeline_logging.yaml:logging_common|logging_python,\
-        ../googleapis/pipeline_config/pipeline_common.yaml:default|python" \
-        PythonGrpcClientPipeline
-
-    $ python execute_pipeline.py \
-        --config "../googleapis/pipeline_config/pipeline_logging.yaml:logging_common|logging_python,\
-        ../googleapis/pipeline_config/pipeline_common.yaml:default|python" \
-        PythonVkitClientPipeline
-
-To run the Java pipeline:
-
-::
-    $ python execute_pipeline.py \
-        --config "../googleapis/pipeline_config/pipeline_core.yaml:core,\
-        ../googleapis/pipeline_config/pipeline_common.yaml:default|java" \
-        JavaCorePipeline
-
-    $ python execute_pipeline.py \
-        --config "../googleapis/pipeline_config/pipeline_pubsub.yaml:pubsub_common|pubsub_java,\
-        ../googleapis/pipeline_config/pipeline_common.yaml:default|java" \
-        JavaGrpcClientPipeline
-
-    $ python execute_pipeline.py \
-        --config "../googleapis/pipeline_config/pipeline_pubsub.yaml:pubsub_common|pubsub_java,\
-        ../googleapis/pipeline_config/pipeline_common.yaml:default|java" \
-        JavaVkitClientPipeline
-
-To run the Go pipeline, first the core protos have to be compiled into the output directory.
-Note: this won't be necessary once a public repository for core proto pb.go files.
-
-::
-    $ python execute_pipeline.py \
-       --config "../googleapis/pipeline_config/pipeline_core.yaml:core,\
-       ../googleapis/pipeline_config/pipeline_logging.yaml:logging_go,\
-       ../googleapis/pipeline_config/pipeline_common.yaml:default|go" \
-       GoCoreProtoPipeline
-
-The actual Go pipeline is as follows:
-
-::
-    $ python execute_pipeline.py \
-       --config "../googleapis/pipeline_config/pipeline_logging.yaml:logging_common|logging_go|logging_type,\
-       ../googleapis/pipeline_config/pipeline_common.yaml:default|go" \
-       GoCoreProtoPipeline
-
-    $ python execute_pipeline.py \
-       --config "../googleapis/pipeline_config/pipeline_logging.yaml:logging_common|logging_go,\
-       ../googleapis/pipeline_config/pipeline_common.yaml:default|go" \
-       GoGrpcClientPipeline
-
-    $ python execute_pipeline.py \
-       --config "../googleapis/pipeline_config/pipeline_logging.yaml:logging_common|logging_go,\
-       ../googleapis/pipeline_config/pipeline_common.yaml:default|go" \
-       GoVkitClientPipeline
-
-
-Pipeline config files
----------------------
-
-Pipeline config files contains configuration data to run pipeline tasks.
-
-googleapis/pipeline_config/pipeline_common.yaml
-
-- default: Default configuration for all pipelines
-- {language}: Language specific configuration
-
-googleapis/pipeline_config/pipeline_{API}.yaml
-
-- {API}_common: cross language API specific configuration
-- {API}_{language}: API x language configurations
+.. _USAGE: https://github.com/googleapis/artman/blob/master/USAGE.rst
 
 
 Python Versions
@@ -191,7 +66,7 @@ stable.
 Details
 -------
 
-For detailed documentation of the modules in gax-python, please watch `DOCUMENTATION`_.
+For detailed documentation of the modules in artman, please watch `DOCUMENTATION`_.
 
 .. _`DOCUMENTATION`: https://googleapis-artman.readthedocs.org/
 
@@ -201,4 +76,4 @@ License
 
 BSD - See `LICENSE`_ for more information.
 
-.. _`LICENSE`: https://github.com/googleapis/gax-python/blob/master/LICENSE
+.. _`LICENSE`: https://github.com/googleapis/artman/blob/master/LICENSE
