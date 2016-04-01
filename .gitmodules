@@ -1,3 +1,0 @@
-[submodule "test/testdata/gapi-example-library-proto"]
-	path = test/testdata/gapi-example-library-proto
-	url = sso://gapi/gapi-example-library-proto

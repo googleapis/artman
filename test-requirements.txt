@@ -1,4 +1,5 @@
-mock
+mock>=1.3.0
 pytest>=2.8.3
+pytest-cov>=1.8.1
 pytest-timeout>=1.0.0
 unittest2>=1.1.0
