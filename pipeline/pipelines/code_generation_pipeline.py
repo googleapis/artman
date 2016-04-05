@@ -223,3 +223,51 @@ class GoVkitClientPipeline(pipeline_base.PipelineBase):
 
     def validate_kwargs(self, **kwargs):
         _validate_codegen_kwargs(_VGEN_REQUIRED, **kwargs)
+
+
+class CSharpCorePipeline(pipeline_base.PipelineBase):
+
+    def __init__(self, **kwargs):
+        kwargs['language'] = 'csharp'
+        super(CSharpCorePipeline, self).__init__(**kwargs)
+
+    def do_build_flow(self, **kwargs):
+        flow = linear_flow.Flow('core-codegen')
+        flow.add(protoc_tasks.ProtoCodeGenTask('ProtoGen', inject=kwargs))
+        return flow
+
+    def validate_kwargs(self, **kwargs):
+        _validate_codegen_kwargs([], **kwargs)
+
+
+class CSharpGrpcClientPipeline(pipeline_base.PipelineBase):
+
+    def __init__(self, **kwargs):
+        kwargs['language'] = 'csharp'
+        super(CSharpGrpcClientPipeline, self).__init__(**kwargs)
+
+    def do_build_flow(self, **kwargs):
+        flow = linear_flow.Flow('grpc-codegen')
+        flow.add(protoc_tasks.ProtoCodeGenTask('ProtoGen', inject=kwargs),
+                 protoc_tasks.GrpcCodeGenTask('GrpcCodegen', inject=kwargs))
+        return flow
+
+    def validate_kwargs(self, **kwargs):
+        _validate_codegen_kwargs([], **kwargs)
+
+
+class CSharpVkitClientPipeline(pipeline_base.PipelineBase):
+
+    def __init__(self, **kwargs):
+        kwargs['language'] = 'csharp'
+        super(CSharpVkitClientPipeline, self).__init__(**kwargs)
+
+    def do_build_flow(self, **kwargs):
+        flow = linear_flow.Flow('vkit-codegen')
+        flow.add(protoc_tasks.ProtoDescGenTask('ProtoDesc', inject=kwargs),
+                 veneer_tasks.VeneerCodeGenTask('VeneerCodegen',
+                                                inject=kwargs))
+        return flow
+
+    def validate_kwargs(self, **kwargs):
+        _validate_codegen_kwargs(_VGEN_REQUIRED, **kwargs)

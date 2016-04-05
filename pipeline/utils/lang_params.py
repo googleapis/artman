@@ -37,8 +37,13 @@ class GoParams(LanguageParams):
     pass
 
 
+class CSharpParams(LanguageParams):
+    pass
+
+
 LANG_PARAMS_MAP = {
     'python': PythonParams(),
     'java': JavaParams(),
-    'go': GoParams()
+    'go': GoParams(),
+    'csharp': CSharpParams(),
 }
