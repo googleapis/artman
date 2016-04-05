@@ -92,10 +92,32 @@ class _GoProtoParams:
         return None
 
 
+class _CSharpProtoParams:
+    def __init__(self):
+        self.path = None
+        self.params = lang_params.LANG_PARAMS_MAP['csharp']
+
+    def code_root(self, output_dir):
+        return self.params.code_root(output_dir)
+
+    def lang_out_param(self, output_dir, with_grpc):
+        return '--csharp_out=' + self.code_root(output_dir)
+
+    def grpc_plugin_path(self, dummy_gapi_tools_path):
+        if self.path is None:
+            self.path = subprocess.check_output(
+                ['which', 'grpc_csharp_plugin'])[:-1]
+        return self.path
+
+    def grpc_out_param(self, output_dir):
+        return '--grpc_out=' + self.code_root(output_dir)
+
+
 _PROTO_PARAMS_MAP = {
     'python': _PythonProtoParams(),
     'java': _JavaProtoParams(),
-    'go': _GoProtoParams()
+    'go': _GoProtoParams(),
+    'csharp': _CSharpProtoParams(),
 }
 
 
