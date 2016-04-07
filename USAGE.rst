@@ -60,6 +60,17 @@ conductor running on your machine. It can also be picked up by other conductor
 processes. You can run the second command for multiple times, and chances are
 good that your conductor will pick up one job at least.
 
+Config generation
+*****************
+
+  ::
+
+     python execute_pipeline.py \
+        --config "../googleapis/pipeline_config/pipeline_logging.yaml:logging_common,\
+        ../googleapis/pipeline_config/pipeline_common.yaml:default" \
+        VkitConfigPipeline
+
+
 Python (logging)
 ****************
 

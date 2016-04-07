@@ -23,6 +23,59 @@ from pipeline.tasks.requirements import vgen_requirements
 from pipeline.utils import lang_params
 
 
+class VeneerConfigGenTask(task_base.TaskBase):
+    """Generates Veneer config file"""
+    default_provides = 'intermediate_config_location'
+
+    def execute(self, gapi_tools_path, descriptor_set, output_dir, api_name):
+        config_gen_dir = os.path.join(output_dir, api_name + '-config-gen')
+        subprocess.check_call(['mkdir', '-p', config_gen_dir])
+        config_gen_path = os.path.join(config_gen_dir,
+                                       api_name + '_veneer.yaml')
+        args = [
+            '--descriptor_set=' + os.path.abspath(descriptor_set),
+            '--output=' + os.path.abspath(config_gen_path)
+            ]
+        clargs = '-Pclargs=' + ','.join(args)
+        subprocess.check_call([os.path.join(gapi_tools_path, 'gradlew'),
+                               '-p', gapi_tools_path, 'runConfigGen', clargs])
+
+        return config_gen_path
+
+    def validate(self):
+        return [vgen_requirements.ConfigGenRequirements]
+
+
+class VeneerConfigMoveTask(task_base.TaskBase):
+    """Move config file to veneer_api_yaml location"""
+
+    def _move_to(self, intermediate_config_location, veneer_api_yaml):
+        error_fmt = 'Could not move generated config file \
+                    from "{0}" to "{1}": '.format(
+                        os.path.abspath(intermediate_config_location),
+                        [os.path.abspath(c_out) for c_out in veneer_api_yaml])
+
+        if len(veneer_api_yaml) > 1:
+            raise ValueError(error_fmt + 'Multiple locations specified')
+        elif len(veneer_api_yaml) == 0:
+            raise ValueError(error_fmt + 'No location specified')
+        elif os.path.exists(veneer_api_yaml[0]):
+            raise ValueError(error_fmt + 'File already exists')
+        else:
+            return veneer_api_yaml[0]
+
+    def execute(self, intermediate_config_location, veneer_api_yaml):
+        conf_out = self._move_to(intermediate_config_location, veneer_api_yaml)
+        if conf_out:
+            subprocess.check_call(['mkdir', '-p', os.path.dirname(conf_out)])
+            subprocess.check_call(['mv', intermediate_config_location,
+                                   conf_out])
+        return
+
+    def validate(self):
+        return []
+
+
 class VeneerCodeGenTask(task_base.TaskBase):
     """Generates Veneer wrappers"""
     default_provides = 'intermediate_code_dir'

@@ -55,6 +55,25 @@ def _validate_codegen_kwargs(extra_args, **kwargs):
     _validate_gapi_tools_path(kwargs['gapi_tools_path'])
 
 
+class VkitConfigPipeline(pipeline_base.PipelineBase):
+
+    def __init__(self, **kwargs):
+        kwargs['language'] = ''
+        super(VkitConfigPipeline, self).__init__(**kwargs)
+
+    def do_build_flow(self, **kwargs):
+        flow = linear_flow.Flow('vkit-configgen')
+        flow.add(protoc_tasks.ProtoDescGenTask('ProtoDesc', inject=kwargs),
+                 veneer_tasks.VeneerConfigGenTask(
+                     'VeneerConfigGen', inject=kwargs),
+                 veneer_tasks.VeneerConfigMoveTask(
+                     'VeneerConfigMove', inject=kwargs))
+        return flow
+
+    def validate_kwargs(self, **kwargs):
+        _validate_codegen_kwargs([], **kwargs)
+
+
 class PythonGrpcClientPipeline(pipeline_base.PipelineBase):
 
     def __init__(self, **kwargs):

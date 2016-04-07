@@ -39,3 +39,16 @@ class MergeRequirements(task_requirement_base.TaskRequirementBase):
     def install(cls):
         # TODO(shinfan): Install kdiff3
         raise Exception('Kdiff3 not installed')
+
+
+class ConfigGenRequirements(task_requirement_base.TaskRequirementBase):
+
+    @classmethod
+    def require(cls):
+        # Intentionally do nothing
+        return []
+
+    @classmethod
+    def install(cls):
+        # Intentionally do nothing
+        pass

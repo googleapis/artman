@@ -40,6 +40,13 @@ def get_expected_calls(baseline, binding):
     return commands
 
 
+def check_calls_match(expected_calls, actual_calls):
+    err_str = 'Mismatch between expected and actual subprocess calls.\r\
+        Expected: {}\rActual: {}'
+    assert expected_calls == actual_calls, err_str.format(
+        expected_calls, actual_calls)
+
+
 @mock.patch('pipeline.utils.task_utils.runGradleTask')
 @mock.patch('subprocess.call')
 @mock.patch('subprocess.check_call')
@@ -77,16 +84,15 @@ def _test_baseline(task_name, test_name, language, output_dir, mock_check_call,
     engine.run()
 
     # Compare with the expected subprocess calls.
-    mock_check_call.assert_has_calls(get_expected_calls(
-        test_name, {'CWD': os.getcwd(), 'OUTPUT': output_dir}))
+    expected_checked_calls = get_expected_calls(
+        test_name, {'CWD': os.getcwd(), 'OUTPUT': output_dir})
+    check_calls_match(expected_checked_calls, mock_check_call.mock_calls)
 
     # Some tasks can use subprocess.call() instead of check_call(), they are
     # tracked separately.
     expected_subprocess_call = get_expected_calls(
         test_name + '.call', {'CWD': os.getcwd(), 'OUTPUT': output_dir})
-
-    if expected_subprocess_call:
-        mock_call.assert_has_calls(expected_subprocess_call)
+    check_calls_match(expected_subprocess_call, mock_call.mock_calls)
 
 
 def _test_python_baseline(task_name, test_name, tmpdir):
@@ -141,3 +147,7 @@ def test_java_grpc_client_baseline(tmpdir):
 def test_java_vkit_client_baseline(tmpdir):
     _test_java_baseline('JavaVkitClientPipeline', 'java_vkit_client_pipeline',
                         tmpdir)
+
+
+def test_config_baseline(tmpdir):
+    _test_baseline('VkitConfigPipeline', 'config_pipeline', '', str(tmpdir))
