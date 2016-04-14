@@ -144,6 +144,27 @@ The actual Go pipeline is as follows:
        GoVkitClientPipeline
 
 
+C# (pubsub)
+***********
+
+  ::
+
+     python execute_pipeline.py \
+       --config "../googleapis/pipeline_config/pipeline_pubsub.yaml:pubsub_common|pubsub_csharp,\
+       ../googleapis/pipeline_config/pipeline_common.yaml:default|csharp" \
+       CSharpCorePipeline
+
+     python execute_pipeline.py \
+       --config "../googleapis/pipeline_config/pipeline_pubsub.yaml:pubsub_common|pubsub_csharp,\
+       ../googleapis/pipeline_config/pipeline_common.yaml:default|csharp" \
+       CSharpGrpcClientPipeline
+
+     python execute_pipeline.py \
+       --config "../googleapis/pipeline_config/pipeline_pubsub.yaml:pubsub_common|pubsub_csharp,\
+       ../googleapis/pipeline_config/pipeline_common.yaml:default|csharp" \
+       CSharpVkitClientPipeline
+
+
 Pipeline configuration
 ----------------------
 
