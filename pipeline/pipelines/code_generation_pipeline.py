@@ -31,14 +31,14 @@ _VGEN_REQUIRED = ['service_yaml',
                   'final_repo_dir']
 
 
-def _validate_gapi_tools_path(gapi_tools_path):
+def _validate_toolkit_path(toolkit_path):
     if not (os.path.isfile(
-                os.path.join(gapi_tools_path, 'gradlew')) and
+                os.path.join(toolkit_path, 'gradlew')) and
             os.path.isfile(
-                os.path.join(gapi_tools_path, 'build.gradle'))):
+                os.path.join(toolkit_path, 'build.gradle'))):
         raise ValueError(
-                'gapi-tools does not contain `gradlew` or `build.gradle`'
-                'at {0}'.format(gapi_tools_path))
+                'toolkit repo does not contain `gradlew` or `build.gradle`'
+                'at {0}'.format(toolkit_path))
 
 
 # TODO(garrettjones) fix required to be relative to pipeline.
@@ -47,12 +47,12 @@ def _validate_gapi_tools_path(gapi_tools_path):
 def _validate_codegen_kwargs(extra_args, **kwargs):
     required = ['src_proto_path',
                 'import_proto_path',
-                'gapi_tools_path',
+                'toolkit_path',
                 'output_dir',
                 'language',
                 'api_name']
     pipeline_util.validate_exists(required + extra_args, **kwargs)
-    _validate_gapi_tools_path(kwargs['gapi_tools_path'])
+    _validate_toolkit_path(kwargs['toolkit_path'])
 
 
 class VkitConfigPipeline(pipeline_base.PipelineBase):

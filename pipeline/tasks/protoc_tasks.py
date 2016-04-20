@@ -35,7 +35,7 @@ class _PythonProtoParams:
     def lang_out_param(self, output_dir, with_grpc):
         return '--python_out=' + self.code_root(output_dir)
 
-    def grpc_plugin_path(self, dummy_gapi_tools_path):
+    def grpc_plugin_path(self, dummy_toolkit_path):
         if self.path is None:
             self.path = subprocess.check_output(
                 ['which', 'grpc_python_plugin'])[:-1]
@@ -56,11 +56,11 @@ class _JavaProtoParams:
     def lang_out_param(self, output_dir, with_grpc):
         return '--java_out=' + self.code_root(output_dir)
 
-    def grpc_plugin_path(self, gapi_tools_path):
+    def grpc_plugin_path(self, toolkit_path):
         if self.path is None:
             print 'start gradle process to locate GRPC Java plugin'
             self.path = task_utils.runGradleTask(
-                'showGrpcJavaPluginPath', gapi_tools_path)
+                'showGrpcJavaPluginPath', toolkit_path)
         return self.path
 
     def grpc_out_param(self, output_dir):
@@ -81,7 +81,7 @@ class _GoProtoParams:
             param += 'plugins=grpc:'
         return param + self.code_root(output_dir)
 
-    def grpc_plugin_path(self, gapi_tools_path):
+    def grpc_plugin_path(self, toolkit_path):
         # Go gRPC code is generated through --go_out=plugin=grpc, no grpc
         # specific plugin.
         return None
@@ -103,7 +103,7 @@ class _CSharpProtoParams:
     def lang_out_param(self, output_dir, with_grpc):
         return '--csharp_out=' + self.code_root(output_dir)
 
-    def grpc_plugin_path(self, dummy_gapi_tools_path):
+    def grpc_plugin_path(self, dummy_toolkit_path):
         if self.path is None:
             self.path = subprocess.check_output(
                 ['which', 'grpc_csharp_plugin'])[:-1]
@@ -121,11 +121,11 @@ _PROTO_PARAMS_MAP = {
 }
 
 
-def _find_protobuf_path(gapi_tools_path):
+def _find_protobuf_path(toolkit_path):
     """Fetch and locate protobuf source"""
     print 'Searching for latest protobuf source'
     return task_utils.runGradleTask(
-        'showProtobufPath', gapi_tools_path)
+        'showProtobufPath', toolkit_path)
 
 
 def _find_protos(proto_paths):
@@ -159,9 +159,9 @@ def _group_by_dirname(protos):
 
 
 def _protoc_header_params(import_proto_path, src_proto_path,
-                          gapi_tools_path):
+                          toolkit_path):
     proto_path = import_proto_path + src_proto_path
-    proto_path.append(_find_protobuf_path(gapi_tools_path))
+    proto_path.append(_find_protobuf_path(toolkit_path))
     return (['protoc'] +
             ['--proto_path=' + path for path in proto_path])
 
@@ -176,8 +176,8 @@ def _protoc_proto_params(proto_params, pkg_dir, with_grpc):
     return [proto_params.lang_out_param(pkg_dir, with_grpc)]
 
 
-def _protoc_grpc_params(proto_params, pkg_dir, gapi_tools_path):
-    plugin_path = proto_params.grpc_plugin_path(gapi_tools_path)
+def _protoc_grpc_params(proto_params, pkg_dir, toolkit_path):
+    plugin_path = proto_params.grpc_plugin_path(toolkit_path)
     if plugin_path is None:
         return []
     return ['--plugin=protoc-gen-grpc=' + plugin_path,
@@ -196,7 +196,7 @@ class ProtoDescGenTask(task_base.TaskBase):
     default_provides = 'descriptor_set'
 
     def execute(self, src_proto_path, import_proto_path, output_dir,
-                api_name, gapi_tools_path):
+                api_name, toolkit_path):
         print 'Compiling descriptors {0}'.format(
             _find_protos(src_proto_path))
         desc_out_file = api_name + '.desc'
@@ -206,7 +206,7 @@ class ProtoDescGenTask(task_base.TaskBase):
         #   - and multiple invocation will overwrite the desc_out_file
         subprocess.check_call(
             _protoc_header_params(
-                import_proto_path, src_proto_path, gapi_tools_path) +
+                import_proto_path, src_proto_path, toolkit_path) +
             _protoc_desc_params(output_dir, desc_out_file) +
             _find_protos(src_proto_path))
         return os.path.join(output_dir, desc_out_file)
@@ -218,7 +218,7 @@ class ProtoDescGenTask(task_base.TaskBase):
 class ProtoCodeGenTask(task_base.TaskBase):
     """Generates protos"""
     def execute(self, language, src_proto_path, import_proto_path,
-                output_dir, api_name, gapi_tools_path):
+                output_dir, api_name, toolkit_path):
         proto_params = _PROTO_PARAMS_MAP[language]
         pkg_dir = _prepare_pkg_dir(output_dir, api_name, language)
         # protoc-gen-go must compile all protos in a package at the same time,
@@ -229,7 +229,7 @@ class ProtoCodeGenTask(task_base.TaskBase):
             print 'Generating protos {0}'.format(dirname)
             subprocess.check_call(
                 _protoc_header_params(
-                    import_proto_path, src_proto_path, gapi_tools_path) +
+                    import_proto_path, src_proto_path, toolkit_path) +
                 _protoc_proto_params(proto_params, pkg_dir, with_grpc=False) +
                 protos)
 
@@ -240,7 +240,7 @@ class ProtoCodeGenTask(task_base.TaskBase):
 class GrpcCodeGenTask(task_base.TaskBase):
     """Generates the gRPC client library"""
     def execute(self, language, src_proto_path, import_proto_path,
-                gapi_tools_path, output_dir, api_name):
+                toolkit_path, output_dir, api_name):
         proto_params = _PROTO_PARAMS_MAP[language]
         pkg_dir = _prepare_pkg_dir(output_dir, api_name, language)
         # See the comments in ProtoCodeGenTask for why this needs to group the
@@ -250,8 +250,8 @@ class GrpcCodeGenTask(task_base.TaskBase):
             print 'Running protoc with grpc plugin on {0}'.format(dirname)
             subprocess.check_call(
                 _protoc_header_params(
-                    import_proto_path, src_proto_path, gapi_tools_path) +
-                _protoc_grpc_params(proto_params, pkg_dir, gapi_tools_path) +
+                    import_proto_path, src_proto_path, toolkit_path) +
+                _protoc_grpc_params(proto_params, pkg_dir, toolkit_path) +
                 protos)
 
     def validate(self):
@@ -261,7 +261,7 @@ class GrpcCodeGenTask(task_base.TaskBase):
 class ProtoAndGrpcCodeGenTask(task_base.TaskBase):
     """Generates protos and the gRPC client library"""
     def execute(self, language, src_proto_path, import_proto_path,
-                gapi_tools_path, output_dir, api_name):
+                toolkit_path, output_dir, api_name):
         proto_params = _PROTO_PARAMS_MAP[language]
         pkg_dir = _prepare_pkg_dir(output_dir, api_name, language)
         # See the comments in ProtoCodeGenTask for why this needs to group the
@@ -271,9 +271,9 @@ class ProtoAndGrpcCodeGenTask(task_base.TaskBase):
             print 'Running protoc and grpc plugin on {0}'.format(dirname)
             subprocess.check_call(
                 _protoc_header_params(
-                    import_proto_path, src_proto_path, gapi_tools_path) +
+                    import_proto_path, src_proto_path, toolkit_path) +
                 _protoc_proto_params(proto_params, pkg_dir, with_grpc=True) +
-                _protoc_grpc_params(proto_params, pkg_dir, gapi_tools_path) +
+                _protoc_grpc_params(proto_params, pkg_dir, toolkit_path) +
                 protos)
 
     def validate(self):
