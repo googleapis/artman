@@ -27,7 +27,7 @@ class VeneerConfigGenTask(task_base.TaskBase):
     """Generates Veneer config file"""
     default_provides = 'intermediate_config_location'
 
-    def execute(self, gapi_tools_path, descriptor_set, output_dir, api_name):
+    def execute(self, toolkit_path, descriptor_set, output_dir, api_name):
         config_gen_dir = os.path.join(output_dir, api_name + '-config-gen')
         subprocess.check_call(['mkdir', '-p', config_gen_dir])
         config_gen_path = os.path.join(config_gen_dir,
@@ -37,8 +37,8 @@ class VeneerConfigGenTask(task_base.TaskBase):
             '--output=' + os.path.abspath(config_gen_path)
             ]
         clargs = '-Pclargs=' + ','.join(args)
-        subprocess.check_call([os.path.join(gapi_tools_path, 'gradlew'),
-                               '-p', gapi_tools_path, 'runConfigGen', clargs])
+        subprocess.check_call([os.path.join(toolkit_path, 'gradlew'),
+                               '-p', toolkit_path, 'runConfigGen', clargs])
 
         return config_gen_path
 
@@ -80,7 +80,7 @@ class VeneerCodeGenTask(task_base.TaskBase):
     """Generates Veneer wrappers"""
     default_provides = 'intermediate_code_dir'
 
-    def execute(self, language, gapi_tools_path, descriptor_set, service_yaml,
+    def execute(self, language, toolkit_path, descriptor_set, service_yaml,
                 veneer_api_yaml, veneer_language_yaml, output_dir, api_name):
         params = lang_params.LANG_PARAMS_MAP[language]
         code_root = params.code_root(
@@ -96,8 +96,8 @@ class VeneerCodeGenTask(task_base.TaskBase):
             '--output=' + os.path.abspath(code_root)
             ] + service_args + veneer_args
         clargs = '-Pclargs=' + ','.join(args)
-        subprocess.check_call([os.path.join(gapi_tools_path, 'gradlew'),
-                               '-p', gapi_tools_path, 'runVGen', clargs])
+        subprocess.check_call([os.path.join(toolkit_path, 'gradlew'),
+                               '-p', toolkit_path, 'runVGen', clargs])
 
         return code_root
 
@@ -106,7 +106,7 @@ class VeneerCodeGenTask(task_base.TaskBase):
 
 
 class VeneerMergeTask(task_base.TaskBase):
-    def execute(self, language, gapi_tools_path, final_repo_dir,
+    def execute(self, language, toolkit_path, final_repo_dir,
                 intermediate_code_dir, auto_merge, auto_resolve, ignore_base):
         params = lang_params.LANG_PARAMS_MAP[language]
         final_code_root = params.code_root(os.path.abspath(final_repo_dir))
@@ -125,8 +125,8 @@ class VeneerMergeTask(task_base.TaskBase):
             args.append('--ignore_base')
         clargs = '-Pclargs=' + ','.join(args)
         print 'Running synchronizer with args: ' + str(args)
-        subprocess.check_call([os.path.join(gapi_tools_path, 'gradlew'),
-                               '-p', gapi_tools_path, 'runSynchronizer',
+        subprocess.check_call([os.path.join(toolkit_path, 'gradlew'),
+                               '-p', toolkit_path, 'runSynchronizer',
                                clargs])
         for root, subdirs, files in os.walk(final_code_root):
             for file in files:

@@ -24,11 +24,11 @@ from pipeline.utils import task_utils
 # TODO: Store both intermediate and final output in all format tasks.
 
 class JavaFormatTask(task_base.TaskBase):
-    def execute(self, intermediate_code_dir, gapi_tools_path):
+    def execute(self, intermediate_code_dir, toolkit_path):
         print 'Formatting files in ' + os.path.abspath(intermediate_code_dir)
         # TODO(shinfan): Move gradle task into requirement
         path = task_utils.runGradleTask(
-                'showJavaFormatterPath', gapi_tools_path)
+                'showJavaFormatterPath', toolkit_path)
         targetFiles = []
         for root, dirs, files in os.walk(intermediate_code_dir):
             for filename in files:

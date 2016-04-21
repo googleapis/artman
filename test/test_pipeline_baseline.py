@@ -57,7 +57,7 @@ def _test_baseline(task_name, test_name, language, output_dir, mock_check_call,
         'src_proto_path': ['test/fake-repos/fake-proto'],
         'import_proto_path':
             ['test/fake-repos/gapi-core-proto/src/main/proto/'],
-        'gapi_tools_path': 'test/fake-repos/gapi-tools',
+        'toolkit_path': 'test/fake-repos/toolkit',
         'service_yaml': [
             'test/testdata/gapi-example-library-proto/src/main/proto/'
             'google/example/library/library.yaml'],
