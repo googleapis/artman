@@ -15,7 +15,7 @@
 """Base class for pipeline task.
 
 This base class extends taskflow Task class, with additional methods and
-properties used by veneer pipeline."""
+properties used by GAPIC pipeline."""
 
 from taskflow.task import Task
 

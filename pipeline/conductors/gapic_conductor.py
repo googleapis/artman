@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-'''Veneer conductor method.
+'''GAPIC conductor method.
 '''
 
 import contextlib
@@ -58,7 +58,7 @@ def run():
             cond.stop()
 
     conductor_id = os.getpid()
-    print('Starting veneer conductor with pid: %s' % conductor_id)
+    print('Starting GAPIC conductor with pid: %s' % conductor_id)
     my_name = 'conductor-%s' % conductor_id
     persist_backend = backend_helper.default_persistence_backend()
     with contextlib.closing(persist_backend):

@@ -1,1 +1,1 @@
-yapf -i {OUTPUT}/library-v1-veneer-gen-python/fake_output_api.py
+yapf -i {OUTPUT}/library-v1-gapic-gen-python/fake_output_api.py

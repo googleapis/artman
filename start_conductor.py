@@ -18,11 +18,11 @@
 """Main class to start conductor.
 """
 
-from pipeline.conductors import veneer_conductor
+from pipeline.conductors import gapic_conductor
 
 
 def main():
-  veneer_conductor.run()
+  gapic_conductor.run()
 
 
 if __name__ == '__main__':

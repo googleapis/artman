@@ -61,12 +61,12 @@ def _test_baseline(task_name, test_name, language, output_dir, mock_check_call,
         'service_yaml': [
             'test/testdata/gapi-example-library-proto/src/main/proto/'
             'google/example/library/library.yaml'],
-        'veneer_language_yaml': [
+        'gapic_language_yaml': [
             'test/testdata/gapi-example-library-proto/src/main/proto/'
-                'google/example/library/' + language + '_veneer.yaml'],
-        'veneer_api_yaml': [
+                'google/example/library/' + language + '_gapic.yaml'],
+        'gapic_api_yaml': [
             'test/testdata/gapi-example-library-proto/src/main/proto/'
-                'google/example/library/library_veneer.yaml'],
+                'google/example/library/library_gapic.yaml'],
         'output_dir': output_dir,
         'api_name': 'library-v1',
         'auto_merge': True,
@@ -100,7 +100,7 @@ def _test_python_baseline(task_name, test_name, tmpdir):
 
     # Create an empty 'fake_output_api.py' in the output_dir. Do not invoke
     #  'touch' command with subprocess.call() because it's mocked.
-    final_output_dir = os.path.join(output_dir, 'library-v1-veneer-gen-python')
+    final_output_dir = os.path.join(output_dir, 'library-v1-gapic-gen-python')
     if not os.path.exists(final_output_dir):
         os.makedirs(final_output_dir)
     with open(os.path.join(final_output_dir, 'fake_output_api.py'), 'w'):

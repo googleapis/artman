@@ -16,15 +16,15 @@
 
 import os
 from pipeline.pipelines import pipeline_base
-from pipeline.tasks import protoc_tasks, veneer_tasks, format_tasks
+from pipeline.tasks import protoc_tasks, gapic_tasks, format_tasks
 from pipeline.utils import pipeline_util
 from taskflow.patterns import linear_flow
 
 
-# kwargs required by veneer code gen
+# kwargs required by GAPIC code gen
 _VGEN_REQUIRED = ['service_yaml',
-                  'veneer_language_yaml',
-                  'veneer_api_yaml',
+                  'gapic_language_yaml',
+                  'gapic_api_yaml',
                   'auto_merge',
                   'auto_resolve',
                   'ignore_base',
@@ -64,10 +64,10 @@ class VkitConfigPipeline(pipeline_base.PipelineBase):
     def do_build_flow(self, **kwargs):
         flow = linear_flow.Flow('vkit-configgen')
         flow.add(protoc_tasks.ProtoDescGenTask('ProtoDesc', inject=kwargs),
-                 veneer_tasks.VeneerConfigGenTask(
-                     'VeneerConfigGen', inject=kwargs),
-                 veneer_tasks.VeneerConfigMoveTask(
-                     'VeneerConfigMove', inject=kwargs))
+                 gapic_tasks.GapicConfigGenTask(
+                     'GapicConfigGen', inject=kwargs),
+                 gapic_tasks.GapicConfigMoveTask(
+                     'GapicConfigMove', inject=kwargs))
         return flow
 
     def validate_kwargs(self, **kwargs):
@@ -98,8 +98,8 @@ class PythonVkitClientPipeline(pipeline_base.PipelineBase):
     def do_build_flow(self, **kwargs):
         flow = linear_flow.Flow('vkit-codegen')
         flow.add(protoc_tasks.ProtoDescGenTask('ProtoDesc', inject=kwargs),
-                 veneer_tasks.VeneerCodeGenTask('VeneerCodegen',
-                                                inject=kwargs),
+                 gapic_tasks.GapicCodeGenTask('GapicCodegen',
+                                              inject=kwargs),
                  format_tasks.PythonFormatTask('PythonFormat', inject=kwargs)
                  # TODO(shinfan): Add merge task for python here.
                  )
@@ -149,10 +149,10 @@ class JavaVkitClientPipeline(pipeline_base.PipelineBase):
     def do_build_flow(self, **kwargs):
         flow = linear_flow.Flow('vkit-codegen')
         flow.add(protoc_tasks.ProtoDescGenTask('ProtoDesc', inject=kwargs),
-                 veneer_tasks.VeneerCodeGenTask('VeneerCodegen',
-                                                inject=kwargs),
+                 gapic_tasks.GapicCodeGenTask('GapicCodegen',
+                                              inject=kwargs),
                  format_tasks.JavaFormatTask('JavaFormat', inject=kwargs),
-                 veneer_tasks.VeneerMergeTask('VeneerMerge', inject=kwargs))
+                 gapic_tasks.GapicMergeTask('GapicMerge', inject=kwargs))
         return flow
 
     def validate_kwargs(self, **kwargs):
@@ -180,16 +180,16 @@ class GoCoreProtoPipeline(pipeline_base.PipelineBase):
         flow.add(
             protoc_tasks.ProtoCodeGenTask('CoreProtoGen',
                                           inject=kwargs),
-            veneer_tasks.GoExtractImportBaseTask('ExtractGoPackageName',
-                                                 inject=kwargs),
+            gapic_tasks.GoExtractImportBaseTask('ExtractGoPackageName',
+                                                inject=kwargs),
             protoc_tasks.GoLangUpdateImportsTask('UpdateImports',
                                                  inject=kwargs))
         return flow
 
     def validate_kwargs(self, **kwargs):
-        # veneer_api_yaml is required by GoExtractImportBaseTask to provide
+        # gapic_api_yaml is required by GoExtractImportBaseTask to provide
         # the import path base needed by GoLangUpdateImportsTask.
-        _validate_codegen_kwargs(['veneer_api_yaml', 'final_repo_dir'],
+        _validate_codegen_kwargs(['gapic_api_yaml', 'final_repo_dir'],
                                  **kwargs)
 
 
@@ -211,16 +211,16 @@ class GoGrpcClientPipeline(pipeline_base.PipelineBase):
         flow.add(
             protoc_tasks.ProtoAndGrpcCodeGenTask('GrpcCodegen',
                                                  inject=kwargs),
-            veneer_tasks.GoExtractImportBaseTask('ExtractGoPackageName',
-                                                 inject=kwargs),
+            gapic_tasks.GoExtractImportBaseTask('ExtractGoPackageName',
+                                                inject=kwargs),
             protoc_tasks.GoLangUpdateImportsTask('UpdateImports',
                                                  inject=kwargs))
         return flow
 
     def validate_kwargs(self, **kwargs):
-        # veneer_api_yaml is required by GoExtractImportBaseTask to provide
+        # gapic_api_yaml is required by GoExtractImportBaseTask to provide
         # the import path base needed by GoLangUpdateImportsTask.
-        _validate_codegen_kwargs(['veneer_api_yaml', 'final_repo_dir'],
+        _validate_codegen_kwargs(['gapic_api_yaml', 'final_repo_dir'],
                                  **kwargs)
 
 
@@ -234,10 +234,10 @@ class GoVkitClientPipeline(pipeline_base.PipelineBase):
         flow = linear_flow.Flow('vkit-codegen')
         flow.add(protoc_tasks.ProtoDescGenTask('ProtoDescGen',
                                                inject=kwargs),
-                 veneer_tasks.VeneerCodeGenTask('VeneerCodegen',
-                                                inject=kwargs),
+                 gapic_tasks.GapicCodeGenTask('GapicCodegen',
+                                              inject=kwargs),
                  format_tasks.GoFormatTask('GoFormat', inject=kwargs),
-                 veneer_tasks.VeneerMergeTask('VeneerMerge', inject=kwargs))
+                 gapic_tasks.GapicMergeTask('GapicMerge', inject=kwargs))
         return flow
 
     def validate_kwargs(self, **kwargs):
@@ -284,8 +284,8 @@ class CSharpVkitClientPipeline(pipeline_base.PipelineBase):
     def do_build_flow(self, **kwargs):
         flow = linear_flow.Flow('vkit-codegen')
         flow.add(protoc_tasks.ProtoDescGenTask('ProtoDesc', inject=kwargs),
-                 veneer_tasks.VeneerCodeGenTask('VeneerCodegen',
-                                                inject=kwargs))
+                 gapic_tasks.GapicCodeGenTask('GapicCodegen',
+                                              inject=kwargs))
         return flow
 
     def validate_kwargs(self, **kwargs):
