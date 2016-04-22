@@ -101,7 +101,42 @@ class PythonGapicClientPipeline(pipeline_base.PipelineBase):
                  gapic_tasks.GapicCodeGenTask('GapicCodegen',
                                               inject=kwargs),
                  format_tasks.PythonFormatTask('PythonFormat', inject=kwargs)
-                 # TODO(shinfan): Add merge task for python here.
+                 # TODO: Add merge task for python here.
+                 )
+        return flow
+
+    def validate_kwargs(self, **kwargs):
+        _validate_codegen_kwargs(_VGEN_REQUIRED, **kwargs)
+
+
+class RubyGrpcClientPipeline(pipeline_base.PipelineBase):
+
+    def __init__(self, **kwargs):
+        kwargs['language'] = 'ruby'
+        super(RubyGrpcClientPipeline, self).__init__(**kwargs)
+
+    def do_build_flow(self, **kwargs):
+        flow = linear_flow.Flow('grpc-codegen')
+        flow.add(protoc_tasks.GrpcPackmanTask('Packman', inject=kwargs))
+        return flow
+
+    def validate_kwargs(self, **kwargs):
+        _validate_codegen_kwargs([], **kwargs)
+
+
+class RubyGapicClientPipeline(pipeline_base.PipelineBase):
+
+    def __init__(self, **kwargs):
+        kwargs['language'] = 'ruby'
+        super(RubyGapicClientPipeline, self).__init__(**kwargs)
+
+    def do_build_flow(self, **kwargs):
+        flow = linear_flow.Flow('gapic-codegen')
+        flow.add(protoc_tasks.ProtoDescGenTask('ProtoDesc', inject=kwargs),
+                 gapic_tasks.GapicCodeGenTask('GapicCodegen',
+                                              inject=kwargs),
+                 format_tasks.RubyFormatTask('RubyFormat', inject=kwargs),
+                 # TODO: Add merge task for ruby here.
                  )
         return flow
 

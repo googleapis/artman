@@ -18,6 +18,7 @@ import os
 import subprocess
 from pipeline.tasks import task_base
 from pipeline.tasks.requirements import go_requirements
+from pipeline.tasks.requirements import ruby_requirements
 from pipeline.utils import task_utils
 
 
@@ -69,3 +70,12 @@ class GoFormatTask(task_base.TaskBase):
 
     def validate(self):
         return [go_requirements.GoFormatRequirements]
+
+
+class RubyFormatTask(task_base.TaskBase):
+    def execute(self, intermediate_code_dir):
+        print 'Formatting file in ' + os.path.abspath(intermediate_code_dir)
+        subprocess.call(['rubocop', '-a', intermediate_code_dir])
+
+    def validate(self):
+        return [ruby_requirements.RubyFormatRequirements]

@@ -1,0 +1,1 @@
+gen-api-package --api_name=library/v1 -l ruby -o {OUTPUT}

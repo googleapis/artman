@@ -121,6 +121,22 @@ def test_python_gapic_client_baseline(tmpdir):
                           tmpdir)
 
 
+def _test_ruby_baseline(task_name, test_name, tmpdir):
+    _test_baseline(task_name, test_name, 'ruby', str(tmpdir))
+
+
+def test_ruby_grpc_client_baseline(tmpdir):
+    _test_ruby_baseline('RubyGrpcClientPipeline',
+                        'ruby_grpc_client_pipeline',
+                        tmpdir)
+
+
+def test_ruby_gapic_client_baseline(tmpdir):
+    _test_ruby_baseline('RubyGapicClientPipeline',
+                        'ruby_gapic_client_pipeline',
+                        tmpdir)
+
+
 def _test_go_baseline(task_name, test_name, tmpdir):
     _test_baseline(task_name, test_name, 'go', str(tmpdir))
 

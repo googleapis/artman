@@ -165,6 +165,22 @@ C# (pubsub)
        CSharpGapicClientPipeline
 
 
+Ruby (logging)
+****************
+
+  ::
+
+     python execute_pipeline.py \
+        --config "../googleapis/gapic/artman_logging.yaml:logging_common|logging_ruby,\
+        ../googleapis/gapic/lang/common.yaml:default|ruby" \
+        RubyGrpcClientPipeline
+
+     python execute_pipeline.py \
+        --config "../googleapis/gapic/artman_logging.yaml:logging_common|logging_ruby,\
+        ../googleapis/gapic/lang/common.yaml:default|ruby" \
+        RubyGapicClientPipeline
+
+
 Pipeline configuration
 ----------------------
 
