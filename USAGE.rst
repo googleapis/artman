@@ -168,7 +168,7 @@ C# (pubsub)
 Pipeline configuration
 ----------------------
 
-artman build pipelines are configured using yaml files with configuration data to
+artman build pipelines are configured using YAML files with configuration data to
 run pipeline tasks.
 
 googleapis/pipeline_config/pipeline_common.yaml

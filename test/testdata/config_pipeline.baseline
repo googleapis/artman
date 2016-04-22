@@ -1,6 +1,6 @@
 mkdir -p {OUTPUT}
 protoc --proto_path=test/fake-repos/gapi-core-proto/src/main/proto/ --proto_path=test/fake-repos/fake-proto --proto_path=MOCK_GRADLE_TASK_OUTPUT --include_imports --include_source_info -o {OUTPUT}/library-v1.desc test/fake-repos/fake-proto/fake.proto
 mkdir -p {OUTPUT}/library-v1-config-gen
-test/fake-repos/toolkit/gradlew -p test/fake-repos/toolkit runConfigGen -Pclargs=--descriptor_set={OUTPUT}/library-v1.desc,--output={OUTPUT}/library-v1-config-gen/library-v1_veneer.yaml
+test/fake-repos/toolkit/gradlew -p test/fake-repos/toolkit runConfigGen -Pclargs=--descriptor_set={OUTPUT}/library-v1.desc,--output={OUTPUT}/library-v1-config-gen/library-v1_gapic.yaml
 mkdir -p test/testdata/gapi-example-library-proto/src/main/proto/google/example/library
-mv {OUTPUT}/library-v1-config-gen/library-v1_veneer.yaml test/testdata/gapi-example-library-proto/src/main/proto/google/example/library/library_veneer.yaml
+mv {OUTPUT}/library-v1-config-gen/library-v1_gapic.yaml test/testdata/gapi-example-library-proto/src/main/proto/google/example/library/library_gapic.yaml

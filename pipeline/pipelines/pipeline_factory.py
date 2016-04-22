@@ -22,17 +22,17 @@ from pipeline.pipelines import code_generation_pipeline  # noqa
 
 
 def make_pipeline_flow(pipeline_name, **kwargs):
-    """This factory function to make veneer pipeline.
+    """Factory function to make a GAPIC pipeline.
 
-    Because veneer pipeline is using OpenStack Taskflow, this factory function
-    is expected to be a function (or staticmethod) which is reimportable (aka
-    has a well defined name that can be located by the __import__ function in
-    python, this excludes lambda style functions and instance methods). The
-    factory function name will be saved into the logbook, and it will be
-    imported and called to create the workflow objects (or recreate it if
-    resumption happens).  This allows for the pipeline to be recreated if and
-    when that is needed (even on remote machines, as long as the reimportable
-    name can be located).
+    Because the GAPIC pipeline is using OpenStack Taskflow, this factory
+    function is expected to be a function (or staticmethod) which is
+    reimportable (aka has a well defined name that can be located by the
+    __import__ function in python, this excludes lambda style functions and
+    instance methods). The factory function name will be saved into the
+    logbook, and it will be imported and called to create the workflow objects
+    (or recreate it if resumption happens).  This allows for the pipeline to be
+    recreated if and when that is needed (even on remote machines, as long as
+    the reimportable name can be located).
 
     """
     return make_pipeline(pipeline_name, **kwargs).flow

@@ -11,7 +11,7 @@ related to an API including
 - generic documentation websites
 - language-specific documentation websites (javadoc, readthedocs, etc)
 
-from the protobuf source IDL and additional configuration in yaml files.
+from the protobuf source IDL and additional configuration in YAML files.
 
 .. _`protobuf`: https://github.com/google/protobuf
 
