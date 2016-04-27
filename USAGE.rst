@@ -68,7 +68,7 @@ Config generation
      python execute_pipeline.py \
         --config "../googleapis/pipeline_config/pipeline_logging.yaml:logging_common,\
         ../googleapis/pipeline_config/pipeline_common.yaml:default" \
-        VkitConfigPipeline
+        GapicConfigPipeline
 
 
 Python (logging)
@@ -84,7 +84,7 @@ Python (logging)
      python execute_pipeline.py \
         --config "../googleapis/pipeline_config/pipeline_logging.yaml:logging_common|logging_python,\
         ../googleapis/pipeline_config/pipeline_common.yaml:default|python" \
-        PythonVkitClientPipeline
+        PythonGapicClientPipeline
 
 
 Java (pubsub)
@@ -105,7 +105,7 @@ Java (pubsub)
      python execute_pipeline.py \
         --config "../googleapis/pipeline_config/pipeline_pubsub.yaml:pubsub_common|pubsub_java,\
         ../googleapis/pipeline_config/pipeline_common.yaml:default|java" \
-        JavaVkitClientPipeline
+        JavaGapicClientPipeline
 
 
 Go (logging)
@@ -141,7 +141,7 @@ The actual Go pipeline is as follows:
      python execute_pipeline.py \
        --config "../googleapis/pipeline_config/pipeline_logging.yaml:logging_common|logging_go,\
        ../googleapis/pipeline_config/pipeline_common.yaml:default|go" \
-       GoVkitClientPipeline
+       GoGapicClientPipeline
 
 
 C# (pubsub)
@@ -162,7 +162,7 @@ C# (pubsub)
      python execute_pipeline.py \
        --config "../googleapis/pipeline_config/pipeline_pubsub.yaml:pubsub_common|pubsub_csharp,\
        ../googleapis/pipeline_config/pipeline_common.yaml:default|csharp" \
-       CSharpVkitClientPipeline
+       CSharpGapicClientPipeline
 
 
 Pipeline configuration

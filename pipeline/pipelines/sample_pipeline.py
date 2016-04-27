@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""A canonical example of a flow class supported by vkit pipeline."""
+"""A canonical example of a flow class supported by gapic pipeline."""
 
 from pipeline.pipelines import pipeline_base
 from pipeline.tasks import sample_tasks
