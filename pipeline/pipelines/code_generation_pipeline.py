@@ -55,14 +55,14 @@ def _validate_codegen_kwargs(extra_args, **kwargs):
     _validate_toolkit_path(kwargs['toolkit_path'])
 
 
-class VkitConfigPipeline(pipeline_base.PipelineBase):
+class GapicConfigPipeline(pipeline_base.PipelineBase):
 
     def __init__(self, **kwargs):
         kwargs['language'] = ''
-        super(VkitConfigPipeline, self).__init__(**kwargs)
+        super(GapicConfigPipeline, self).__init__(**kwargs)
 
     def do_build_flow(self, **kwargs):
-        flow = linear_flow.Flow('vkit-configgen')
+        flow = linear_flow.Flow('gapic-configgen')
         flow.add(protoc_tasks.ProtoDescGenTask('ProtoDesc', inject=kwargs),
                  gapic_tasks.GapicConfigGenTask(
                      'GapicConfigGen', inject=kwargs),
@@ -89,14 +89,14 @@ class PythonGrpcClientPipeline(pipeline_base.PipelineBase):
         _validate_codegen_kwargs([], **kwargs)
 
 
-class PythonVkitClientPipeline(pipeline_base.PipelineBase):
+class PythonGapicClientPipeline(pipeline_base.PipelineBase):
 
     def __init__(self, **kwargs):
         kwargs['language'] = 'python'
-        super(PythonVkitClientPipeline, self).__init__(**kwargs)
+        super(PythonGapicClientPipeline, self).__init__(**kwargs)
 
     def do_build_flow(self, **kwargs):
-        flow = linear_flow.Flow('vkit-codegen')
+        flow = linear_flow.Flow('gapic-codegen')
         flow.add(protoc_tasks.ProtoDescGenTask('ProtoDesc', inject=kwargs),
                  gapic_tasks.GapicCodeGenTask('GapicCodegen',
                                               inject=kwargs),
@@ -140,14 +140,14 @@ class JavaGrpcClientPipeline(pipeline_base.PipelineBase):
         _validate_codegen_kwargs([], **kwargs)
 
 
-class JavaVkitClientPipeline(pipeline_base.PipelineBase):
+class JavaGapicClientPipeline(pipeline_base.PipelineBase):
 
     def __init__(self, **kwargs):
         kwargs['language'] = 'java'
-        super(JavaVkitClientPipeline, self).__init__(**kwargs)
+        super(JavaGapicClientPipeline, self).__init__(**kwargs)
 
     def do_build_flow(self, **kwargs):
-        flow = linear_flow.Flow('vkit-codegen')
+        flow = linear_flow.Flow('gapic-codegen')
         flow.add(protoc_tasks.ProtoDescGenTask('ProtoDesc', inject=kwargs),
                  gapic_tasks.GapicCodeGenTask('GapicCodegen',
                                               inject=kwargs),
@@ -224,14 +224,14 @@ class GoGrpcClientPipeline(pipeline_base.PipelineBase):
                                  **kwargs)
 
 
-class GoVkitClientPipeline(pipeline_base.PipelineBase):
+class GoGapicClientPipeline(pipeline_base.PipelineBase):
 
     def __init__(self, **kwargs):
         kwargs['language'] = 'go'
-        super(GoVkitClientPipeline, self).__init__(**kwargs)
+        super(GoGapicClientPipeline, self).__init__(**kwargs)
 
     def do_build_flow(self, **kwargs):
-        flow = linear_flow.Flow('vkit-codegen')
+        flow = linear_flow.Flow('gapic-codegen')
         flow.add(protoc_tasks.ProtoDescGenTask('ProtoDescGen',
                                                inject=kwargs),
                  gapic_tasks.GapicCodeGenTask('GapicCodegen',
@@ -275,14 +275,14 @@ class CSharpGrpcClientPipeline(pipeline_base.PipelineBase):
         _validate_codegen_kwargs([], **kwargs)
 
 
-class CSharpVkitClientPipeline(pipeline_base.PipelineBase):
+class CSharpGapicClientPipeline(pipeline_base.PipelineBase):
 
     def __init__(self, **kwargs):
         kwargs['language'] = 'csharp'
-        super(CSharpVkitClientPipeline, self).__init__(**kwargs)
+        super(CSharpGapicClientPipeline, self).__init__(**kwargs)
 
     def do_build_flow(self, **kwargs):
-        flow = linear_flow.Flow('vkit-codegen')
+        flow = linear_flow.Flow('gapic-codegen')
         flow.add(protoc_tasks.ProtoDescGenTask('ProtoDesc', inject=kwargs),
                  gapic_tasks.GapicCodeGenTask('GapicCodegen',
                                               inject=kwargs))

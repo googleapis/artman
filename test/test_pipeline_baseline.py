@@ -115,9 +115,9 @@ def test_python_grpc_client_baseline(tmpdir):
                           tmpdir)
 
 
-def test_python_vkit_client_baseline(tmpdir):
-    _test_python_baseline('PythonVkitClientPipeline',
-                          'python_vkit_client_pipeline',
+def test_python_gapic_client_baseline(tmpdir):
+    _test_python_baseline('PythonGapicClientPipeline',
+                          'python_gapic_client_pipeline',
                           tmpdir)
 
 
@@ -130,8 +130,8 @@ def test_go_grpc_client_baseline(tmpdir):
                       tmpdir)
 
 
-def test_go_vkit_client_baseline(tmpdir):
-    _test_go_baseline('GoVkitClientPipeline', 'go_vkit_client_pipeline',
+def test_go_gapic_client_baseline(tmpdir):
+    _test_go_baseline('GoGapicClientPipeline', 'go_gapic_client_pipeline',
                       tmpdir)
 
 
@@ -144,10 +144,11 @@ def test_java_grpc_client_baseline(tmpdir):
                         tmpdir)
 
 
-def test_java_vkit_client_baseline(tmpdir):
-    _test_java_baseline('JavaVkitClientPipeline', 'java_vkit_client_pipeline',
+def test_java_gapic_client_baseline(tmpdir):
+    _test_java_baseline('JavaGapicClientPipeline',
+                        'java_gapic_client_pipeline',
                         tmpdir)
 
 
 def test_config_baseline(tmpdir):
-    _test_baseline('VkitConfigPipeline', 'config_pipeline', '', str(tmpdir))
+    _test_baseline('GapicConfigPipeline', 'config_pipeline', '', str(tmpdir))
