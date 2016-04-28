@@ -66,8 +66,8 @@ Config generation
   ::
 
      python execute_pipeline.py \
-        --config "../googleapis/pipeline_config/pipeline_logging.yaml:logging_common,\
-        ../googleapis/pipeline_config/pipeline_common.yaml:default" \
+        --config "../googleapis/gapic/api/artman_logging.yaml:logging_common,\
+        ../googleapis/gapic/lang/common.yaml:default" \
         GapicConfigPipeline
 
 
@@ -77,13 +77,13 @@ Python (logging)
   ::
 
      python execute_pipeline.py \
-        --config "../googleapis/pipeline_config/pipeline_logging.yaml:logging_common|logging_python,\
-        ../googleapis/pipeline_config/pipeline_common.yaml:default|python" \
+        --config "../googleapis/gapic/api/artman_logging.yaml:logging_common|logging_python,\
+        ../googleapis/gapic/lang/common.yaml:default|python" \
         PythonGrpcClientPipeline
 
      python execute_pipeline.py \
-        --config "../googleapis/pipeline_config/pipeline_logging.yaml:logging_common|logging_python,\
-        ../googleapis/pipeline_config/pipeline_common.yaml:default|python" \
+        --config "../googleapis/gapic/api/artman_logging.yaml:logging_common|logging_python,\
+        ../googleapis/gapic/lang/common.yaml:default|python" \
         PythonGapicClientPipeline
 
 
@@ -93,18 +93,18 @@ Java (pubsub)
   ::
 
      python execute_pipeline.py \
-        --config "../googleapis/pipeline_config/pipeline_core.yaml:core,\
-        ../googleapis/pipeline_config/pipeline_common.yaml:default|java" \
+        --config "../googleapis/gapic/core/artman_core.yaml:core,\
+        ../googleapis/gapic/lang/common.yaml:default|java" \
         JavaCorePipeline
 
      python execute_pipeline.py \
-        --config "../googleapis/pipeline_config/pipeline_pubsub.yaml:pubsub_common|pubsub_java,\
-        ../googleapis/pipeline_config/pipeline_common.yaml:default|java" \
+        --config "../googleapis/gapic/api/artman_pubsub.yaml:pubsub_common|pubsub_java,\
+        ../googleapis/gapic/lang/common.yaml:default|java" \
         JavaGrpcClientPipeline
 
      python execute_pipeline.py \
-        --config "../googleapis/pipeline_config/pipeline_pubsub.yaml:pubsub_common|pubsub_java,\
-        ../googleapis/pipeline_config/pipeline_common.yaml:default|java" \
+        --config "../googleapis/gapic/api/artman_pubsub.yaml:pubsub_common|pubsub_java,\
+        ../googleapis/gapic/lang/common.yaml:default|java" \
         JavaGapicClientPipeline
 
 
@@ -118,9 +118,9 @@ repository for the core proto pb.go files.
   ::
 
      python execute_pipeline.py \
-       --config "../googleapis/pipeline_config/pipeline_core.yaml:core,\
-       ../googleapis/pipeline_config/pipeline_logging.yaml:logging_go,\
-       ../googleapis/pipeline_config/pipeline_common.yaml:default|go" \
+       --config "../googleapis/gapic/core/artman_core.yaml:core,\
+       ../googleapis/gapic/api/artman_logging.yaml:logging_go,\
+       ../googleapis/gapic/lang/common.yaml:default|go" \
        GoCoreProtoPipeline
 
 
@@ -129,18 +129,18 @@ The actual Go pipeline is as follows:
   ::
 
      python execute_pipeline.py \
-       --config "../googleapis/pipeline_config/pipeline_logging.yaml:logging_common|logging_go|logging_type,\
-       ../googleapis/pipeline_config/pipeline_common.yaml:default|go" \
+       --config "../googleapis/gapic/api/artman_logging.yaml:logging_common|logging_go|logging_type,\
+       ../googleapis/gapic/lang/common.yaml:default|go" \
        GoCoreProtoPipeline
 
      python execute_pipeline.py \
-       --config "../googleapis/pipeline_config/pipeline_logging.yaml:logging_common|logging_go,\
-       ../googleapis/pipeline_config/pipeline_common.yaml:default|go" \
+       --config "../googleapis/gapic/api/artman_logging.yaml:logging_common|logging_go,\
+       ../googleapis/gapic/lang/common.yaml:default|go" \
        GoGrpcClientPipeline
 
      python execute_pipeline.py \
-       --config "../googleapis/pipeline_config/pipeline_logging.yaml:logging_common|logging_go,\
-       ../googleapis/pipeline_config/pipeline_common.yaml:default|go" \
+       --config "../googleapis/gapic/api/artman_logging.yaml:logging_common|logging_go,\
+       ../googleapis/gapic/lang/common.yaml:default|go" \
        GoGapicClientPipeline
 
 
@@ -150,18 +150,18 @@ C# (pubsub)
   ::
 
      python execute_pipeline.py \
-       --config "../googleapis/pipeline_config/pipeline_pubsub.yaml:pubsub_common|pubsub_csharp,\
-       ../googleapis/pipeline_config/pipeline_common.yaml:default|csharp" \
+       --config "../googleapis/gapic/api/artman_pubsub.yaml:pubsub_common|pubsub_csharp,\
+       ../googleapis/gapic/lang/common.yaml:default|csharp" \
        CSharpCorePipeline
 
      python execute_pipeline.py \
-       --config "../googleapis/pipeline_config/pipeline_pubsub.yaml:pubsub_common|pubsub_csharp,\
-       ../googleapis/pipeline_config/pipeline_common.yaml:default|csharp" \
+       --config "../googleapis/gapic/api/artman_pubsub.yaml:pubsub_common|pubsub_csharp,\
+       ../googleapis/gapic/lang/common.yaml:default|csharp" \
        CSharpGrpcClientPipeline
 
      python execute_pipeline.py \
-       --config "../googleapis/pipeline_config/pipeline_pubsub.yaml:pubsub_common|pubsub_csharp,\
-       ../googleapis/pipeline_config/pipeline_common.yaml:default|csharp" \
+       --config "../googleapis/gapic/api/artman_pubsub.yaml:pubsub_common|pubsub_csharp,\
+       ../googleapis/gapic/lang/common.yaml:default|csharp" \
        CSharpGapicClientPipeline
 
 
@@ -171,12 +171,12 @@ Pipeline configuration
 artman build pipelines are configured using YAML files with configuration data to
 run pipeline tasks.
 
-googleapis/pipeline_config/pipeline_common.yaml
+googleapis/gapic/lang/pipeline_common.yaml
 
 - default: Default configuration for all pipelines
 - {language}: Language specific configuration
 
-googleapis/pipeline_config/pipeline_{API}.yaml
+googleapis/gapic/lang/pipeline_{API}.yaml
 
 - {API}_common: cross language API specific configuration
 - {API}_{language}: API x language configurations
