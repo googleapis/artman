@@ -24,21 +24,22 @@ from pipeline.utils import lang_params
 from pipeline.utils import task_utils
 
 
-class _PythonProtoParams:
-    def __init__(self):
+class _SimpleProtoParams:
+    def __init__(self, language):
+        self.language = language
         self.path = None
-        self.params = lang_params.LANG_PARAMS_MAP['python']
+        self.params = lang_params.LANG_PARAMS_MAP[language]
 
     def code_root(self, output_dir):
         return self.params.code_root(output_dir)
 
     def lang_out_param(self, output_dir, with_grpc):
-        return '--python_out=' + self.code_root(output_dir)
+        return '--{}_out={}'.format(self.language, self.code_root(output_dir))
 
     def grpc_plugin_path(self, dummy_toolkit_path):
         if self.path is None:
             self.path = subprocess.check_output(
-                ['which', 'grpc_python_plugin'])[:-1]
+                ['which', 'grpc_{}_plugin'.format(self.language)])[:-1]
         return self.path
 
     def grpc_out_param(self, output_dir):
@@ -92,32 +93,12 @@ class _GoProtoParams:
         return None
 
 
-class _CSharpProtoParams:
-    def __init__(self):
-        self.path = None
-        self.params = lang_params.LANG_PARAMS_MAP['csharp']
-
-    def code_root(self, output_dir):
-        return self.params.code_root(output_dir)
-
-    def lang_out_param(self, output_dir, with_grpc):
-        return '--csharp_out=' + self.code_root(output_dir)
-
-    def grpc_plugin_path(self, dummy_toolkit_path):
-        if self.path is None:
-            self.path = subprocess.check_output(
-                ['which', 'grpc_csharp_plugin'])[:-1]
-        return self.path
-
-    def grpc_out_param(self, output_dir):
-        return '--grpc_out=' + self.code_root(output_dir)
-
-
 _PROTO_PARAMS_MAP = {
-    'python': _PythonProtoParams(),
+    'python': _SimpleProtoParams('python'),
+    'ruby': _SimpleProtoParams('ruby'),
     'java': _JavaProtoParams(),
     'go': _GoProtoParams(),
-    'csharp': _CSharpProtoParams(),
+    'csharp': _SimpleProtoParams('csharp'),
 }
 
 
@@ -323,12 +304,12 @@ class GoLangUpdateImportsTask(task_base.TaskBase):
 
 class GrpcPackmanTask(task_base.TaskBase):
     """Checks packman requirements"""
-    def execute(self, api_name, output_dir):
+    def execute(self, language, api_name, output_dir):
         # Fix the api_name convention (ex. logging-v2) for packman.
         api_name = api_name.replace('-', '/')
         subprocess.check_call(
             ['gen-api-package', '--api_name=' + api_name,
-             '-l', 'python', '-o', output_dir])
+             '-l', language, '-o', output_dir])
 
     def validate(self):
         return [packman_requirements.PackmanRequirements]

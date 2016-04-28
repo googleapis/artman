@@ -12,27 +12,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Util class for programming-language-specific things.
-"""
+"""Requirements for Ruby codegen."""
 
-import os
-import os.path
+from pipeline.tasks.requirements import task_requirement_base
 
 
-class LanguageParams:
-    def code_root(self, base_dir):
-        return base_dir
+class RubyFormatRequirements(task_requirement_base.TaskRequirementBase):
 
+    @classmethod
+    def require(cls):
+        return ['rubocop']
 
-class JavaParams(LanguageParams):
-    def code_root(self, base_dir):
-        return os.path.join(base_dir, 'src', 'main', 'java')
-
-
-LANG_PARAMS_MAP = {
-    'python': LanguageParams(),
-    'ruby': LanguageParams(),
-    'java': JavaParams(),
-    'go': LanguageParams(),
-    'csharp': LanguageParams(),
-}
+    @classmethod
+    def install(cls):
+        # Intentionally do nothing
+        pass
