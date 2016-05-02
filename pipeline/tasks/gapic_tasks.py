@@ -18,6 +18,7 @@ import os
 import subprocess
 import yaml
 
+from pipeline.tasks import packman_tasks
 from pipeline.tasks import task_base
 from pipeline.tasks.requirements import vgen_requirements
 from pipeline.utils import lang_params
@@ -156,3 +157,9 @@ class GoExtractImportBaseTask(task_base.TaskBase):
                 continue
             if 'package_name' in go_settings:
                 return go_settings.get('package_name')
+
+
+class GapicPackmanTask(packman_tasks.PackmanTaskBase):
+    def execute(self, language, api_name, final_repo_dir):
+        self.run_packman(language, api_name, '--gax_dir=' + final_repo_dir,
+                         '--template_root=templates/gax')
