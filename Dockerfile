@@ -36,6 +36,11 @@ RUN mkdir -p "$GOPATH/src" "$GOPATH/bin" && chmod -R 777 "$GOPATH"
 # Install Node.js.
 RUN npm install -g googleapis-packman
 
+# Setup tools for codegen of Ruby
+RUN gem install rubocop --version '= 0.39.0' --no-ri --no-rdoc
+RUN gem install bundler --version '= 1.12.1' --no-ri --no-rdoc
+RUN gem install rake --version '= 10.5.0' --no-ri --no-rdoc
+
 # Run the pipeline.
 ADD . /src
 WORKDIR /src
