@@ -100,9 +100,9 @@ class PythonGapicClientPipeline(pipeline_base.PipelineBase):
         flow.add(protoc_tasks.ProtoDescGenTask('ProtoDesc', inject=kwargs),
                  gapic_tasks.GapicCodeGenTask('GapicCodegen',
                                               inject=kwargs),
-                 format_tasks.PythonFormatTask('PythonFormat', inject=kwargs)
-                 # TODO: Add merge task for python here.
-                 )
+                 format_tasks.PythonFormatTask('PythonFormat', inject=kwargs),
+                 gapic_tasks.GapicMergeTask('GapicMerge', inject=kwargs),
+                 gapic_tasks.GapicPackmanTask('GapicPackman', inject=kwargs))
         return flow
 
     def validate_kwargs(self, **kwargs):
@@ -136,8 +136,8 @@ class RubyGapicClientPipeline(pipeline_base.PipelineBase):
                  gapic_tasks.GapicCodeGenTask('GapicCodegen',
                                               inject=kwargs),
                  format_tasks.RubyFormatTask('RubyFormat', inject=kwargs),
-                 # TODO: Add merge task for ruby here.
-                 )
+                 gapic_tasks.GapicMergeTask('GapicMerge', inject=kwargs),
+                 gapic_tasks.GapicPackmanTask('GapicPackman', inject=kwargs))
         return flow
 
     def validate_kwargs(self, **kwargs):

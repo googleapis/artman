@@ -17,9 +17,9 @@
 import os
 import re
 import subprocess
+from pipeline.tasks import packman_tasks
 from pipeline.tasks import task_base
 from pipeline.tasks.requirements import grpc_requirements
-from pipeline.tasks.requirements import packman_requirements
 from pipeline.utils import lang_params
 from pipeline.utils import task_utils
 
@@ -302,14 +302,6 @@ class GoLangUpdateImportsTask(task_base.TaskBase):
         return re.sub(pattern, replacement, line)
 
 
-class GrpcPackmanTask(task_base.TaskBase):
-    """Checks packman requirements"""
+class GrpcPackmanTask(packman_tasks.PackmanTaskBase):
     def execute(self, language, api_name, output_dir):
-        # Fix the api_name convention (ex. logging-v2) for packman.
-        api_name = api_name.replace('-', '/')
-        subprocess.check_call(
-            ['gen-api-package', '--api_name=' + api_name,
-             '-l', language, '-o', output_dir])
-
-    def validate(self):
-        return [packman_requirements.PackmanRequirements]
+        self.run_packman(language, api_name, '-o', output_dir)
