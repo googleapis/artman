@@ -66,7 +66,7 @@ Config generation
   ::
 
      python execute_pipeline.py \
-        --config "../googleapis/gapic/api/artman_logging.yaml:logging_common,\
+        --config "../googleapis/gapic/api/artman_logging.yaml:common,\
         ../googleapis/gapic/lang/common.yaml:default" \
         GapicConfigPipeline
 
@@ -77,12 +77,12 @@ Python (logging)
   ::
 
      python execute_pipeline.py \
-        --config "../googleapis/gapic/api/artman_logging.yaml:logging_common|logging_python,\
+        --config "../googleapis/gapic/api/artman_logging.yaml:common|python,\
         ../googleapis/gapic/lang/common.yaml:default|python" \
         PythonGrpcClientPipeline
 
      python execute_pipeline.py \
-        --config "../googleapis/gapic/api/artman_logging.yaml:logging_common|logging_python,\
+        --config "../googleapis/gapic/api/artman_logging.yaml:common|python,\
         ../googleapis/gapic/lang/common.yaml:default|python" \
         PythonGapicClientPipeline
 
@@ -98,12 +98,12 @@ Java (pubsub)
         JavaCorePipeline
 
      python execute_pipeline.py \
-        --config "../googleapis/gapic/api/artman_pubsub.yaml:pubsub_common|pubsub_java,\
+        --config "../googleapis/gapic/api/artman_pubsub.yaml:common|java,\
         ../googleapis/gapic/lang/common.yaml:default|java" \
         JavaGrpcClientPipeline
 
      python execute_pipeline.py \
-        --config "../googleapis/gapic/api/artman_pubsub.yaml:pubsub_common|pubsub_java,\
+        --config "../googleapis/gapic/api/artman_pubsub.yaml:common|java,\
         ../googleapis/gapic/lang/common.yaml:default|java" \
         JavaGapicClientPipeline
 
@@ -129,17 +129,17 @@ The actual Go pipeline is as follows:
   ::
 
      python execute_pipeline.py \
-       --config "../googleapis/gapic/api/artman_logging.yaml:logging_common|logging_go|logging_type,\
+       --config "../googleapis/gapic/api/artman_logging.yaml:common|go|type,\
        ../googleapis/gapic/lang/common.yaml:default|go" \
        GoCoreProtoPipeline
 
      python execute_pipeline.py \
-       --config "../googleapis/gapic/api/artman_logging.yaml:logging_common|logging_go,\
+       --config "../googleapis/gapic/api/artman_logging.yaml:common|go,\
        ../googleapis/gapic/lang/common.yaml:default|go" \
        GoGrpcClientPipeline
 
      python execute_pipeline.py \
-       --config "../googleapis/gapic/api/artman_logging.yaml:logging_common|logging_go,\
+       --config "../googleapis/gapic/api/artman_logging.yaml:common|go,\
        ../googleapis/gapic/lang/common.yaml:default|go" \
        GoGapicClientPipeline
 
@@ -150,17 +150,17 @@ C# (pubsub)
   ::
 
      python execute_pipeline.py \
-       --config "../googleapis/gapic/api/artman_pubsub.yaml:pubsub_common|pubsub_csharp,\
+       --config "../googleapis/gapic/api/artman_pubsub.yaml:common|csharp,\
        ../googleapis/gapic/lang/common.yaml:default|csharp" \
        CSharpCorePipeline
 
      python execute_pipeline.py \
-       --config "../googleapis/gapic/api/artman_pubsub.yaml:pubsub_common|pubsub_csharp,\
+       --config "../googleapis/gapic/api/artman_pubsub.yaml:common|csharp,\
        ../googleapis/gapic/lang/common.yaml:default|csharp" \
        CSharpGrpcClientPipeline
 
      python execute_pipeline.py \
-       --config "../googleapis/gapic/api/artman_pubsub.yaml:pubsub_common|pubsub_csharp,\
+       --config "../googleapis/gapic/api/artman_pubsub.yaml:common|csharp,\
        ../googleapis/gapic/lang/common.yaml:default|csharp" \
        CSharpGapicClientPipeline
 
@@ -171,12 +171,12 @@ Ruby (logging)
   ::
 
      python execute_pipeline.py \
-        --config "../googleapis/gapic/artman_logging.yaml:logging_common|logging_ruby,\
+        --config "../googleapis/gapic/artman_logging.yaml:common|ruby,\
         ../googleapis/gapic/lang/common.yaml:default|ruby" \
         RubyGrpcClientPipeline
 
      python execute_pipeline.py \
-        --config "../googleapis/gapic/artman_logging.yaml:logging_common|logging_ruby,\
+        --config "../googleapis/gapic/artman_logging.yaml:common|ruby,\
         ../googleapis/gapic/lang/common.yaml:default|ruby" \
         RubyGapicClientPipeline
 
