@@ -1,4 +1,7 @@
 oslo.utils>=3.4.0 # Apache-2.0
 pyyaml>=3.11
 taskflow>=1.25.0
+kazoo>=2.2.1
+google-apitools
+gcloud==0.10.0
 yapf>=0.6.2 # Apache-2.0
