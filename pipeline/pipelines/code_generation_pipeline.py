@@ -325,3 +325,20 @@ class CSharpGapicClientPipeline(pipeline_base.PipelineBase):
 
     def validate_kwargs(self, **kwargs):
         _validate_codegen_kwargs(_VGEN_REQUIRED, **kwargs)
+
+
+class PhpGapicClientPipeline(pipeline_base.PipelineBase):
+
+    def __init__(self, **kwargs):
+        kwargs['language'] = 'php'
+        super(PhpGapicClientPipeline, self).__init__(**kwargs)
+
+    def do_build_flow(self, **kwargs):
+        flow = linear_flow.Flow('gapic-codegen')
+        flow.add(protoc_tasks.ProtoDescGenTask('ProtoDesc', inject=kwargs),
+                 gapic_tasks.GapicCodeGenTask('GapicCodegen',
+                                              inject=kwargs))
+        return flow
+
+    def validate_kwargs(self, **kwargs):
+        _validate_codegen_kwargs(_VGEN_REQUIRED, **kwargs)

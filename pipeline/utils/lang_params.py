@@ -29,10 +29,16 @@ class JavaParams(LanguageParams):
         return os.path.join(base_dir, 'src', 'main', 'java')
 
 
+class PhpParams(LanguageParams):
+    def code_root(self, base_dir):
+        return os.path.join(base_dir, 'src')
+
+
 LANG_PARAMS_MAP = {
     'python': LanguageParams(),
     'ruby': LanguageParams(),
     'java': JavaParams(),
     'go': LanguageParams(),
     'csharp': LanguageParams(),
+    'php': PhpParams(),
 }

@@ -166,5 +166,15 @@ def test_java_gapic_client_baseline(tmpdir):
                         tmpdir)
 
 
+def _test_php_baseline(task_name, test_name, tmpdir):
+    _test_baseline(task_name, test_name, 'php', str(tmpdir))
+
+
+def test_php_gapic_client_baseline(tmpdir):
+    _test_php_baseline('PhpGapicClientPipeline',
+                       'php_gapic_client_pipeline',
+                       tmpdir)
+
+
 def test_config_baseline(tmpdir):
     _test_baseline('GapicConfigPipeline', 'config_pipeline', '', str(tmpdir))
