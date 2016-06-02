@@ -93,12 +93,34 @@ class _GoProtoParams:
         return None
 
 
+class _PhpProtoParams:
+    def __init__(self):
+        self.path = None
+        self.params = lang_params.LANG_PARAMS_MAP['php']
+
+    def code_root(self, output_dir):
+        return self.params.code_root(output_dir)
+
+    def lang_out_param(self, output_dir, with_grpc):
+        return '--php_out={}'.format(self.code_root(output_dir))
+
+    def grpc_plugin_path(self, dummy_toolkit_path):
+        if self.path is None:
+            self.path = subprocess.check_output(
+                ['which', 'protoc-gen-php'])[:-1]
+        return self.path
+
+    def grpc_out_param(self, output_dir):
+        return '--grpc_out=' + self.code_root(output_dir)
+
+
 _PROTO_PARAMS_MAP = {
     'python': _SimpleProtoParams('python'),
     'ruby': _SimpleProtoParams('ruby'),
     'java': _JavaProtoParams(),
     'go': _GoProtoParams(),
     'csharp': _SimpleProtoParams('csharp'),
+    'php': _PhpProtoParams(),
 }
 
 

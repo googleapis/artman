@@ -19,6 +19,7 @@ import subprocess
 from pipeline.tasks import task_base
 from pipeline.tasks.requirements import go_requirements
 from pipeline.tasks.requirements import ruby_requirements
+from pipeline.tasks.requirements import php_requirements
 from pipeline.utils import task_utils
 
 
@@ -79,3 +80,12 @@ class RubyFormatTask(task_base.TaskBase):
 
     def validate(self):
         return [ruby_requirements.RubyFormatRequirements]
+
+
+class PhpFormatTask(task_base.TaskBase):
+    def execute(self, intermediate_code_dir):
+        print 'Formatting file in ' + os.path.abspath(intermediate_code_dir)
+        subprocess.call(['php-cs-fixer', 'fix', intermediate_code_dir])
+
+    def validate(self):
+        return [php_requirements.PhpFormatRequirements]

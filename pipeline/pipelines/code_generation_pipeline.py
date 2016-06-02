@@ -327,6 +327,21 @@ class CSharpGapicClientPipeline(pipeline_base.PipelineBase):
         _validate_codegen_kwargs(_VGEN_REQUIRED, **kwargs)
 
 
+class PhpGrpcClientPipeline(pipeline_base.PipelineBase):
+
+    def __init__(self, **kwargs):
+        kwargs['language'] = 'php'
+        super(PhpGrpcClientPipeline, self).__init__(**kwargs)
+
+    def do_build_flow(self, **kwargs):
+        flow = linear_flow.Flow('grpc-codegen')
+        flow.add(protoc_tasks.GrpcPackmanTask('Packman', inject=kwargs))
+        return flow
+
+    def validate_kwargs(self, **kwargs):
+        _validate_codegen_kwargs([], **kwargs)
+
+
 class PhpGapicClientPipeline(pipeline_base.PipelineBase):
 
     def __init__(self, **kwargs):
@@ -337,7 +352,9 @@ class PhpGapicClientPipeline(pipeline_base.PipelineBase):
         flow = linear_flow.Flow('gapic-codegen')
         flow.add(protoc_tasks.ProtoDescGenTask('ProtoDesc', inject=kwargs),
                  gapic_tasks.GapicCodeGenTask('GapicCodegen',
-                                              inject=kwargs))
+                                              inject=kwargs),
+                 format_tasks.PhpFormatTask('PhpFormat', inject=kwargs),
+                 gapic_tasks.GapicMergeTask('GapicMerge', inject=kwargs))
         return flow
 
     def validate_kwargs(self, **kwargs):

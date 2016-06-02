@@ -176,5 +176,10 @@ def test_php_gapic_client_baseline(tmpdir):
                        tmpdir)
 
 
+def test_php_grpc_client_baseline(tmpdir):
+    _test_java_baseline('PhpGrpcClientPipeline', 'php_grpc_client_pipeline',
+                        tmpdir)
+
+
 def test_config_baseline(tmpdir):
     _test_baseline('GapicConfigPipeline', 'config_pipeline', '', str(tmpdir))
