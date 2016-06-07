@@ -15,7 +15,7 @@
 """Base class for pipeline task.
 
 This base class extends taskflow Task class, with additional methods and
-properties used by GAPIC pipeline."""
+properties used by the GAPIC pipeline."""
 
 from taskflow.task import Task
 
@@ -23,9 +23,9 @@ from taskflow.task import Task
 class TaskBase(Task):
 
     def validate(self):
-        """Abstract method, which returns list of task requirements.
+        """Abstract method, which returns a list of task requirements.
 
-        Subclass must implment this method and return list of task requirements
-        classes.
+        Subclass must implement this method and return a list of task
+        requirements classes.
         """
         raise NotImplementedError("Subclass must implement abstract method")
