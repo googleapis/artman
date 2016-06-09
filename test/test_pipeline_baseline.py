@@ -50,8 +50,9 @@ def check_calls_match(expected_calls, actual_calls):
 @mock.patch('pipeline.utils.task_utils.runGradleTask')
 @mock.patch('subprocess.call')
 @mock.patch('subprocess.check_call')
-def _test_baseline(task_name, test_name, language, output_dir, mock_check_call,
-                   mock_call, mock_gradle_task):
+@mock.patch('os.chdir')
+def _test_baseline(task_name, test_name, language, output_dir, mock_chdir,
+                   mock_check_call, mock_call, mock_gradle_task):
     # Pipeline kwargs
     kwargs_ = {
         'src_proto_path': ['test/fake-repos/fake-proto'],
@@ -72,7 +73,7 @@ def _test_baseline(task_name, test_name, language, output_dir, mock_check_call,
         'auto_merge': True,
         'auto_resolve': True,
         'ignore_base': False,
-        'final_repo_dir': output_dir}
+        'final_repo_dir': output_dir + '/final'}
 
     # Mock output value of gradle tasks
     mock_gradle_task.return_value = 'MOCK_GRADLE_TASK_OUTPUT'

@@ -27,3 +27,15 @@ class RubyFormatRequirements(task_requirement_base.TaskRequirementBase):
     def install(cls):
         # Intentionally do nothing
         pass
+
+
+class RakeRequirements(task_requirement_base.TaskRequirementBase):
+
+    @classmethod
+    def require(cls):
+        return ['rake']
+
+    @classmethod
+    def install(cls):
+        # Intentionally do nothing
+        pass

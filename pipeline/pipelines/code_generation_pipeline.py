@@ -16,7 +16,8 @@
 
 import os
 from pipeline.pipelines import pipeline_base
-from pipeline.tasks import protoc_tasks, gapic_tasks, format_tasks
+from pipeline.tasks import protoc_tasks, package_tasks, gapic_tasks, \
+                           format_tasks
 from pipeline.utils import pipeline_util
 from taskflow.patterns import linear_flow
 
@@ -82,7 +83,10 @@ class PythonGrpcClientPipeline(pipeline_base.PipelineBase):
 
     def do_build_flow(self, **kwargs):
         flow = linear_flow.Flow('grpc-codegen')
-        flow.add(protoc_tasks.GrpcPackmanTask('Packman', inject=kwargs))
+        flow.add(protoc_tasks.GrpcPackmanTask('Packman', inject=kwargs),
+                 package_tasks.GrpcPackageDirTask('PackageDir', inject=kwargs),
+                 package_tasks.PythonPackageGenTask('GrpcPackageGen',
+                                                    inject=kwargs))
         return flow
 
     def validate_kwargs(self, **kwargs):
@@ -101,8 +105,15 @@ class PythonGapicClientPipeline(pipeline_base.PipelineBase):
                  gapic_tasks.GapicCodeGenTask('GapicCodegen',
                                               inject=kwargs),
                  format_tasks.PythonFormatTask('PythonFormat', inject=kwargs),
-                 gapic_tasks.GapicMergeTask('GapicMerge', inject=kwargs),
-                 gapic_tasks.GapicPackmanTask('GapicPackman', inject=kwargs))
+                 # TODO: Add merge task for python here. We don't use
+                 # GapicMergeTask because we don't want to have baseline/ in
+                 # the final_repo_dir in Python.
+                 gapic_tasks.GapicCopyTask('GapicCopy', inject=kwargs),
+                 gapic_tasks.GapicPackmanTask('GapicPackman', inject=kwargs),
+                 package_tasks.GapicPackageDirTask('PackageDir',
+                                                   inject=kwargs),
+                 package_tasks.PythonPackageGenTask('GapicPackageGen',
+                                                    inject=kwargs))
         return flow
 
     def validate_kwargs(self, **kwargs):
@@ -117,7 +128,10 @@ class RubyGrpcClientPipeline(pipeline_base.PipelineBase):
 
     def do_build_flow(self, **kwargs):
         flow = linear_flow.Flow('grpc-codegen')
-        flow.add(protoc_tasks.GrpcPackmanTask('Packman', inject=kwargs))
+        flow.add(protoc_tasks.GrpcPackmanTask('Packman', inject=kwargs),
+                 package_tasks.GrpcPackageDirTask('PackageDir', inject=kwargs),
+                 package_tasks.RubyPackageGenTask('GrpcPackageGen',
+                                                  inject=kwargs))
         return flow
 
     def validate_kwargs(self, **kwargs):
@@ -137,7 +151,11 @@ class RubyGapicClientPipeline(pipeline_base.PipelineBase):
                                               inject=kwargs),
                  format_tasks.RubyFormatTask('RubyFormat', inject=kwargs),
                  gapic_tasks.GapicMergeTask('GapicMerge', inject=kwargs),
-                 gapic_tasks.GapicPackmanTask('GapicPackman', inject=kwargs))
+                 gapic_tasks.GapicPackmanTask('GapicPackman', inject=kwargs),
+                 package_tasks.GapicPackageDirTask('PackageDir',
+                                                   inject=kwargs),
+                 package_tasks.RubyPackageGenTask('GapicPackageGen',
+                                                  inject=kwargs))
         return flow
 
     def validate_kwargs(self, **kwargs):
