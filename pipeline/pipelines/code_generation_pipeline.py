@@ -84,9 +84,7 @@ class PythonGrpcClientPipeline(pipeline_base.PipelineBase):
     def do_build_flow(self, **kwargs):
         flow = linear_flow.Flow('grpc-codegen')
         flow.add(protoc_tasks.GrpcPackmanTask('Packman', inject=kwargs),
-                 package_tasks.GrpcPackageDirTask('PackageDir', inject=kwargs),
-                 package_tasks.PythonPackageGenTask('GrpcPackageGen',
-                                                    inject=kwargs))
+                 package_tasks.GrpcPackageDirTask('PackageDir', inject=kwargs))
         return flow
 
     def validate_kwargs(self, **kwargs):
