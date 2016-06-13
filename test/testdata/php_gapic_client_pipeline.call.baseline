@@ -1,1 +1,1 @@
-php-cs-fixer fix {OUTPUT}/library-v1-gapic-gen-php/src
+php-cs-fixer fix {OUTPUT}/library-v1-gapic-gen-php

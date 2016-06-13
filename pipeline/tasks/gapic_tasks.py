@@ -21,7 +21,6 @@ import yaml
 from pipeline.tasks import packman_tasks
 from pipeline.tasks import task_base
 from pipeline.tasks.requirements import vgen_requirements
-from pipeline.utils import lang_params
 
 
 class GapicConfigGenTask(task_base.TaskBase):
@@ -83,9 +82,8 @@ class GapicCodeGenTask(task_base.TaskBase):
 
     def execute(self, language, toolkit_path, descriptor_set, service_yaml,
                 gapic_api_yaml, gapic_language_yaml, output_dir, api_name):
-        params = lang_params.LANG_PARAMS_MAP[language]
-        code_root = params.code_root(
-            os.path.join(output_dir, api_name + '-gapic-gen-' + language))
+        code_root = os.path.join(output_dir,
+                                 api_name + '-gapic-gen-' + language)
         subprocess.check_call(['rm', '-rf', code_root])
         gapic_yaml = gapic_api_yaml + gapic_language_yaml
         gapic_args = ['--gapic_yaml=' + os.path.abspath(yaml)
@@ -120,10 +118,9 @@ class GapicCopyTask(task_base.TaskBase):
 class GapicMergeTask(task_base.TaskBase):
     def execute(self, language, toolkit_path, final_repo_dir,
                 intermediate_code_dir, auto_merge, auto_resolve, ignore_base):
-        params = lang_params.LANG_PARAMS_MAP[language]
-        final_code_root = params.code_root(os.path.abspath(final_repo_dir))
-        baseline_root = params.code_root(
-            os.path.abspath(os.path.join(final_repo_dir, 'baseline')))
+        final_code_root = os.path.abspath(final_repo_dir)
+        baseline_root = os.path.abspath(
+            os.path.join(final_repo_dir, 'baseline'))
         args = [
             '--source_path=' + final_code_root,
             '--generated_path=' + os.path.abspath(intermediate_code_dir),
