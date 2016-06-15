@@ -21,7 +21,7 @@ class PhpFormatRequirements(task_requirement_base.TaskRequirementBase):
 
     @classmethod
     def require(cls):
-        return ['php-cs-fixer']
+        return ['php-cs-fixer', 'phpcbf']
 
     @classmethod
     def install(cls):

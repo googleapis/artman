@@ -84,8 +84,11 @@ class RubyFormatTask(task_base.TaskBase):
 
 class PhpFormatTask(task_base.TaskBase):
     def execute(self, intermediate_code_dir):
-        print 'Formatting file in ' + os.path.abspath(intermediate_code_dir)
+        abs_code_dir = os.path.abspath(intermediate_code_dir)
+        print 'Formatting file using php-cs-fixer in ' + abs_code_dir
         subprocess.call(['php-cs-fixer', 'fix', intermediate_code_dir])
+        print 'Formatting file using phpcbf in ' + abs_code_dir
+        subprocess.call(['phpcbf', '--standard=PSR2', intermediate_code_dir])
 
     def validate(self):
         return [php_requirements.PhpFormatRequirements]

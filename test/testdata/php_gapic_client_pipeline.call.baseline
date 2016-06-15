@@ -1,1 +1,2 @@
 php-cs-fixer fix {OUTPUT}/library-v1-gapic-gen-php
+phpcbf --standard=PSR2 {OUTPUT}/library-v1-gapic-gen-php
