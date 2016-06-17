@@ -27,11 +27,11 @@ optional arguments:
   -h, --help            show this help message and exit
   --remote_mode         When specified, the pipeline will be executed remotely
   --pipeline_kwargs PIPELINE_KWARGS
-                        pipeline_kwargs string, e.g. {'sleep_secs':3, 'id':1}
+                        pipeline_kwargs string, e.g. "{'sleep_secs':3, 'id':1}"
 
 Example:
 
-  python execute_pipeline.py --pipeline_kwargs={\'sleep_secs\':4} SamplePipeline
+  python execute_pipeline.py --pipeline_kwargs "{'sleep_secs':4}" SamplePipeline
 
 """
 

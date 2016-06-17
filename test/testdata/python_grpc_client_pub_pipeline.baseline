@@ -1,0 +1,4 @@
+gen-api-package --api_name=library/v1 -l python -o {OUTPUT}
+devpi login --password example-pwd example-user
+devpi use https://example-site.exampledomain.com/example-user/dev
+devpi upload --no-vcs --from-dir {OUTPUT}/final

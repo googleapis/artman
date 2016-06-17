@@ -51,8 +51,8 @@ def check_calls_match(expected_calls, actual_calls):
 @mock.patch('subprocess.call')
 @mock.patch('subprocess.check_call')
 @mock.patch('os.chdir')
-def _test_baseline(task_name, test_name, language, output_dir, mock_chdir,
-                   mock_check_call, mock_call, mock_gradle_task):
+def _test_baseline(task_name, test_name, language, output_dir, extra_kwargs,
+                   mock_chdir, mock_check_call, mock_call, mock_gradle_task):
     # Pipeline kwargs
     kwargs_ = {
         'src_proto_path': ['test/fake-repos/fake-proto'],
@@ -74,6 +74,7 @@ def _test_baseline(task_name, test_name, language, output_dir, mock_chdir,
         'auto_resolve': True,
         'ignore_base': False,
         'final_repo_dir': output_dir + '/final'}
+    kwargs_.update(extra_kwargs)
 
     # Mock output value of gradle tasks
     mock_gradle_task.return_value = 'MOCK_GRADLE_TASK_OUTPUT'
@@ -96,24 +97,39 @@ def _test_baseline(task_name, test_name, language, output_dir, mock_chdir,
     check_calls_match(expected_subprocess_call, mock_call.mock_calls)
 
 
-def _test_python_baseline(task_name, test_name, tmpdir):
+def _test_python_baseline(task_name, test_name, tmpdir, extra_kwargs={}):
     output_dir = str(tmpdir)
 
     # Create an empty 'fake_output_api.py' in the output_dir. Do not invoke
-    #  'touch' command with subprocess.call() because it's mocked.
+    # 'touch' command with subprocess.call() because it's mocked.
     final_output_dir = os.path.join(output_dir, 'library-v1-gapic-gen-python')
     if not os.path.exists(final_output_dir):
         os.makedirs(final_output_dir)
     with open(os.path.join(final_output_dir, 'fake_output_api.py'), 'w'):
         pass
 
-    _test_baseline(task_name, test_name, 'python', output_dir)
+    _test_baseline(task_name, test_name, 'python', output_dir, extra_kwargs)
 
 
-def test_python_grpc_client_baseline(tmpdir):
+def test_python_grpc_client_nopub_baseline(tmpdir):
+    extra_kwargs = {
+        'pypi_server_url': 'https://example-site.exampledomain.com/',
+        'pypi_uname': 'example-user',
+        'pypi_pwd': 'example-pwd'}
     _test_python_baseline('PythonGrpcClientPipeline',
-                          'python_grpc_client_pipeline',
-                          tmpdir)
+                          'python_grpc_client_nopub_pipeline',
+                          tmpdir, extra_kwargs)
+
+
+def test_python_grpc_client_pub_baseline(tmpdir):
+    extra_kwargs = {
+        'pypi_server_url': 'https://example-site.exampledomain.com/',
+        'pypi_uname': 'example-user',
+        'pypi_pwd': 'example-pwd',
+        'publish_env': 'dev'}
+    _test_python_baseline('PythonGrpcClientPipeline',
+                          'python_grpc_client_pub_pipeline',
+                          tmpdir, extra_kwargs)
 
 
 def test_python_gapic_client_baseline(tmpdir):
@@ -123,7 +139,7 @@ def test_python_gapic_client_baseline(tmpdir):
 
 
 def _test_ruby_baseline(task_name, test_name, tmpdir):
-    _test_baseline(task_name, test_name, 'ruby', str(tmpdir))
+    _test_baseline(task_name, test_name, 'ruby', str(tmpdir), {})
 
 
 def test_ruby_grpc_client_baseline(tmpdir):
@@ -139,7 +155,7 @@ def test_ruby_gapic_client_baseline(tmpdir):
 
 
 def _test_go_baseline(task_name, test_name, tmpdir):
-    _test_baseline(task_name, test_name, 'go', str(tmpdir))
+    _test_baseline(task_name, test_name, 'go', str(tmpdir), {})
 
 
 def test_go_grpc_client_baseline(tmpdir):
@@ -153,7 +169,7 @@ def test_go_gapic_client_baseline(tmpdir):
 
 
 def _test_java_baseline(task_name, test_name, tmpdir):
-    _test_baseline(task_name, test_name, 'java', str(tmpdir))
+    _test_baseline(task_name, test_name, 'java', str(tmpdir), {})
 
 
 def test_java_grpc_client_baseline(tmpdir):
@@ -168,7 +184,7 @@ def test_java_gapic_client_baseline(tmpdir):
 
 
 def _test_php_baseline(task_name, test_name, tmpdir):
-    _test_baseline(task_name, test_name, 'php', str(tmpdir))
+    _test_baseline(task_name, test_name, 'php', str(tmpdir), {})
 
 
 def test_php_gapic_client_baseline(tmpdir):
@@ -183,4 +199,8 @@ def test_php_grpc_client_baseline(tmpdir):
 
 
 def test_config_baseline(tmpdir):
-    _test_baseline('GapicConfigPipeline', 'config_pipeline', '', str(tmpdir))
+    _test_baseline('GapicConfigPipeline',
+                   'config_pipeline',
+                   '',
+                   str(tmpdir),
+                   {})

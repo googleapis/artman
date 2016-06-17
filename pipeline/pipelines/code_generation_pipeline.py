@@ -17,7 +17,7 @@
 import os
 from pipeline.pipelines import pipeline_base
 from pipeline.tasks import protoc_tasks, package_tasks, gapic_tasks, \
-                           format_tasks
+                           format_tasks, publish_tasks
 from pipeline.utils import pipeline_util
 from taskflow.patterns import linear_flow
 
@@ -30,6 +30,11 @@ _VGEN_REQUIRED = ['service_yaml',
                   'auto_resolve',
                   'ignore_base',
                   'final_repo_dir']
+_PYTHON_PUB_REQUIRED = ['pypi_server_url',
+                        'pypi_uname',
+                        'pypi_pwd',
+                        'publish_env']
+_PYTHON_PUB_ENVS = ['dev', 'test', 'staging', 'prod']
 
 
 def _validate_toolkit_path(toolkit_path):
@@ -54,6 +59,13 @@ def _validate_codegen_kwargs(extra_args, **kwargs):
                 'api_name']
     pipeline_util.validate_exists(required + extra_args, **kwargs)
     _validate_toolkit_path(kwargs['toolkit_path'])
+
+
+def _validate_publish_kwargs(**kwargs):
+    if kwargs['publish_env'] not in _PYTHON_PUB_ENVS:
+        raise ValueError(
+                'Invalid environment "{}". choose from one of {}'
+                .format(kwargs['publish_env'], _PYTHON_PUB_ENVS))
 
 
 class GapicConfigPipeline(pipeline_base.PipelineBase):
@@ -85,10 +97,17 @@ class PythonGrpcClientPipeline(pipeline_base.PipelineBase):
         flow = linear_flow.Flow('grpc-codegen')
         flow.add(protoc_tasks.GrpcPackmanTask('Packman', inject=kwargs),
                  package_tasks.GrpcPackageDirTask('PackageDir', inject=kwargs))
+        if 'publish_env' in kwargs:
+            flow.add(publish_tasks.PypiUploadTask('PypiUpload',
+                                                  inject=kwargs))
         return flow
 
     def validate_kwargs(self, **kwargs):
-        _validate_codegen_kwargs([], **kwargs)
+        req_args = _VGEN_REQUIRED[:]
+        if 'publish_env' in kwargs:
+            req_args += _PYTHON_PUB_REQUIRED
+            _validate_publish_kwargs(**kwargs)
+        _validate_codegen_kwargs(req_args, **kwargs)
 
 
 class PythonGapicClientPipeline(pipeline_base.PipelineBase):

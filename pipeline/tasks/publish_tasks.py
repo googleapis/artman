@@ -12,22 +12,31 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Tasks that perform cleanup after code generation"""
+"""Tasks for publishing artman output"""
 
-import os
 import subprocess
 from pipeline.tasks import task_base
 
 
-class CleanUpTask(task_base.TaskBase):
-    """Recursively removes all entries in `output_dir` that are not included in
-    `saved_dirs`"""
-    def execute(self, output_dir, saved_dirs):
-        print 'Cleaning up temporary files'
-        for entry in os.listdir(output_dir):
-            if entry not in saved_dirs:
-                subprocess.check_call(
-                    ['rm', '-rf', os.path.join(output_dir, entry)])
+class PypiUploadTask(task_base.TaskBase):
+    """Publishes a PyPI package"""
+
+    def execute(self, pypi_server_url, pypi_uname, pypi_pwd, publish_env,
+                final_repo_dir):
+        publish_url = pypi_server_url + pypi_uname + '/' + publish_env
+        subprocess.check_call(
+            ['devpi',
+             'login',
+             '--password',
+             pypi_pwd,
+             pypi_uname])
+        subprocess.check_call(['devpi', 'use', publish_url])
+        subprocess.check_call(
+            ['devpi',
+             'upload',
+             '--no-vcs',
+             '--from-dir',
+             final_repo_dir])
 
     def validate(self):
         return []
