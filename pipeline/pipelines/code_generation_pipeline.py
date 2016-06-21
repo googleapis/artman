@@ -179,6 +179,40 @@ class RubyGapicClientPipeline(pipeline_base.PipelineBase):
         _validate_codegen_kwargs(_VGEN_REQUIRED, **kwargs)
 
 
+class NodeJSGrpcClientPipeline(pipeline_base.PipelineBase):
+
+    def __init__(self, **kwargs):
+        kwargs['language'] = 'nodejs'
+        super(NodeJSGrpcClientPipeline, self).__init__(**kwargs)
+
+    def do_build_flow(self, **kwargs):
+        flow = linear_flow.Flow('grpc-codegen')
+        flow.add(protoc_tasks.GrpcPackmanTask('Packman', inject=kwargs))
+        return flow
+
+    def validate_kwargs(self, **kwargs):
+        _validate_codegen_kwargs([], **kwargs)
+
+
+class NodeJSGapicClientPipeline(pipeline_base.PipelineBase):
+
+    def __init__(self, **kwargs):
+        kwargs['language'] = 'nodejs'
+        super(NodeJSGapicClientPipeline, self).__init__(**kwargs)
+
+    def do_build_flow(self, **kwargs):
+        flow = linear_flow.Flow('gapic-codegen')
+        flow.add(protoc_tasks.ProtoDescGenTask('ProtoDesc', inject=kwargs),
+                 gapic_tasks.GapicCodeGenTask('GapicCodegen',
+                                              inject=kwargs),
+                 gapic_tasks.GapicCopyTask('GapicCopy', inject=kwargs),
+                 gapic_tasks.GapicPackmanTask('GapicPackman', inject=kwargs))
+        return flow
+
+    def validate_kwargs(self, **kwargs):
+        _validate_codegen_kwargs(_VGEN_REQUIRED, **kwargs)
+
+
 class JavaCorePipeline(pipeline_base.PipelineBase):
 
     def __init__(self, **kwargs):

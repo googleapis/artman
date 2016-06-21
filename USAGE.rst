@@ -181,6 +181,22 @@ Ruby (logging)
         RubyGapicClientPipeline
 
 
+Node.JS (logging)
+****************
+
+  ::
+
+     python execute_pipeline.py \
+        --config "../googleapis/gapic/artman_logging.yaml:common|nodejs,\
+        ../googleapis/gapic/lang/common.yaml:default|nodejs" \
+        NodeJSGrpcClientPipeline
+
+     python execute_pipeline.py \
+        --config "../googleapis/gapic/artman_logging.yaml:common|nodejs,\
+        ../googleapis/gapic/lang/common.yaml:default|nodejs" \
+        NodeJSGapicClientPipeline
+
+
 Pipeline configuration
 ----------------------
 

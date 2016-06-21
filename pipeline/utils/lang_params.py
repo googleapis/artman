@@ -37,6 +37,7 @@ class PhpParams(LanguageParams):
 LANG_PARAMS_MAP = {
     'python': LanguageParams(),
     'ruby': LanguageParams(),
+    'nodejs': LanguageParams(),
     'java': JavaParams(),
     'go': LanguageParams(),
     'csharp': LanguageParams(),
