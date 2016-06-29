@@ -236,8 +236,8 @@ class JavaGrpcClientPipeline(pipeline_base.PipelineBase):
 
     def do_build_flow(self, **kwargs):
         flow = linear_flow.Flow('grpc-codegen')
-        flow.add(protoc_tasks.ProtoCodeGenTask('ProtoGen', inject=kwargs),
-                 protoc_tasks.GrpcCodeGenTask('GrpcCodegen', inject=kwargs))
+        kwargs.update({'packman_flags': ['--experimental_alt_java']})
+        flow.add(protoc_tasks.GrpcPackmanTask('Packman', inject=kwargs))
         return flow
 
     def validate_kwargs(self, **kwargs):

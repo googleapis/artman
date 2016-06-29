@@ -1,4 +1,1 @@
-mkdir -p {OUTPUT}/library-v1-gen-java/src/main/java
-protoc --proto_path=test/fake-repos/gapi-core-proto/src/main/proto/ --proto_path=test/fake-repos/fake-proto --proto_path=MOCK_GRADLE_TASK_OUTPUT --java_out={OUTPUT}/library-v1-gen-java/src/main/java test/fake-repos/fake-proto/fake.proto
-mkdir -p {OUTPUT}/library-v1-gen-java/src/main/java
-protoc --proto_path=test/fake-repos/gapi-core-proto/src/main/proto/ --proto_path=test/fake-repos/fake-proto --proto_path=MOCK_GRADLE_TASK_OUTPUT --plugin=protoc-gen-grpc=MOCK_GRADLE_TASK_OUTPUT --grpc_out={OUTPUT}/library-v1-gen-java/src/main/java test/fake-repos/fake-proto/fake.proto
+gen-api-package --api_name=library/v1 -l java -o {OUTPUT} --experimental_alt_java

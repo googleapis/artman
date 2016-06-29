@@ -325,5 +325,6 @@ class GoLangUpdateImportsTask(task_base.TaskBase):
 
 
 class GrpcPackmanTask(packman_tasks.PackmanTaskBase):
-    def execute(self, language, api_name, output_dir):
-        self.run_packman(language, api_name, '-o', output_dir)
+    def execute(self, language, api_name, output_dir, packman_flags=[]):
+        arg_list = [language, api_name, '-o', output_dir] + packman_flags
+        self.run_packman(*arg_list)
