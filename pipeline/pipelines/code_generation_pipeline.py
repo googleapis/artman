@@ -30,11 +30,8 @@ _VGEN_REQUIRED = ['service_yaml',
                   'auto_resolve',
                   'ignore_base',
                   'final_repo_dir']
-_PYTHON_PUB_REQUIRED = ['pypi_server_url',
-                        'pypi_uname',
-                        'pypi_pwd',
-                        'publish_env']
 _PYTHON_PUB_ENVS = ['dev', 'test', 'staging', 'prod']
+_JAVA_PUB_ENVS = ['staging', 'prod']
 
 
 def _validate_toolkit_path(toolkit_path):
@@ -61,11 +58,16 @@ def _validate_codegen_kwargs(extra_args, **kwargs):
     _validate_toolkit_path(kwargs['toolkit_path'])
 
 
-def _validate_publish_kwargs(**kwargs):
-    if kwargs['publish_env'] not in _PYTHON_PUB_ENVS:
-        raise ValueError(
-                'Invalid environment "{}". choose from one of {}'
-                .format(kwargs['publish_env'], _PYTHON_PUB_ENVS))
+def _validate_publish_kwargs(allowed_envs, **kwargs):
+    required = ['repo_url',
+                'username',
+                'password']
+    if 'publish_env' in kwargs:
+        pipeline_util.validate_exists(required, **kwargs)
+        if kwargs['publish_env'] not in allowed_envs:
+            raise ValueError(
+                    'Invalid publish_env "{}". choose from one of {}'
+                    .format(kwargs['publish_env'], allowed_envs))
 
 
 class GapicConfigPipeline(pipeline_base.PipelineBase):
@@ -104,10 +106,8 @@ class PythonGrpcClientPipeline(pipeline_base.PipelineBase):
 
     def validate_kwargs(self, **kwargs):
         req_args = _VGEN_REQUIRED[:]
-        if 'publish_env' in kwargs:
-            req_args += _PYTHON_PUB_REQUIRED
-            _validate_publish_kwargs(**kwargs)
         _validate_codegen_kwargs(req_args, **kwargs)
+        _validate_publish_kwargs(_PYTHON_PUB_ENVS, **kwargs)
 
 
 class PythonGapicClientPipeline(pipeline_base.PipelineBase):
@@ -238,10 +238,15 @@ class JavaGrpcClientPipeline(pipeline_base.PipelineBase):
         flow = linear_flow.Flow('grpc-codegen')
         kwargs.update({'packman_flags': ['--experimental_alt_java']})
         flow.add(protoc_tasks.GrpcPackmanTask('Packman', inject=kwargs))
+        if 'publish_env' in kwargs:
+            flow.add(publish_tasks.MavenDeployTask('MavenDeploy',
+                                                   inject=kwargs))
         return flow
 
     def validate_kwargs(self, **kwargs):
-        _validate_codegen_kwargs([], **kwargs)
+        req_args = _VGEN_REQUIRED[:]
+        _validate_codegen_kwargs(req_args, **kwargs)
+        _validate_publish_kwargs(_JAVA_PUB_ENVS, **kwargs)
 
 
 class JavaGapicClientPipeline(pipeline_base.PipelineBase):

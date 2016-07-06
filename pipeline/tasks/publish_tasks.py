@@ -21,15 +21,15 @@ from pipeline.tasks import task_base
 class PypiUploadTask(task_base.TaskBase):
     """Publishes a PyPI package"""
 
-    def execute(self, pypi_server_url, pypi_uname, pypi_pwd, publish_env,
+    def execute(self, repo_url, username, password, publish_env,
                 final_repo_dir):
-        publish_url = pypi_server_url + pypi_uname + '/' + publish_env
+        publish_url = repo_url + username + '/' + publish_env
         subprocess.check_call(
             ['devpi',
              'login',
              '--password',
-             pypi_pwd,
-             pypi_uname])
+             password,
+             username])
         subprocess.check_call(['devpi', 'use', publish_url])
         subprocess.check_call(
             ['devpi',
@@ -37,6 +37,22 @@ class PypiUploadTask(task_base.TaskBase):
              '--no-vcs',
              '--from-dir',
              final_repo_dir])
+
+    def validate(self):
+        return []
+
+
+class MavenDeployTask(task_base.TaskBase):
+    """Publishes to a Maven repository"""
+    def execute(self, repo_url, username, password, publish_env,
+                final_repo_dir):
+        subprocess.check_call(
+            [final_repo_dir + '/gradlew',
+             'uploadArchives',
+             '-PmavenRepoUrl=' + repo_url,
+             '-PmavenUsername=' + username,
+             '-PmavenPassword=' + password,
+             '-p' + final_repo_dir])
 
     def validate(self):
         return []

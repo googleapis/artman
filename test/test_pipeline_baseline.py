@@ -97,7 +97,8 @@ def _test_baseline(task_name, test_name, language, output_dir, extra_kwargs,
     check_calls_match(expected_subprocess_call, mock_call.mock_calls)
 
 
-def _test_python_baseline(task_name, test_name, tmpdir, extra_kwargs={}):
+def _test_python_baseline(task_name, test_name, tmpdir, extra_kwargs=None):
+    extra_kwargs = extra_kwargs or {}
     output_dir = str(tmpdir)
 
     # Create an empty 'fake_output_api.py' in the output_dir. Do not invoke
@@ -113,9 +114,9 @@ def _test_python_baseline(task_name, test_name, tmpdir, extra_kwargs={}):
 
 def test_python_grpc_client_nopub_baseline(tmpdir):
     extra_kwargs = {
-        'pypi_server_url': 'https://example-site.exampledomain.com/',
-        'pypi_uname': 'example-user',
-        'pypi_pwd': 'example-pwd'}
+        'repo_url': 'https://example-site.exampledomain.com/',
+        'username': 'example-user',
+        'password': 'example-pwd'}
     _test_python_baseline('PythonGrpcClientPipeline',
                           'python_grpc_client_nopub_pipeline',
                           tmpdir, extra_kwargs)
@@ -123,9 +124,9 @@ def test_python_grpc_client_nopub_baseline(tmpdir):
 
 def test_python_grpc_client_pub_baseline(tmpdir):
     extra_kwargs = {
-        'pypi_server_url': 'https://example-site.exampledomain.com/',
-        'pypi_uname': 'example-user',
-        'pypi_pwd': 'example-pwd',
+        'repo_url': 'https://example-site.exampledomain.com/',
+        'username': 'example-user',
+        'password': 'example-pwd',
         'publish_env': 'dev'}
     _test_python_baseline('PythonGrpcClientPipeline',
                           'python_grpc_client_pub_pipeline',
@@ -184,13 +185,32 @@ def test_go_gapic_client_baseline(tmpdir):
                       tmpdir)
 
 
-def _test_java_baseline(task_name, test_name, tmpdir):
-    _test_baseline(task_name, test_name, 'java', str(tmpdir), {})
+def _test_java_baseline(task_name, test_name, tmpdir, extra_kwargs=None):
+    extra_kwargs = extra_kwargs or {}
+    _test_baseline(task_name, test_name, 'java', str(tmpdir), extra_kwargs)
 
 
-def test_java_grpc_client_baseline(tmpdir):
-    _test_java_baseline('JavaGrpcClientPipeline', 'java_grpc_client_pipeline',
-                        tmpdir)
+def test_java_grpc_client_pub_baseline(tmpdir):
+    extra_kwargs = {
+        'repo_url': 'http://maven.example.com/nexus/content/repositories/'
+                    'releases',
+        'username': 'example-maven-uname',
+        'password': 'example-maven-pwd',
+        'publish_env': 'prod'}
+    _test_java_baseline('JavaGrpcClientPipeline',
+                        'java_grpc_client_pub_pipeline',
+                        tmpdir, extra_kwargs)
+
+
+def test_java_grpc_client_nopub_baseline(tmpdir):
+    extra_kwargs = {
+        'repo_url': 'http://maven.example.com/nexus/content/repositories/'
+                    'releases',
+        'username': 'example-maven-uname',
+        'password': 'example-maven-pwd'}
+    _test_java_baseline('JavaGrpcClientPipeline',
+                        'java_grpc_client_nopub_pipeline',
+                        tmpdir, extra_kwargs)
 
 
 def test_java_gapic_client_baseline(tmpdir):

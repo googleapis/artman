@@ -1,0 +1,2 @@
+gen-api-package --api_name=library/v1 -l java -o {OUTPUT} --experimental_alt_java
+{OUTPUT}/final/gradlew uploadArchives -PmavenRepoUrl=http://maven.example.com/nexus/content/repositories/releases -PmavenUsername=example-maven-uname -PmavenPassword=example-maven-pwd -p{OUTPUT}/final
