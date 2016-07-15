@@ -28,18 +28,6 @@ def _scoped_run_command(target_dir, commands):
     os.chdir(current_dir)
 
 
-def _build_wheel_package(target_dir):
-    _scoped_run_command(target_dir, ['python', './setup.py', 'bdist_wheel'])
-
-
-class PythonPackageGenTask(task_base.TaskBase):
-    """Generates .whl file for the target directory."""
-
-    def execute(self, package_dir):
-        _scoped_run_command(
-            package_dir, ['python', './setup.py', 'bdist_wheel'])
-
-
 class RubyPackageGenTask(task_base.TaskBase):
     """Generates .gem file for the target directory."""
 

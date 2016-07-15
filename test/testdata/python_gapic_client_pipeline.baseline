@@ -5,4 +5,3 @@ test/fake-repos/toolkit/gradlew -p test/fake-repos/toolkit runVGen -Pclargs=--de
 rm -rf {OUTPUT}/final
 cp -rf {OUTPUT}/library-v1-gapic-gen-python {OUTPUT}/final
 gen-api-package --api_name=library/v1 -l python --gax_dir={OUTPUT}/final --template_root=templates/gax
-python ./setup.py bdist_wheel

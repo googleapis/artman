@@ -128,9 +128,7 @@ class PythonGapicClientPipeline(pipeline_base.PipelineBase):
                  gapic_tasks.GapicCopyTask('GapicCopy', inject=kwargs),
                  gapic_tasks.GapicPackmanTask('GapicPackman', inject=kwargs),
                  package_tasks.GapicPackageDirTask('PackageDir',
-                                                   inject=kwargs),
-                 package_tasks.PythonPackageGenTask('GapicPackageGen',
-                                                    inject=kwargs))
+                                                   inject=kwargs))
         return flow
 
     def validate_kwargs(self, **kwargs):
