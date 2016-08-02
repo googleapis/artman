@@ -1,1 +1,1 @@
-gen-api-package --api_name=library/v1 -l python -o {OUTPUT}
+gen-api-package --api_name=library/v1 -l python -o {OUTPUT} --package_prefix google- -i {CWD}/test/fake-repos/gapi-core-proto/src/main/proto -r test/fake-repos/fake-proto

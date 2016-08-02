@@ -1,1 +1,1 @@
-gen-api-package --api_name=library/v1 -l java -o {OUTPUT} --experimental_alt_java
+gen-api-package --api_name=library/v1 -l java -o {OUTPUT} --package_prefix google- -i {CWD}/test/fake-repos/gapi-core-proto/src/main/proto -r test/fake-repos/fake-proto --experimental_alt_java

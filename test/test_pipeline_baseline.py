@@ -47,7 +47,7 @@ def check_calls_match(expected_calls, actual_calls):
         expected_calls, actual_calls)
 
 
-@mock.patch('pipeline.utils.task_utils.runGradleTask')
+@mock.patch('pipeline.utils.task_utils.run_gradle_task')
 @mock.patch('subprocess.call')
 @mock.patch('subprocess.check_call')
 @mock.patch('os.chdir')

@@ -60,7 +60,7 @@ class _JavaProtoParams:
     def grpc_plugin_path(self, toolkit_path):
         if self.path is None:
             print 'start gradle process to locate GRPC Java plugin'
-            self.path = task_utils.runGradleTask(
+            self.path = task_utils.run_gradle_task(
                 'showGrpcJavaPluginPath', toolkit_path)
         return self.path
 
@@ -127,7 +127,7 @@ _PROTO_PARAMS_MAP = {
 def _find_protobuf_path(toolkit_path):
     """Fetch and locate protobuf source"""
     print 'Searching for latest protobuf source'
-    return task_utils.runGradleTask(
+    return task_utils.run_gradle_task(
         'showProtobufPath', toolkit_path)
 
 
@@ -325,6 +325,18 @@ class GoLangUpdateImportsTask(task_base.TaskBase):
 
 
 class GrpcPackmanTask(packman_tasks.PackmanTaskBase):
-    def execute(self, language, api_name, output_dir, packman_flags=[]):
-        arg_list = [language, api_name, '-o', output_dir] + packman_flags
+    def execute(self, language, api_name, output_dir, src_proto_path,
+                import_proto_path, packman_flags=None):
+        packman_flags = packman_flags or []
+        api_name = task_utils.packman_api_name(api_name)
+        arg_list = [language, api_name, '-o', output_dir,
+                    '--package_prefix', 'google-']
+
+        # Import path must be absolute. See
+        #   https://github.com/googleapis/packman/issues/1
+        import_proto_path = [os.path.abspath(imp) for imp in import_proto_path]
+
+        arg_list += [arg for imp in import_proto_path for arg in ('-i', imp)]
+        arg_list += [arg for src in src_proto_path for arg in ('-r', src)]
+        arg_list += packman_flags
         self.run_packman(*arg_list)

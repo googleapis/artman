@@ -17,7 +17,7 @@
 import subprocess
 
 
-def runGradleTask(task_name, task_path):
+def run_gradle_task(task_name, task_path):
     output = subprocess.check_output(
         ['./gradlew', task_name], cwd=task_path)
     # It is a convention that gradle task uses 'output: ' as
@@ -27,3 +27,8 @@ def runGradleTask(task_name, task_path):
         if line.startswith(prefix):
             return line[len(prefix):]
     return None
+
+
+def packman_api_name(api_name):
+    """Changes an pipeline kwarg API name to format expected by Packman"""
+    return api_name.replace('-', '/')
