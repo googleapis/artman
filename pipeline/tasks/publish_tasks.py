@@ -16,6 +16,7 @@
 
 import subprocess
 from pipeline.tasks import task_base
+from pipeline.utils import github_utils
 
 
 class PypiUploadTask(task_base.TaskBase):
@@ -44,6 +45,7 @@ class PypiUploadTask(task_base.TaskBase):
 
 class MavenDeployTask(task_base.TaskBase):
     """Publishes to a Maven repository"""
+
     def execute(self, repo_url, username, password, publish_env,
                 final_repo_dir):
         subprocess.check_call(
@@ -53,6 +55,23 @@ class MavenDeployTask(task_base.TaskBase):
              '-PmavenUsername=' + username,
              '-PmavenPassword=' + password,
              '-p' + final_repo_dir])
+
+    def validate(self):
+        return []
+
+
+class GitHubPushTask(task_base.TaskBase):
+    """Uploads local files to GitHub repository in a new commit.
+
+    Won't delete files (if missing in local repo) from the remote repo. If the
+    remote copy of a file differs from local copy, overwrites with local copy.
+    Does not change files or folders that are in remote repo but not in local
+    repo.
+    """
+    def execute(self, owner, branch, username, password, publish_env,
+                dir_to_push, message):
+        github_utils.push_dir_to_github(dir_to_push, username, password, owner,
+                                        publish_env, branch, message)
 
     def validate(self):
         return []
