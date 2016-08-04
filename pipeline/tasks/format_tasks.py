@@ -87,6 +87,11 @@ class PhpFormatTask(task_base.TaskBase):
         abs_code_dir = os.path.abspath(intermediate_code_dir)
         print 'Formatting file using php-cs-fixer in ' + abs_code_dir
         subprocess.call(['php-cs-fixer', 'fix', intermediate_code_dir])
+        # We require a second call to php-cs-fixer because instances of @type
+        # have been converted to @var. We cannot disable this conversion in
+        # the first call without affecting other aspects of the formatting.
+        subprocess.call(['php-cs-fixer', 'fix', intermediate_code_dir,
+                         '--fixers=phpdoc_var_to_type'])
         print 'Formatting file using phpcbf in ' + abs_code_dir
         subprocess.call(['phpcbf', '--standard=PSR2', intermediate_code_dir])
 
