@@ -18,12 +18,28 @@
 """Main class to start conductor.
 """
 
+import argparse
+
 from pipeline.conductors import gapic_conductor
 
 
 def main():
-  gapic_conductor.run()
+  jobboard_name = _parse_args()
+  gapic_conductor.run(jobboard_name)
 
+def _parse_args():
+  parser = _CreateArgumentParser()
+  flags = parser.parse_args()
+  return flags.jobboard_name.lower()
+
+def _CreateArgumentParser():
+  parser = argparse.ArgumentParser()
+  parser.add_argument(
+      "--jobboard_name",
+      type=str,
+      default="remote",
+      help="The name of the jobboard to monitor.")
+  return parser
 
 if __name__ == '__main__':
   main()

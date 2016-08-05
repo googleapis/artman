@@ -14,7 +14,6 @@
 
 """Tasks for publishing artman output"""
 
-import subprocess
 from pipeline.tasks import task_base
 from pipeline.utils import github_utils
 
@@ -25,14 +24,14 @@ class PypiUploadTask(task_base.TaskBase):
     def execute(self, repo_url, username, password, publish_env,
                 final_repo_dir):
         publish_url = repo_url + username + '/' + publish_env
-        subprocess.check_call(
+        self.exec_command(
             ['devpi',
              'login',
              '--password',
              password,
              username])
-        subprocess.check_call(['devpi', 'use', publish_url])
-        subprocess.check_call(
+        self.exec_command(['devpi', 'use', publish_url])
+        self.exec_command(
             ['devpi',
              'upload',
              '--no-vcs',
@@ -48,7 +47,7 @@ class MavenDeployTask(task_base.TaskBase):
 
     def execute(self, repo_url, username, password, publish_env,
                 final_repo_dir):
-        subprocess.check_call(
+        self.exec_command(
             [final_repo_dir + '/gradlew',
              'uploadArchives',
              '-PmavenRepoUrl=' + repo_url,

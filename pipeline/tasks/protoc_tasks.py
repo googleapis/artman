@@ -107,7 +107,7 @@ class _PhpProtoParams:
     def grpc_plugin_path(self, dummy_toolkit_path):
         if self.path is None:
             self.path = subprocess.check_output(
-                ['which', 'protoc-gen-php'])[:-1]
+                ['which', 'protoc-gen-php'], stderr=subprocess.STDOUT)[:-1]
         return self.path
 
     def grpc_out_param(self, output_dir):
@@ -190,7 +190,9 @@ def _protoc_grpc_params(proto_params, pkg_dir, toolkit_path):
 def _prepare_pkg_dir(output_dir, api_name, language):
     proto_params = _PROTO_PARAMS_MAP[language]
     pkg_dir = os.path.join(output_dir, api_name + '-gen-' + language)
-    subprocess.check_call(['mkdir', '-p', proto_params.code_root(pkg_dir)])
+    subprocess.check_output([
+        'mkdir', '-p', proto_params.code_root(pkg_dir)],
+        stderr=subprocess.STDOUT)
     return pkg_dir
 
 
@@ -203,11 +205,11 @@ class ProtoDescGenTask(task_base.TaskBase):
         print 'Compiling descriptors {0}'.format(
             _find_protos(src_proto_path))
         desc_out_file = api_name + '.desc'
-        subprocess.check_call(['mkdir', '-p', output_dir])
+        self.exec_command(['mkdir', '-p', output_dir])
         # DescGen don't use _group_by_dirname right now because
         #   - it doesn't have to
         #   - and multiple invocation will overwrite the desc_out_file
-        subprocess.check_call(
+        self.exec_command(
             _protoc_header_params(
                 import_proto_path, src_proto_path, toolkit_path) +
             _protoc_desc_params(output_dir, desc_out_file) +
@@ -230,7 +232,7 @@ class ProtoCodeGenTask(task_base.TaskBase):
         for (dirname, protos) in _group_by_dirname(
                 _find_protos(src_proto_path)).items():
             print 'Generating protos {0}'.format(dirname)
-            subprocess.check_call(
+            self.exec_command(
                 _protoc_header_params(
                     import_proto_path, src_proto_path, toolkit_path) +
                 _protoc_proto_params(proto_params, pkg_dir, with_grpc=False) +
@@ -251,7 +253,7 @@ class GrpcCodeGenTask(task_base.TaskBase):
         for (dirname, protos) in _group_by_dirname(
                 _find_protos(src_proto_path)).items():
             print 'Running protoc with grpc plugin on {0}'.format(dirname)
-            subprocess.check_call(
+            self.exec_command(
                 _protoc_header_params(
                     import_proto_path, src_proto_path, toolkit_path) +
                 _protoc_grpc_params(proto_params, pkg_dir, toolkit_path) +
@@ -272,7 +274,7 @@ class ProtoAndGrpcCodeGenTask(task_base.TaskBase):
         for (dirname, protos) in _group_by_dirname(
                 _find_protos(src_proto_path)).items():
             print 'Running protoc and grpc plugin on {0}'.format(dirname)
-            subprocess.check_call(
+            self.exec_command(
                 _protoc_header_params(
                     import_proto_path, src_proto_path, toolkit_path) +
                 _protoc_proto_params(proto_params, pkg_dir, with_grpc=True) +
@@ -326,7 +328,7 @@ class GoLangUpdateImportsTask(task_base.TaskBase):
 
 class GrpcPackmanTask(packman_tasks.PackmanTaskBase):
     def execute(self, language, api_name, output_dir, src_proto_path,
-                import_proto_path, packman_flags=None):
+                import_proto_path, packman_flags=None, repo_dir=None):
         packman_flags = packman_flags or []
         api_name = task_utils.packman_api_name(api_name)
         arg_list = [language, api_name, '-o', output_dir,
@@ -339,4 +341,6 @@ class GrpcPackmanTask(packman_tasks.PackmanTaskBase):
         arg_list += [arg for imp in import_proto_path for arg in ('-i', imp)]
         arg_list += [arg for src in src_proto_path for arg in ('-r', src)]
         arg_list += packman_flags
+        if repo_dir:
+            arg_list += ['-r', repo_dir]
         self.run_packman(*arg_list)

@@ -11,78 +11,65 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """Pipelines that run gRPC codegen and VGen"""
 
 import os
 from pipeline.pipelines import pipeline_base
 from pipeline.tasks import protoc_tasks, package_tasks, gapic_tasks, \
-                           format_tasks, publish_tasks
+                           format_tasks, publish_tasks, io_tasks
 from pipeline.utils import pipeline_util
 from taskflow.patterns import linear_flow
 
-
 # kwargs required by GAPIC code gen
-_VGEN_REQUIRED = ['service_yaml',
-                  'gapic_language_yaml',
-                  'gapic_api_yaml',
-                  'auto_merge',
-                  'auto_resolve',
-                  'ignore_base',
+_VGEN_REQUIRED = ['service_yaml', 'gapic_language_yaml', 'gapic_api_yaml',
+                  'auto_merge', 'auto_resolve', 'ignore_base',
                   'final_repo_dir']
 _PYTHON_PUB_ENVS = ['dev', 'test', 'staging', 'prod']
 _JAVA_PUB_ENVS = ['staging', 'prod']
 
 
 def _validate_toolkit_path(toolkit_path):
-    if not (os.path.isfile(
-                os.path.join(toolkit_path, 'gradlew')) and
-            os.path.isfile(
-                os.path.join(toolkit_path, 'build.gradle'))):
+    if not (os.path.isfile(os.path.join(toolkit_path, 'gradlew')) and
+            os.path.isfile(os.path.join(toolkit_path, 'build.gradle'))):
         raise ValueError(
-                'toolkit repo does not contain `gradlew` or `build.gradle`'
-                'at {0}'.format(toolkit_path))
+            'toolkit repo does not contain `gradlew` or `build.gradle`'
+            'at {0}'.format(toolkit_path))
 
 
 # TODO(garrettjones) fix required to be relative to pipeline.
 # Ideally this should just be computed dynamically based
 # on the pipeline's tasks.
 def _validate_codegen_kwargs(extra_args, **kwargs):
-    required = ['src_proto_path',
-                'import_proto_path',
-                'toolkit_path',
-                'output_dir',
-                'language',
-                'api_name']
+    required = ['src_proto_path', 'import_proto_path', 'toolkit_path',
+                'output_dir', 'language', 'api_name']
     pipeline_util.validate_exists(required + extra_args, **kwargs)
-    _validate_toolkit_path(kwargs['toolkit_path'])
 
 
 def _validate_publish_kwargs(allowed_envs, **kwargs):
-    required = ['repo_url',
-                'username',
-                'password']
+    required = ['repo_url', 'username', 'password']
     if 'publish_env' in kwargs:
         pipeline_util.validate_exists(required, **kwargs)
         if kwargs['publish_env'] not in allowed_envs:
-            raise ValueError(
-                    'Invalid publish_env "{}". choose from one of {}'
-                    .format(kwargs['publish_env'], allowed_envs))
+            raise ValueError('Invalid publish_env "{}". choose from one of {}'
+                             .format(kwargs['publish_env'], allowed_envs))
 
 
 class GapicConfigPipeline(pipeline_base.PipelineBase):
-
     def __init__(self, **kwargs):
         kwargs['language'] = ''
         super(GapicConfigPipeline, self).__init__(**kwargs)
 
     def do_build_flow(self, **kwargs):
         flow = linear_flow.Flow('gapic-configgen')
-        flow.add(protoc_tasks.ProtoDescGenTask('ProtoDesc', inject=kwargs),
-                 gapic_tasks.GapicConfigGenTask(
-                     'GapicConfigGen', inject=kwargs),
-                 gapic_tasks.GapicConfigMoveTask(
-                     'GapicConfigMove', inject=kwargs))
+        flow.add(
+            io_tasks.PrepareGoogleapisDirTask('PrepareGoogleapisDirTask',
+                                              inject=kwargs),
+            protoc_tasks.ProtoDescGenTask('ProtoDesc',
+                                          inject=kwargs),
+            gapic_tasks.GapicConfigGenTask('GapicConfigGen',
+                                           inject=kwargs),
+            gapic_tasks.GapicConfigMoveTask('GapicConfigMove',
+                                            inject=kwargs))
         return flow
 
     def validate_kwargs(self, **kwargs):
@@ -90,18 +77,20 @@ class GapicConfigPipeline(pipeline_base.PipelineBase):
 
 
 class PythonGrpcClientPipeline(pipeline_base.PipelineBase):
-
     def __init__(self, **kwargs):
         kwargs['language'] = 'python'
         super(PythonGrpcClientPipeline, self).__init__(**kwargs)
 
     def do_build_flow(self, **kwargs):
         flow = linear_flow.Flow('grpc-codegen')
-        flow.add(protoc_tasks.GrpcPackmanTask('Packman', inject=kwargs),
-                 package_tasks.GrpcPackageDirTask('PackageDir', inject=kwargs))
+        flow.add(
+            io_tasks.PrepareGoogleapisDirTask('PrepareGoogleapisDirTask',
+                                              inject=kwargs),
+            protoc_tasks.GrpcPackmanTask('Packman', inject=kwargs),
+            package_tasks.GrpcPackageDirTask('PackageDir',
+                                             inject=kwargs))
         if 'publish_env' in kwargs:
-            flow.add(publish_tasks.PypiUploadTask('PypiUpload',
-                                                  inject=kwargs))
+            flow.add(publish_tasks.PypiUploadTask('PypiUpload', inject=kwargs))
         return flow
 
     def validate_kwargs(self, **kwargs):
@@ -111,14 +100,15 @@ class PythonGrpcClientPipeline(pipeline_base.PipelineBase):
 
 
 class PythonGapicClientPipeline(pipeline_base.PipelineBase):
-
     def __init__(self, **kwargs):
         kwargs['language'] = 'python'
         super(PythonGapicClientPipeline, self).__init__(**kwargs)
 
     def do_build_flow(self, **kwargs):
         flow = linear_flow.Flow('gapic-codegen')
-        flow.add(protoc_tasks.ProtoDescGenTask('ProtoDesc', inject=kwargs),
+        flow.add(io_tasks.PrepareGoogleapisDirTask('PrepareGoogleapisDirTask',
+                                                   inject=kwargs),
+                 protoc_tasks.ProtoDescGenTask('ProtoDesc', inject=kwargs),
                  gapic_tasks.GapicCodeGenTask('GapicCodegen',
                                               inject=kwargs),
                  format_tasks.PythonFormatTask('PythonFormat', inject=kwargs),
@@ -136,17 +126,20 @@ class PythonGapicClientPipeline(pipeline_base.PipelineBase):
 
 
 class RubyGrpcClientPipeline(pipeline_base.PipelineBase):
-
     def __init__(self, **kwargs):
         kwargs['language'] = 'ruby'
         super(RubyGrpcClientPipeline, self).__init__(**kwargs)
 
     def do_build_flow(self, **kwargs):
         flow = linear_flow.Flow('grpc-codegen')
-        flow.add(protoc_tasks.GrpcPackmanTask('Packman', inject=kwargs),
-                 package_tasks.GrpcPackageDirTask('PackageDir', inject=kwargs),
-                 package_tasks.RubyPackageGenTask('GrpcPackageGen',
-                                                  inject=kwargs))
+        flow.add(
+            io_tasks.PrepareGoogleapisDirTask('PrepareGoogleapisDirTask',
+                                              inject=kwargs),
+            protoc_tasks.GrpcPackmanTask('Packman', inject=kwargs),
+            package_tasks.GrpcPackageDirTask('PackageDir',
+                                             inject=kwargs),
+            package_tasks.RubyPackageGenTask('GrpcPackageGen',
+                                             inject=kwargs))
         return flow
 
     def validate_kwargs(self, **kwargs):
@@ -154,23 +147,29 @@ class RubyGrpcClientPipeline(pipeline_base.PipelineBase):
 
 
 class RubyGapicClientPipeline(pipeline_base.PipelineBase):
-
     def __init__(self, **kwargs):
         kwargs['language'] = 'ruby'
         super(RubyGapicClientPipeline, self).__init__(**kwargs)
 
     def do_build_flow(self, **kwargs):
         flow = linear_flow.Flow('gapic-codegen')
-        flow.add(protoc_tasks.ProtoDescGenTask('ProtoDesc', inject=kwargs),
-                 gapic_tasks.GapicCodeGenTask('GapicCodegen',
+        flow.add(
+            io_tasks.PrepareGoogleapisDirTask('PrepareGoogleapisDirTask',
                                               inject=kwargs),
-                 format_tasks.RubyFormatTask('RubyFormat', inject=kwargs),
-                 gapic_tasks.GapicMergeTask('GapicMerge', inject=kwargs),
-                 gapic_tasks.GapicPackmanTask('GapicPackman', inject=kwargs),
-                 package_tasks.GapicPackageDirTask('PackageDir',
-                                                   inject=kwargs),
-                 package_tasks.RubyPackageGenTask('GapicPackageGen',
-                                                  inject=kwargs))
+            protoc_tasks.ProtoDescGenTask('ProtoDesc',
+                                          inject=kwargs),
+            gapic_tasks.GapicCodeGenTask('GapicCodegen',
+                                         inject=kwargs),
+            format_tasks.RubyFormatTask('RubyFormat',
+                                        inject=kwargs),
+            gapic_tasks.GapicMergeTask('GapicMerge',
+                                       inject=kwargs),
+            gapic_tasks.GapicPackmanTask('GapicPackman',
+                                         inject=kwargs),
+            package_tasks.GapicPackageDirTask('PackageDir',
+                                              inject=kwargs),
+            package_tasks.RubyPackageGenTask('GapicPackageGen',
+                                             inject=kwargs))
         return flow
 
     def validate_kwargs(self, **kwargs):
@@ -178,14 +177,16 @@ class RubyGapicClientPipeline(pipeline_base.PipelineBase):
 
 
 class NodeJSGrpcClientPipeline(pipeline_base.PipelineBase):
-
     def __init__(self, **kwargs):
         kwargs['language'] = 'nodejs'
         super(NodeJSGrpcClientPipeline, self).__init__(**kwargs)
 
     def do_build_flow(self, **kwargs):
         flow = linear_flow.Flow('grpc-codegen')
-        flow.add(protoc_tasks.GrpcPackmanTask('Packman', inject=kwargs))
+        flow.add(
+            io_tasks.PrepareGoogleapisDirTask('PrepareGoogleapisDirTask',
+                                              inject=kwargs),
+            protoc_tasks.GrpcPackmanTask('Packman', inject=kwargs))
         return flow
 
     def validate_kwargs(self, **kwargs):
@@ -193,18 +194,22 @@ class NodeJSGrpcClientPipeline(pipeline_base.PipelineBase):
 
 
 class NodeJSGapicClientPipeline(pipeline_base.PipelineBase):
-
     def __init__(self, **kwargs):
         kwargs['language'] = 'nodejs'
         super(NodeJSGapicClientPipeline, self).__init__(**kwargs)
 
     def do_build_flow(self, **kwargs):
         flow = linear_flow.Flow('gapic-codegen')
-        flow.add(protoc_tasks.ProtoDescGenTask('ProtoDesc', inject=kwargs),
-                 gapic_tasks.GapicCodeGenTask('GapicCodegen',
+        flow.add(
+            io_tasks.PrepareGoogleapisDirTask('PrepareGoogleapisDirTask',
                                               inject=kwargs),
-                 gapic_tasks.GapicCopyTask('GapicCopy', inject=kwargs),
-                 gapic_tasks.GapicPackmanTask('GapicPackman', inject=kwargs))
+            protoc_tasks.ProtoDescGenTask('ProtoDesc',
+                                          inject=kwargs),
+            gapic_tasks.GapicCodeGenTask('GapicCodegen',
+                                         inject=kwargs),
+            gapic_tasks.GapicCopyTask('GapicCopy', inject=kwargs),
+            gapic_tasks.GapicPackmanTask('GapicPackman',
+                                         inject=kwargs))
         return flow
 
     def validate_kwargs(self, **kwargs):
@@ -212,14 +217,16 @@ class NodeJSGapicClientPipeline(pipeline_base.PipelineBase):
 
 
 class JavaCorePipeline(pipeline_base.PipelineBase):
-
     def __init__(self, **kwargs):
         kwargs['language'] = 'java'
         super(JavaCorePipeline, self).__init__(**kwargs)
 
     def do_build_flow(self, **kwargs):
         flow = linear_flow.Flow('core-codegen')
-        flow.add(protoc_tasks.ProtoCodeGenTask('ProtoGen', inject=kwargs))
+        flow.add(
+            io_tasks.PrepareGoogleapisDirTask('PrepareGoogleapisDirTask',
+                                              inject=kwargs),
+            protoc_tasks.ProtoCodeGenTask('ProtoGen', inject=kwargs))
         return flow
 
     def validate_kwargs(self, **kwargs):
@@ -227,7 +234,6 @@ class JavaCorePipeline(pipeline_base.PipelineBase):
 
 
 class JavaGrpcClientPipeline(pipeline_base.PipelineBase):
-
     def __init__(self, **kwargs):
         kwargs['language'] = 'java'
         super(JavaGrpcClientPipeline, self).__init__(**kwargs)
@@ -235,7 +241,10 @@ class JavaGrpcClientPipeline(pipeline_base.PipelineBase):
     def do_build_flow(self, **kwargs):
         flow = linear_flow.Flow('grpc-codegen')
         kwargs.update({'packman_flags': ['--experimental_alt_java']})
-        flow.add(protoc_tasks.GrpcPackmanTask('Packman', inject=kwargs))
+        flow.add(
+            io_tasks.PrepareGoogleapisDirTask('PrepareGoogleapisDirTask',
+                                              inject=kwargs),
+            protoc_tasks.GrpcPackmanTask('Packman', inject=kwargs))
         if 'publish_env' in kwargs:
             flow.add(publish_tasks.MavenDeployTask('MavenDeploy',
                                                    inject=kwargs))
@@ -248,18 +257,23 @@ class JavaGrpcClientPipeline(pipeline_base.PipelineBase):
 
 
 class JavaGapicClientPipeline(pipeline_base.PipelineBase):
-
     def __init__(self, **kwargs):
         kwargs['language'] = 'java'
         super(JavaGapicClientPipeline, self).__init__(**kwargs)
 
     def do_build_flow(self, **kwargs):
         flow = linear_flow.Flow('gapic-codegen')
-        flow.add(protoc_tasks.ProtoDescGenTask('ProtoDesc', inject=kwargs),
-                 gapic_tasks.GapicCodeGenTask('GapicCodegen',
+        flow.add(
+            io_tasks.PrepareGoogleapisDirTask('PrepareGoogleapisDirTask',
                                               inject=kwargs),
-                 format_tasks.JavaFormatTask('JavaFormat', inject=kwargs),
-                 gapic_tasks.GapicMergeTask('GapicMerge', inject=kwargs))
+            protoc_tasks.ProtoDescGenTask('ProtoDesc',
+                                          inject=kwargs),
+            gapic_tasks.GapicCodeGenTask('GapicCodegen',
+                                         inject=kwargs),
+            format_tasks.JavaFormatTask('JavaFormat',
+                                        inject=kwargs),
+            gapic_tasks.GapicMergeTask('GapicMerge',
+                                       inject=kwargs))
         return flow
 
     def validate_kwargs(self, **kwargs):
@@ -285,6 +299,8 @@ class GoCoreProtoPipeline(pipeline_base.PipelineBase):
     def do_build_flow(self, **kwargs):
         flow = linear_flow.Flow('core-protogen')
         flow.add(
+            io_tasks.PrepareGoogleapisDirTask('PrepareGoogleapisDirTask',
+                                              inject=kwargs),
             protoc_tasks.ProtoCodeGenTask('CoreProtoGen',
                                           inject=kwargs),
             gapic_tasks.GoExtractImportBaseTask('ExtractGoPackageName',
@@ -316,6 +332,8 @@ class GoGrpcClientPipeline(pipeline_base.PipelineBase):
     def do_build_flow(self, **kwargs):
         flow = linear_flow.Flow('grpc-protogen')
         flow.add(
+            io_tasks.PrepareGoogleapisDirTask('PrepareGoogleapisDirTask',
+                                              inject=kwargs),
             protoc_tasks.ProtoAndGrpcCodeGenTask('GrpcCodegen',
                                                  inject=kwargs),
             gapic_tasks.GoExtractImportBaseTask('ExtractGoPackageName',
@@ -332,19 +350,22 @@ class GoGrpcClientPipeline(pipeline_base.PipelineBase):
 
 
 class GoGapicClientPipeline(pipeline_base.PipelineBase):
-
     def __init__(self, **kwargs):
         kwargs['language'] = 'go'
         super(GoGapicClientPipeline, self).__init__(**kwargs)
 
     def do_build_flow(self, **kwargs):
         flow = linear_flow.Flow('gapic-codegen')
-        flow.add(protoc_tasks.ProtoDescGenTask('ProtoDescGen',
-                                               inject=kwargs),
-                 gapic_tasks.GapicCodeGenTask('GapicCodegen',
+        flow.add(
+            io_tasks.PrepareGoogleapisDirTask('PrepareGoogleapisDirTask',
                                               inject=kwargs),
-                 format_tasks.GoFormatTask('GoFormat', inject=kwargs),
-                 gapic_tasks.GapicMergeTask('GapicMerge', inject=kwargs))
+            protoc_tasks.ProtoDescGenTask('ProtoDescGen',
+                                          inject=kwargs),
+            gapic_tasks.GapicCodeGenTask('GapicCodegen',
+                                         inject=kwargs),
+            format_tasks.GoFormatTask('GoFormat', inject=kwargs),
+            gapic_tasks.GapicMergeTask('GapicMerge',
+                                       inject=kwargs))
         return flow
 
     def validate_kwargs(self, **kwargs):
@@ -352,14 +373,16 @@ class GoGapicClientPipeline(pipeline_base.PipelineBase):
 
 
 class CSharpCorePipeline(pipeline_base.PipelineBase):
-
     def __init__(self, **kwargs):
         kwargs['language'] = 'csharp'
         super(CSharpCorePipeline, self).__init__(**kwargs)
 
     def do_build_flow(self, **kwargs):
         flow = linear_flow.Flow('core-codegen')
-        flow.add(protoc_tasks.ProtoCodeGenTask('ProtoGen', inject=kwargs))
+        flow.add(
+            io_tasks.PrepareGoogleapisDirTask('PrepareGoogleapisDirTask',
+                                              inject=kwargs),
+            protoc_tasks.ProtoCodeGenTask('ProtoGen', inject=kwargs))
         return flow
 
     def validate_kwargs(self, **kwargs):
@@ -367,15 +390,18 @@ class CSharpCorePipeline(pipeline_base.PipelineBase):
 
 
 class CSharpGrpcClientPipeline(pipeline_base.PipelineBase):
-
     def __init__(self, **kwargs):
         kwargs['language'] = 'csharp'
         super(CSharpGrpcClientPipeline, self).__init__(**kwargs)
 
     def do_build_flow(self, **kwargs):
         flow = linear_flow.Flow('grpc-codegen')
-        flow.add(protoc_tasks.ProtoCodeGenTask('ProtoGen', inject=kwargs),
-                 protoc_tasks.GrpcCodeGenTask('GrpcCodegen', inject=kwargs))
+        flow.add(
+            io_tasks.PrepareGoogleapisDirTask('PrepareGoogleapisDirTask',
+                                              inject=kwargs),
+            protoc_tasks.ProtoCodeGenTask('ProtoGen', inject=kwargs),
+            protoc_tasks.GrpcCodeGenTask('GrpcCodegen',
+                                         inject=kwargs))
         return flow
 
     def validate_kwargs(self, **kwargs):
@@ -383,16 +409,19 @@ class CSharpGrpcClientPipeline(pipeline_base.PipelineBase):
 
 
 class CSharpGapicClientPipeline(pipeline_base.PipelineBase):
-
     def __init__(self, **kwargs):
         kwargs['language'] = 'csharp'
         super(CSharpGapicClientPipeline, self).__init__(**kwargs)
 
     def do_build_flow(self, **kwargs):
         flow = linear_flow.Flow('gapic-codegen')
-        flow.add(protoc_tasks.ProtoDescGenTask('ProtoDesc', inject=kwargs),
-                 gapic_tasks.GapicCodeGenTask('GapicCodegen',
-                                              inject=kwargs))
+        flow.add(
+            io_tasks.PrepareGoogleapisDirTask('PrepareGoogleapisDirTask',
+                                              inject=kwargs),
+            protoc_tasks.ProtoDescGenTask('ProtoDesc',
+                                          inject=kwargs),
+            gapic_tasks.GapicCodeGenTask('GapicCodegen',
+                                         inject=kwargs))
         return flow
 
     def validate_kwargs(self, **kwargs):
@@ -400,14 +429,16 @@ class CSharpGapicClientPipeline(pipeline_base.PipelineBase):
 
 
 class PhpGrpcClientPipeline(pipeline_base.PipelineBase):
-
     def __init__(self, **kwargs):
         kwargs['language'] = 'php'
         super(PhpGrpcClientPipeline, self).__init__(**kwargs)
 
     def do_build_flow(self, **kwargs):
         flow = linear_flow.Flow('grpc-codegen')
-        flow.add(protoc_tasks.GrpcPackmanTask('Packman', inject=kwargs))
+        flow.add(
+            io_tasks.PrepareGoogleapisDirTask('PrepareGoogleapisDirTask',
+                                              inject=kwargs),
+            protoc_tasks.GrpcPackmanTask('Packman', inject=kwargs))
         return flow
 
     def validate_kwargs(self, **kwargs):
@@ -415,18 +446,22 @@ class PhpGrpcClientPipeline(pipeline_base.PipelineBase):
 
 
 class PhpGapicClientPipeline(pipeline_base.PipelineBase):
-
     def __init__(self, **kwargs):
         kwargs['language'] = 'php'
         super(PhpGapicClientPipeline, self).__init__(**kwargs)
 
     def do_build_flow(self, **kwargs):
         flow = linear_flow.Flow('gapic-codegen')
-        flow.add(protoc_tasks.ProtoDescGenTask('ProtoDesc', inject=kwargs),
-                 gapic_tasks.GapicCodeGenTask('GapicCodegen',
+        flow.add(
+            io_tasks.PrepareGoogleapisDirTask('PrepareGoogleapisDirTask',
                                               inject=kwargs),
-                 format_tasks.PhpFormatTask('PhpFormat', inject=kwargs),
-                 gapic_tasks.GapicMergeTask('GapicMerge', inject=kwargs))
+            protoc_tasks.ProtoDescGenTask('ProtoDesc',
+                                          inject=kwargs),
+            gapic_tasks.GapicCodeGenTask('GapicCodegen',
+                                         inject=kwargs),
+            format_tasks.PhpFormatTask('PhpFormat', inject=kwargs),
+            gapic_tasks.GapicMergeTask('GapicMerge',
+                                       inject=kwargs))
         return flow
 
     def validate_kwargs(self, **kwargs):

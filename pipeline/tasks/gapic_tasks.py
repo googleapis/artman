@@ -11,11 +11,9 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """Tasks related to generation of GAPIC wrappers"""
 
 import os
-import subprocess
 import yaml
 
 from pipeline.tasks import packman_tasks
@@ -30,16 +28,16 @@ class GapicConfigGenTask(task_base.TaskBase):
 
     def execute(self, toolkit_path, descriptor_set, output_dir, api_name):
         config_gen_dir = os.path.join(output_dir, api_name + '-config-gen')
-        subprocess.check_call(['mkdir', '-p', config_gen_dir])
+        self.exec_command(['mkdir', '-p', config_gen_dir])
         config_gen_path = os.path.join(config_gen_dir,
                                        api_name + '_gapic.yaml')
         args = [
             '--descriptor_set=' + os.path.abspath(descriptor_set),
             '--output=' + os.path.abspath(config_gen_path)
-            ]
+        ]
         clargs = '-Pclargs=' + ','.join(args)
-        subprocess.check_call([os.path.join(toolkit_path, 'gradlew'),
-                               '-p', toolkit_path, 'runConfigGen', clargs])
+        self.exec_command([os.path.join(toolkit_path, 'gradlew'), '-p',
+                           toolkit_path, 'runConfigGen', clargs])
 
         return config_gen_path
 
@@ -53,8 +51,8 @@ class GapicConfigMoveTask(task_base.TaskBase):
     def _move_to(self, intermediate_config_location, gapic_api_yaml):
         error_fmt = 'Could not move generated config file \
                     from "{0}" to "{1}": '.format(
-                        os.path.abspath(intermediate_config_location),
-                        [os.path.abspath(c_out) for c_out in gapic_api_yaml])
+            os.path.abspath(intermediate_config_location),
+            [os.path.abspath(c_out) for c_out in gapic_api_yaml])
 
         if len(gapic_api_yaml) > 1:
             raise ValueError(error_fmt + 'Multiple locations specified')
@@ -68,9 +66,8 @@ class GapicConfigMoveTask(task_base.TaskBase):
     def execute(self, intermediate_config_location, gapic_api_yaml):
         conf_out = self._move_to(intermediate_config_location, gapic_api_yaml)
         if conf_out:
-            subprocess.check_call(['mkdir', '-p', os.path.dirname(conf_out)])
-            subprocess.check_call(['mv', intermediate_config_location,
-                                   conf_out])
+            self.exec_command(['mkdir', '-p', os.path.dirname(conf_out)])
+            self.exec_command(['mv', intermediate_config_location, conf_out])
         return
 
     def validate(self):
@@ -85,19 +82,19 @@ class GapicCodeGenTask(task_base.TaskBase):
                 gapic_api_yaml, gapic_language_yaml, output_dir, api_name):
         code_root = os.path.join(output_dir,
                                  api_name + '-gapic-gen-' + language)
-        subprocess.check_call(['rm', '-rf', code_root])
+        self.exec_command(['rm', '-rf', code_root])
         gapic_yaml = gapic_api_yaml + gapic_language_yaml
         gapic_args = ['--gapic_yaml=' + os.path.abspath(yaml)
                       for yaml in gapic_yaml]
         service_args = ['--service_yaml=' + os.path.abspath(yaml)
                         for yaml in service_yaml]
         args = [
-            '--descriptor_set=' + os.path.abspath(descriptor_set),
-            '--output=' + os.path.abspath(code_root)
-            ] + service_args + gapic_args
+            '--descriptor_set=' + os.path.abspath(descriptor_set), '--output='
+            + os.path.abspath(code_root)
+        ] + service_args + gapic_args
         clargs = '-Pclargs=' + ','.join(args)
-        subprocess.check_call([os.path.join(toolkit_path, 'gradlew'),
-                               '-p', toolkit_path, 'runVGen', clargs])
+        self.exec_command([os.path.join(toolkit_path, 'gradlew'), '-p',
+                           toolkit_path, 'runVGen', clargs])
 
         return code_root
 
@@ -111,22 +108,21 @@ class GapicCopyTask(task_base.TaskBase):
 
     def execute(self, final_repo_dir, intermediate_code_dir):
         # Simply removes the previous code generation results.
-        subprocess.check_call(['rm', '-rf', final_repo_dir])
-        subprocess.check_call([
-            'cp', '-rf', intermediate_code_dir, final_repo_dir])
+        self.exec_command(['rm', '-rf', final_repo_dir])
+        self.exec_command(['cp', '-rf', intermediate_code_dir, final_repo_dir])
 
 
 class GapicMergeTask(task_base.TaskBase):
     def execute(self, language, toolkit_path, final_repo_dir,
                 intermediate_code_dir, auto_merge, auto_resolve, ignore_base):
         final_code_root = os.path.abspath(final_repo_dir)
-        baseline_root = os.path.abspath(
-            os.path.join(final_repo_dir, 'baseline'))
+        baseline_root = os.path.abspath(os.path.join(final_repo_dir,
+                                                     'baseline'))
         args = [
             '--source_path=' + final_code_root,
             '--generated_path=' + os.path.abspath(intermediate_code_dir),
             '--baseline_path=' + baseline_root,
-            ]
+        ]
         if auto_merge:
             args.append('--auto_merge')
         if auto_resolve:
@@ -135,9 +131,8 @@ class GapicMergeTask(task_base.TaskBase):
             args.append('--ignore_base')
         clargs = '-Pclargs=' + ','.join(args)
         print 'Running synchronizer with args: ' + str(args)
-        subprocess.check_call([os.path.join(toolkit_path, 'gradlew'),
-                               '-p', toolkit_path, 'runSynchronizer',
-                               clargs])
+        self.exec_command([os.path.join(toolkit_path, 'gradlew'), '-p',
+                           toolkit_path, 'runSynchronizer', clargs])
         for root, subdirs, files in os.walk(final_code_root):
             for file in files:
                 if file.endswith('.orig'):
@@ -170,6 +165,7 @@ class GoExtractImportBaseTask(task_base.TaskBase):
 
 class GapicPackmanTask(packman_tasks.PackmanTaskBase):
     def execute(self, language, api_name, final_repo_dir):
+        # TODO: Use TaskBase.exec_command()
         self.run_packman(language,
                          task_utils.packman_api_name(api_name),
                          '--gax_dir=' + final_repo_dir,

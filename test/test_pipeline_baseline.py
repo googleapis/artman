@@ -19,8 +19,8 @@ from pipeline.pipelines import pipeline_factory
 from taskflow import engines
 
 
-def get_expected_calls(baseline, binding):
-    """Returns the list of expected calls of subprocess.check_call() and
+def get_expected_calls(baseline, binding, stderr=False):
+    """Returns the list of expected calls of subprocess.check_output() and
     subprocess.call().
 
     The expected commandlines are listed in the baseline files located
@@ -35,8 +35,12 @@ def get_expected_calls(baseline, binding):
     with open(filename) as f:
         for line in f:
             tokens = line.strip().split()
-            commands.append(mock.call([
-                token.format(**binding) for token in tokens]))
+            if stderr:
+                commands.append(mock.call([
+                    token.format(**binding) for token in tokens], stderr=-2))
+            else:
+                commands.append(mock.call([
+                    token.format(**binding) for token in tokens]))
     return commands
 
 
@@ -50,9 +54,11 @@ def check_calls_match(expected_calls, actual_calls):
 @mock.patch('pipeline.utils.task_utils.run_gradle_task')
 @mock.patch('subprocess.call')
 @mock.patch('subprocess.check_call')
+@mock.patch('subprocess.check_output')
 @mock.patch('os.chdir')
 def _test_baseline(task_name, test_name, language, output_dir, extra_kwargs,
-                   mock_chdir, mock_check_call, mock_call, mock_gradle_task):
+                   mock_chdir, mock_check_output, mock_check_call, mock_call,
+                   mock_gradle_task):
     # Pipeline kwargs
     kwargs_ = {
         'src_proto_path': ['test/fake-repos/fake-proto'],
@@ -73,12 +79,14 @@ def _test_baseline(task_name, test_name, language, output_dir, extra_kwargs,
         'auto_merge': True,
         'auto_resolve': True,
         'ignore_base': False,
-        'final_repo_dir': output_dir + '/final'}
+        'final_repo_dir': output_dir + '/final',
+        'repo_root': '.'}
     kwargs_.update(extra_kwargs)
 
     # Mock output value of gradle tasks
     mock_gradle_task.return_value = 'MOCK_GRADLE_TASK_OUTPUT'
     mock_call.return_value = 0
+    mock_check_output.return_value = ''
 
     # Run pipeline
     pipeline = pipeline_factory.make_pipeline(task_name, **kwargs_)
@@ -87,8 +95,8 @@ def _test_baseline(task_name, test_name, language, output_dir, extra_kwargs,
 
     # Compare with the expected subprocess calls.
     expected_checked_calls = get_expected_calls(
-        test_name, {'CWD': os.getcwd(), 'OUTPUT': output_dir})
-    check_calls_match(expected_checked_calls, mock_check_call.mock_calls)
+        test_name, {'CWD': os.getcwd(), 'OUTPUT': output_dir}, True)
+    check_calls_match(expected_checked_calls, mock_check_output.mock_calls)
 
     # Some tasks can use subprocess.call() instead of check_call(), they are
     # tracked separately.

@@ -11,50 +11,77 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """Util class for job-related operations.
 """
 
 import contextlib
 import os
+import time
 
 from taskflow import engines
+from taskflow import states
 from taskflow.persistence import logbook
-
 from oslo_utils import uuidutils
-
 from pipeline.pipelines import pipeline_factory
 from pipeline.utils import backend_helper
 
+# TODO(cbao): Include machine name
+POSTER_NAME = "poster-%s" % os.getpid()
 
-def post_remote_pipeline_job(pipeline):
-    ME = os.getpid()
-    print("Starting poster with pid: %s" % ME)
-    my_name = "poster-%s" % ME
+
+def post_remote_pipeline_job_and_wait(pipeline, jobboard_name):
+    """Post a pipeline job and wait until it is finished."""
+    my_name = POSTER_NAME
+    print("Starting poster with name: %s" % my_name)
     persist_backend = backend_helper.default_persistence_backend()
     with contextlib.closing(persist_backend):
         with contextlib.closing(persist_backend.get_connection()) as conn:
             conn.upgrade()
-        job_backend = backend_helper.default_jobboard_backend(my_name)
-        job_backend.connect()
-        with contextlib.closing(job_backend):
+        jobboard = backend_helper.get_jobboard(my_name, jobboard_name)
+        jobboard.connect()
+        with contextlib.closing(jobboard):
             # Create information in the persistence backend about the
             # unit of work we want to complete and the factory that
             # can be called to create the tasks that the work unit needs
             # to be done.
             lb = logbook.LogBook("post-from-%s" % my_name)
-            fd = logbook.FlowDetail("sample-from-%s" % my_name,
-                                    uuidutils.generate_uuid())
+            flow_uuid = uuidutils.generate_uuid()
+            fd = logbook.FlowDetail("flow-of-%s" % my_name, flow_uuid)
             lb.add(fd)
             with contextlib.closing(persist_backend.get_connection()) as conn:
                 conn.save_logbook(lb)
 
             engines.save_factory_details(fd,
                                          pipeline_factory.make_pipeline_flow,
-                                         [pipeline.name],
+                                         [pipeline.name, True],
                                          pipeline.kwargs,
                                          backend=persist_backend)
             # Post, and be done with it!
-            jb = job_backend.post("sample-job-from-%s" % my_name, book=lb)
+            jb = jobboard.post("job-from-%s" % my_name, book=lb)
             print("Posted: %s" % jb)
+            # TODO(cbao): Move wait until into a seperate method.
+            state = states.UNCLAIMED
+            print 'Job staus: %s' % state
+            while state != states.COMPLETE:
+                if (jb.state != state):
+                    state = jb.state
+                    print 'Job staus: %s' % state
+                time.sleep(1)
             return jb
+
+
+def fetch_job_status(jb, jobboard_name):
+    result = []
+    my_name = POSTER_NAME
+    persist_backend = backend_helper.default_persistence_backend()
+    with contextlib.closing(persist_backend):
+        with contextlib.closing(persist_backend.get_connection()) as conn:
+            conn.upgrade()
+        jobboard = backend_helper.get_jobboard(my_name, jobboard_name)
+        jobboard.connect()
+        with contextlib.closing(jobboard):
+            with contextlib.closing(persist_backend.get_connection()) as conn:
+                for flow in jb.book:
+                    flow_detail = conn.get_flow_details(flow.uuid)
+                    result += flow_detail
+    return result, flow_detail

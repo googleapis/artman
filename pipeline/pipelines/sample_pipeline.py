@@ -34,3 +34,6 @@ class SamplePipeline(pipeline_base.PipelineBase):
     def validate_kwargs(self, **kwargs):
         if 'sleep_secs' not in kwargs:
             raise ValueError('sleep_secs must be provided')
+
+    def require_additional_tasks_for_remote_execution(self):
+        return False

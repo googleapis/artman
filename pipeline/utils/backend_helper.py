@@ -22,13 +22,6 @@ from taskflow.persistence import backends as persistence_backends
 # Default host/port of ZooKeeper service.
 ZK_HOST = '104.197.10.180:2181'
 
-# Default jobboard configuration.
-JB_CONF = {
-    'hosts': ZK_HOST,
-    'board': 'zookeeper',
-    'path': '/dev/jobs',
-}
-
 # Default persistence configuration.
 PERSISTENCE_CONF = {
     'connection': 'zookeeper',
@@ -41,7 +34,11 @@ def default_persistence_backend():
     return persistence_backends.fetch(PERSISTENCE_CONF)
 
 
-def default_jobboard_backend(name):
-    return job_backends.fetch(name,
-                              JB_CONF,
+def get_jobboard(name, jobboard_name):
+    config = {
+        'hosts': ZK_HOST,
+        'board': 'zookeeper',
+        'path': '/taskflow/jobboard/zookeeper/' + jobboard_name,
+    }
+    return job_backends.fetch(name, config,
                               persistence=default_persistence_backend())

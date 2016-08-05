@@ -24,7 +24,7 @@ from pipeline.tasks.requirements import ruby_requirements
 def _scoped_run_command(target_dir, commands):
     current_dir = os.getcwd()
     os.chdir(target_dir)
-    subprocess.check_call(commands)
+    subprocess.check_output(commands, stderr=subprocess.STDOUT)
     os.chdir(current_dir)
 
 

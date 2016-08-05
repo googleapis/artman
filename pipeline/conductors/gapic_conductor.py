@@ -19,7 +19,6 @@ import contextlib
 import os
 
 from taskflow.conductors import backends as conductor_backends
-from taskflow.types import timing
 
 from pipeline.utils import backend_helper
 
@@ -28,35 +27,7 @@ from pipeline.utils import backend_helper
 # types. Turn this into an abstract class, and let its subclasses defines the
 # pipelines types they can execute. Task requirements needed by pipelines shall
 # be installed before conductor starts claiming jobs.
-def run():
-    # This continuously consumes until its stopped via ctrl-c or some other
-    # kill signal...
-    event_watches = {}
-
-    # This will be triggered by the conductor doing various activities
-    # with engines, and is quite nice to be able to see the various timing
-    # segments (which is useful for debugging, or watching, or figuring out
-    # where to optimize).
-    def on_conductor_event(cond, event, details):
-        print('Event \'%s\' has been received...' % event)
-        print('Details = %s' % details)
-        if event.endswith('_start'):
-            w = timing.StopWatch()
-            w.start()
-            base_event = event[0:-len('_start')]
-            event_watches[base_event] = w
-        if event.endswith('_end'):
-            base_event = event[0:-len('_end')]
-            try:
-                w = event_watches.pop(base_event)
-                w.stop()
-                print('It took %0.3f seconds for event \'%s\' to finish' %
-                      (w.elapsed(), base_event))
-            except KeyError:
-                pass
-        if event == 'running_end':
-            cond.stop()
-
+def run(jobboard_name):
     conductor_id = os.getpid()
     print('Starting GAPIC conductor with pid: %s' % conductor_id)
     my_name = 'conductor-%s' % conductor_id
@@ -64,15 +35,14 @@ def run():
     with contextlib.closing(persist_backend):
         with contextlib.closing(persist_backend.get_connection()) as conn:
             conn.upgrade()
-        job_backend = backend_helper.default_jobboard_backend(my_name)
-        job_backend.connect()
-        with contextlib.closing(job_backend):
+        jobboard = backend_helper.get_jobboard(my_name, jobboard_name)
+        jobboard.connect()
+        with contextlib.closing(jobboard):
             cond = conductor_backends.fetch('blocking',
                                             my_name,
-                                            job_backend,
-                                            persistence=persist_backend)
-            # on_conductor_event = functools.partial(on_conductor_event, cond)
-            # cond.notifier.register(cond.notifier.ANY, on_conductor_event)
+                                            jobboard,
+                                            persistence=persist_backend,
+                                            engine='serial')
             # Run forever, and kill -9 or ctrl-c me...
             try:
                 print('Conductor %s is running' % my_name)

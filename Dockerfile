@@ -20,18 +20,24 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     git
 
 # Install runtime packages.
-RUN apt-get install -y \
+RUN apt-get update && \
+    apt-get install -y \
     ruby \
     python \
     python-dev \
     python-pip \
-    openjdk-7-jre-headless
+    unzip \
+    perl \
+    openjdk-7-jdk
+
+# Define commonly used JAVA_HOME variable
+ENV JAVA_HOME /usr/lib/jvm/java-7-openjdk-amd64
 
 ADD ./scripts /scripts
 WORKDIR /scripts
 # This is need to install nodejs 4.x otherwise nodejs 0.x will be installed.
 RUN bash setup_node4.sh
-RUN apt-get install -y nodejs 
+RUN apt-get install -y nodejs
 
 # Install linuxbrew.
 RUN useradd -m -s /bin/bash linuxbrew
@@ -40,11 +46,12 @@ USER linuxbrew
 WORKDIR /home/linuxbrew
 ENV PATH /home/linuxbrew/.linuxbrew/bin:/home/linuxbrew/.linuxbrew/sbin:$PATH
 ENV SHELL /bin/bash
-RUN yes |ruby -e "$(curl -fsSL https://raw.github.com/Homebrew/linuxbrew/go/install)"
+RUN yes |ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Linuxbrew/install/master/install)"
 RUN brew doctor || true
 
 # Install protoc and grpc.
-RUN curl -s https://raw.githubusercontent.com/grpc/homebrew-grpc/master/scripts/install | bash -s
+RUN brew tap grpc/grpc
+RUN brew install --with-plugins grpc
 
 # Install Go1.6 from linuxbrew.
 RUN brew install go
@@ -56,7 +63,7 @@ ENV PATH $GOPATH/bin:/home/linuxbrew/.linuxbrew/opt/go/libexec/bin:$PATH
 RUN mkdir -p "$GOPATH/src" "$GOPATH/bin" && chmod -R 777 "$GOPATH"
 
 # Install pacman
-RUN npm install -g googleapis-packman
+RUN npm install -g googleapis-packman@0.8.0
 
 # Setup tools for codegen of Ruby
 RUN gem install rubocop --version '= 0.39.0' --no-ri --no-rdoc
@@ -67,9 +74,10 @@ RUN gem install rake --version '= 10.5.0' --no-ri --no-rdoc
 WORKDIR /
 RUN git clone https://github.com/googleapis/googleapis
 RUN git clone https://github.com/googleapis/toolkit
+ENV TOOLKIT_HOME /toolkit
 
 # Run the pipeline.
-# TODO(cbao): pipeline should be installed from package manager.
+# TODO(ethanbao): pipeline should be installed from package manager.
 ADD . /src
 WORKDIR /src
 RUN pip install -r requirements.txt

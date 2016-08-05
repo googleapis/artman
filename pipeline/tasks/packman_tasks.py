@@ -14,7 +14,6 @@
 
 """Tasks related to generation of packman tool"""
 
-import subprocess
 
 from pipeline.tasks import task_base
 from pipeline.tasks.requirements import packman_requirements
@@ -25,7 +24,7 @@ class PackmanTaskBase(task_base.TaskBase):
         # Fix the api_name convention (ex. logging-v2) for packman.
         args = ['gen-api-package', '--api_name=' + api_name, '-l', language]
         args.extend(additional_args)
-        subprocess.check_call(args)
+        self.exec_command(args)
 
     def validate(self):
         return [packman_requirements.PackmanRequirements]

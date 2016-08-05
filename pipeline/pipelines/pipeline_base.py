@@ -52,6 +52,13 @@ class PipelineBase(object):
         """
         raise NotImplementedError('Subclass must implement abstract method')
 
+    def require_additional_tasks_for_remote_execution(self):
+        """Return true, if additional tasks are needed for remote execution.
+
+        TODO(ethanbao): Return a list of tasks that need to be added.
+        """
+        return True
+
     @property
     def flow(self):
         return self._flow

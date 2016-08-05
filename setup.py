@@ -26,7 +26,7 @@ requirements = [
     'kazoo>=2.2.1',
     'oslo.utils>=3.4.0',
     'pyyaml>=3.11',
-    'taskflow>=1.25.0',
+    'taskflow>=1.25.0,<2.0.0',
     'yapf>=0.6.2'
 ]
 
