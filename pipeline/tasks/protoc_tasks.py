@@ -332,7 +332,7 @@ class GrpcPackmanTask(packman_tasks.PackmanTaskBase):
         packman_flags = packman_flags or []
         api_name = task_utils.packman_api_name(api_name)
         arg_list = [language, api_name, '-o', output_dir,
-                    '--package_prefix', 'google-']
+                    '--package_prefix', 'grpc-']
 
         # Import path must be absolute. See
         #   https://github.com/googleapis/packman/issues/1
