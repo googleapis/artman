@@ -61,11 +61,11 @@ def post_remote_pipeline_job_and_wait(pipeline, jobboard_name):
             print("Posted: %s" % jb)
             # TODO(cbao): Move wait until into a seperate method.
             state = states.UNCLAIMED
-            print 'Job staus: %s' % state
+            print 'Job status: %s' % state
             while state != states.COMPLETE:
                 if (jb.state != state):
                     state = jb.state
-                    print 'Job staus: %s' % state
+                    print 'Job status: %s' % state
                 time.sleep(1)
             return jb
 

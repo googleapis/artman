@@ -12,12 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Requirements to run VGen"""
+"""Requirements to run GAPIC"""
 
 from pipeline.tasks.requirements import task_requirement_base
 
 
-class VGenRequirements(task_requirement_base.TaskRequirementBase):
+class GapicRequirements(task_requirement_base.TaskRequirementBase):
 
     @classmethod
     def require(cls):

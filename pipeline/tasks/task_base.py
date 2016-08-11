@@ -60,3 +60,15 @@ class TaskBase(Task):
         except subprocess.CalledProcessError as e:
             self.log(e.output)
             raise e
+
+
+class EmptyTask(TaskBase):
+    """An empty task that can be used by languages when they do not need to
+    implement some functionality.
+    """
+
+    def execute(self):
+        pass
+
+    def validate(self):
+        return []

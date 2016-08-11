@@ -23,9 +23,9 @@ class GrpcRequirements(task_requirement_base.TaskRequirementBase):
 
     @classmethod
     def require(cls):
-        """Grpc requires protoc and grpc plugins.
+        """gRPC requires protoc and gRPC plugins.
 
-        TODO(cbao): List more grpc plugins.
+        TODO(cbao): List more gRPC plugins.
         TODO(mukai): Take care of the installation of grpc_go_plugin.
         """
         return ['protoc', 'grpc_java_plugin', 'grpc_python_plugin',
@@ -33,7 +33,7 @@ class GrpcRequirements(task_requirement_base.TaskRequirementBase):
 
     @classmethod
     def install(cls):
-        """Install protoc and grpc plugins via a installation shell script."""
+        """Install protoc and gRPC plugins via a installation shell script."""
         curl_process = subprocess.Popen(
             ["curl", "-s", "http://goo.gl/getrpc"],
             stdout=subprocess.PIPE)

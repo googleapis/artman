@@ -17,6 +17,7 @@
 import os
 import re
 import subprocess
+import yaml
 from pipeline.tasks import packman_tasks
 from pipeline.tasks import task_base
 from pipeline.tasks.requirements import grpc_requirements
@@ -39,7 +40,8 @@ class _SimpleProtoParams:
     def grpc_plugin_path(self, dummy_toolkit_path):
         if self.path is None:
             self.path = subprocess.check_output(
-                ['which', 'grpc_{}_plugin'.format(self.language)])[:-1]
+                ['which', 'grpc_{}_plugin'.format(self.language)],
+                stderr=subprocess.STDOUT)[:-1]
         return self.path
 
     def grpc_out_param(self, output_dir):
@@ -344,3 +346,24 @@ class GrpcPackmanTask(packman_tasks.PackmanTaskBase):
         if repo_dir:
             arg_list += ['-r', repo_dir]
         self.run_packman(*arg_list)
+
+
+class GoExtractImportBaseTask(task_base.TaskBase):
+    default_provides = 'go_import_base'
+
+    def execute(self, gapic_api_yaml):
+        for yaml_file in gapic_api_yaml:
+            if not os.path.exists(yaml_file):
+                continue
+            with open(yaml_file) as f:
+                gapic_config = yaml.load(f)
+            if not gapic_config:
+                continue
+            language_settings = gapic_config.get('language_settings')
+            if not language_settings:
+                continue
+            go_settings = language_settings.get('go')
+            if not go_settings:
+                continue
+            if 'package_name' in go_settings:
+                return go_settings.get('package_name')

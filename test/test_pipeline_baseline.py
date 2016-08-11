@@ -14,9 +14,8 @@
 
 import mock
 import os
-
-from pipeline.pipelines import pipeline_factory
-from taskflow import engines
+import pytest
+import execute_pipeline
 
 
 def get_expected_calls(baseline, binding, stderr=False):
@@ -51,64 +50,7 @@ def check_calls_match(expected_calls, actual_calls):
         expected_calls, actual_calls)
 
 
-@mock.patch('pipeline.utils.task_utils.run_gradle_task')
-@mock.patch('subprocess.call')
-@mock.patch('subprocess.check_call')
-@mock.patch('subprocess.check_output')
-@mock.patch('os.chdir')
-def _test_baseline(task_name, test_name, language, output_dir, extra_kwargs,
-                   mock_chdir, mock_check_output, mock_check_call, mock_call,
-                   mock_gradle_task):
-    # Pipeline kwargs
-    kwargs_ = {
-        'src_proto_path': ['test/fake-repos/fake-proto'],
-        'import_proto_path':
-            ['test/fake-repos/gapi-core-proto/src/main/proto/'],
-        'toolkit_path': 'test/fake-repos/toolkit',
-        'service_yaml': [
-            'test/testdata/gapi-example-library-proto/src/main/proto/'
-            'google/example/library/library.yaml'],
-        'gapic_language_yaml': [
-            'test/testdata/gapi-example-library-proto/src/main/proto/'
-                'google/example/library/' + language + '_gapic.yaml'],
-        'gapic_api_yaml': [
-            'test/testdata/gapi-example-library-proto/src/main/proto/'
-                'google/example/library/library_gapic.yaml'],
-        'output_dir': output_dir,
-        'api_name': 'library-v1',
-        'auto_merge': True,
-        'auto_resolve': True,
-        'ignore_base': False,
-        'final_repo_dir': output_dir + '/final',
-        'repo_root': '.'}
-    kwargs_.update(extra_kwargs)
-
-    # Mock output value of gradle tasks
-    mock_gradle_task.return_value = 'MOCK_GRADLE_TASK_OUTPUT'
-    mock_call.return_value = 0
-    mock_check_output.return_value = ''
-
-    # Run pipeline
-    pipeline = pipeline_factory.make_pipeline(task_name, **kwargs_)
-    engine = engines.load(pipeline.flow, engine='serial')
-    engine.run()
-
-    # Compare with the expected subprocess calls.
-    expected_checked_calls = get_expected_calls(
-        test_name, {'CWD': os.getcwd(), 'OUTPUT': output_dir}, True)
-    check_calls_match(expected_checked_calls, mock_check_output.mock_calls)
-
-    # Some tasks can use subprocess.call() instead of check_call(), they are
-    # tracked separately.
-    expected_subprocess_call = get_expected_calls(
-        test_name + '.call', {'CWD': os.getcwd(), 'OUTPUT': output_dir})
-    check_calls_match(expected_subprocess_call, mock_call.mock_calls)
-
-
-def _test_python_baseline(task_name, test_name, tmpdir, extra_kwargs=None):
-    extra_kwargs = extra_kwargs or {}
-    output_dir = str(tmpdir)
-
+def make_fake_python_output(output_dir):
     # Create an empty 'fake_output_api.py' in the output_dir. Do not invoke
     # 'touch' command with subprocess.call() because it's mocked.
     final_output_dir = os.path.join(output_dir, 'library-v1-gapic-gen-python')
@@ -117,134 +59,111 @@ def _test_python_baseline(task_name, test_name, tmpdir, extra_kwargs=None):
     with open(os.path.join(final_output_dir, 'fake_output_api.py'), 'w'):
         pass
 
-    _test_baseline(task_name, test_name, 'python', output_dir, extra_kwargs)
+
+@mock.patch('pipeline.utils.task_utils.run_gradle_task')
+@mock.patch('subprocess.call')
+@mock.patch('subprocess.check_call')
+@mock.patch('subprocess.check_output')
+@mock.patch('os.chdir')
+def _test_baseline(pipeline_name, config, pipeline_kwargs, baseline,
+                   setup_output, mock_chdir, mock_check_output,
+                   mock_check_call, mock_call, mock_gradle_task):
+    reporoot = os.path.abspath('.')
+
+    # Execute pipeline args
+    args = ['--config', config, '--pipeline_kwargs', pipeline_kwargs,
+            '--reporoot', reporoot, pipeline_name]
+
+    # Mock output value of gradle tasks
+    mock_gradle_task.return_value = 'MOCK_GRADLE_TASK_OUTPUT'
+    mock_call.return_value = 0
+    mock_check_output.return_value = ''
+
+    # Output_dir as defined in artman yaml file
+    output_dir = os.path.join(reporoot, 'test/testdata/test_output')
+
+    # Run setup_output function
+    if setup_output:
+        setup_output(output_dir)
+
+    # Run pipeline
+    execute_pipeline.main(args)
+
+    # Compare with the expected subprocess calls.
+    expected_checked_calls = get_expected_calls(
+        baseline, {'CWD': os.getcwd(), 'OUTPUT': output_dir}, True)
+    check_calls_match(expected_checked_calls, mock_check_output.mock_calls)
+
+    # Some tasks can use subprocess.call() instead of check_call(), they are
+    # tracked separately.
+    expected_subprocess_call = get_expected_calls(
+        baseline + '.call', {'CWD': os.getcwd(), 'OUTPUT': output_dir})
+    check_calls_match(expected_subprocess_call, mock_call.mock_calls)
 
 
-def test_python_grpc_client_nopub_baseline(tmpdir):
-    extra_kwargs = {
-        'repo_url': 'https://example-site.exampledomain.com/',
-        'username': 'example-user',
-        'password': 'example-pwd'}
-    _test_python_baseline('PythonGrpcClientPipeline',
-                          'python_grpc_client_nopub_pipeline',
-                          tmpdir, extra_kwargs)
-
-
-def test_python_grpc_client_pub_baseline(tmpdir):
-    extra_kwargs = {
+python_pub_kwargs = {
         'repo_url': 'https://example-site.exampledomain.com/',
         'username': 'example-user',
         'password': 'example-pwd',
         'publish_env': 'dev'}
-    _test_python_baseline('PythonGrpcClientPipeline',
-                          'python_grpc_client_pub_pipeline',
-                          tmpdir, extra_kwargs)
 
 
-def test_python_gapic_client_baseline(tmpdir):
-    _test_python_baseline('PythonGapicClientPipeline',
-                          'python_gapic_client_pipeline',
-                          tmpdir)
-
-
-def _test_ruby_baseline(task_name, test_name, tmpdir):
-    _test_baseline(task_name, test_name, 'ruby', str(tmpdir), {})
-
-
-def test_ruby_grpc_client_baseline(tmpdir):
-    _test_ruby_baseline('RubyGrpcClientPipeline',
-                        'ruby_grpc_client_pipeline',
-                        tmpdir)
-
-
-def test_ruby_gapic_client_baseline(tmpdir):
-    _test_ruby_baseline('RubyGapicClientPipeline',
-                        'ruby_gapic_client_pipeline',
-                        tmpdir)
-
-
-def _test_nodejs_baseline(task_name, test_name, tmpdir):
-    _test_baseline(task_name, test_name, 'nodejs', str(tmpdir), {})
-
-
-def test_nodejs_grpc_client_baseline(tmpdir):
-    _test_nodejs_baseline('NodeJSGrpcClientPipeline',
-                          'nodejs_grpc_client_pipeline',
-                          tmpdir)
-
-
-def test_nodejs_gapic_client_baseline(tmpdir):
-    _test_nodejs_baseline('NodeJSGapicClientPipeline',
-                          'nodejs_gapic_client_pipeline',
-                          tmpdir)
-
-
-def _test_go_baseline(task_name, test_name, tmpdir):
-    _test_baseline(task_name, test_name, 'go', str(tmpdir), {})
-
-
-def test_go_grpc_client_baseline(tmpdir):
-    _test_go_baseline('GoGrpcClientPipeline', 'go_grpc_client_pipeline',
-                      tmpdir)
-
-
-def test_go_gapic_client_baseline(tmpdir):
-    _test_go_baseline('GoGapicClientPipeline', 'go_gapic_client_pipeline',
-                      tmpdir)
-
-
-def _test_java_baseline(task_name, test_name, tmpdir, extra_kwargs=None):
-    extra_kwargs = extra_kwargs or {}
-    _test_baseline(task_name, test_name, 'java', str(tmpdir), extra_kwargs)
-
-
-def test_java_grpc_client_pub_baseline(tmpdir):
-    extra_kwargs = {
+java_pub_kwargs = {
         'repo_url': 'http://maven.example.com/nexus/content/repositories/'
                     'releases',
         'username': 'example-maven-uname',
         'password': 'example-maven-pwd',
         'publish_env': 'prod'}
-    _test_java_baseline('JavaGrpcClientPipeline',
-                        'java_grpc_client_pub_pipeline',
-                        tmpdir, extra_kwargs)
 
 
-def test_java_grpc_client_nopub_baseline(tmpdir):
-    extra_kwargs = {
-        'repo_url': 'http://maven.example.com/nexus/content/repositories/'
-                    'releases',
-        'username': 'example-maven-uname',
-        'password': 'example-maven-pwd'}
-    _test_java_baseline('JavaGrpcClientPipeline',
-                        'java_grpc_client_nopub_pipeline',
-                        tmpdir, extra_kwargs)
+@pytest.mark.parametrize(
+    'pipeline_name, language, extra_kwargs, baseline, setup_output',
+    [
+        ('GapicConfigPipeline', None, {}, 'config_pipeline', None),
+        ('PythonGrpcClientPipeline', 'python', {},
+         'python_grpc_client_nopub_pipeline', make_fake_python_output),
+        ('PythonGrpcClientPipeline', 'python', python_pub_kwargs,
+         'python_grpc_client_pub_pipeline', make_fake_python_output),
+        ('PythonGapicClientPipeline', 'python', {},
+         'python_gapic_client_pipeline', make_fake_python_output),
+        ('JavaGrpcClientPipeline', 'java', {},
+         'java_grpc_client_nopub_pipeline', None),
+        ('JavaGrpcClientPipeline', 'java', java_pub_kwargs,
+         'java_grpc_client_pub_pipeline', None),
+        ('JavaGapicClientPipeline', 'java', {},
+         'java_gapic_client_pipeline', None),
+        ('NodeJSGrpcClientPipeline', 'nodejs', {},
+         'nodejs_grpc_client_pipeline', None),
+        ('NodeJSGapicClientPipeline', 'nodejs', {},
+         'nodejs_gapic_client_pipeline', None),
+        ('RubyGrpcClientPipeline', 'ruby', {},
+         'ruby_grpc_client_pipeline', None),
+        ('RubyGapicClientPipeline', 'ruby', {},
+         'ruby_gapic_client_pipeline', None),
+        ('GoGrpcClientPipeline', 'go', {},
+         'go_grpc_client_pipeline', None),
+        ('GoGapicClientPipeline', 'go', {},
+         'go_gapic_client_pipeline', None),
+        ('PhpGrpcClientPipeline', 'php', {},
+         'php_grpc_client_pipeline', None),
+        ('PhpGapicClientPipeline', 'php', {},
+         'php_gapic_client_pipeline', None),
+        ('CSharpGrpcClientPipeline', 'csharp', {},
+         'csharp_grpc_client_pipeline', None),
+        ('CSharpGapicClientPipeline', 'csharp', {},
+         'csharp_gapic_client_pipeline', None),
+    ])
+def test_generator(pipeline_name, language, extra_kwargs, baseline,
+                   setup_output):
+    artman_api_yaml = 'test/testdata/googleapis_test/gapic/api/' \
+                      'artman_library.yaml:common'
+    artman_language_yaml = 'test/testdata/googleapis_test/gapic/lang/' \
+                           'common.yaml:default'
+    if language is not None:
+        artman_api_yaml += '|' + language
+        artman_language_yaml += '|' + language
 
-
-def test_java_gapic_client_baseline(tmpdir):
-    _test_java_baseline('JavaGapicClientPipeline',
-                        'java_gapic_client_pipeline',
-                        tmpdir)
-
-
-def _test_php_baseline(task_name, test_name, tmpdir):
-    _test_baseline(task_name, test_name, 'php', str(tmpdir), {})
-
-
-def test_php_gapic_client_baseline(tmpdir):
-    _test_php_baseline('PhpGapicClientPipeline',
-                       'php_gapic_client_pipeline',
-                       tmpdir)
-
-
-def test_php_grpc_client_baseline(tmpdir):
-    _test_java_baseline('PhpGrpcClientPipeline', 'php_grpc_client_pipeline',
-                        tmpdir)
-
-
-def test_config_baseline(tmpdir):
-    _test_baseline('GapicConfigPipeline',
-                   'config_pipeline',
-                   '',
-                   str(tmpdir),
-                   {})
+    config = ','.join([artman_api_yaml, artman_language_yaml])
+    pipeline_kwargs = str(extra_kwargs)
+    _test_baseline(pipeline_name, config, pipeline_kwargs, baseline,
+                   setup_output)

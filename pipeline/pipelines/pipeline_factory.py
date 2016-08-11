@@ -14,16 +14,13 @@
 """Factory function that recreates pipeline based on pipeline name and
 kwargs."""
 
-import os
-import time
-import uuid
 
 from pipeline.pipelines import pipeline_base
 # These are required to list the subclasses of pipeline_base
 from pipeline.pipelines import sample_pipeline  # noqa
-from pipeline.pipelines import code_generation_pipeline  # noqa
-
-from pipeline.tasks import io_tasks
+from pipeline.pipelines import gapic_generation_pipeline  # noqa
+from pipeline.pipelines import grpc_generation_pipeline  # noqa
+from pipeline.pipelines import core_generation_pipeline  # noqa
 
 
 def make_pipeline_flow(pipeline_name, remote_mode=False, **kwargs):
@@ -47,11 +44,7 @@ def make_pipeline(pipeline_name, remote_mode=False, **kwargs):
     for cls in _rec_subclasses(pipeline_base.PipelineBase):
         if cls.__name__ == pipeline_name:
             print("Create %s instance." % pipeline_name)
-            if 'TOOLKIT_HOME' in os.environ:
-                kwargs['toolkit_path'] = os.environ['TOOLKIT_HOME']
-            if remote_mode:
-                return create_pipeline_for_remote_execution(cls, **kwargs)
-            return cls(**kwargs)
+            return cls(remote_mode=remote_mode, **kwargs)
     raise ValueError("Invalid pipeline name: %s" % pipeline_name)
 
 
@@ -64,24 +57,3 @@ def _rec_subclasses(cls):
             subclasses.append(subcls)
             subclasses += _rec_subclasses(subcls)
     return subclasses
-
-
-def create_pipeline_for_remote_execution(cls, additional_tasks=True, **kwargs):
-    tmp_id = str(uuid.uuid4())
-    filename = tmp_id + '.tar.gz'
-    kwargs['tarfile'] = filename
-    kwargs['bucket_name'] = 'pipeline'
-    kwargs['src_path'] = filename
-    kwargs['dest_path'] = time.strftime('%Y/%m/%d') + '/' + filename
-
-    pipeline = cls(**kwargs)
-    # Add additional tasks for remote execution.
-    if pipeline.require_additional_tasks_for_remote_execution():
-        pipeline.flow.add(
-            io_tasks.PrepareUploadDirTask('PrepareUploadDirTask',
-                                          inject=kwargs),
-            io_tasks.BlobUploadTask('BlobUploadTask',
-                                    inject=kwargs),
-            io_tasks.CleanupTempDirsTask('CleanupTempDirsTask',
-                                         inject=kwargs))
-    return pipeline

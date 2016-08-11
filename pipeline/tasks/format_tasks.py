@@ -25,13 +25,13 @@ from pipeline.utils import task_utils
 # TODO: Store both intermediate and final output in all format tasks.
 
 class JavaFormatTask(task_base.TaskBase):
-    def execute(self, intermediate_code_dir, toolkit_path):
-        print 'Formatting files in ' + os.path.abspath(intermediate_code_dir)
+    def execute(self, gapic_code_dir, toolkit_path):
+        print 'Formatting files in ' + os.path.abspath(gapic_code_dir)
         # TODO(shinfan): Move gradle task into requirement
         path = task_utils.run_gradle_task(
                 'showJavaFormatterPath', toolkit_path)
         targetFiles = []
-        for root, dirs, files in os.walk(intermediate_code_dir):
+        for root, dirs, files in os.walk(gapic_code_dir):
             for filename in files:
                 if filename.endswith('.java'):
                     targetFile = os.path.abspath(os.path.join(root, filename))
@@ -44,10 +44,10 @@ class JavaFormatTask(task_base.TaskBase):
 
 
 class PythonFormatTask(task_base.TaskBase):
-    def execute(self, intermediate_code_dir):
-        print 'Formatting files in ' + os.path.abspath(intermediate_code_dir)
+    def execute(self, gapic_code_dir):
+        print 'Formatting files in ' + os.path.abspath(gapic_code_dir)
         targetFiles = []
-        for root, dirs, files in os.walk(intermediate_code_dir):
+        for root, dirs, files in os.walk(gapic_code_dir):
             for filename in files:
                 if filename.endswith('.py'):
                     targetFile = os.path.abspath(os.path.join(root, filename))
@@ -64,26 +64,45 @@ class PythonFormatTask(task_base.TaskBase):
 
 
 class GoFormatTask(task_base.TaskBase):
-    def execute(self, intermediate_code_dir):
-        print 'Formatting files in ' + os.path.abspath(intermediate_code_dir)
-        self.exec_command(['gofmt', '-w', intermediate_code_dir])
+    def execute(self, gapic_code_dir):
+        print 'Formatting files in ' + os.path.abspath(gapic_code_dir)
+        self.exec_command(['gofmt', '-w', gapic_code_dir])
 
     def validate(self):
         return [go_requirements.GoFormatRequirements]
 
 
 class PhpFormatTask(task_base.TaskBase):
-    def execute(self, intermediate_code_dir):
-        abs_code_dir = os.path.abspath(intermediate_code_dir)
+    def execute(self, gapic_code_dir):
+        abs_code_dir = os.path.abspath(gapic_code_dir)
         print 'Formatting file using php-cs-fixer in ' + abs_code_dir
-        subprocess.call(['php-cs-fixer', 'fix', intermediate_code_dir])
+        subprocess.call(['php-cs-fixer', 'fix', gapic_code_dir])
         # We require a second call to php-cs-fixer because instances of @type
         # have been converted to @var. We cannot disable this conversion in
         # the first call without affecting other aspects of the formatting.
-        subprocess.call(['php-cs-fixer', 'fix', intermediate_code_dir,
+        subprocess.call(['php-cs-fixer', 'fix', gapic_code_dir,
                          '--fixers=phpdoc_var_to_type'])
         print 'Formatting file using phpcbf in ' + abs_code_dir
-        subprocess.call(['phpcbf', '--standard=PSR2', intermediate_code_dir])
+        subprocess.call(['phpcbf', '--standard=PSR2', gapic_code_dir])
 
     def validate(self):
         return [php_requirements.PhpFormatRequirements]
+
+
+format_task_dict = {
+    'java': JavaFormatTask,
+    'python': PythonFormatTask,
+    'go': GoFormatTask,
+    'ruby': task_base.EmptyTask,
+    'php': PhpFormatTask,
+    'csharp': task_base.EmptyTask,
+    'nodejs': task_base.EmptyTask
+}
+
+
+def make_format_task(language, task_name, inject_args):
+    cls = format_task_dict.get(language)
+    if cls:
+        return cls(task_name, inject=inject_args)
+    else:
+        raise ValueError('No format task found for language: ' + language)

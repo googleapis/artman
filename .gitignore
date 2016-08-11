@@ -69,3 +69,4 @@ target/
 # Project-specific
 .tox/*
 output/*
+test/testdata/test_output
