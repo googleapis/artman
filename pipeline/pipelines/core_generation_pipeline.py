@@ -17,20 +17,27 @@
    language."""
 
 from pipeline.pipelines import code_generation_pipeline
+from pipeline.pipelines import grpc_generation_pipeline
 from pipeline.tasks import protoc_tasks
+from pipeline.tasks import publish_tasks
 
 
-class JavaCoreProtoPipeline(
-        code_generation_pipeline.CodeGenerationPipelineBase):
+class JavaCoreProtoPipeline(grpc_generation_pipeline.GrpcClientPipeline):
+    """Generates a package with the common protos from googleapis.
+
+    It inherits from GrpcClientPipeline because it uses Packman just like
+    client generation does; the only difference is the extra
+    --build_common_protos argument to Packman.
+    """
 
     def __init__(self, **kwargs):
         kwargs['language'] = 'java'
+        packman_flags = ['--experimental_alt_java', '--build_common_protos']
+        kwargs.update({'packman_flags': packman_flags})
         super(JavaCoreProtoPipeline, self).__init__(**kwargs)
 
-    def do_build_flow(self, **kwargs):
-        flow = super(JavaCoreProtoPipeline, self).do_build_flow(**kwargs)
-        flow.add(protoc_tasks.ProtoCodeGenTask('ProtoGen', inject=kwargs))
-        return flow
+    def get_grpc_publish_tasks(self, **kwargs):
+        return [publish_tasks.MavenDeployTask('MavenDeploy', inject=kwargs)]
 
 
 class GoCoreProtoPipeline(code_generation_pipeline.CodeGenerationPipelineBase):

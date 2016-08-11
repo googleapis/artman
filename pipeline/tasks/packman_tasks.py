@@ -21,7 +21,6 @@ from pipeline.tasks.requirements import packman_requirements
 
 class PackmanTaskBase(task_base.TaskBase):
     def run_packman(self, language, api_name, *additional_args):
-        # Fix the api_name convention (ex. logging-v2) for packman.
         args = ['gen-api-package', '--api_name=' + api_name, '-l', language]
         args.extend(additional_args)
         self.exec_command(args)

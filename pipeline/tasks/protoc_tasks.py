@@ -189,9 +189,13 @@ def _protoc_grpc_params(proto_params, pkg_dir, toolkit_path):
             proto_params.grpc_out_param(pkg_dir)]
 
 
+def _pkg_root_dir(output_dir, api_name, language):
+    return os.path.join(output_dir, api_name + '-gen-' + language)
+
+
 def _prepare_pkg_dir(output_dir, api_name, language):
     proto_params = _PROTO_PARAMS_MAP[language]
-    pkg_dir = os.path.join(output_dir, api_name + '-gen-' + language)
+    pkg_dir = _pkg_root_dir(output_dir, api_name, language)
     subprocess.check_output([
         'mkdir', '-p', proto_params.code_root(pkg_dir)],
         stderr=subprocess.STDOUT)
@@ -332,8 +336,9 @@ class GrpcPackmanTask(packman_tasks.PackmanTaskBase):
     def execute(self, language, api_name, output_dir, src_proto_path,
                 import_proto_path, packman_flags=None, repo_dir=None):
         packman_flags = packman_flags or []
-        api_name = task_utils.packman_api_name(api_name)
-        arg_list = [language, api_name, '-o', output_dir,
+        api_name_arg = task_utils.packman_api_name(api_name)
+        pkg_dir = _pkg_root_dir(output_dir, api_name, language)
+        arg_list = [language, api_name_arg, '-o', pkg_dir,
                     '--package_prefix', 'grpc-']
 
         # Import path must be absolute. See

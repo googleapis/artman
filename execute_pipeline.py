@@ -149,7 +149,7 @@ def _parse_args(args):
 
     if flags.env:
         pipeline_id = str(uuid.uuid4())
-        # Use a unique randome temp directory for remote execution.
+        # Use a unique random temp directory for remote execution.
         # TODO(ethanbao): Let remote artman decide the temp directory.
         repo_root = '/tmp/artman/%s' % pipeline_id
         pipeline_args['pipeline_id'] = pipeline_id
