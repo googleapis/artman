@@ -160,8 +160,6 @@ class RubyGapicClientPipeline(pipeline_base.PipelineBase):
                                           inject=kwargs),
             gapic_tasks.GapicCodeGenTask('GapicCodegen',
                                          inject=kwargs),
-            format_tasks.RubyFormatTask('RubyFormat',
-                                        inject=kwargs),
             gapic_tasks.GapicMergeTask('GapicMerge',
                                        inject=kwargs),
             gapic_tasks.GapicPackmanTask('GapicPackman',
@@ -207,9 +205,8 @@ class NodeJSGapicClientPipeline(pipeline_base.PipelineBase):
                                           inject=kwargs),
             gapic_tasks.GapicCodeGenTask('GapicCodegen',
                                          inject=kwargs),
-            gapic_tasks.GapicCopyTask('GapicCopy', inject=kwargs),
-            gapic_tasks.GapicPackmanTask('GapicPackman',
-                                         inject=kwargs))
+            gapic_tasks.GapicMergeTask('GapicMerge', inject=kwargs),
+            gapic_tasks.GapicPackmanTask('GapicPackman', inject=kwargs))
         return flow
 
     def validate_kwargs(self, **kwargs):

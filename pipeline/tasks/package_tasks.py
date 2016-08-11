@@ -19,6 +19,7 @@ import subprocess
 
 from pipeline.tasks import task_base
 from pipeline.tasks.requirements import ruby_requirements
+from pipeline.utils import task_utils
 
 
 def _scoped_run_command(target_dir, commands):
@@ -32,7 +33,9 @@ class RubyPackageGenTask(task_base.TaskBase):
     """Generates .gem file for the target directory."""
 
     def execute(self, package_dir):
-        _scoped_run_command(package_dir, ['rake', 'build'])
+        # Do not create gem if the output is a part of gcloud.
+        if not task_utils.is_output_gcloud(package_dir):
+            _scoped_run_command(package_dir, ['rake', 'build'])
 
     def validate(self):
         return [ruby_requirements.RakeRequirements]

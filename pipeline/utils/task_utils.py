@@ -13,6 +13,8 @@
 # limitations under the License.
 """Utility functions related to tasks"""
 
+import os.path
+import re
 import subprocess
 
 
@@ -31,3 +33,13 @@ def run_gradle_task(task_name, task_path):
 def packman_api_name(api_name):
     """Changes an pipeline kwarg API name to format expected by Packman"""
     return api_name.replace('-', '/')
+
+
+def is_output_gcloud(final_repo_dir):
+    """Check if the final_repo_dir is a part of gcloud project.
+
+    Currently it simply checks if the path contains 'gcloud-xxx'.
+    """
+    final_repo_dir = os.path.abspath(final_repo_dir)
+    return re.search(os.path.sep + 'gcloud-[a-z]+' + os.path.sep,
+                     final_repo_dir)

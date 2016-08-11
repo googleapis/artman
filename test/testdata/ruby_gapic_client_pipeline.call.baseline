@@ -1,1 +1,0 @@
-rubocop -a {OUTPUT}/library-v1-gapic-gen-ruby

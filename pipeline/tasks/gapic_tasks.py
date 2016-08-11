@@ -165,6 +165,11 @@ class GoExtractImportBaseTask(task_base.TaskBase):
 
 class GapicPackmanTask(packman_tasks.PackmanTaskBase):
     def execute(self, language, api_name, final_repo_dir):
+        # Some APIs will be a part of gcloud project for Ruby and NodeJS.
+        # Such APIs don't need packman.
+        if ((language == 'ruby' or language == 'nodejs') and
+                task_utils.is_output_gcloud(final_repo_dir)):
+            return
         # TODO: Use TaskBase.exec_command()
         self.run_packman(language,
                          task_utils.packman_api_name(api_name),
