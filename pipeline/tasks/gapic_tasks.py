@@ -25,15 +25,18 @@ class GapicConfigGenTask(task_base.TaskBase):
     """Generates GAPIC config file"""
     default_provides = 'gapic_config_dir'
 
-    def execute(self, toolkit_path, descriptor_set, output_dir, api_name):
+    def execute(self, toolkit_path, descriptor_set, service_yaml,
+                output_dir, api_name):
         config_gen_dir = os.path.join(output_dir, api_name + '-config-gen')
         self.exec_command(['mkdir', '-p', config_gen_dir])
         config_gen_path = os.path.join(config_gen_dir,
                                        api_name + '_gapic.yaml')
+        service_args = ['--service_yaml=' + os.path.abspath(yaml)
+                        for yaml in service_yaml]
         args = [
             '--descriptor_set=' + os.path.abspath(descriptor_set),
             '--output=' + os.path.abspath(config_gen_path)
-        ]
+        ] + service_args
         clargs = '-Pclargs=' + ','.join(args)
         self.exec_command([os.path.join(toolkit_path, 'gradlew'), '-p',
                            toolkit_path, 'runConfigGen', clargs])
