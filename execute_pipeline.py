@@ -102,8 +102,12 @@ def _CreateArgumentParser():
     parser.add_argument(
         '--config',
         type=str,
-        help='Comma-delimited list of the form '
-            + '/path/to/config.yaml:config_section')
+        help='Comma-delimited list of yaml config files. Each file may '
+             'be followed by a colon (:) and then a |-delimited list of '
+             'sections to be loaded from the config file. When this list '
+             'of config sections is not provided, it will default to '
+             '":common|<language>". An example with two config section is: '
+             '/path/to/config.yaml:config_section_A|config_section_B')
     parser.add_argument(
         '--reporoot',
         type=str,
@@ -121,13 +125,21 @@ def _CreateArgumentParser():
         default=None,
         help='Environment for remote execution (valid value is \'remote\', and '
              'is case-insensitive. Pipeline will be executed locally if this '
-             'flag is not provided.')
+             'flag is not provided.'),
+    parser.add_argument(
+        '-l',
+        '--language',
+        type=str,
+        default=None,
+        help='Specify the language in which to generate output.')
     return parser
 
 
-def _load_config_spec(config_spec, repl_vars):
-    (config_path, config_sections) = config_spec.strip().split(':')
-    config_sections = config_sections.split('|')
+def _load_config_spec(config_spec, config_sections, repl_vars):
+    config_split = config_spec.strip().split(':')
+    config_path = config_split[0]
+    if len(config_split) > 1:
+        config_sections = config_split[1].split('|')
     data = {}
     with open(config_path) as config_file:
         all_config_data = yaml.load(config_file)
@@ -145,6 +157,7 @@ def _parse_args(args):
     flags = parser.parse_args(args=args)
 
     repo_root = flags.reporoot
+    language = flags.language
     pipeline_args = {}
 
     if flags.env:
@@ -155,15 +168,20 @@ def _parse_args(args):
         pipeline_args['pipeline_id'] = pipeline_id
 
     pipeline_args['repo_root'] = repo_root
+    pipeline_args['language'] = language
     # TODO(ethanbao): Remove TOOLKIT_HOME var after toolkit_path is removed from
     # gapic yaml.
     repl_vars = {'REPOROOT': repo_root,
                  'TOOLKIT_HOME': os.path.join(flags.reporoot, 'toolkit')}
 
+    config_sections = ['common']
+    if language:
+        config_sections.append(language)
+
     if flags.config:
         for config_spec in flags.config.split(','):
-          config_args = _load_config_spec(config_spec, repl_vars)
-          pipeline_args.update(config_args)
+            config_args = _load_config_spec(config_spec, config_sections, repl_vars)
+            pipeline_args.update(config_args)
 
     cmd_args = ast.literal_eval(flags.pipeline_kwargs)
     pipeline_args.update(cmd_args)

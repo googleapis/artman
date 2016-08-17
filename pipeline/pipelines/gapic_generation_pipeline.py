@@ -28,61 +28,60 @@ _VGEN_REQUIRED = ['service_yaml', 'gapic_language_yaml', 'gapic_api_yaml',
 class GapicConfigPipeline(code_gen.CodeGenerationPipelineBase):
 
     def __init__(self, **kwargs):
-        kwargs['language'] = ''
-        super(GapicConfigPipeline, self).__init__(**kwargs)
+        super(GapicConfigPipeline, self).__init__(
+            GapicConfigTaskFactory(), **kwargs)
 
-    def do_build_flow(self, **kwargs):
-        flow = super(GapicConfigPipeline, self).do_build_flow(**kwargs)
-        flow.add(protoc_tasks.ProtoDescGenTask('ProtoDesc', inject=kwargs),
-                 gapic_tasks.GapicConfigGenTask(
+
+class GapicConfigTaskFactory(code_gen.TaskFactoryBase):
+
+    def get_tasks(self, **kwargs):
+        return [protoc_tasks.ProtoDescGenTask('ProtoDesc', inject=kwargs),
+                gapic_tasks.GapicConfigGenTask(
                      'GapicConfigGen', inject=kwargs),
-                 gapic_tasks.GapicConfigMoveTask(
-                     'GapicConfigMove', inject=kwargs))
-        return flow
+                gapic_tasks.GapicConfigMoveTask(
+                     'GapicConfigMove', inject=kwargs)]
+
+    def get_validate_kwargs(self):
+        return []
 
 
-class GapicClientPipelineBase(code_gen.CodeGenerationPipelineBase):
+class GapicClientPipeline(code_gen.CodeGenerationPipelineBase):
 
     def __init__(self, **kwargs):
-        super(GapicClientPipelineBase, self).__init__(**kwargs)
+        super(GapicClientPipeline, self).__init__(
+            get_gapic_task_factory(kwargs['language']),
+            **kwargs)
 
-    def get_gapic_codegen_tasks(self, **kwargs):
+
+class GapicTaskFactoryBase(code_gen.TaskFactoryBase):
+
+    def get_tasks(self, **kwargs):
+        return (self._get_gapic_codegen_tasks(**kwargs)
+                + self._get_gapic_package_tasks(**kwargs))
+
+    def _get_gapic_codegen_tasks(self, **kwargs):
         return [protoc_tasks.ProtoDescGenTask('ProtoDesc', inject=kwargs),
                 gapic_tasks.GapicCodeGenTask('GapicCodegen', inject=kwargs),
                 format_tasks.make_format_task(
                     kwargs['language'], 'GapicFormat', kwargs)]
 
-    def get_gapic_package_tasks(self, **kwargs):
+    def _get_gapic_package_tasks(self, **kwargs):
         return [gapic_tasks.GapicMergeTask('GapicMerge', inject=kwargs)]
 
-    def do_build_flow(self, **kwargs):
-        flow = super(GapicClientPipelineBase, self).do_build_flow(**kwargs)
-        flow.add(*self.get_gapic_codegen_tasks(**kwargs))
-        flow.add(*self.get_gapic_package_tasks(**kwargs))
-        return flow
-
-    def validate_kwargs(self, **kwargs):
-        code_gen._validate_codegen_kwargs(_VGEN_REQUIRED, **kwargs)
+    def get_validate_kwargs(self):
+        return _VGEN_REQUIRED
 
 
-class PythonGapicClientPipeline(GapicClientPipelineBase):
+class _PythonGapicTaskFactory(GapicTaskFactoryBase):
 
-    def __init__(self, **kwargs):
-        kwargs['language'] = 'python'
-        super(PythonGapicClientPipeline, self).__init__(**kwargs)
-
-    def get_gapic_package_tasks(self, **kwargs):
+    def _get_gapic_package_tasks(self, **kwargs):
         return [gapic_tasks.GapicCopyTask('GapicCopy', inject=kwargs),
                 gapic_tasks.GapicPackmanTask('GapicPackman', inject=kwargs)]
 
 
-class RubyGapicClientPipeline(GapicClientPipelineBase):
+class _RubyGapicTaskFactory(GapicTaskFactoryBase):
 
-    def __init__(self, **kwargs):
-        kwargs['language'] = 'ruby'
-        super(RubyGapicClientPipeline, self).__init__(**kwargs)
-
-    def get_gapic_package_tasks(self, **kwargs):
+    def _get_gapic_package_tasks(self, **kwargs):
         return [gapic_tasks.GapicMergeTask('GapicMerge', inject=kwargs),
                 gapic_tasks.GapicPackmanTask('GapicPackman', inject=kwargs),
                 package_tasks.GapicPackageDirTask('PackageDir',
@@ -91,43 +90,34 @@ class RubyGapicClientPipeline(GapicClientPipelineBase):
                                                  inject=kwargs)]
 
 
-class NodeJSGapicClientPipeline(GapicClientPipelineBase):
+class _NodeJSGapicTaskFactory(GapicTaskFactoryBase):
 
-    def __init__(self, **kwargs):
-        kwargs['language'] = 'nodejs'
-        super(NodeJSGapicClientPipeline, self).__init__(**kwargs)
-
-    def get_gapic_package_tasks(self, **kwargs):
+    def _get_gapic_package_tasks(self, **kwargs):
         return [gapic_tasks.GapicMergeTask('GapicMerge', inject=kwargs),
                 gapic_tasks.GapicPackmanTask('GapicPackman', inject=kwargs)]
 
 
-class JavaGapicClientPipeline(GapicClientPipelineBase):
+class _CSharpGapicTaskFactory(GapicTaskFactoryBase):
 
-    def __init__(self, **kwargs):
-        kwargs['language'] = 'java'
-        super(JavaGapicClientPipeline, self).__init__(**kwargs)
-
-
-class GoGapicClientPipeline(GapicClientPipelineBase):
-
-    def __init__(self, **kwargs):
-        kwargs['language'] = 'go'
-        super(GoGapicClientPipeline, self).__init__(**kwargs)
-
-
-class CSharpGapicClientPipeline(GapicClientPipelineBase):
-
-    def __init__(self, **kwargs):
-        kwargs['language'] = 'csharp'
-        super(CSharpGapicClientPipeline, self).__init__(**kwargs)
-
-    def get_gapic_package_tasks(self, **kwargs):
+    def _get_gapic_package_tasks(self, **kwargs):
         return []
 
 
-class PhpGapicClientPipeline(GapicClientPipelineBase):
+_GAPIC_TASK_FACTORY_DICT = {
+    'java': GapicTaskFactoryBase,
+    'python': _PythonGapicTaskFactory,
+    'go': GapicTaskFactoryBase,
+    'ruby': _RubyGapicTaskFactory,
+    'php': GapicTaskFactoryBase,
+    'csharp': _CSharpGapicTaskFactory,
+    'nodejs': _NodeJSGapicTaskFactory
+}
 
-    def __init__(self, **kwargs):
-        kwargs['language'] = 'php'
-        super(PhpGapicClientPipeline, self).__init__(**kwargs)
+
+def get_gapic_task_factory(language):
+    cls = _GAPIC_TASK_FACTORY_DICT.get(language)
+    if cls:
+        return cls()
+    else:
+        raise ValueError('No GAPIC task factory found for language: '
+                         + language)

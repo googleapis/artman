@@ -65,14 +65,18 @@ def make_fake_python_output(output_dir):
 @mock.patch('subprocess.check_call')
 @mock.patch('subprocess.check_output')
 @mock.patch('os.chdir')
-def _test_baseline(pipeline_name, config, pipeline_kwargs, baseline,
+def _test_baseline(pipeline_name, language, config, pipeline_kwargs, baseline,
                    setup_output, mock_chdir, mock_check_output,
                    mock_check_call, mock_call, mock_gradle_task):
     reporoot = os.path.abspath('.')
 
     # Execute pipeline args
-    args = ['--config', config, '--pipeline_kwargs', pipeline_kwargs,
-            '--reporoot', reporoot, pipeline_name]
+    args = ['--config', config,
+            '--pipeline_kwargs', pipeline_kwargs,
+            '--reporoot', reporoot,
+            pipeline_name]
+    if language:
+        args += ['--language', language]
 
     # Mock output value of gradle tasks
     mock_gradle_task.return_value = 'MOCK_GRADLE_TASK_OUTPUT'
@@ -120,54 +124,51 @@ java_pub_kwargs = {
     'pipeline_name, language, extra_kwargs, baseline, setup_output',
     [
         ('GapicConfigPipeline', None, {}, 'config_pipeline', None),
-        ('PythonGrpcClientPipeline', 'python', {},
+        ('GrpcClientPipeline', 'python', {},
          'python_grpc_client_nopub_pipeline', make_fake_python_output),
-        ('PythonGrpcClientPipeline', 'python', python_pub_kwargs,
+        ('GrpcClientPipeline', 'python', python_pub_kwargs,
          'python_grpc_client_pub_pipeline', make_fake_python_output),
-        ('PythonGapicClientPipeline', 'python', {},
+        ('GapicClientPipeline', 'python', {},
          'python_gapic_client_pipeline', make_fake_python_output),
-        ('JavaCoreProtoPipeline', 'java', {},
+        ('CoreProtoPipeline', 'java', {},
          'java_core_proto_nopub_pipeline', None),
-        ('JavaCoreProtoPipeline', 'java', java_pub_kwargs,
+        ('CoreProtoPipeline', 'java', java_pub_kwargs,
          'java_core_proto_pub_pipeline', None),
-        ('JavaGrpcClientPipeline', 'java', {},
+        ('GrpcClientPipeline', 'java', {},
          'java_grpc_client_nopub_pipeline', None),
-        ('JavaGrpcClientPipeline', 'java', java_pub_kwargs,
+        ('GrpcClientPipeline', 'java', java_pub_kwargs,
          'java_grpc_client_pub_pipeline', None),
-        ('JavaGapicClientPipeline', 'java', {},
+        ('GapicClientPipeline', 'java', {},
          'java_gapic_client_pipeline', None),
-        ('NodeJSGrpcClientPipeline', 'nodejs', {},
+        ('GrpcClientPipeline', 'nodejs', {},
          'nodejs_grpc_client_pipeline', None),
-        ('NodeJSGapicClientPipeline', 'nodejs', {},
+        ('GapicClientPipeline', 'nodejs', {},
          'nodejs_gapic_client_pipeline', None),
-        ('RubyGrpcClientPipeline', 'ruby', {},
+        ('GrpcClientPipeline', 'ruby', {},
          'ruby_grpc_client_pipeline', None),
-        ('RubyGapicClientPipeline', 'ruby', {},
+        ('GapicClientPipeline', 'ruby', {},
          'ruby_gapic_client_pipeline', None),
-        ('GoGrpcClientPipeline', 'go', {},
+        ('GrpcClientPipeline', 'go', {},
          'go_grpc_client_pipeline', None),
-        ('GoGapicClientPipeline', 'go', {},
+        ('GapicClientPipeline', 'go', {},
          'go_gapic_client_pipeline', None),
-        ('PhpGrpcClientPipeline', 'php', {},
+        ('GrpcClientPipeline', 'php', {},
          'php_grpc_client_pipeline', None),
-        ('PhpGapicClientPipeline', 'php', {},
+        ('GapicClientPipeline', 'php', {},
          'php_gapic_client_pipeline', None),
-        ('CSharpGrpcClientPipeline', 'csharp', {},
+        ('GrpcClientPipeline', 'csharp', {},
          'csharp_grpc_client_pipeline', None),
-        ('CSharpGapicClientPipeline', 'csharp', {},
+        ('GapicClientPipeline', 'csharp', {},
          'csharp_gapic_client_pipeline', None),
     ])
 def test_generator(pipeline_name, language, extra_kwargs, baseline,
                    setup_output):
     artman_api_yaml = 'test/testdata/googleapis_test/gapic/api/' \
-                      'artman_library.yaml:common'
+                      'artman_library.yaml'
     artman_language_yaml = 'test/testdata/googleapis_test/gapic/lang/' \
-                           'common.yaml:default'
-    if language is not None:
-        artman_api_yaml += '|' + language
-        artman_language_yaml += '|' + language
-
+                           'common.yaml'
     config = ','.join([artman_api_yaml, artman_language_yaml])
+
     pipeline_kwargs = str(extra_kwargs)
-    _test_baseline(pipeline_name, config, pipeline_kwargs, baseline,
+    _test_baseline(pipeline_name, language, config, pipeline_kwargs, baseline,
                    setup_output)

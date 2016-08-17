@@ -45,10 +45,12 @@ def _load_remote_parameters(kwargs):
 
 
 class CodeGenerationPipelineBase(pipeline_base.PipelineBase):
-    """ Base class for GAPIC, gRPC, and Core code generation pipelines, and
-        for GAPIC config generation pipeline"""
+    """Base class for GAPIC, gRPC, and Core code generation pipelines, and
+    for GAPIC config generation pipeline.
+    """
 
-    def __init__(self, remote_mode=False, **kwargs):
+    def __init__(self, task_factory, remote_mode=False, **kwargs):
+        self.task_factory = task_factory
         if 'TOOLKIT_HOME' in os.environ:
             kwargs['toolkit_path'] = os.environ['TOOLKIT_HOME']
         if remote_mode:
@@ -60,6 +62,7 @@ class CodeGenerationPipelineBase(pipeline_base.PipelineBase):
         flow = linear_flow.Flow('CodeGenerationPipeline')
         flow.add(io_tasks.PrepareGoogleapisDirTask('PrepareGoogleapisDirTask',
                                                    inject=kwargs))
+        flow.add(*self.task_factory.get_tasks(**kwargs))
         return flow
 
     def additional_tasks_for_remote_execution(self, **kwargs):
@@ -71,4 +74,26 @@ class CodeGenerationPipelineBase(pipeline_base.PipelineBase):
                                          inject=kwargs)]
 
     def validate_kwargs(self, **kwargs):
-        _validate_codegen_kwargs([], **kwargs)
+        _validate_codegen_kwargs(self.task_factory.get_validate_kwargs(),
+                                 **kwargs)
+
+
+class TaskFactoryBase(object):
+    """Abstract base class for task factories.
+
+    Task factory objects are used by CodeGenerationPipelineBase.
+    Subclasses must implement the get_tasks and get_validate_kwargs
+    methods.
+    """
+
+    def get_tasks(self, **kwargs):
+        """Abstract method, subclasses must implement this method and return
+        a list of tasks.
+        """
+        raise NotImplementedError('Subclass must implement abstract method')
+
+    def get_validate_kwargs(self):
+        """Abstract method, subclasses must implement this method and return
+        a list of required keyword arguments.
+        """
+        raise NotImplementedError('Subclass must implement abstract method')

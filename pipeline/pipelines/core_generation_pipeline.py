@@ -13,34 +13,36 @@
 # limitations under the License.
 
 """Pipelines that run protoc core codegen. The generated core library for each
-   language contains the well known types, defined by protobuf, for that
-   language."""
+language contains the well known types, defined by protobuf, for that language.
+"""
 
-from pipeline.pipelines import code_generation_pipeline
+from pipeline.pipelines import code_generation_pipeline as code_gen
 from pipeline.pipelines import grpc_generation_pipeline
 from pipeline.tasks import protoc_tasks
-from pipeline.tasks import publish_tasks
 
 
-class JavaCoreProtoPipeline(grpc_generation_pipeline.GrpcClientPipeline):
+class CoreProtoPipeline(code_gen.CodeGenerationPipelineBase):
+
+    def __init__(self, **kwargs):
+        super(CoreProtoPipeline, self).__init__(
+            get_core_task_factory(kwargs['language']), **kwargs)
+
+
+class _JavaCoreTaskFactory(grpc_generation_pipeline.GrpcTaskFactoryBase):
     """Generates a package with the common protos from googleapis.
 
-    It inherits from GrpcClientPipeline because it uses Packman just like
+    It inherits from GrpcTaskFactoryBase because it uses Packman just like
     client generation does; the only difference is the extra
     --build_common_protos argument to Packman.
     """
 
-    def __init__(self, **kwargs):
-        kwargs['language'] = 'java'
+    def get_tasks(self, **kwargs):
         packman_flags = ['--experimental_alt_java', '--build_common_protos']
         kwargs.update({'packman_flags': packman_flags})
-        super(JavaCoreProtoPipeline, self).__init__(**kwargs)
-
-    def get_grpc_publish_tasks(self, **kwargs):
-        return [publish_tasks.MavenDeployTask('MavenDeploy', inject=kwargs)]
+        return super(_JavaCoreTaskFactory, self).get_tasks(**kwargs)
 
 
-class GoCoreProtoPipeline(code_generation_pipeline.CodeGenerationPipelineBase):
+class _GoCoreTaskFactory(code_gen.TaskFactoryBase):
     """Responsible for the protobuf flow for Go language.
 
     The Go compiler needs to specify an import path which is relative to
@@ -52,34 +54,39 @@ class GoCoreProtoPipeline(code_generation_pipeline.CodeGenerationPipelineBase):
     set up.
     """
 
-    def __init__(self, **kwargs):
-        kwargs['language'] = 'go'
-        super(GoCoreProtoPipeline, self).__init__(**kwargs)
-
-    def do_build_flow(self, **kwargs):
-        flow = super(GoCoreProtoPipeline, self).do_build_flow(**kwargs)
-        flow.add(
+    def get_tasks(self, **kwargs):
+        return [
             protoc_tasks.ProtoCodeGenTask('CoreProtoGen',
                                           inject=kwargs),
             protoc_tasks.GoExtractImportBaseTask('ExtractGoPackageName',
                                                  inject=kwargs),
             protoc_tasks.GoLangUpdateImportsTask('UpdateImports',
-                                                 inject=kwargs))
-        return flow
+                                                 inject=kwargs)]
 
-    def validate_kwargs(self, **kwargs):
-        code_generation_pipeline._validate_codegen_kwargs(
-            ['gapic_api_yaml', 'final_repo_dir'],
-            **kwargs)
+    def get_validate_kwargs(self):
+        return ['gapic_api_yaml', 'final_repo_dir']
 
 
-class CSharpCorePipeline(code_generation_pipeline.CodeGenerationPipelineBase):
+class _CSharpCoreTaskFactory(code_gen.TaskFactoryBase):
 
-    def __init__(self, **kwargs):
-        kwargs['language'] = 'csharp'
-        super(CSharpCorePipeline, self).__init__(**kwargs)
+    def get_tasks(self, **kwargs):
+        return [protoc_tasks.ProtoCodeGenTask('ProtoGen', inject=kwargs)]
 
-    def do_build_flow(self, **kwargs):
-        flow = super(CSharpCorePipeline, self).do_build_flow(**kwargs)
-        flow.add(protoc_tasks.ProtoCodeGenTask('ProtoGen', inject=kwargs))
-        return flow
+    def get_validate_kwargs(self):
+        return []
+
+
+_CORE_TASK_FACTORY_DICT = {
+    'java': _JavaCoreTaskFactory,
+    'go': _GoCoreTaskFactory,
+    'csharp': _CSharpCoreTaskFactory,
+}
+
+
+def get_core_task_factory(language):
+    cls = _CORE_TASK_FACTORY_DICT.get(language)
+    if cls:
+        return cls()
+    else:
+        raise ValueError('No core task factory found for language: '
+                         + language)

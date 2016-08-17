@@ -74,3 +74,22 @@ class GitHubPushTask(task_base.TaskBase):
 
     def validate(self):
         return []
+
+
+_PUBLISH_TASK_DICT = {
+    'java': MavenDeployTask,
+    'python': PypiUploadTask,
+    'go': task_base.EmptyTask,
+    'ruby': task_base.EmptyTask,
+    'php': task_base.EmptyTask,
+    'csharp': task_base.EmptyTask,
+    'nodejs': task_base.EmptyTask
+}
+
+
+def make_publish_task(language, task_name, inject_args):
+    cls = _PUBLISH_TASK_DICT.get(language)
+    if cls:
+        return cls(task_name, inject=inject_args)
+    else:
+        raise ValueError('No publish task found for language: ' + language)

@@ -14,71 +14,47 @@
 
 """Pipelines that run gRPC codegen"""
 
-from pipeline.pipelines import code_generation_pipeline
+from pipeline.pipelines import code_generation_pipeline as code_gen
 from pipeline.tasks import protoc_tasks, package_tasks, publish_tasks
 
 
-class GrpcClientPipeline(code_generation_pipeline.CodeGenerationPipelineBase):
+class GrpcClientPipeline(code_gen.CodeGenerationPipelineBase):
 
     def __init__(self, **kwargs):
-        super(GrpcClientPipeline, self).__init__(**kwargs)
+        super(GrpcClientPipeline, self).__init__(
+            get_grpc_task_factory(kwargs['language']), **kwargs)
 
-    def get_grpc_codegen_tasks(self, **kwargs):
-        return [protoc_tasks.GrpcPackmanTask('Packman', inject=kwargs)]
 
-    def get_grpc_publish_tasks(self, **kwargs):
+class GrpcTaskFactoryBase(code_gen.TaskFactoryBase):
+
+    def get_tasks(self, **kwargs):
+        tasks = [protoc_tasks.GrpcPackmanTask('Packman', inject=kwargs)]
+        if 'publish_env' in kwargs:
+            tasks.append(publish_tasks.make_publish_task(
+                kwargs['language'], 'GrpcPublishTask', kwargs))
+        return tasks
+
+    def get_validate_kwargs(self):
         return []
 
-    def do_build_flow(self, **kwargs):
-        flow = super(GrpcClientPipeline, self).do_build_flow(**kwargs)
-        flow.add(*self.get_grpc_codegen_tasks(**kwargs))
-        if 'publish_env' in kwargs:
-            flow.add(*self.get_grpc_publish_tasks(**kwargs))
-        return flow
 
+class _RubyGrpcTaskFactory(GrpcTaskFactoryBase):
 
-class PythonGrpcClientPipeline(GrpcClientPipeline):
-
-    def __init__(self, **kwargs):
-        kwargs['language'] = 'python'
-        super(PythonGrpcClientPipeline, self).__init__(**kwargs)
-
-    def get_grpc_publish_tasks(self, **kwargs):
-        return [publish_tasks.PypiUploadTask('PypiUpload', inject=kwargs)]
-
-
-class RubyGrpcClientPipeline(GrpcClientPipeline):
-
-    def __init__(self, **kwargs):
-        kwargs['language'] = 'ruby'
-        super(RubyGrpcClientPipeline, self).__init__(**kwargs)
-
-    def get_grpc_codegen_tasks(self, **kwargs):
+    def get_tasks(self, **kwargs):
         return [protoc_tasks.GrpcPackmanTask('Packman', inject=kwargs),
                 package_tasks.GrpcPackageDirTask('PackageDir', inject=kwargs),
                 package_tasks.RubyPackageGenTask('GrpcPackageGen',
                                                  inject=kwargs)]
 
 
-class NodeJSGrpcClientPipeline(GrpcClientPipeline):
+class _JavaGrpcTaskFactory(GrpcTaskFactoryBase):
 
-    def __init__(self, **kwargs):
-        kwargs['language'] = 'nodejs'
-        super(NodeJSGrpcClientPipeline, self).__init__(**kwargs)
-
-
-class JavaGrpcClientPipeline(GrpcClientPipeline):
-
-    def __init__(self, **kwargs):
-        kwargs['language'] = 'java'
+    def get_tasks(self, **kwargs):
         kwargs.update({'packman_flags': ['--experimental_alt_java']})
-        super(JavaGrpcClientPipeline, self).__init__(**kwargs)
-
-    def get_grpc_publish_tasks(self, **kwargs):
-        return [publish_tasks.MavenDeployTask('MavenDeploy', inject=kwargs)]
+        return super(_JavaGrpcTaskFactory, self).get_tasks(**kwargs)
 
 
-class GoGrpcClientPipeline(GrpcClientPipeline):
+class _GoGrpcTaskFactory(GrpcTaskFactoryBase):
     """Responsible for the protobuf/gRPC flow for Go language.
 
     The Go compiler needs to specify an import path which is relative to
@@ -87,11 +63,7 @@ class GoGrpcClientPipeline(GrpcClientPipeline):
     which is taken care of by GoLangUpdateProtoImportsTask.
     """
 
-    def __init__(self, **kwargs):
-        kwargs['language'] = 'go'
-        super(GoGrpcClientPipeline, self).__init__(**kwargs)
-
-    def get_grpc_codegen_tasks(self, **kwargs):
+    def get_tasks(self, **kwargs):
         return [
             protoc_tasks.ProtoAndGrpcCodeGenTask('GrpcCodegen',
                                                  inject=kwargs),
@@ -100,25 +72,32 @@ class GoGrpcClientPipeline(GrpcClientPipeline):
             protoc_tasks.GoLangUpdateImportsTask('UpdateImports',
                                                  inject=kwargs)]
 
-    def validate_kwargs(self, **kwargs):
-        code_generation_pipeline._validate_codegen_kwargs(
-            ['gapic_api_yaml', 'final_repo_dir'],
-            **kwargs)
+    def get_validate_kwargs(self):
+        return ['gapic_api_yaml', 'final_repo_dir']
 
 
-class CSharpGrpcClientPipeline(GrpcClientPipeline):
+class _CSharpGrpcTaskFactory(GrpcTaskFactoryBase):
 
-    def __init__(self, **kwargs):
-        kwargs['language'] = 'csharp'
-        super(CSharpGrpcClientPipeline, self).__init__(**kwargs)
-
-    def get_grpc_codegen_tasks(self, **kwargs):
+    def get_tasks(self, **kwargs):
         return [protoc_tasks.ProtoCodeGenTask('ProtoGen', inject=kwargs),
                 protoc_tasks.GrpcCodeGenTask('GrpcCodegen', inject=kwargs)]
 
 
-class PhpGrpcClientPipeline(GrpcClientPipeline):
+_GRPC_TASK_FACTORY_DICT = {
+    'java': _JavaGrpcTaskFactory,
+    'python': GrpcTaskFactoryBase,
+    'go': _GoGrpcTaskFactory,
+    'ruby': _RubyGrpcTaskFactory,
+    'php': GrpcTaskFactoryBase,
+    'csharp': _CSharpGrpcTaskFactory,
+    'nodejs': GrpcTaskFactoryBase
+}
 
-    def __init__(self, **kwargs):
-        kwargs['language'] = 'php'
-        super(PhpGrpcClientPipeline, self).__init__(**kwargs)
+
+def get_grpc_task_factory(language):
+    cls = _GRPC_TASK_FACTORY_DICT.get(language)
+    if cls:
+        return cls()
+    else:
+        raise ValueError('No gRPC task factory found for language: '
+                         + language)

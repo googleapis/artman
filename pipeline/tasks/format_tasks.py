@@ -89,7 +89,7 @@ class PhpFormatTask(task_base.TaskBase):
         return [php_requirements.PhpFormatRequirements]
 
 
-format_task_dict = {
+_FORMAT_TASK_DICT = {
     'java': JavaFormatTask,
     'python': PythonFormatTask,
     'go': GoFormatTask,
@@ -101,7 +101,7 @@ format_task_dict = {
 
 
 def make_format_task(language, task_name, inject_args):
-    cls = format_task_dict.get(language)
+    cls = _FORMAT_TASK_DICT.get(language)
     if cls:
         return cls(task_name, inject=inject_args)
     else:
