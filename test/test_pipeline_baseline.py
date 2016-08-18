@@ -60,6 +60,16 @@ def make_fake_python_output(output_dir):
         pass
 
 
+def make_fake_java_output(output_dir):
+    # Create an empty 'FakeOutputApi.java' in the output_dir. Do not invoke
+    # 'touch' command with subprocess.call() because it's mocked.
+    final_output_dir = os.path.join(output_dir, 'library-v1-gapic-gen-java')
+    if not os.path.exists(final_output_dir):
+        os.makedirs(final_output_dir)
+    with open(os.path.join(final_output_dir, 'FakeOutputApi.java'), 'w'):
+        pass
+
+
 @mock.patch('pipeline.utils.task_utils.run_gradle_task')
 @mock.patch('subprocess.call')
 @mock.patch('subprocess.check_call')
@@ -139,7 +149,7 @@ java_pub_kwargs = {
         ('GrpcClientPipeline', 'java', java_pub_kwargs,
          'java_grpc_client_pub_pipeline', None),
         ('GapicClientPipeline', 'java', {},
-         'java_gapic_client_pipeline', None),
+         'java_gapic_client_pipeline', make_fake_java_output),
         ('GrpcClientPipeline', 'nodejs', {},
          'nodejs_grpc_client_pipeline', None),
         ('GapicClientPipeline', 'nodejs', {},

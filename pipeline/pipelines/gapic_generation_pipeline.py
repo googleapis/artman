@@ -72,10 +72,17 @@ class GapicTaskFactoryBase(code_gen.TaskFactoryBase):
         return _VGEN_REQUIRED
 
 
+class _JavaGapicTaskFactory(GapicTaskFactoryBase):
+
+    def _get_gapic_package_tasks(self, **kwargs):
+        return [gapic_tasks.GapicCopyTask('GapicCopy', inject=kwargs)]
+
+
 class _PythonGapicTaskFactory(GapicTaskFactoryBase):
 
     def _get_gapic_package_tasks(self, **kwargs):
-        return [gapic_tasks.GapicCopyTask('GapicCopy', inject=kwargs),
+        return [gapic_tasks.GapicCleanTask('GapicClean', inject=kwargs),
+                gapic_tasks.GapicCopyTask('GapicCopy', inject=kwargs),
                 gapic_tasks.GapicPackmanTask('GapicPackman', inject=kwargs)]
 
 
@@ -104,7 +111,7 @@ class _CSharpGapicTaskFactory(GapicTaskFactoryBase):
 
 
 _GAPIC_TASK_FACTORY_DICT = {
-    'java': GapicTaskFactoryBase,
+    'java': _JavaGapicTaskFactory,
     'python': _PythonGapicTaskFactory,
     'go': GapicTaskFactoryBase,
     'ruby': _RubyGapicTaskFactory,
