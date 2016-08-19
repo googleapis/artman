@@ -88,6 +88,17 @@ Python (logging)
         --language python \
         GapicClientPipeline
 
+Python also supports a mode that generates dummy proto classes, which allows
+Sphinx to generate and link to documentation for proto messages.
+
+  ::
+
+     python execute_pipeline.py \
+        --config "../googleapis/gapic/api/artman_logging.yaml,\
+        ../googleapis/gapic/lang/doc.yaml" \
+        --language python \
+        GapicClientPipeline
+
 
 Java (pubsub)
 *************
@@ -192,6 +203,17 @@ Ruby (logging)
         --config "../googleapis/gapic/api/artman_logging.yaml,\
         ../googleapis/gapic/lang/common.yaml" \
        --language ruby \
+        GapicClientPipeline
+
+Ruby also supports a mode that generates dummy proto classes, which allows
+YARD to generate and link to documentation for proto messages.
+
+  ::
+
+     python execute_pipeline.py \
+        --config "../googleapis/gapic/api/artman_logging.yaml,\
+        ../googleapis/gapic/lang/doc.yaml" \
+        --language ruby \
         GapicClientPipeline
 
 
