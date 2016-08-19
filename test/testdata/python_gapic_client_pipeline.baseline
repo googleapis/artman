@@ -3,5 +3,6 @@ protoc --proto_path=test/fake-repos/gapi-core-proto/src/main/proto/ --proto_path
 rm -rf {OUTPUT}/library-v1-gapic-gen-python
 test/fake-repos/toolkit/gradlew -p test/fake-repos/toolkit runVGen -Pclargs=--descriptor_set={OUTPUT}/library-v1.desc,--output={OUTPUT}/library-v1-gapic-gen-python,--service_yaml={CWD}/test/testdata/gapi-example-library-proto/src/main/proto/google/example/library/library.yaml,--gapic_yaml={CWD}/test/testdata/gapi-example-library-proto/src/main/proto/google/example/library/library_gapic.yaml,--gapic_yaml={CWD}/test/testdata/gapi-example-library-proto/src/main/proto/google/example/library/python_gapic.yaml
 rm -rf {OUTPUT}/final
+mkdir -p {OUTPUT}/final
 cp -rf {OUTPUT}/library-v1-gapic-gen-python/fake_output_api.py {OUTPUT}/final
 gen-api-package --api_name=library/v1 -l python --gax_dir={OUTPUT}/final --template_root=templates/gax
