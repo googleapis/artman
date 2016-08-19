@@ -333,6 +333,8 @@ class GoLangUpdateImportsTask(task_base.TaskBase):
 
 
 class GrpcPackmanTask(packman_tasks.PackmanTaskBase):
+    default_provides = 'package_dir'
+
     def execute(self, language, api_name, output_dir, src_proto_path,
                 import_proto_path, packman_flags=None, repo_dir=None):
         packman_flags = packman_flags or []
@@ -351,6 +353,7 @@ class GrpcPackmanTask(packman_tasks.PackmanTaskBase):
         if repo_dir:
             arg_list += ['-r', repo_dir]
         self.run_packman(*arg_list)
+        return os.path.join(pkg_dir, language)
 
 
 class GoExtractImportBaseTask(task_base.TaskBase):

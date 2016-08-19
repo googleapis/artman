@@ -39,25 +39,3 @@ class RubyPackageGenTask(task_base.TaskBase):
 
     def validate(self):
         return [ruby_requirements.RakeRequirements]
-
-
-class GrpcPackageDirTask(task_base.TaskBase):
-    """Bring 'package_dir' parameter for gRPC code generation pipeline.
-
-    This assumes that gRPC client is generated through packman, which generates
-    the files under output/language.
-    """
-
-    default_provides = 'package_dir'
-
-    def execute(self, language, output_dir):
-        return os.path.join(output_dir, language)
-
-
-class GapicPackageDirTask(task_base.TaskBase):
-    """Bring 'package_dir' parameter for Gapic code generation pipeline."""
-
-    default_provides = 'package_dir'
-
-    def execute(self, final_repo_dir):
-        return final_repo_dir

@@ -14,6 +14,9 @@
 
 """Tasks for publishing artman output"""
 
+import os
+import urlparse
+
 from pipeline.tasks import task_base
 from pipeline.utils import github_utils
 
@@ -22,21 +25,19 @@ class PypiUploadTask(task_base.TaskBase):
     """Publishes a PyPI package"""
 
     def execute(self, repo_url, username, password, publish_env,
-                final_repo_dir):
-        publish_url = repo_url + username + '/' + publish_env
+                package_dir):
+        upload_url = urlparse.urljoin(repo_url, username) + '/' + publish_env
         self.exec_command(
             ['devpi',
              'login',
              '--password',
              password,
              username])
-        self.exec_command(['devpi', 'use', publish_url])
-        self.exec_command(
-            ['devpi',
-             'upload',
-             '--no-vcs',
-             '--from-dir',
-             final_repo_dir])
+        prev_dir = os.getcwd()
+        self.exec_command(['devpi', 'use', upload_url])
+        os.chdir(package_dir)
+        self.exec_command(['devpi', 'upload', '--no-vcs'])
+        os.chdir(prev_dir)
 
     def validate(self):
         return []
@@ -46,14 +47,14 @@ class MavenDeployTask(task_base.TaskBase):
     """Publishes to a Maven repository"""
 
     def execute(self, repo_url, username, password, publish_env,
-                final_repo_dir):
+                package_dir):
         self.exec_command(
-            [final_repo_dir + '/gradlew',
+            [package_dir + '/gradlew',
              'uploadArchives',
              '-PmavenRepoUrl=' + repo_url,
              '-PmavenUsername=' + username,
              '-PmavenPassword=' + password,
-             '-p' + final_repo_dir])
+             '-p' + package_dir])
 
     def validate(self):
         return []

@@ -91,8 +91,6 @@ class _RubyGapicTaskFactory(GapicTaskFactoryBase):
     def _get_gapic_package_tasks(self, **kwargs):
         return [gapic_tasks.GapicMergeTask('GapicMerge', inject=kwargs),
                 gapic_tasks.GapicPackmanTask('GapicPackman', inject=kwargs),
-                package_tasks.GapicPackageDirTask('PackageDir',
-                                                  inject=kwargs),
                 package_tasks.RubyPackageGenTask('GapicPackageGen',
                                                  inject=kwargs)]
 

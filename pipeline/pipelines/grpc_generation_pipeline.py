@@ -42,7 +42,6 @@ class _RubyGrpcTaskFactory(GrpcTaskFactoryBase):
 
     def get_tasks(self, **kwargs):
         return [protoc_tasks.GrpcPackmanTask('Packman', inject=kwargs),
-                package_tasks.GrpcPackageDirTask('PackageDir', inject=kwargs),
                 package_tasks.RubyPackageGenTask('GrpcPackageGen',
                                                  inject=kwargs)]
 

@@ -157,6 +157,8 @@ class GapicMergeTask(task_base.TaskBase):
 
 
 class GapicPackmanTask(packman_tasks.PackmanTaskBase):
+    default_provides = 'package_dir'
+
     def execute(self, language, api_name, final_repo_dir):
         # Some APIs will be a part of gcloud project for Ruby and NodeJS.
         # Such APIs don't need packman.
@@ -168,3 +170,4 @@ class GapicPackmanTask(packman_tasks.PackmanTaskBase):
                          task_utils.packman_api_name(api_name),
                          '--gax_dir=' + final_repo_dir,
                          '--template_root=templates/gax')
+        return final_repo_dir
