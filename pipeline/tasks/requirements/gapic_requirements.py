@@ -29,18 +29,6 @@ class GapicRequirements(task_requirement_base.TaskRequirementBase):
         raise Exception('Java not installed')
 
 
-class MergeRequirements(task_requirement_base.TaskRequirementBase):
-
-    @classmethod
-    def require(cls):
-        return ['kdiff3']
-
-    @classmethod
-    def install(cls):
-        # TODO(shinfan): Install kdiff3
-        raise Exception('Kdiff3 not installed')
-
-
 class ConfigGenRequirements(task_requirement_base.TaskRequirementBase):
 
     @classmethod

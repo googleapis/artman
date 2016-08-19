@@ -8,9 +8,6 @@ common:
     - ${THISDIR}/../../../gapi-example-library-proto/src/main/proto/google/example/library/library.yaml
   gapic_api_yaml:
     - ${THISDIR}/../../../gapi-example-library-proto/src/main/proto/google/example/library/library_gapic.yaml
-  auto_merge: true
-  auto_resolve: true
-  ignore_base: false
   output_dir: ${REPOROOT}/test/testdata/test_output
 java:
   final_repo_dir: ${REPOROOT}/test/testdata/test_output/final

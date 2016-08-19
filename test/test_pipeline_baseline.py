@@ -43,30 +43,51 @@ def get_expected_calls(baseline, binding, stderr=False):
     return commands
 
 
-def check_calls_match(expected_calls, actual_calls):
-    err_str = 'Mismatch between expected and actual subprocess calls.\r\
-        Expected: {}\rActual: {}'
-    assert expected_calls == actual_calls, err_str.format(
-        expected_calls, actual_calls)
+def format_arg(arg, bindings):
+    for (k, v) in bindings.items():
+        arg = arg.replace(v, '{' + k + '}')
+    return arg
 
 
-def make_fake_python_output(output_dir):
-    # Create an empty 'fake_output_api.py' in the output_dir. Do not invoke
+def format_args(args, bindings):
+    return ' '.join([format_arg(arg, bindings) for arg in args])
+
+
+def format_calls(calls, bindings):
+    return '\n'.join([format_args(args, bindings)
+                      for (name, (args,), kwargs) in calls])
+
+
+def check_calls_match(expected_calls, actual_calls, bindings):
+    mismatch_text = 'Mismatch between expected and actual subprocess calls.\n'
+
+    def format_err(exp, act):
+        return mismatch_text + 'Expected:\n' + exp + '\nActual:\n' + act
+    exp = format_calls(expected_calls, bindings)
+    act = format_calls(actual_calls, bindings)
+    assert exp == act, format_err(exp, act)
+
+
+_DUMMY_FILE_DICT = {
+    'java': 'MyApi.java',
+    'python': 'my_api.py',
+    'go': 'my_api.go',
+    'ruby': 'my_api.rb',
+    'php': 'MyApi.php',
+    'csharp': 'MyApi.cs',
+    'nodejs': 'my_api.js'
+}
+
+
+def make_fake_gapic_output(output_dir, language):
+    # Create a dummy file in the output_dir. Do not invoke
     # 'touch' command with subprocess.call() because it's mocked.
-    final_output_dir = os.path.join(output_dir, 'library-v1-gapic-gen-python')
+    dir_head = 'library-v1-gapic-gen-' + language
+    final_output_dir = os.path.join(output_dir, dir_head)
     if not os.path.exists(final_output_dir):
         os.makedirs(final_output_dir)
-    with open(os.path.join(final_output_dir, 'fake_output_api.py'), 'w'):
-        pass
-
-
-def make_fake_java_output(output_dir):
-    # Create an empty 'FakeOutputApi.java' in the output_dir. Do not invoke
-    # 'touch' command with subprocess.call() because it's mocked.
-    final_output_dir = os.path.join(output_dir, 'library-v1-gapic-gen-java')
-    if not os.path.exists(final_output_dir):
-        os.makedirs(final_output_dir)
-    with open(os.path.join(final_output_dir, 'FakeOutputApi.java'), 'w'):
+    dummy_file = _DUMMY_FILE_DICT[language]
+    with open(os.path.join(final_output_dir, dummy_file), 'w'):
         pass
 
 
@@ -98,21 +119,24 @@ def _test_baseline(pipeline_name, language, config, pipeline_kwargs, baseline,
 
     # Run setup_output function
     if setup_output:
-        setup_output(output_dir)
+        setup_output(output_dir, language)
 
     # Run pipeline
     execute_pipeline.main(args)
 
+    bindings = {'CWD': os.getcwd(), 'OUTPUT': output_dir}
+
     # Compare with the expected subprocess calls.
     expected_checked_calls = get_expected_calls(
-        baseline, {'CWD': os.getcwd(), 'OUTPUT': output_dir}, True)
-    check_calls_match(expected_checked_calls, mock_check_output.mock_calls)
+        baseline, bindings, True)
+    check_calls_match(expected_checked_calls,
+                      mock_check_output.mock_calls, bindings)
 
     # Some tasks can use subprocess.call() instead of check_call(), they are
     # tracked separately.
     expected_subprocess_call = get_expected_calls(
-        baseline + '.call', {'CWD': os.getcwd(), 'OUTPUT': output_dir})
-    check_calls_match(expected_subprocess_call, mock_call.mock_calls)
+        baseline + '.call', bindings)
+    check_calls_match(expected_subprocess_call, mock_call.mock_calls, bindings)
 
 
 python_pub_kwargs = {
@@ -135,11 +159,11 @@ java_pub_kwargs = {
     [
         ('GapicConfigPipeline', None, {}, 'config_pipeline', None),
         ('GrpcClientPipeline', 'python', {},
-         'python_grpc_client_nopub_pipeline', make_fake_python_output),
+         'python_grpc_client_nopub_pipeline', None),
         ('GrpcClientPipeline', 'python', python_pub_kwargs,
-         'python_grpc_client_pub_pipeline', make_fake_python_output),
+         'python_grpc_client_pub_pipeline', None),
         ('GapicClientPipeline', 'python', {},
-         'python_gapic_client_pipeline', make_fake_python_output),
+         'python_gapic_client_pipeline', make_fake_gapic_output),
         ('CoreProtoPipeline', 'java', {},
          'java_core_proto_nopub_pipeline', None),
         ('CoreProtoPipeline', 'java', java_pub_kwargs,
@@ -149,27 +173,27 @@ java_pub_kwargs = {
         ('GrpcClientPipeline', 'java', java_pub_kwargs,
          'java_grpc_client_pub_pipeline', None),
         ('GapicClientPipeline', 'java', {},
-         'java_gapic_client_pipeline', make_fake_java_output),
+         'java_gapic_client_pipeline', make_fake_gapic_output),
         ('GrpcClientPipeline', 'nodejs', {},
          'nodejs_grpc_client_pipeline', None),
         ('GapicClientPipeline', 'nodejs', {},
-         'nodejs_gapic_client_pipeline', None),
+         'nodejs_gapic_client_pipeline', make_fake_gapic_output),
         ('GrpcClientPipeline', 'ruby', {},
          'ruby_grpc_client_pipeline', None),
         ('GapicClientPipeline', 'ruby', {},
-         'ruby_gapic_client_pipeline', None),
+         'ruby_gapic_client_pipeline', make_fake_gapic_output),
         ('GrpcClientPipeline', 'go', {},
          'go_grpc_client_pipeline', None),
         ('GapicClientPipeline', 'go', {},
-         'go_gapic_client_pipeline', None),
+         'go_gapic_client_pipeline', make_fake_gapic_output),
         ('GrpcClientPipeline', 'php', {},
          'php_grpc_client_pipeline', None),
         ('GapicClientPipeline', 'php', {},
-         'php_gapic_client_pipeline', None),
+         'php_gapic_client_pipeline', make_fake_gapic_output),
         ('GrpcClientPipeline', 'csharp', {},
          'csharp_grpc_client_pipeline', None),
         ('GapicClientPipeline', 'csharp', {},
-         'csharp_gapic_client_pipeline', None),
+         'csharp_gapic_client_pipeline', make_fake_gapic_output),
     ])
 def test_generator(pipeline_name, language, extra_kwargs, baseline,
                    setup_output):

@@ -3,4 +3,5 @@ protoc --proto_path=test/fake-repos/gapi-core-proto/src/main/proto/ --proto_path
 rm -rf {OUTPUT}/library-v1-gapic-gen-go
 test/fake-repos/toolkit/gradlew -p test/fake-repos/toolkit runVGen -Pclargs=--descriptor_set={OUTPUT}/library-v1.desc,--output={OUTPUT}/library-v1-gapic-gen-go,--service_yaml={CWD}/test/testdata/gapi-example-library-proto/src/main/proto/google/example/library/library.yaml,--gapic_yaml={CWD}/test/testdata/gapi-example-library-proto/src/main/proto/google/example/library/library_gapic.yaml,--gapic_yaml={CWD}/test/testdata/gapi-example-library-proto/src/main/proto/google/example/library/go_gapic.yaml
 gofmt -w {OUTPUT}/library-v1-gapic-gen-go
-test/fake-repos/toolkit/gradlew -p test/fake-repos/toolkit runSynchronizer -Pclargs=--source_path={OUTPUT}/final,--generated_path={OUTPUT}/library-v1-gapic-gen-go,--baseline_path={OUTPUT}/final/baseline,--auto_merge,--auto_resolve
+mkdir -p {OUTPUT}/final
+cp -rf {OUTPUT}/library-v1-gapic-gen-go/my_api.go {OUTPUT}/final

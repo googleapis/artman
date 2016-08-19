@@ -21,7 +21,6 @@ from pipeline.tasks import package_tasks
 
 # kwargs required by GAPIC code gen
 _VGEN_REQUIRED = ['service_yaml', 'gapic_language_yaml', 'gapic_api_yaml',
-                  'auto_merge', 'auto_resolve', 'ignore_base',
                   'final_repo_dir']
 
 
@@ -66,16 +65,10 @@ class GapicTaskFactoryBase(code_gen.TaskFactoryBase):
                     kwargs['language'], 'GapicFormat', kwargs)]
 
     def _get_gapic_package_tasks(self, **kwargs):
-        return [gapic_tasks.GapicMergeTask('GapicMerge', inject=kwargs)]
+        return [gapic_tasks.GapicCopyTask('GapicCopy', inject=kwargs)]
 
     def get_validate_kwargs(self):
         return _VGEN_REQUIRED
-
-
-class _JavaGapicTaskFactory(GapicTaskFactoryBase):
-
-    def _get_gapic_package_tasks(self, **kwargs):
-        return [gapic_tasks.GapicCopyTask('GapicCopy', inject=kwargs)]
 
 
 class _PythonGapicTaskFactory(GapicTaskFactoryBase):
@@ -89,7 +82,7 @@ class _PythonGapicTaskFactory(GapicTaskFactoryBase):
 class _RubyGapicTaskFactory(GapicTaskFactoryBase):
 
     def _get_gapic_package_tasks(self, **kwargs):
-        return [gapic_tasks.GapicMergeTask('GapicMerge', inject=kwargs),
+        return [gapic_tasks.GapicCopyTask('GapicCopy', inject=kwargs),
                 gapic_tasks.GapicPackmanTask('GapicPackman', inject=kwargs),
                 package_tasks.RubyPackageGenTask('GapicPackageGen',
                                                  inject=kwargs)]
@@ -98,23 +91,17 @@ class _RubyGapicTaskFactory(GapicTaskFactoryBase):
 class _NodeJSGapicTaskFactory(GapicTaskFactoryBase):
 
     def _get_gapic_package_tasks(self, **kwargs):
-        return [gapic_tasks.GapicMergeTask('GapicMerge', inject=kwargs),
+        return [gapic_tasks.GapicCopyTask('GapicCopy', inject=kwargs),
                 gapic_tasks.GapicPackmanTask('GapicPackman', inject=kwargs)]
 
 
-class _CSharpGapicTaskFactory(GapicTaskFactoryBase):
-
-    def _get_gapic_package_tasks(self, **kwargs):
-        return []
-
-
 _GAPIC_TASK_FACTORY_DICT = {
-    'java': _JavaGapicTaskFactory,
+    'java': GapicTaskFactoryBase,
     'python': _PythonGapicTaskFactory,
     'go': GapicTaskFactoryBase,
     'ruby': _RubyGapicTaskFactory,
     'php': GapicTaskFactoryBase,
-    'csharp': _CSharpGapicTaskFactory,
+    'csharp': GapicTaskFactoryBase,
     'nodejs': _NodeJSGapicTaskFactory
 }
 

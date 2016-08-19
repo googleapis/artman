@@ -126,36 +126,6 @@ class GapicCopyTask(task_base.TaskBase):
                 'cp', '-rf', src_path, final_repo_dir])
 
 
-class GapicMergeTask(task_base.TaskBase):
-    def execute(self, language, toolkit_path, final_repo_dir,
-                gapic_code_dir, auto_merge, auto_resolve, ignore_base):
-        final_code_root = os.path.abspath(final_repo_dir)
-        baseline_root = os.path.abspath(os.path.join(final_repo_dir,
-                                                     'baseline'))
-        args = [
-            '--source_path=' + final_code_root,
-            '--generated_path=' + os.path.abspath(gapic_code_dir),
-            '--baseline_path=' + baseline_root,
-        ]
-        if auto_merge:
-            args.append('--auto_merge')
-        if auto_resolve:
-            args.append('--auto_resolve')
-        if ignore_base:
-            args.append('--ignore_base')
-        clargs = '-Pclargs=' + ','.join(args)
-        print 'Running synchronizer with args: ' + str(args)
-        self.exec_command([os.path.join(toolkit_path, 'gradlew'), '-p',
-                           toolkit_path, 'runSynchronizer', clargs])
-        for root, subdirs, files in os.walk(final_code_root):
-            for file in files:
-                if file.endswith('.orig'):
-                    os.remove(os.path.join(root, file))
-
-    def validate(self):
-        return [gapic_requirements.MergeRequirements]
-
-
 class GapicPackmanTask(packman_tasks.PackmanTaskBase):
     default_provides = 'package_dir'
 
