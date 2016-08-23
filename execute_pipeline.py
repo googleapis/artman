@@ -135,7 +135,7 @@ def _CreateArgumentParser():
     return parser
 
 
-def _load_config_spec(config_spec, config_sections, repl_vars):
+def _load_config_spec(config_spec, config_sections, repl_vars, language):
     config_split = config_spec.strip().split(':')
     config_path = config_split[0]
     if len(config_split) > 1:
@@ -145,6 +145,8 @@ def _load_config_spec(config_spec, config_sections, repl_vars):
         all_config_data = yaml.load(config_file)
     for section in config_sections:
         data.update(all_config_data[section])
+    if language in all_config_data:
+        data.update(all_config_data[language])
 
     repl_vars['THISDIR'] = os.path.dirname(config_path)
     _var_replace_config_data(data, repl_vars)
@@ -175,12 +177,11 @@ def _parse_args(args):
                  'TOOLKIT_HOME': os.path.join(flags.reporoot, 'toolkit')}
 
     config_sections = ['common']
-    if language:
-        config_sections.append(language)
 
     if flags.config:
         for config_spec in flags.config.split(','):
-            config_args = _load_config_spec(config_spec, config_sections, repl_vars)
+            config_args = _load_config_spec(config_spec, config_sections, repl_vars,
+                                            language)
             pipeline_args.update(config_args)
 
     cmd_args = ast.literal_eval(flags.pipeline_kwargs)
