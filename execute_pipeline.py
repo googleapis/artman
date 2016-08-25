@@ -205,6 +205,8 @@ def _var_replace_config_data(data, repl_vars):
 
 
 def _var_replace(in_str, repl_vars):
+    if not in_str:
+        return
     new_str = in_str
     for (k, v) in repl_vars.iteritems():
         new_str = new_str.replace('${' + k + '}', v)
