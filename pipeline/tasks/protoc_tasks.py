@@ -356,6 +356,27 @@ class GrpcPackmanTask(packman_tasks.PackmanTaskBase):
         return os.path.join(pkg_dir, language)
 
 
+class JavaGrpcPackmanTask(GrpcPackmanTask):
+
+    def execute(self, language, api_name, output_dir, src_proto_path,
+                import_proto_path, packman_flags=None, repo_dir=None):
+        packman_flags = packman_flags or ['--experimental_alt_java']
+        return super(JavaGrpcPackmanTask, self).execute(
+            language, api_name, output_dir, src_proto_path,
+            import_proto_path, packman_flags, repo_dir)
+
+
+class JavaCorePackmanTask(GrpcPackmanTask):
+
+    def execute(self, language, api_name, output_dir, src_proto_path,
+                import_proto_path, packman_flags=None, repo_dir=None):
+        packman_flags = packman_flags or ['--experimental_alt_java',
+                                          '--build_common_protos']
+        return super(JavaCorePackmanTask, self).execute(
+            language, api_name, output_dir, src_proto_path,
+            import_proto_path, packman_flags, repo_dir)
+
+
 class GoExtractImportBaseTask(task_base.TaskBase):
     default_provides = 'go_import_base'
 

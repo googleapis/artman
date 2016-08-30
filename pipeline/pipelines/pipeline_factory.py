@@ -21,6 +21,7 @@ from pipeline.pipelines import sample_pipeline  # noqa
 from pipeline.pipelines import gapic_generation_pipeline  # noqa
 from pipeline.pipelines import grpc_generation_pipeline  # noqa
 from pipeline.pipelines import core_generation_pipeline  # noqa
+from pipeline.pipelines import batch_generation_pipeline  # noqa
 
 
 def make_pipeline_flow(pipeline_name, remote_mode=False, **kwargs):

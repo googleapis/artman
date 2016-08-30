@@ -19,19 +19,15 @@ import os
 import time
 import uuid
 
-from pipeline.utils import pipeline_util
+from pipeline.utils import pipeline_util, task_utils
 from pipeline.pipelines import pipeline_base
 from pipeline.tasks import io_tasks
 from taskflow.patterns import linear_flow
 
 
-# TODO(garrettjones) fix required to be relative to pipeline.
-# Ideally this should just be computed dynamically based
-# on the pipeline's tasks.
-def _validate_codegen_kwargs(extra_args, **kwargs):
-    required = ['src_proto_path', 'import_proto_path', 'toolkit_path',
-                'output_dir', 'language', 'api_name']
-    pipeline_util.validate_exists(required + extra_args, **kwargs)
+# kwargs required by multiple pipelines
+COMMON_REQUIRED = ['src_proto_path', 'import_proto_path', 'toolkit_path',
+                   'output_dir', 'api_name']
 
 
 def _load_remote_parameters(kwargs):
@@ -59,23 +55,27 @@ class CodeGenerationPipelineBase(pipeline_base.PipelineBase):
             remote_mode=remote_mode, **kwargs)
 
     def do_build_flow(self, **kwargs):
+        tasks = task_utils.instantiate_tasks(
+            [io_tasks.PrepareGoogleapisDirTask], kwargs)
+        tasks += self.task_factory.get_tasks(**kwargs)
         flow = linear_flow.Flow('CodeGenerationPipeline')
-        flow.add(io_tasks.PrepareGoogleapisDirTask('PrepareGoogleapisDirTask',
-                                                   inject=kwargs))
-        flow.add(*self.task_factory.get_tasks(**kwargs))
+        flow.add(*tasks)
         return flow
 
     def additional_tasks_for_remote_execution(self, **kwargs):
-        return [
-            io_tasks.PrepareUploadDirTask('PrepareUploadDirTask',
-                                          inject=kwargs),
-            io_tasks.BlobUploadTask('BlobUploadTask', inject=kwargs),
-            io_tasks.CleanupTempDirsTask('CleanupTempDirsTask',
-                                         inject=kwargs)]
+        return task_utils.instantiate_tasks([io_tasks.PrepareUploadDirTask,
+                                             io_tasks.BlobUploadTask,
+                                             io_tasks.CleanupTempDirsTask],
+                                            kwargs)
 
     def validate_kwargs(self, **kwargs):
-        _validate_codegen_kwargs(self.task_factory.get_validate_kwargs(),
-                                 **kwargs)
+        # TODO(garrettjones) fix required to be relative to pipeline.
+        # Ideally this should just be computed dynamically based
+        # on the pipeline's tasks.
+        pipeline_util.validate_exists(self.task_factory.get_validate_kwargs(),
+                                      **kwargs)
+        pipeline_util.validate_does_not_exist(
+            self.task_factory.get_invalid_kwargs(), **kwargs)
 
 
 class TaskFactoryBase(object):
@@ -93,6 +93,12 @@ class TaskFactoryBase(object):
         raise NotImplementedError('Subclass must implement abstract method')
 
     def get_validate_kwargs(self):
+        """Abstract method, subclasses must implement this method and return
+        a list of required keyword arguments.
+        """
+        raise NotImplementedError('Subclass must implement abstract method')
+
+    def get_invalid_kwargs(self):
         """Abstract method, subclasses must implement this method and return
         a list of required keyword arguments.
         """

@@ -235,6 +235,20 @@ Node.JS (logging)
         GapicClientPipeline
 
 
+Gapic Batch Pipeline
+********************
+
+The GAPIC batch pipeline can be used to generate multiple API and language
+combinations with one artman command. This example uses the staging repository
+batch config file in the googleapis repository.
+
+  ::
+
+     python execute_pipeline.py \
+        --config "../googleapis/gapic/batch/staging.yaml" \
+        GapicClientBatchPipeline
+
+
 Pipeline configuration
 ----------------------
 

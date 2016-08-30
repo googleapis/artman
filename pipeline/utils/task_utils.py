@@ -43,3 +43,18 @@ def is_output_gcloud(final_repo_dir):
     final_repo_dir = os.path.abspath(final_repo_dir)
     return re.search(os.path.sep + 'gcloud-[a-z]+' + os.path.sep,
                      final_repo_dir)
+
+
+def instantiate_tasks(task_class_list, inject):
+    """Instantiates a list of Tasks. Generates a name for each task based on
+    the class name, and if available the language and api_name settings.
+    """
+    tasks = []
+    for task_class in task_class_list:
+        name = task_class.__name__
+        if inject.get('language'):
+            name += '-' + inject['language']
+        if inject.get('api_name'):
+            name += '-' + inject['api_name']
+        tasks.append(task_class(name, inject=inject))
+    return tasks

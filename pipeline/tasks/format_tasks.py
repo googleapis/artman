@@ -100,9 +100,9 @@ _FORMAT_TASK_DICT = {
 }
 
 
-def make_format_task(language, task_name, inject_args):
+def get_format_task(language):
     cls = _FORMAT_TASK_DICT.get(language)
     if cls:
-        return cls(task_name, inject=inject_args)
+        return cls
     else:
         raise ValueError('No format task found for language: ' + language)

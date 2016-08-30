@@ -49,7 +49,7 @@ from gcloud import storage
 from gcloud import logging
 from taskflow import engines, task, states
 from pipeline.pipelines import pipeline_factory
-from pipeline.utils import job_util, pipeline_util
+from pipeline.utils import job_util, pipeline_util, config_util
 
 
 def main(args):
@@ -135,25 +135,6 @@ def _CreateArgumentParser():
     return parser
 
 
-def _load_config_spec(config_spec, config_sections, repl_vars, language):
-    config_split = config_spec.strip().split(':')
-    config_path = config_split[0]
-    if len(config_split) > 1:
-        config_sections = config_split[1].split('|')
-    data = {}
-    with open(config_path) as config_file:
-        all_config_data = yaml.load(config_file)
-    for section in config_sections:
-        data.update(all_config_data[section])
-    if language in all_config_data:
-        data.update(all_config_data[language])
-
-    repl_vars['THISDIR'] = os.path.dirname(config_path)
-    _var_replace_config_data(data, repl_vars)
-    del repl_vars['THISDIR']
-    return data
-
-
 def _parse_args(args):
     parser = _CreateArgumentParser()
     flags = parser.parse_args(args=args)
@@ -170,7 +151,8 @@ def _parse_args(args):
         pipeline_args['pipeline_id'] = pipeline_id
 
     pipeline_args['repo_root'] = repo_root
-    pipeline_args['language'] = language
+    if language:
+        pipeline_args['language'] = language
     # TODO(ethanbao): Remove TOOLKIT_HOME var after toolkit_path is removed from
     # gapic yaml.
     repl_vars = {'REPOROOT': repo_root,
@@ -180,8 +162,10 @@ def _parse_args(args):
 
     if flags.config:
         for config_spec in flags.config.split(','):
-            config_args = _load_config_spec(config_spec, config_sections, repl_vars,
-                                            language)
+            config_args = config_util.load_config_spec(config_spec,
+                                                       config_sections,
+                                                       repl_vars,
+                                                       language)
             pipeline_args.update(config_args)
 
     cmd_args = ast.literal_eval(flags.pipeline_kwargs)
@@ -194,23 +178,6 @@ def _parse_args(args):
             pipeline_args,
             flags.env.lower() if flags.env else None,
             flags.local_repo)
-
-
-def _var_replace_config_data(data, repl_vars):
-    for (k, v) in data.items():
-        if type(v) is list:
-            data[k] = [_var_replace(lv, repl_vars) for lv in v]
-        elif type(v) is not bool:
-            data[k] = _var_replace(v, repl_vars)
-
-
-def _var_replace(in_str, repl_vars):
-    if not in_str:
-        return
-    new_str = in_str
-    for (k, v) in repl_vars.iteritems():
-        new_str = new_str.replace('${' + k + '}', v)
-    return new_str
 
 
 def _load_local_repo(private_repo_root, **pipeline_kwargs):

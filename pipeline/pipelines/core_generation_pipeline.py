@@ -17,8 +17,8 @@ language contains the well known types, defined by protobuf, for that language.
 """
 
 from pipeline.pipelines import code_generation_pipeline as code_gen
-from pipeline.pipelines import grpc_generation_pipeline
-from pipeline.tasks import protoc_tasks
+from pipeline.tasks import protoc_tasks, publish_tasks
+from pipeline.utils import task_utils
 
 
 class CoreProtoPipeline(code_gen.CodeGenerationPipelineBase):
@@ -28,21 +28,34 @@ class CoreProtoPipeline(code_gen.CodeGenerationPipelineBase):
             get_core_task_factory(kwargs['language']), **kwargs)
 
 
-class _JavaCoreTaskFactory(grpc_generation_pipeline.GrpcTaskFactoryBase):
-    """Generates a package with the common protos from googleapis.
-
-    It inherits from GrpcTaskFactoryBase because it uses Packman just like
-    client generation does; the only difference is the extra
-    --build_common_protos argument to Packman.
-    """
+class CoreTaskFactoryBase(code_gen.TaskFactoryBase):
 
     def get_tasks(self, **kwargs):
-        packman_flags = ['--experimental_alt_java', '--build_common_protos']
-        kwargs.update({'packman_flags': packman_flags})
-        return super(_JavaCoreTaskFactory, self).get_tasks(**kwargs)
+        return task_utils.instantiate_tasks(
+            self._get_core_codegen_tasks(**kwargs), kwargs)
+
+    def _get_core_codegen_tasks(self, **kwargs):
+        raise NotImplementedError('Subclass must implement abstract method')
+
+    def get_validate_kwargs(self):
+        return code_gen.COMMON_REQUIRED
+
+    def get_invalid_kwargs(self):
+        return []
 
 
-class _GoCoreTaskFactory(code_gen.TaskFactoryBase):
+class _JavaCoreTaskFactory(CoreTaskFactoryBase):
+    """Generates a package with the common protos from googleapis.
+    """
+
+    def _get_core_codegen_tasks(self, **kwargs):
+        tasks = [protoc_tasks.JavaCorePackmanTask]
+        if 'publish_env' in kwargs:
+            tasks.append(publish_tasks.MavenDeployTask)
+        return tasks
+
+
+class _GoCoreTaskFactory(CoreTaskFactoryBase):
     """Responsible for the protobuf flow for Go language.
 
     The Go compiler needs to specify an import path which is relative to
@@ -54,26 +67,19 @@ class _GoCoreTaskFactory(code_gen.TaskFactoryBase):
     set up.
     """
 
-    def get_tasks(self, **kwargs):
-        return [
-            protoc_tasks.ProtoCodeGenTask('CoreProtoGen',
-                                          inject=kwargs),
-            protoc_tasks.GoExtractImportBaseTask('ExtractGoPackageName',
-                                                 inject=kwargs),
-            protoc_tasks.GoLangUpdateImportsTask('UpdateImports',
-                                                 inject=kwargs)]
+    def _get_core_codegen_tasks(self, **kwargs):
+        return [protoc_tasks.ProtoCodeGenTask,
+                protoc_tasks.GoExtractImportBaseTask,
+                protoc_tasks.GoLangUpdateImportsTask]
 
     def get_validate_kwargs(self):
-        return ['gapic_api_yaml', 'final_repo_dir']
+        return ['gapic_api_yaml', 'final_repo_dir'] + code_gen.COMMON_REQUIRED
 
 
-class _CSharpCoreTaskFactory(code_gen.TaskFactoryBase):
+class _CSharpCoreTaskFactory(CoreTaskFactoryBase):
 
-    def get_tasks(self, **kwargs):
-        return [protoc_tasks.ProtoCodeGenTask('ProtoGen', inject=kwargs)]
-
-    def get_validate_kwargs(self):
-        return []
+    def _get_core_codegen_tasks(self, **kwargs):
+        return [protoc_tasks.ProtoCodeGenTask]
 
 
 _CORE_TASK_FACTORY_DICT = {

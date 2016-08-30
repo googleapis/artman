@@ -16,6 +16,7 @@
 
 from pipeline.pipelines import code_generation_pipeline as code_gen
 from pipeline.tasks import protoc_tasks, package_tasks, publish_tasks
+from pipeline.utils import task_utils
 
 
 class GrpcClientPipeline(code_gen.CodeGenerationPipelineBase):
@@ -28,29 +29,33 @@ class GrpcClientPipeline(code_gen.CodeGenerationPipelineBase):
 class GrpcTaskFactoryBase(code_gen.TaskFactoryBase):
 
     def get_tasks(self, **kwargs):
-        tasks = [protoc_tasks.GrpcPackmanTask('Packman', inject=kwargs)]
+        tasks = self._get_grpc_codegen_tasks(**kwargs)
         if 'publish_env' in kwargs:
-            tasks.append(publish_tasks.make_publish_task(
-                kwargs['language'], 'GrpcPublishTask', kwargs))
-        return tasks
+            tasks.append(publish_tasks.get_publish_task(
+                kwargs['language']))
+        return task_utils.instantiate_tasks(tasks, kwargs)
+
+    def _get_grpc_codegen_tasks(self, **kwargs):
+        return [protoc_tasks.GrpcPackmanTask]
 
     def get_validate_kwargs(self):
+        return code_gen.COMMON_REQUIRED
+
+    def get_invalid_kwargs(self):
         return []
 
 
 class _RubyGrpcTaskFactory(GrpcTaskFactoryBase):
 
-    def get_tasks(self, **kwargs):
-        return [protoc_tasks.GrpcPackmanTask('Packman', inject=kwargs),
-                package_tasks.RubyPackageGenTask('GrpcPackageGen',
-                                                 inject=kwargs)]
+    def _get_grpc_codegen_tasks(self, **kwargs):
+        return [protoc_tasks.GrpcPackmanTask,
+                package_tasks.RubyPackageGenTask]
 
 
 class _JavaGrpcTaskFactory(GrpcTaskFactoryBase):
 
-    def get_tasks(self, **kwargs):
-        kwargs.update({'packman_flags': ['--experimental_alt_java']})
-        return super(_JavaGrpcTaskFactory, self).get_tasks(**kwargs)
+    def _get_grpc_codegen_tasks(self, **kwargs):
+        return [protoc_tasks.JavaGrpcPackmanTask]
 
 
 class _GoGrpcTaskFactory(GrpcTaskFactoryBase):
@@ -62,24 +67,20 @@ class _GoGrpcTaskFactory(GrpcTaskFactoryBase):
     which is taken care of by GoLangUpdateProtoImportsTask.
     """
 
-    def get_tasks(self, **kwargs):
-        return [
-            protoc_tasks.ProtoAndGrpcCodeGenTask('GrpcCodegen',
-                                                 inject=kwargs),
-            protoc_tasks.GoExtractImportBaseTask('ExtractGoPackageName',
-                                                 inject=kwargs),
-            protoc_tasks.GoLangUpdateImportsTask('UpdateImports',
-                                                 inject=kwargs)]
+    def _get_grpc_codegen_tasks(self, **kwargs):
+        return [protoc_tasks.ProtoAndGrpcCodeGenTask,
+                protoc_tasks.GoExtractImportBaseTask,
+                protoc_tasks.GoLangUpdateImportsTask]
 
     def get_validate_kwargs(self):
-        return ['gapic_api_yaml', 'final_repo_dir']
+        return ['gapic_api_yaml', 'final_repo_dir'] + code_gen.COMMON_REQUIRED
 
 
 class _CSharpGrpcTaskFactory(GrpcTaskFactoryBase):
 
-    def get_tasks(self, **kwargs):
-        return [protoc_tasks.ProtoCodeGenTask('ProtoGen', inject=kwargs),
-                protoc_tasks.GrpcCodeGenTask('GrpcCodegen', inject=kwargs)]
+    def _get_grpc_codegen_tasks(self, **kwargs):
+        return [protoc_tasks.ProtoCodeGenTask,
+                protoc_tasks.GrpcCodeGenTask]
 
 
 _GRPC_TASK_FACTORY_DICT = {

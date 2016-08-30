@@ -9,6 +9,7 @@ common:
   gapic_api_yaml:
     - ${THISDIR}/../../../gapi-example-library-proto/src/main/proto/google/example/library/library_gapic.yaml
   output_dir: ${REPOROOT}/test/testdata/test_output
+  enable_batch_generation: True
 java:
   final_repo_dir: ${REPOROOT}/test/testdata/test_output/final
 python:

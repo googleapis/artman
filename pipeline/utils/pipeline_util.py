@@ -28,6 +28,12 @@ def validate_exists(required, **kwargs):
             raise ValueError('{0} must be provided'.format(arg))
 
 
+def validate_does_not_exist(unsupported, **kwargs):
+    for arg in unsupported:
+        if arg in kwargs:
+            raise ValueError('{0} is not supported'.format(arg))
+
+
 def download(url, directory):
     filename = os.path.basename(urlparse.urlsplit(url).path)
     if not os.path.isfile(os.path.join(directory, filename)):

@@ -15,13 +15,15 @@
 """Pipelines that run GAPIC"""
 
 from pipeline.pipelines import code_generation_pipeline as code_gen
+from pipeline.pipelines import batch_generation_pipeline as batch_gen
 from pipeline.tasks import gapic_tasks, format_tasks, protoc_tasks
 from pipeline.tasks import package_tasks
+from pipeline.utils import task_utils
 
 
 # kwargs required by GAPIC code gen
 _VGEN_REQUIRED = ['service_yaml', 'gapic_language_yaml', 'gapic_api_yaml',
-                  'final_repo_dir']
+                  'final_repo_dir', 'language']
 
 
 class GapicConfigPipeline(code_gen.CodeGenerationPipelineBase):
@@ -34,14 +36,16 @@ class GapicConfigPipeline(code_gen.CodeGenerationPipelineBase):
 class GapicConfigTaskFactory(code_gen.TaskFactoryBase):
 
     def get_tasks(self, **kwargs):
-        return [protoc_tasks.ProtoDescGenTask('ProtoDesc', inject=kwargs),
-                gapic_tasks.GapicConfigGenTask(
-                     'GapicConfigGen', inject=kwargs),
-                gapic_tasks.GapicConfigMoveTask(
-                     'GapicConfigMove', inject=kwargs)]
+        return task_utils.instantiate_tasks([protoc_tasks.ProtoDescGenTask,
+                                             gapic_tasks.GapicConfigGenTask,
+                                             gapic_tasks.GapicConfigMoveTask],
+                                            kwargs)
 
     def get_validate_kwargs(self):
-        return []
+        return code_gen.COMMON_REQUIRED
+
+    def get_invalid_kwargs(self):
+        return ['language']
 
 
 class GapicClientPipeline(code_gen.CodeGenerationPipelineBase):
@@ -52,47 +56,62 @@ class GapicClientPipeline(code_gen.CodeGenerationPipelineBase):
             **kwargs)
 
 
+class GapicClientBatchPipeline(batch_gen.BatchPipeline):
+
+    def __init__(self, **kwargs):
+        super(GapicClientBatchPipeline, self).__init__(
+            _make_batch_pipeline_tasks, **kwargs)
+
+
+def _make_batch_pipeline_tasks(**kwargs):
+    task_factory = get_gapic_task_factory(kwargs['language'])
+    tasks = task_factory._get_gapic_codegen_tasks(**kwargs)
+    return task_utils.instantiate_tasks(tasks, kwargs)
+
+
 class GapicTaskFactoryBase(code_gen.TaskFactoryBase):
 
     def get_tasks(self, **kwargs):
-        return (self._get_gapic_codegen_tasks(**kwargs)
-                + self._get_gapic_package_tasks(**kwargs))
+        tasks = (self._get_gapic_codegen_tasks(**kwargs)
+                 + self._get_gapic_package_tasks(**kwargs))
+        return task_utils.instantiate_tasks(tasks, kwargs)
 
     def _get_gapic_codegen_tasks(self, **kwargs):
-        return [protoc_tasks.ProtoDescGenTask('ProtoDesc', inject=kwargs),
-                gapic_tasks.GapicCodeGenTask('GapicCodegen', inject=kwargs),
-                format_tasks.make_format_task(
-                    kwargs['language'], 'GapicFormat', kwargs)]
+        return [protoc_tasks.ProtoDescGenTask,
+                gapic_tasks.GapicCodeGenTask,
+                format_tasks.get_format_task(kwargs['language'])]
 
     def _get_gapic_package_tasks(self, **kwargs):
-        return [gapic_tasks.GapicCopyTask('GapicCopy', inject=kwargs)]
+        return [gapic_tasks.GapicCopyTask]
 
     def get_validate_kwargs(self):
-        return _VGEN_REQUIRED
+        return _VGEN_REQUIRED + code_gen.COMMON_REQUIRED
+
+    def get_invalid_kwargs(self):
+        return []
 
 
 class _PythonGapicTaskFactory(GapicTaskFactoryBase):
 
     def _get_gapic_package_tasks(self, **kwargs):
-        return [gapic_tasks.GapicCleanTask('GapicClean', inject=kwargs),
-                gapic_tasks.GapicCopyTask('GapicCopy', inject=kwargs),
-                gapic_tasks.GapicPackmanTask('GapicPackman', inject=kwargs)]
+        return [gapic_tasks.GapicCleanTask,
+                gapic_tasks.GapicCopyTask,
+                gapic_tasks.GapicPackmanTask]
 
 
 class _RubyGapicTaskFactory(GapicTaskFactoryBase):
 
     def _get_gapic_package_tasks(self, **kwargs):
-        return [gapic_tasks.GapicCopyTask('GapicCopy', inject=kwargs),
-                gapic_tasks.GapicPackmanTask('GapicPackman', inject=kwargs),
-                package_tasks.RubyPackageGenTask('GapicPackageGen',
-                                                 inject=kwargs)]
+        return [gapic_tasks.GapicCopyTask,
+                gapic_tasks.GapicPackmanTask,
+                package_tasks.RubyPackageGenTask]
 
 
 class _NodeJSGapicTaskFactory(GapicTaskFactoryBase):
 
     def _get_gapic_package_tasks(self, **kwargs):
-        return [gapic_tasks.GapicCopyTask('GapicCopy', inject=kwargs),
-                gapic_tasks.GapicPackmanTask('GapicPackman', inject=kwargs)]
+        return [gapic_tasks.GapicCopyTask,
+                gapic_tasks.GapicPackmanTask]
 
 
 _GAPIC_TASK_FACTORY_DICT = {
