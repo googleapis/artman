@@ -39,26 +39,29 @@ To execute a build pipeline locally, try the following example command:
      python execute_pipeline.py \
        --pipeline_kwargs={\'sleep_secs\':2} SamplePipeline
 
-To execute a build pipeline remotely, start two consoles and run the following command
-in one console:
+Remote
+******
+
+A build pipeline can also be triggered remotely. Run the following command to start a build server:
 
   ::
 
-     python start_conductor.py
+     TOOLKIT_HOME=<path_to_toolkit_repo> python start_conductor.py \
+       --log_local --jobboard=<unique_jobboard_name>
 
 
-And then run the following command for multiple times with different parameter:
+And then run this example command to trigger a trivial build on that server
+(use the same jobboard name):
 
   ::
 
      python execute_pipeline.py \
        --pipeline_kwargs={\'sleep_secs\':2} \
-       --env remote SamplePipeline
+       --env=<unique_jobboard_name> SamplePipeline
 
 Please note, there is no guarantee that your pipeline job will be claimed by the
-conductor running on your machine. It can also be picked up by other conductor
-processes. You can run the second command for multiple times, and chances are
-good that your conductor will pick up one job at least.
+remote build server unless you choose a unique jobboard name that no one else is using.
+Otherwise, it can be picked up by another conductor process.
 
 Config generation
 *****************

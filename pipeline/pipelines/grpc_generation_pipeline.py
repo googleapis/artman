@@ -23,7 +23,7 @@ class GrpcClientPipeline(code_gen.CodeGenerationPipelineBase):
 
     def __init__(self, **kwargs):
         super(GrpcClientPipeline, self).__init__(
-            get_grpc_task_factory(kwargs['language']), **kwargs)
+            _get_grpc_task_factory(kwargs), **kwargs)
 
 
 class GrpcTaskFactoryBase(code_gen.TaskFactoryBase):
@@ -94,7 +94,11 @@ _GRPC_TASK_FACTORY_DICT = {
 }
 
 
-def get_grpc_task_factory(language):
+def _get_grpc_task_factory(kwargs):
+    if 'language' not in kwargs:
+        raise ValueError('Valid --language argument required for gRPC codegen')
+
+    language = kwargs['language']
     cls = _GRPC_TASK_FACTORY_DICT.get(language)
     if cls:
         return cls()

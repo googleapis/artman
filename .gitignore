@@ -69,3 +69,6 @@ target/
 # Project-specific
 .tox/*
 output/*
+
+# Ctags
+tags

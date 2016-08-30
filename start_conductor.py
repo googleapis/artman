@@ -19,21 +19,28 @@
 """
 
 import argparse
+import logging as pylog
 
 from pipeline.conductors import gapic_conductor
 
 
 def main():
-  jobboard_name = _parse_args()
+  jobboard_name, log_local = _parse_args()
+  if log_local:
+      pylog.basicConfig()
   gapic_conductor.run(jobboard_name)
 
 def _parse_args():
   parser = _CreateArgumentParser()
   flags = parser.parse_args()
-  return flags.jobboard_name.lower()
+  return flags.jobboard_name.lower(), flags.log_local
 
 def _CreateArgumentParser():
   parser = argparse.ArgumentParser()
+  parser.add_argument(
+      "-l", "--log_local",
+      action='store_true',
+      help="Log to local console.")
   parser.add_argument(
       "--jobboard_name",
       type=str,

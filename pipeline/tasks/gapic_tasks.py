@@ -62,6 +62,7 @@ class GapicConfigMoveTask(task_base.TaskBase):
             raise ValueError(error_fmt + 'No location specified')
         conf_out = os.path.abspath(gapic_api_yaml[0])
         if os.path.exists(conf_out):
+            # TODO (issue #80): no need to test in remote environment
             raise ValueError(error_fmt + 'File already exists')
         else:
             return conf_out

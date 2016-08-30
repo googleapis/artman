@@ -68,6 +68,23 @@ def check_calls_match(expected_calls, actual_calls, bindings):
     assert exp == act, format_err(exp, act)
 
 
+def _test_error(pipeline_name, language, config, pipeline_kwargs,
+                expected_error):
+    reporoot = os.path.abspath('.')
+
+    # Execute pipeline args
+    args = ['--config', config,
+            '--pipeline_kwargs', pipeline_kwargs,
+            '--reporoot', reporoot,
+            pipeline_name]
+    if language:
+        args += ['--language', language]
+
+    # Run pipeline
+    with pytest.raises(expected_error):
+        execute_pipeline.main(args)
+
+
 @mock.patch('pipeline.utils.task_utils.run_gradle_task')
 @mock.patch('subprocess.call')
 @mock.patch('subprocess.check_call')
@@ -125,6 +142,26 @@ java_pub_kwargs = {
         'username': 'example-maven-uname',
         'password': 'example-maven-pwd',
         'publish_env': 'prod'}
+
+
+@pytest.mark.parametrize(
+    'pipeline_name, language, extra_kwargs, expected_error',
+    [
+        ('GrpcClientPipeline', None, {}, ValueError),
+        ('GrpcClientPipeline', '', {}, ValueError),
+        ('GrpcClientPipeline', 'cylon', {}, ValueError)
+    ])
+def test_generator_errors(pipeline_name, language, extra_kwargs,
+                          expected_error):
+    artman_api_yaml = 'test/testdata/googleapis_test/gapic/api/' \
+                      'artman_library.yaml'
+    artman_language_yaml = 'test/testdata/googleapis_test/gapic/lang/' \
+                           'common.yaml'
+    config = ','.join([artman_api_yaml, artman_language_yaml])
+
+    pipeline_kwargs = str(extra_kwargs)
+    _test_error(pipeline_name, language, config, pipeline_kwargs,
+                expected_error)
 
 
 @pytest.mark.parametrize(
