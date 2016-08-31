@@ -112,7 +112,7 @@ Java (pubsub)
         --config "../googleapis/gapic/core/artman_core.yaml,\
         ../googleapis/gapic/lang/common.yaml" \
         --language java
-        CoreProtoPipeline
+        GrpcClientPipeline
 
      python execute_pipeline.py \
         --config "../googleapis/gapic/api/artman_pubsub.yaml,\

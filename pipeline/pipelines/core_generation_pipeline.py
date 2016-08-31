@@ -17,7 +17,7 @@ language contains the well known types, defined by protobuf, for that language.
 """
 
 from pipeline.pipelines import code_generation_pipeline as code_gen
-from pipeline.tasks import protoc_tasks, publish_tasks
+from pipeline.tasks import protoc_tasks
 from pipeline.utils import task_utils
 
 
@@ -42,17 +42,6 @@ class CoreTaskFactoryBase(code_gen.TaskFactoryBase):
 
     def get_invalid_kwargs(self):
         return []
-
-
-class _JavaCoreTaskFactory(CoreTaskFactoryBase):
-    """Generates a package with the common protos from googleapis.
-    """
-
-    def _get_core_codegen_tasks(self, **kwargs):
-        tasks = [protoc_tasks.JavaCorePackmanTask]
-        if 'publish_env' in kwargs:
-            tasks.append(publish_tasks.MavenDeployTask)
-        return tasks
 
 
 class _GoCoreTaskFactory(CoreTaskFactoryBase):
@@ -83,7 +72,6 @@ class _CSharpCoreTaskFactory(CoreTaskFactoryBase):
 
 
 _CORE_TASK_FACTORY_DICT = {
-    'java': _JavaCoreTaskFactory,
     'go': _GoCoreTaskFactory,
     'csharp': _CSharpCoreTaskFactory,
 }

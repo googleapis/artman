@@ -22,8 +22,8 @@ from pipeline.utils import task_utils
 
 
 # kwargs required by GAPIC code gen
-_VGEN_REQUIRED = ['service_yaml', 'gapic_language_yaml', 'gapic_api_yaml',
-                  'final_repo_dir', 'language']
+_GAPIC_REQUIRED = ['service_yaml', 'gapic_language_yaml', 'gapic_api_yaml',
+                   'final_repo_dir', 'language']
 
 
 class GapicConfigPipeline(code_gen.CodeGenerationPipelineBase):
@@ -85,7 +85,7 @@ class GapicTaskFactoryBase(code_gen.TaskFactoryBase):
         return [gapic_tasks.GapicCopyTask]
 
     def get_validate_kwargs(self):
-        return _VGEN_REQUIRED + code_gen.COMMON_REQUIRED
+        return _GAPIC_REQUIRED + code_gen.COMMON_REQUIRED
 
     def get_invalid_kwargs(self):
         return []

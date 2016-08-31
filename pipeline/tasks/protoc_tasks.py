@@ -163,9 +163,9 @@ def _group_by_dirname(protos):
     return dirs
 
 
-def _protoc_header_params(import_proto_path, src_proto_path,
+def _protoc_header_params(proto_path,
                           toolkit_path):
-    proto_path = import_proto_path + src_proto_path
+    proto_path = proto_path[:]
     proto_path.append(_find_protobuf_path(toolkit_path))
     return (['protoc'] +
             ['--proto_path=' + path for path in proto_path])
@@ -207,19 +207,22 @@ class ProtoDescGenTask(task_base.TaskBase):
     default_provides = 'descriptor_set'
 
     def execute(self, src_proto_path, import_proto_path, output_dir,
-                api_name, toolkit_path):
-        print 'Compiling descriptors {0}'.format(
-            _find_protos(src_proto_path))
+                api_name, toolkit_path, desc_proto_path=None):
+        desc_proto_path = desc_proto_path or []
+        desc_protos = _find_protos(src_proto_path + desc_proto_path)
+        header_proto_path = import_proto_path + desc_proto_path
+        header_proto_path.extend(src_proto_path)
         desc_out_file = api_name + '.desc'
+        print 'Compiling descriptors for {0}'.format(desc_protos)
         self.exec_command(['mkdir', '-p', output_dir])
         # DescGen don't use _group_by_dirname right now because
         #   - it doesn't have to
         #   - and multiple invocation will overwrite the desc_out_file
         self.exec_command(
             _protoc_header_params(
-                import_proto_path, src_proto_path, toolkit_path) +
+                header_proto_path, toolkit_path) +
             _protoc_desc_params(output_dir, desc_out_file) +
-            _find_protos(src_proto_path))
+            desc_protos)
         return os.path.join(output_dir, desc_out_file)
 
     def validate(self):
@@ -240,7 +243,7 @@ class ProtoCodeGenTask(task_base.TaskBase):
             print 'Generating protos {0}'.format(dirname)
             self.exec_command(
                 _protoc_header_params(
-                    import_proto_path, src_proto_path, toolkit_path) +
+                    import_proto_path + src_proto_path, toolkit_path) +
                 _protoc_proto_params(proto_params, pkg_dir, with_grpc=False) +
                 protos)
 
@@ -261,7 +264,7 @@ class GrpcCodeGenTask(task_base.TaskBase):
             print 'Running protoc with grpc plugin on {0}'.format(dirname)
             self.exec_command(
                 _protoc_header_params(
-                    import_proto_path, src_proto_path, toolkit_path) +
+                    import_proto_path + src_proto_path, toolkit_path) +
                 _protoc_grpc_params(proto_params, pkg_dir, toolkit_path) +
                 protos)
 
@@ -282,7 +285,7 @@ class ProtoAndGrpcCodeGenTask(task_base.TaskBase):
             print 'Running protoc and grpc plugin on {0}'.format(dirname)
             self.exec_command(
                 _protoc_header_params(
-                    import_proto_path, src_proto_path, toolkit_path) +
+                    import_proto_path + src_proto_path, toolkit_path) +
                 _protoc_proto_params(proto_params, pkg_dir, with_grpc=True) +
                 _protoc_grpc_params(proto_params, pkg_dir, toolkit_path) +
                 protos)
@@ -359,20 +362,16 @@ class GrpcPackmanTask(packman_tasks.PackmanTaskBase):
 class JavaGrpcPackmanTask(GrpcPackmanTask):
 
     def execute(self, language, api_name, output_dir, src_proto_path,
-                import_proto_path, packman_flags=None, repo_dir=None):
-        packman_flags = packman_flags or ['--experimental_alt_java']
+                import_proto_path, packman_flags=None, repo_dir=None,
+                proto_gen_pkg_deps=None):
+        proto_gen_pkg_deps = proto_gen_pkg_deps or []
+        packman_flags = packman_flags or []
+        if len(packman_flags) == 0:
+            packman_flags.append('--experimental_alt_java')
+            for dep in proto_gen_pkg_deps:
+                packman_flags.append('--proto_gen_pkg_dep')
+                packman_flags.append(dep)
         return super(JavaGrpcPackmanTask, self).execute(
-            language, api_name, output_dir, src_proto_path,
-            import_proto_path, packman_flags, repo_dir)
-
-
-class JavaCorePackmanTask(GrpcPackmanTask):
-
-    def execute(self, language, api_name, output_dir, src_proto_path,
-                import_proto_path, packman_flags=None, repo_dir=None):
-        packman_flags = packman_flags or ['--experimental_alt_java',
-                                          '--build_common_protos']
-        return super(JavaCorePackmanTask, self).execute(
             language, api_name, output_dir, src_proto_path,
             import_proto_path, packman_flags, repo_dir)
 
