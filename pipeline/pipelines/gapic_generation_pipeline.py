@@ -17,13 +17,13 @@
 from pipeline.pipelines import code_generation_pipeline as code_gen
 from pipeline.pipelines import batch_generation_pipeline as batch_gen
 from pipeline.tasks import gapic_tasks, format_tasks, protoc_tasks
-from pipeline.tasks import package_tasks
+from pipeline.tasks import package_tasks, staging_tasks
 from pipeline.utils import task_utils
 
 
 # kwargs required by GAPIC code gen
 _GAPIC_REQUIRED = ['service_yaml', 'gapic_language_yaml', 'gapic_api_yaml',
-                   'final_repo_dir', 'language']
+                   'final_repo_dir', 'language', 'stage_output']
 
 
 class GapicConfigPipeline(code_gen.CodeGenerationPipelineBase):
@@ -65,7 +65,8 @@ class GapicClientBatchPipeline(batch_gen.BatchPipeline):
 
 def _make_batch_pipeline_tasks(**kwargs):
     task_factory = get_gapic_task_factory(kwargs['language'])
-    tasks = task_factory._get_gapic_codegen_tasks(**kwargs)
+    tasks = (task_factory._get_gapic_codegen_tasks(**kwargs)
+             + task_factory._get_gapic_staging_tasks(**kwargs))
     return task_utils.instantiate_tasks(tasks, kwargs)
 
 
@@ -73,6 +74,7 @@ class GapicTaskFactoryBase(code_gen.TaskFactoryBase):
 
     def get_tasks(self, **kwargs):
         tasks = (self._get_gapic_codegen_tasks(**kwargs)
+                 + self._get_gapic_staging_tasks(**kwargs)
                  + self._get_gapic_package_tasks(**kwargs))
         return task_utils.instantiate_tasks(tasks, kwargs)
 
@@ -80,6 +82,13 @@ class GapicTaskFactoryBase(code_gen.TaskFactoryBase):
         return [protoc_tasks.ProtoDescGenTask,
                 gapic_tasks.GapicCodeGenTask,
                 format_tasks.get_format_task(kwargs['language'])]
+
+    def _get_gapic_staging_tasks(self, **kwargs):
+        if kwargs['stage_output']:
+            return [staging_tasks.StagingOutputDirTask,
+                    staging_tasks.StagingCleanTask,
+                    staging_tasks.StagingCopyTask]
+        return []
 
     def _get_gapic_package_tasks(self, **kwargs):
         return [gapic_tasks.GapicCopyTask]

@@ -18,7 +18,6 @@ import yaml
 import glob
 
 from pipeline.pipelines import code_generation_pipeline as code_gen
-from pipeline.tasks import batch_tasks
 from taskflow.patterns import linear_flow
 from pipeline.utils import config_util, task_utils
 
@@ -69,11 +68,6 @@ class BatchTaskFactory(code_gen.TaskFactoryBase):
             api_kwargs.update(kwargs)
 
             tasks = self.make_pipeline_tasks_func(**api_kwargs)
-            tasks += task_utils.instantiate_tasks(
-                [batch_tasks.BatchOutputDirTask,
-                 batch_tasks.BatchCleanTask,
-                 batch_tasks.BatchCopyTask],
-                api_kwargs)
 
             single_flow = linear_flow.Flow('SingleLanguageApiFlow')
             single_flow.add(*tasks)
@@ -81,7 +75,7 @@ class BatchTaskFactory(code_gen.TaskFactoryBase):
 
     def get_validate_kwargs(self, **kwargs):
         return ['batch_apis', 'batch_languages', 'api_config_pattern',
-                'artman_language_yaml', 'batch_output_dir']
+                'artman_language_yaml', 'stage_output']
 
     def get_invalid_kwargs(self, **kwargs):
         return ['language']

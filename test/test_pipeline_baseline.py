@@ -90,18 +90,15 @@ def _test_error(pipeline_name, language, config, pipeline_kwargs,
 @mock.patch('subprocess.check_call')
 @mock.patch('subprocess.check_output')
 @mock.patch('os.chdir')
-def _test_baseline(pipeline_name, language, config, pipeline_kwargs, baseline,
+def _test_baseline(pipeline_name, config, extra_args, baseline,
                    mock_chdir, mock_check_output, mock_check_call, mock_call,
                    mock_gradle_task):
     reporoot = os.path.abspath('.')
 
     # Execute pipeline args
     args = ['--config', config,
-            '--pipeline_kwargs', pipeline_kwargs,
             '--reporoot', reporoot,
-            pipeline_name]
-    if language:
-        args += ['--language', language]
+            pipeline_name] + extra_args
 
     # Mock output value of gradle tasks
     mock_gradle_task.return_value = 'MOCK_GRADLE_TASK_OUTPUT'
@@ -129,19 +126,19 @@ def _test_baseline(pipeline_name, language, config, pipeline_kwargs, baseline,
     check_calls_match(expected_subprocess_call, mock_call.mock_calls, bindings)
 
 
-python_pub_kwargs = {
+python_pub_extra_args = ['--pipeline_kwargs', str({
         'repo_url': 'https://example-site.exampledomain.com/',
         'username': 'example-user',
         'password': 'example-pwd',
-        'publish_env': 'dev'}
+        'publish_env': 'dev'})]
 
 
-java_pub_kwargs = {
+java_pub_extra_args = ['--pipeline_kwargs', str({
         'repo_url': 'http://maven.example.com/nexus/content/repositories/'
                     'releases',
         'username': 'example-maven-uname',
         'password': 'example-maven-pwd',
-        'publish_env': 'prod'}
+        'publish_env': 'prod'})]
 
 
 @pytest.mark.parametrize(
@@ -165,54 +162,67 @@ def test_generator_errors(pipeline_name, language, extra_kwargs,
 
 
 @pytest.mark.parametrize(
-    'pipeline_name, language, extra_kwargs, baseline',
+    'pipeline_name, language, extra_args, baseline',
     [
-        ('GapicConfigPipeline', None, {}, 'config_pipeline'),
-        ('GrpcClientPipeline', 'python', {},
+        ('GapicConfigPipeline', None, [], 'config_pipeline'),
+        ('GrpcClientPipeline', 'python', [],
          'python_grpc_client_nopub_pipeline'),
-        ('GrpcClientPipeline', 'python', python_pub_kwargs,
+        ('GrpcClientPipeline', 'python', python_pub_extra_args,
          'python_grpc_client_pub_pipeline'),
-        ('GapicClientPipeline', 'python', {},
+        ('GapicClientPipeline', 'python', [],
          'python_gapic_client_pipeline'),
-        ('GrpcClientPipeline', 'java', {},
+        ('GrpcClientPipeline', 'java', [],
          'java_grpc_client_nopub_pipeline'),
-        ('GrpcClientPipeline', 'java', java_pub_kwargs,
+        ('GrpcClientPipeline', 'java', java_pub_extra_args,
          'java_grpc_client_pub_pipeline'),
-        ('GapicClientPipeline', 'java', {},
+        ('GapicClientPipeline', 'java', [],
          'java_gapic_client_pipeline'),
-        ('GrpcClientPipeline', 'nodejs', {},
+        ('GrpcClientPipeline', 'nodejs', [],
          'nodejs_grpc_client_pipeline'),
-        ('GapicClientPipeline', 'nodejs', {},
+        ('GapicClientPipeline', 'nodejs', [],
          'nodejs_gapic_client_pipeline'),
-        ('GrpcClientPipeline', 'ruby', {},
+        ('GrpcClientPipeline', 'ruby', [],
          'ruby_grpc_client_pipeline'),
-        ('GapicClientPipeline', 'ruby', {},
+        ('GapicClientPipeline', 'ruby', [],
          'ruby_gapic_client_pipeline'),
-        ('GrpcClientPipeline', 'go', {},
+        ('GrpcClientPipeline', 'go', [],
          'go_grpc_client_pipeline'),
-        ('GapicClientPipeline', 'go', {},
+        ('GapicClientPipeline', 'go', [],
          'go_gapic_client_pipeline'),
-        ('GrpcClientPipeline', 'php', {},
+        ('GrpcClientPipeline', 'php', [],
          'php_grpc_client_pipeline'),
-        ('GapicClientPipeline', 'php', {},
+        ('GapicClientPipeline', 'php', [],
          'php_gapic_client_pipeline'),
-        ('GrpcClientPipeline', 'csharp', {},
+        # Use PHP to test stage_output flag in GapicClientPipeline
+        ('GapicClientPipeline', 'php', ['--stage_output'],
+         'php_gapic_client_stage_pipeline'),
+        ('GrpcClientPipeline', 'csharp', [],
          'csharp_grpc_client_pipeline'),
-        ('GapicClientPipeline', 'csharp', {},
+        ('GapicClientPipeline', 'csharp', [],
          'csharp_gapic_client_pipeline'),
     ])
-def test_generator(pipeline_name, language, extra_kwargs, baseline):
-
+def test_generator(pipeline_name, language, extra_args, baseline):
     artman_api_yaml = 'test/testdata/googleapis_test/gapic/api/' \
                       'artman_library.yaml'
     artman_language_yaml = 'test/testdata/googleapis_test/gapic/lang/' \
                            'common.yaml'
     config = ','.join([artman_api_yaml, artman_language_yaml])
-    pipeline_kwargs = str(extra_kwargs)
-    _test_baseline(pipeline_name, language, config, pipeline_kwargs, baseline)
+    if language:
+        extra_args += ['--language', language]
+    _test_baseline(pipeline_name, config, extra_args, baseline)
 
 
-def test_gapic_batch_pipeline():
-    _test_baseline('GapicClientBatchPipeline', None,
-                   'test/testdata/googleapis_test/gapic/batch/staging.yaml',
-                   {}, 'gapic_batch_pipeline')
+@pytest.mark.parametrize(
+    'extra_args, baseline',
+    [
+        ([], 'gapic_batch_pipeline'),
+        (['--stage_output'], 'gapic_batch_staging_pipeline')
+    ]
+)
+def test_generator_batch(extra_args, baseline):
+    config = 'test/testdata/googleapis_test/gapic/batch/staging.yaml'
+    pipeline_name = 'GapicClientBatchPipeline'
+    _test_baseline(pipeline_name,
+                   config,
+                   extra_args,
+                   baseline)

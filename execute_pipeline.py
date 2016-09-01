@@ -125,13 +125,18 @@ def _CreateArgumentParser():
         default=None,
         help='Environment for remote execution (valid value is \'remote\', and '
              'is case-insensitive. Pipeline will be executed locally if this '
-             'flag is not provided.'),
+             'flag is not provided.')
     parser.add_argument(
         '-l',
         '--language',
         type=str,
         default=None,
         help='Specify the language in which to generate output.')
+    parser.add_argument(
+        '--stage_output',
+        action='store_true',
+        help='Control whether to add the generated output to the staging '
+             'repository.')
     return parser
 
 
@@ -141,6 +146,7 @@ def _parse_args(args):
 
     repo_root = flags.reporoot
     language = flags.language
+    stage_output = flags.stage_output
     pipeline_args = {}
 
     if flags.env:
@@ -153,6 +159,7 @@ def _parse_args(args):
     pipeline_args['repo_root'] = repo_root
     if language:
         pipeline_args['language'] = language
+    pipeline_args['stage_output'] = stage_output
     # TODO(ethanbao): Remove TOOLKIT_HOME var after toolkit_path is removed from
     # gapic yaml.
     repl_vars = {'REPOROOT': repo_root,
