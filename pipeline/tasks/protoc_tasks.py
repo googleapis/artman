@@ -376,6 +376,20 @@ class JavaGrpcPackmanTask(GrpcPackmanTask):
             import_proto_path, packman_flags, repo_dir)
 
 
+class RubyGrpcCopyTask(task_base.TaskBase):
+    """Copies the generated protos and gRPC client library to
+    the final_repo_dir/lib.
+    """
+    def execute(self, api_name, language, output_dir,
+                final_repo_dir):
+        pkg_dir = _pkg_root_dir(output_dir, api_name, language)
+        pkg_dir = os.path.join(pkg_dir, 'ruby', 'lib')
+        print "Copying " + pkg_dir + "/* to " + final_repo_dir
+        if not os.path.exists(final_repo_dir):
+            self.exec_command(['mkdir', '-p', final_repo_dir])
+        self.exec_command(['cp', '-rf', pkg_dir, final_repo_dir])
+
+
 class GoExtractImportBaseTask(task_base.TaskBase):
     default_provides = 'go_import_base'
 
