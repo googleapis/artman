@@ -35,12 +35,16 @@ def packman_api_name(api_name):
     return api_name.replace('-', '/')
 
 
-def is_output_gcloud(final_repo_dir):
+def is_output_gcloud(language, final_repo_dir):
     """Check if the final_repo_dir is a part of gcloud project.
-
-    Currently it simply checks if the path contains 'gcloud-xxx'.
     """
     final_repo_dir = os.path.abspath(final_repo_dir)
+    if language == 'nodejs':
+        cloud_dirname = 'google-cloud-node'
+    else:
+        cloud_dirname = 'google-cloud-' + language
+    if final_repo_dir.find(os.path.sep + cloud_dirname + os.path.sep) >= 0:
+        return True
     return re.search(os.path.sep + 'gcloud-[a-z]+' + os.path.sep,
                      final_repo_dir)
 

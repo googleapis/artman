@@ -134,7 +134,7 @@ class GapicPackmanTask(packman_tasks.PackmanTaskBase):
         # Some APIs will be a part of gcloud project for Ruby and NodeJS.
         # Such APIs don't need packman.
         if ((language != 'ruby' and language != 'nodejs') or
-                not task_utils.is_output_gcloud(final_repo_dir)):
+                not task_utils.is_output_gcloud(language, final_repo_dir)):
             # TODO: Use TaskBase.exec_command()
             self.run_packman(language,
                              task_utils.packman_api_name(api_name),

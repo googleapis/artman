@@ -32,9 +32,9 @@ def _scoped_run_command(target_dir, commands):
 class RubyPackageGenTask(task_base.TaskBase):
     """Generates .gem file for the target directory."""
 
-    def execute(self, package_dir):
+    def execute(self, language, package_dir):
         # Do not create gem if the output is a part of gcloud.
-        if not task_utils.is_output_gcloud(package_dir):
+        if not task_utils.is_output_gcloud(language, package_dir):
             _scoped_run_command(package_dir, ['rake', 'build'])
 
     def validate(self):
