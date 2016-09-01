@@ -117,7 +117,6 @@ class _PhpProtoParams:
 
 
 _PROTO_PARAMS_MAP = {
-    'python': _SimpleProtoParams('python'),
     'ruby': _SimpleProtoParams('ruby'),
     'java': _JavaProtoParams(),
     'go': _GoProtoParams(),

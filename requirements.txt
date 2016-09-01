@@ -4,5 +4,6 @@ taskflow==1.25.0
 kazoo>=2.2.1
 google-apitools
 gcloud==0.15.0
+grpcio-tools>=1.0.0
 yapf>=0.6.2 # Apache-2.0
 requests>=2.10.0,<3.0.0

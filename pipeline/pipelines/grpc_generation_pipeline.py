@@ -59,6 +59,16 @@ class _JavaGrpcTaskFactory(GrpcTaskFactoryBase):
         return [protoc_tasks.JavaGrpcPackmanTask]
 
 
+class _PythonGrpcTaskFactory(GrpcTaskFactoryBase):
+
+    def get_tasks(self, **kwargs):
+        kwargs.update({'packman_flags': ['--proto_compiler',
+                                         'python',
+                                         '--proto_compiler_args',
+                                         '-m grpc.tools.protoc']})
+        return super(_PythonGrpcTaskFactory, self).get_tasks(**kwargs)
+
+
 class _GoGrpcTaskFactory(GrpcTaskFactoryBase):
     """Responsible for the protobuf/gRPC flow for Go language.
 
@@ -86,7 +96,7 @@ class _CSharpGrpcTaskFactory(GrpcTaskFactoryBase):
 
 _GRPC_TASK_FACTORY_DICT = {
     'java': _JavaGrpcTaskFactory,
-    'python': GrpcTaskFactoryBase,
+    'python': _PythonGrpcTaskFactory,
     'go': _GoGrpcTaskFactory,
     'ruby': _RubyGrpcTaskFactory,
     'php': GrpcTaskFactoryBase,

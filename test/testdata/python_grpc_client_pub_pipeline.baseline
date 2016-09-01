@@ -1,4 +1,4 @@
-gen-api-package --api_name=library/v1 -l python -o {OUTPUT}/library-v1-gen-python --package_prefix grpc- -i {CWD}/test/fake-repos/gapi-core-proto/src/main/proto -r test/fake-repos/fake-proto
+gen-api-package --api_name=library/v1 -l python -o {OUTPUT}/library-v1-gen-python --package_prefix grpc- -i {CWD}/test/fake-repos/gapi-core-proto/src/main/proto -r test/fake-repos/fake-proto --proto_compiler python --proto_compiler_args -m grpc.tools.protoc
 devpi login --password example-pwd example-user
 devpi use https://example-site.exampledomain.com/example-user/dev
 devpi upload --no-vcs

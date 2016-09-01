@@ -46,8 +46,8 @@ A build pipeline can also be triggered remotely. Run the following command to st
 
   ::
 
-     TOOLKIT_HOME=<path_to_toolkit_repo> python start_conductor.py \
-       --log_local --jobboard=<unique_jobboard_name>
+     TOOLKIT_HOME=<path_to_toolkit_repo> PATH=<path_to_packman_repo>/bin:$PATH \
+       python start_conductor.py --jobboard=<unique_jobboard_name> [--log_local]
 
 
 And then run this example command to trigger a trivial build on that server
