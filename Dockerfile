@@ -63,7 +63,7 @@ ENV PATH $GOPATH/bin:/home/linuxbrew/.linuxbrew/opt/go/libexec/bin:$PATH
 RUN mkdir -p "$GOPATH/src" "$GOPATH/bin" && chmod -R 777 "$GOPATH"
 
 # Install pacman
-RUN npm install -g googleapis-packman@0.8.0
+RUN npm install -g googleapis-packman@0.8.4
 
 # Setup tools for codegen of Ruby
 RUN gem install rubocop --version '= 0.39.0' --no-ri --no-rdoc
@@ -80,5 +80,6 @@ ENV TOOLKIT_HOME /toolkit
 # TODO(ethanbao): pipeline should be installed from package manager.
 ADD . /src
 WORKDIR /src
+RUN pip install --upgrade pip
 RUN pip install -r requirements.txt
 CMD python start_conductor.py
