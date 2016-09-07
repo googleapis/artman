@@ -66,7 +66,7 @@ def main(args):
         task_details, flow_detail = job_util.fetch_job_status(jb, env)
 
         for task_detail in task_details:
-            if task_detail.name == 'BlobUploadTask' and task_detail.results:
+            if task_detail.name.startswith('BlobUploadTask') and task_detail.results:
                 bucket_name, path, _ = task_detail.results
                 pipeline_util.download_from_gcs(
                     bucket_name,
