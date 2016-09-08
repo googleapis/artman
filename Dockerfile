@@ -62,8 +62,10 @@ ENV GOPATH /go
 ENV PATH $GOPATH/bin:/home/linuxbrew/.linuxbrew/opt/go/libexec/bin:$PATH
 RUN mkdir -p "$GOPATH/src" "$GOPATH/bin" && chmod -R 777 "$GOPATH"
 
-# Install pacman
-RUN npm install -g googleapis-packman@0.8.4
+# Install packman
+# TODO: consider installing released packages once artman is versioned (so that
+#   each release of artman is pegged to a release of packman)
+RUN npm install -g https://github.com/googleapis/packman.git 
 
 # Setup tools for codegen of Ruby
 RUN gem install rubocop --version '= 0.39.0' --no-ri --no-rdoc
