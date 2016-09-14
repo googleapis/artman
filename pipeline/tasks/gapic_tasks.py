@@ -130,11 +130,8 @@ class GapicCopyTask(task_base.TaskBase):
 class GapicPackmanTask(packman_tasks.PackmanTaskBase):
     default_provides = 'package_dir'
 
-    def execute(self, language, api_name, final_repo_dir):
-        # Some APIs will be a part of gcloud project for Ruby and NodeJS.
-        # Such APIs don't need packman.
-        if ((language != 'ruby' and language != 'nodejs') or
-                not task_utils.is_output_gcloud(language, final_repo_dir)):
+    def execute(self, language, api_name, final_repo_dir, skip_packman=False):
+        if not skip_packman:
             # TODO: Use TaskBase.exec_command()
             self.run_packman(language,
                              task_utils.packman_api_name(api_name),
