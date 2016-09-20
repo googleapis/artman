@@ -5,4 +5,3 @@ test/fake-repos/toolkit/gradlew -p test/fake-repos/toolkit runVGen -Pclargs=--de
 mkdir -p {OUTPUT}/final
 cp -rf {OUTPUT}/library-v1-gapic-gen-ruby/my_api.rb {OUTPUT}/final
 gen-api-package --api_name=library/v1 -l ruby --gax_dir={OUTPUT}/final --template_root=templates/gax
-rake build

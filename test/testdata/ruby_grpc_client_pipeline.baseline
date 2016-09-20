@@ -1,4 +1,3 @@
 gen-api-package --api_name=library/v1 -l ruby -o {CWD}/test/testdata/test_output/library-v1-gen-ruby --package_prefix grpc- -i {CWD}/test/fake-repos/gapi-core-proto/src/main/proto -r test/fake-repos/fake-proto
 mkdir -p {CWD}/test/testdata/test_output/final
 cp -rf {CWD}/test/testdata/test_output/library-v1-gen-ruby/ruby/lib {CWD}/test/testdata/test_output/final
-rake build

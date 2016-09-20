@@ -17,7 +17,7 @@
 from pipeline.pipelines import code_generation_pipeline as code_gen
 from pipeline.pipelines import batch_generation_pipeline as batch_gen
 from pipeline.tasks import gapic_tasks, format_tasks, protoc_tasks
-from pipeline.tasks import package_tasks, staging_tasks
+from pipeline.tasks import staging_tasks
 from pipeline.utils import task_utils
 
 
@@ -112,8 +112,7 @@ class _RubyGapicTaskFactory(GapicTaskFactoryBase):
 
     def _get_gapic_package_tasks(self, **kwargs):
         return [gapic_tasks.GapicCopyTask,
-                gapic_tasks.GapicPackmanTask,
-                package_tasks.RubyPackageGenTask]
+                gapic_tasks.GapicPackmanTask]
 
 
 class _NodeJSGapicTaskFactory(GapicTaskFactoryBase):
