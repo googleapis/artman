@@ -111,7 +111,7 @@ def _test_baseline(pipeline_name, config, extra_args, baseline,
     # Run pipeline
     execute_pipeline.main(args)
 
-    bindings = {'CWD': os.getcwd(), 'OUTPUT': output_dir}
+    bindings = {'CWD': reporoot, 'OUTPUT': output_dir}
 
     # Compare with the expected subprocess calls.
     expected_checked_calls = get_expected_calls(

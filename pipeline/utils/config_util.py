@@ -16,7 +16,6 @@
 """Utils related to config files"""
 
 
-import os
 import yaml
 
 
@@ -33,9 +32,7 @@ def load_config_spec(config_spec, config_sections, repl_vars, language):
     if language in all_config_data:
         data.update(all_config_data[language])
 
-    repl_vars['THISDIR'] = os.path.dirname(config_path)
     var_replace_config_data(data, repl_vars)
-    del repl_vars['THISDIR']
     return data
 
 
