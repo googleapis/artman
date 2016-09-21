@@ -243,13 +243,14 @@ Gapic Batch Pipeline
 
 The GAPIC batch pipeline can be used to generate multiple API and language
 combinations with one artman command. This example uses the staging repository
-batch config file in the googleapis repository.
+batch config file in the googleapis repository, and puts the output in the
+staging repository.
 
   ::
 
      python execute_pipeline.py \
-        --config "../googleapis/gapic/batch/staging.yaml" \
-        GapicClientBatchPipeline
+        --config "../googleapis/gapic/batch/common.yaml" \
+        --stage_output GapicClientBatchPipeline
 
 
 Pipeline configuration
