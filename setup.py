@@ -22,7 +22,7 @@ import setuptools
 from pip.req import parse_requirements
 
 requirements = [
-    'gcloud>=0.10.0',
+    'google-cloud>=0.19.0',
     'grpcio-tools>=1.0.0',
     'kazoo>=2.2.1',
     'oslo.utils>=3.4.0',
