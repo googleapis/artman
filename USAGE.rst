@@ -252,6 +252,32 @@ staging repository.
         --config "../googleapis/gapic/batch/common.yaml" \
         --stage_output GapicClientBatchPipeline
 
+It is also possible to restrict the batch generation to only a particular
+language. This can greatly reduce the total execution time of the command.
+Set the language by editing the googleapis/gapic/batch/common.yaml file, or
+by specifying the batch_languages argument on the command line using the
+pipeline_kwargs argument. For example, to run batch generation only for Java:
+
+  ::
+
+     python execute_pipeline.py \
+        --config "../googleapis/gapic/batch/common.yaml" \
+        --stage_output \
+        --pipeline_kwargs "{'batch_languages':'java'}" \
+        GapicClientBatchPipeline
+
+It is also possible to restrict the APIs that will be generated using the
+batch_apis setting. For example, to run the batch command to generate only
+the PubSub API in all languages:
+
+  ::
+
+     python execute_pipeline.py \
+        --config "../googleapis/gapic/batch/common.yaml" \
+        --stage_output \
+        --pipeline_kwargs "{'batch_apis':'pubsub'}" \
+        GapicClientBatchPipeline
+
 
 Pipeline configuration
 ----------------------
