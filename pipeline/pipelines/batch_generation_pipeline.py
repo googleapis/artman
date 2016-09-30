@@ -118,9 +118,12 @@ def _get_languages(artman_language_yaml, batch_languages):
 
 def _get_artman_config_filenames(api_config_pattern, batch_apis):
     if batch_apis == '*':
-        return sorted(glob.glob(api_config_pattern))
+        glob_pattern = config_util.var_replace(api_config_pattern,
+                                               {'API_SHORT_NAME': '*'})
+        return sorted(glob.glob(glob_pattern))
     else:
-        return [config_util.var_replace(api_config_pattern, {'APINAME': api})
+        return [config_util.var_replace(api_config_pattern,
+                                        {'API_SHORT_NAME': api})
                 for api in batch_apis.split(',')]
 
 
