@@ -1,3 +1,6 @@
-gen-api-package --api_name=library/v1 -l ruby -o {CWD}/test/testdata/test_output/library-v1-gen-ruby --package_prefix grpc- -i {CWD}/test/fake-repos/gapi-core-proto/src/main/proto -r test/fake-repos/fake-proto
-mkdir -p {CWD}/test/testdata/test_output/final
-cp -rf {CWD}/test/testdata/test_output/library-v1-gen-ruby/ruby/lib {CWD}/test/testdata/test_output/final
+mkdir -p {OUTPUT}/library-v1-gen-ruby
+which grpc_ruby_plugin
+grpc_tools_ruby_protoc --proto_path=test/fake-repos/gapi-core-proto/src/main/proto/ --proto_path=test/fake-repos/fake-proto --proto_path=MOCK_GRADLE_TASK_OUTPUT --ruby_out={OUTPUT}/library-v1-gen-ruby --plugin=protoc-gen-grpc= --grpc_out={OUTPUT}/library-v1-gen-ruby test/fake-repos/fake-proto/fake.proto
+mkdir -p {OUTPUT}/final/lib
+cp -rf {OUTPUT}/library-v1-gen-ruby/library_pb.rb {OUTPUT}/final/lib
+cp -rf {OUTPUT}/library-v1-gen-ruby/my_api_services_pb.rb {OUTPUT}/final/lib

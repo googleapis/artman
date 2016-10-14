@@ -65,12 +65,13 @@ RUN mkdir -p "$GOPATH/src" "$GOPATH/bin" && chmod -R 777 "$GOPATH"
 # Install packman
 # TODO: consider installing released packages once artman is versioned (so that
 #   each release of artman is pegged to a release of packman)
-RUN npm install -g https://github.com/googleapis/packman.git 
+RUN npm install -g https://github.com/googleapis/packman.git
 
 # Setup tools for codegen of Ruby
 RUN gem install rubocop --version '= 0.39.0' --no-ri --no-rdoc
 RUN gem install bundler --version '= 1.12.1' --no-ri --no-rdoc
 RUN gem install rake --version '= 10.5.0' --no-ri --no-rdoc
+RUN gem install grpc-tools --version '=1.0.0' --no-ri --no-rdoc
 
 # Install couple of git repos
 WORKDIR /
