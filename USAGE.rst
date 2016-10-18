@@ -111,7 +111,7 @@ Java (pubsub)
      python execute_pipeline.py \
         --config "../googleapis/gapic/core/artman_core.yaml,\
         ../googleapis/gapic/lang/common.yaml" \
-        --language java
+        --language java \
         GrpcClientPipeline
 
      python execute_pipeline.py \
