@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import os
 import uuid
 from multiprocessing import Process
 import unittest
@@ -34,6 +35,8 @@ class ConductorE2ETest(unittest.TestCase):
     def tearDownClass(cls):
         cls.p.terminate()
 
+    @unittest.skipIf(os.environ.get('TRAVIS'),
+                     'Skipping conductor test when running under Travis CI')
     def test_remote_sample_pipeline(self):
         pipeline_kwargs = {'sleep_secs': 1}
         pipeline = pipeline_factory.make_pipeline(
