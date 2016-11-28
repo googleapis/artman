@@ -28,7 +28,7 @@ class JavaFormatTask(task_base.TaskBase):
     def execute(self, gapic_code_dir, toolkit_path):
         print 'Formatting files in ' + os.path.abspath(gapic_code_dir)
         # TODO(shinfan): Move gradle task into requirement
-        path = task_utils.run_gradle_task(
+        path = task_utils.get_gradle_task_output(
                 'showJavaFormatterPath', toolkit_path)
         targetFiles = []
         for root, dirs, files in os.walk(gapic_code_dir):

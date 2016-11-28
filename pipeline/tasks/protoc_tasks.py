@@ -18,6 +18,7 @@ import os
 import re
 import subprocess
 import yaml
+
 from pipeline.tasks import packman_tasks
 from pipeline.tasks import task_base
 from pipeline.tasks.requirements import grpc_requirements
@@ -48,8 +49,8 @@ class _SimpleProtoParams:
         return '--grpc_out=' + self.code_root(output_dir)
 
     @property
-    def proto_compiler(self):
-        return 'protoc'
+    def proto_compiler_command(self):
+        return ['protoc']
 
 
 class _JavaProtoParams:
@@ -66,7 +67,7 @@ class _JavaProtoParams:
     def grpc_plugin_path(self, toolkit_path):
         if self.path is None:
             print 'start gradle process to locate GRPC Java plugin'
-            self.path = task_utils.run_gradle_task(
+            self.path = task_utils.get_gradle_task_output(
                 'showGrpcJavaPluginPath', toolkit_path)
         return self.path
 
@@ -74,8 +75,8 @@ class _JavaProtoParams:
         return '--grpc_out=' + self.code_root(output_dir)
 
     @property
-    def proto_compiler(self):
-        return 'protoc'
+    def proto_compiler_command(self):
+        return ['protoc']
 
 
 class _GoProtoParams:
@@ -103,8 +104,8 @@ class _GoProtoParams:
         return None
 
     @property
-    def proto_compiler(self):
-        return 'protoc'
+    def proto_compiler_command(self):
+        return ['protoc']
 
 
 class _PhpProtoParams:
@@ -128,8 +129,8 @@ class _PhpProtoParams:
         return '--grpc_out=' + self.code_root(output_dir)
 
     @property
-    def proto_compiler(self):
-        return 'protoc'
+    def proto_compiler_command(self):
+        return ['protoc']
 
 
 class _RubyProtoParams:
@@ -154,8 +155,31 @@ class _RubyProtoParams:
         return '--grpc_out=' + self.code_root(output_dir)
 
     @property
-    def proto_compiler(self):
-        return 'grpc_tools_ruby_protoc'
+    def proto_compiler_command(self):
+        return ['grpc_tools_ruby_protoc']
+
+
+class _PythonProtoParams:
+    def __init__(self):
+        self.path = None
+        self.params = lang_params.LANG_PARAMS_MAP['python']
+
+    def code_root(self, output_dir):
+        return self.params.code_root(output_dir)
+
+    def lang_out_param(self, output_dir, with_grpc):
+        return '--python_out={}'.format(self.code_root(output_dir))
+
+    def grpc_plugin_path(self, dummy_toolkit_path):
+        # No plugin for grpc.tools
+        return None
+
+    def grpc_out_param(self, output_dir):
+        return '--grpc_out=' + self.code_root(output_dir)
+
+    @property
+    def proto_compiler_command(self):
+        return ['python', '-m', 'grpc.tools.protoc']
 
 
 _PROTO_PARAMS_MAP = {
@@ -164,27 +188,15 @@ _PROTO_PARAMS_MAP = {
     'go': _GoProtoParams(),
     'csharp': _SimpleProtoParams('csharp'),
     'php': _PhpProtoParams(),
+    'python': _PythonProtoParams()
 }
 
 
 def _find_protobuf_path(toolkit_path):
     """Fetch and locate protobuf source"""
     print 'Searching for latest protobuf source'
-    return task_utils.run_gradle_task(
+    return task_utils.get_gradle_task_output(
         'showProtobufPath', toolkit_path)
-
-
-def _find_protos(proto_paths):
-    """Searches along `proto_path` for .proto files and returns a list of
-    paths"""
-    protos = []
-    if type(proto_paths) is not list:
-        raise ValueError("proto_paths must be a list")
-    for path in proto_paths:
-        for root, _, files in os.walk(path):
-            protos += [os.path.join(root, proto) for proto in files
-                       if os.path.splitext(proto)[1] == '.proto']
-    return protos
 
 
 def _group_by_dirname(protos):
@@ -249,7 +261,8 @@ class ProtoDescGenTask(task_base.TaskBase):
     def execute(self, src_proto_path, import_proto_path, output_dir,
                 api_name, toolkit_path, desc_proto_path=None):
         desc_proto_path = desc_proto_path or []
-        desc_protos = _find_protos(src_proto_path + desc_proto_path)
+        desc_protos = list(
+            task_utils.find_protos(src_proto_path + desc_proto_path))
         header_proto_path = import_proto_path + desc_proto_path
         header_proto_path.extend(src_proto_path)
         desc_out_file = api_name + '.desc'
@@ -269,69 +282,87 @@ class ProtoDescGenTask(task_base.TaskBase):
         return [grpc_requirements.GrpcRequirements]
 
 
-class ProtoCodeGenTask(task_base.TaskBase):
+class ProtocCodeGenTaskBase(task_base.TaskBase):
+    default_provides = 'intermediate_package_dir'
+
+    def _execute_proto_codegen(
+            self, language, src_proto_path, import_proto_path,
+            output_dir, api_name, toolkit_path, gen_proto=False,
+            gen_grpc=False, final_src_proto_path=None,
+            final_import_proto_path=None):
+        src_proto_path = final_src_proto_path or src_proto_path
+        import_proto_path = final_import_proto_path or import_proto_path
+        proto_params = _PROTO_PARAMS_MAP[language]
+        pkg_dir = _prepare_pkg_dir(output_dir, api_name, language)
+
+        if gen_proto:
+            protoc_proto_params = _protoc_proto_params(
+                proto_params, pkg_dir, with_grpc=True)
+        else:
+            protoc_proto_params = []
+
+        if gen_grpc:
+            protoc_grpc_params = _protoc_grpc_params(
+                proto_params, pkg_dir, toolkit_path)
+        else:
+            protoc_grpc_params = []
+
+        # protoc-gen-go must compile all protos in a package at the same
+        # time, and *only* the protos in that package. This doesn't break
+        # other languages, so we do it that way for all of them.
+        for (dirname, protos) in _group_by_dirname(
+                task_utils.find_protos(src_proto_path)).items():
+            self.exec_command(
+                proto_params.proto_compiler_command +
+                _protoc_header_params(
+                    import_proto_path + src_proto_path, toolkit_path) +
+                protoc_proto_params +
+                protoc_grpc_params +
+                protos)
+
+        return pkg_dir
+
+
+class ProtoCodeGenTask(ProtocCodeGenTaskBase):
     """Generates protos"""
     def execute(self, language, src_proto_path, import_proto_path,
-                output_dir, api_name, toolkit_path):
-        proto_params = _PROTO_PARAMS_MAP[language]
-        pkg_dir = _prepare_pkg_dir(output_dir, api_name, language)
-        # protoc-gen-go must compile all protos in a package at the same time,
-        # and *only* the protos in that package. This doesn't break other
-        # languages, so we do it that way for all of them.
-        for (dirname, protos) in _group_by_dirname(
-                _find_protos(src_proto_path)).items():
-            print 'Generating protos {0}'.format(dirname)
-            self.exec_command(
-                [proto_params.proto_compiler] +
-                _protoc_header_params(
-                    import_proto_path + src_proto_path, toolkit_path) +
-                _protoc_proto_params(proto_params, pkg_dir, with_grpc=False) +
-                protos)
+                output_dir, api_name, toolkit_path, final_src_proto_path=None,
+                final_import_proto_path=None):
+        return self._execute_proto_codegen(
+            language, src_proto_path, import_proto_path, output_dir, api_name,
+            toolkit_path, gen_proto=True,
+            final_src_proto_path=final_src_proto_path,
+            final_import_proto_path=final_import_proto_path)
 
     def validate(self):
         return [grpc_requirements.GrpcRequirements]
 
 
-class GrpcCodeGenTask(task_base.TaskBase):
+class GrpcCodeGenTask(ProtocCodeGenTaskBase):
     """Generates the gRPC client library"""
     def execute(self, language, src_proto_path, import_proto_path,
-                toolkit_path, output_dir, api_name):
-        proto_params = _PROTO_PARAMS_MAP[language]
-        pkg_dir = _prepare_pkg_dir(output_dir, api_name, language)
-        # See the comments in ProtoCodeGenTask for why this needs to group the
-        # proto files by directory.
-        for (dirname, protos) in _group_by_dirname(
-                _find_protos(src_proto_path)).items():
-            print 'Running protoc with grpc plugin on {0}'.format(dirname)
-            self.exec_command(
-                [proto_params.proto_compiler] +
-                _protoc_header_params(
-                    import_proto_path + src_proto_path, toolkit_path) +
-                _protoc_grpc_params(proto_params, pkg_dir, toolkit_path) +
-                protos)
+                toolkit_path, output_dir, api_name, final_src_proto_path=None,
+                final_import_proto_path=None):
+        return self._execute_proto_codegen(
+            language, src_proto_path, import_proto_path, output_dir, api_name,
+            toolkit_path, gen_grpc=True,
+            final_src_proto_path=final_src_proto_path,
+            final_import_proto_path=final_import_proto_path)
 
     def validate(self):
         return [grpc_requirements.GrpcRequirements]
 
 
-class ProtoAndGrpcCodeGenTask(task_base.TaskBase):
+class ProtoAndGrpcCodeGenTask(ProtocCodeGenTaskBase):
     """Generates protos and the gRPC client library"""
     def execute(self, language, src_proto_path, import_proto_path,
-                toolkit_path, output_dir, api_name):
-        proto_params = _PROTO_PARAMS_MAP[language]
-        pkg_dir = _prepare_pkg_dir(output_dir, api_name, language)
-        # See the comments in ProtoCodeGenTask for why this needs to group the
-        # proto files by directory.
-        for (dirname, protos) in _group_by_dirname(
-                _find_protos(src_proto_path)).items():
-            print 'Running protoc and grpc plugin on {0}'.format(dirname)
-            self.exec_command(
-                [proto_params.proto_compiler] +
-                _protoc_header_params(
-                    import_proto_path + src_proto_path, toolkit_path) +
-                _protoc_proto_params(proto_params, pkg_dir, with_grpc=True) +
-                _protoc_grpc_params(proto_params, pkg_dir, toolkit_path) +
-                protos)
+                toolkit_path, output_dir, api_name, final_src_proto_path=None,
+                final_import_proto_path=None):
+        return self._execute_proto_codegen(
+            language, src_proto_path, import_proto_path, output_dir, api_name,
+            toolkit_path, gen_proto=True, gen_grpc=True,
+            final_src_proto_path=final_src_proto_path,
+            final_import_proto_path=final_import_proto_path)
 
     def validate(self):
         return [grpc_requirements.GrpcRequirements]
@@ -382,7 +413,12 @@ class GrpcPackmanTask(packman_tasks.PackmanTaskBase):
     default_provides = 'package_dir'
 
     def execute(self, language, api_name, output_dir, src_proto_path,
-                import_proto_path, packman_flags=None, repo_dir=None):
+                import_proto_path, packman_flags=None, repo_dir=None,
+                final_src_proto_path=None, final_import_proto_path=None):
+
+        src_proto_path = final_src_proto_path or src_proto_path
+        import_proto_path = final_import_proto_path or import_proto_path
+
         packman_flags = packman_flags or []
         api_name_arg = task_utils.packman_api_name(api_name)
         pkg_dir = _pkg_root_dir(output_dir, api_name, language)
@@ -400,6 +436,48 @@ class GrpcPackmanTask(packman_tasks.PackmanTaskBase):
             arg_list += ['-r', repo_dir]
         self.run_packman(*arg_list)
         return os.path.join(pkg_dir, language)
+
+
+class GrpcPackageMetadataGenTask(task_base.TaskBase):
+    default_provides = 'package_dir'
+
+    def execute(self, api_name, toolkit_path, descriptor_set, service_yaml,
+                intermediate_package_dir, output_dir,
+                package_dependencies_yaml, package_defaults_yaml, language):
+        service_args = ['--service_yaml=' + os.path.abspath(yaml)
+                        for yaml in service_yaml]
+        pkg_dir = os.path.join(output_dir, 'python', 'grpc-' + api_name)
+
+        # TODO(geigerj): This section temporarily replicates packman behavior.
+        # Instead, these configuration values should be derived from the artman
+        # config.
+        packman_name = task_utils.packman_api_name(api_name)
+        packman_api_name_parts = packman_name.split('/')
+        packman_api_name = '/'.join(packman_api_name_parts[:-1])
+        packman_api_version = packman_api_name_parts[-1]
+        packman_api_shortname = packman_api_name.split('/')[-1]
+
+        # Currently corresponds to packman's `titlename`. To be replaced
+        # by data from service config; see googleapis/toolkit#270
+        full_name = ('Google ' + packman_api_shortname[0].upper() +
+                     packman_api_shortname[1:])
+
+        args = [
+            '--descriptor_set=' + os.path.abspath(descriptor_set),
+            '--input=' + os.path.abspath(intermediate_package_dir),
+            '--output=' + os.path.abspath(pkg_dir),
+            '--dependencies_config=' + os.path.abspath(
+                package_dependencies_yaml),
+            '--defaults_config=' + os.path.abspath(package_defaults_yaml),
+            '--language=' + language,
+            '--short_name=' + packman_api_shortname,
+            '--name=' + full_name,
+            '--googleapis_path=' + packman_api_name,
+            '--version=' + packman_api_version
+        ] + service_args
+        self.exec_command(task_utils.gradle_task(
+            toolkit_path, 'runPackageMetadataGen', args))
+        return pkg_dir
 
 
 class JavaGrpcPackmanTask(GrpcPackmanTask):

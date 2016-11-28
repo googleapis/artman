@@ -15,7 +15,7 @@
 """Pipelines that run gRPC codegen"""
 
 from pipeline.pipelines import code_generation_pipeline as code_gen
-from pipeline.tasks import protoc_tasks, publish_tasks
+from pipeline.tasks import protoc_tasks, publish_tasks, python_grpc_tasks
 from pipeline.utils import task_utils
 
 
@@ -60,12 +60,11 @@ class _JavaGrpcTaskFactory(GrpcTaskFactoryBase):
 
 class _PythonGrpcTaskFactory(GrpcTaskFactoryBase):
 
-    def get_tasks(self, **kwargs):
-        kwargs.update({'packman_flags': ['--proto_compiler',
-                                         'python',
-                                         '--proto_compiler_args',
-                                         '-m grpc.tools.protoc']})
-        return super(_PythonGrpcTaskFactory, self).get_tasks(**kwargs)
+    def _get_grpc_codegen_tasks(self, **kwargs):
+        return [python_grpc_tasks.PythonChangePackageTask,
+                protoc_tasks.ProtoDescGenTask,
+                protoc_tasks.ProtoCodeGenTask,
+                protoc_tasks.GrpcPackageMetadataGenTask]
 
 
 class _GoGrpcTaskFactory(GrpcTaskFactoryBase):

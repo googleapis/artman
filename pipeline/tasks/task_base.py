@@ -55,7 +55,8 @@ class TaskBase(Task):
         TODO(ethanbao): Use subprocess.Popen which is recommended."""
         try:
             output = subprocess.check_output(args, stderr=subprocess.STDOUT)
-            self.log(output)
+            if output:
+                self.log(output)
             return output
         except subprocess.CalledProcessError as e:
             self.log(e.output)

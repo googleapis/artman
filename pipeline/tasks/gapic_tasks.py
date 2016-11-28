@@ -37,9 +37,8 @@ class GapicConfigGenTask(task_base.TaskBase):
             '--descriptor_set=' + os.path.abspath(descriptor_set),
             '--output=' + os.path.abspath(config_gen_path)
         ] + service_args
-        clargs = '-Pclargs=' + ','.join(args)
-        self.exec_command([os.path.join(toolkit_path, 'gradlew'), '-p',
-                           toolkit_path, 'runConfigGen', clargs])
+        self.exec_command(
+            task_utils.gradle_task(toolkit_path, 'runConfigGen', args))
 
         return config_gen_path
 
@@ -96,9 +95,8 @@ class GapicCodeGenTask(task_base.TaskBase):
             '--descriptor_set=' + os.path.abspath(descriptor_set), '--output='
             + os.path.abspath(code_root)
         ] + service_args + gapic_args
-        clargs = '-Pclargs=' + ','.join(args)
-        self.exec_command([os.path.join(toolkit_path, 'gradlew'), '-p',
-                           toolkit_path, 'runVGen', clargs])
+        self.exec_command(
+            task_utils.gradle_task(toolkit_path, 'runCodeGen', args))
 
         return code_root
 

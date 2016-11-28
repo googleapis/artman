@@ -2,6 +2,10 @@ common:
   toolkit_path: test/fake-repos/toolkit
   staging_repo_dir: '${REPOROOT}/test/testdata/test_output/staging-repo'
   enable_batch_generation: True
+  # common gRPC package generation parameters
+  package_dependencies_yaml: ${REPOROOT}/test/testdata/googleapis_test/gapic/packaging/dependencies.yaml
+  package_defaults_yaml: ${REPOROOT}/test/testdata/googleapis_test/gapic/packaging/api_defaults.yaml
+  common_protos_yaml: ${REPOROOT}/test/testdata/googleapis_test/gapic/packaging/common_protos.yaml
 java:
   gapic_language_yaml:
     - ${REPOROOT}/test/testdata/gapi-example-library-proto/src/main/proto/google/example/library/java_gapic.yaml
