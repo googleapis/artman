@@ -234,9 +234,14 @@ def _protoc_proto_params(proto_params, pkg_dir, with_grpc):
 
 
 def _protoc_grpc_params(proto_params, pkg_dir, toolkit_path):
+    params = []
     plugin_param = proto_params.grpc_plugin_path(toolkit_path)
+    if plugin_param:
+        params.append('--plugin=protoc-gen-grpc={}'.format(plugin_param))
     grpc_param = proto_params.grpc_out_param(pkg_dir)
-    return [param for param in (plugin_param, grpc_param) if param]
+    if grpc_param:
+        params.append(grpc_param)
+    return params
 
 
 def _pkg_root_dir(output_dir, api_name, language):
