@@ -175,7 +175,7 @@ class _PythonProtoParams:
         return None
 
     def grpc_out_param(self, output_dir):
-        return '--grpc_out=' + self.code_root(output_dir)
+        return '--grpc_python_out=' + self.code_root(output_dir)
 
     @property
     def proto_compiler_command(self):
@@ -234,11 +234,9 @@ def _protoc_proto_params(proto_params, pkg_dir, with_grpc):
 
 
 def _protoc_grpc_params(proto_params, pkg_dir, toolkit_path):
-    plugin_path = proto_params.grpc_plugin_path(toolkit_path)
-    if plugin_path is None:
-        return []
-    return ['--plugin=protoc-gen-grpc=' + plugin_path,
-            proto_params.grpc_out_param(pkg_dir)]
+    plugin_param = proto_params.grpc_plugin_path(toolkit_path)
+    grpc_param = proto_params.grpc_out_param(pkg_dir)
+    return [param for param in (plugin_param, grpc_param) if param]
 
 
 def _pkg_root_dir(output_dir, api_name, language):
