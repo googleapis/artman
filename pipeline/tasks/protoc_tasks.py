@@ -145,11 +145,8 @@ class _RubyProtoParams:
         return '--ruby_out={}'.format(self.code_root(output_dir))
 
     def grpc_plugin_path(self, dummy_toolkit_path):
-        if self.path is None:
-            self.path = subprocess.check_output(
-                ['which', 'grpc_ruby_plugin'],
-                stderr=subprocess.STDOUT)[:-1]
-        return self.path
+        # No plugin for grpc_toos_ruby_protoc
+        return None
 
     def grpc_out_param(self, output_dir):
         return '--grpc_out=' + self.code_root(output_dir)
