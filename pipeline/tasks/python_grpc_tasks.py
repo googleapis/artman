@@ -56,9 +56,12 @@ class PythonChangePackageTask(task_base.TaskBase):
         with open(common_protos_yaml) as common_protos_file:
             common_protos_data = yaml.load(common_protos_file)
 
-        # Treat google.protobuf as a common proto package, even though it is
-        # not included in the common-protos we generate.
-        common_protos = ['google.protobuf']
+        # Treat google.protobuf, google.iam as a common proto package, even
+        # though they are not included in the common-protos we generate.
+        #
+        # TODO (geigerj): remove 'google.iam' when it is included in the common
+        # protos package.
+        common_protos = ['google.protobuf', 'google.iam']
         for package in common_protos_data['packages']:
             common_protos.append('google.' + package['name'].replace('/', '.'))
 
