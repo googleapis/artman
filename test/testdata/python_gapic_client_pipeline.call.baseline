@@ -1,1 +1,1 @@
-yapf -i {OUTPUT}/library-v1-gapic-gen-python/my_api.py
+yapf -i {OUTPUT}/google-cloud-library-v1-gapic-gen-python/my_api.py

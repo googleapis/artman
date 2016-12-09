@@ -26,11 +26,14 @@ class GapicConfigGenTask(task_base.TaskBase):
     default_provides = 'gapic_config_dir'
 
     def execute(self, toolkit_path, descriptor_set, service_yaml,
-                output_dir, api_name):
-        config_gen_dir = os.path.join(output_dir, api_name + '-config-gen')
+                output_dir, api_name, api_version, organization_name):
+        api_full_name = task_utils.api_full_name(
+            api_name, api_version, organization_name)
+        config_gen_dir = os.path.join(
+            output_dir, api_full_name + '-config-gen')
         self.exec_command(['mkdir', '-p', config_gen_dir])
         config_gen_path = os.path.join(config_gen_dir,
-                                       api_name + '_gapic.yaml')
+                                       api_full_name + '_gapic.yaml')
         service_args = ['--service_yaml=' + os.path.abspath(yaml)
                         for yaml in service_yaml]
         args = [
@@ -82,9 +85,12 @@ class GapicCodeGenTask(task_base.TaskBase):
     default_provides = 'gapic_code_dir'
 
     def execute(self, language, toolkit_path, descriptor_set, service_yaml,
-                gapic_api_yaml, gapic_language_yaml, output_dir, api_name):
-        code_root = os.path.join(output_dir,
-                                 api_name + '-gapic-gen-' + language)
+                gapic_api_yaml, gapic_language_yaml, output_dir, api_name,
+                api_version, organization_name):
+        api_full_name = task_utils.api_full_name(
+            api_name, api_version, organization_name)
+        code_root = os.path.join(
+            output_dir, api_full_name + '-gapic-gen-' + language)
         self.exec_command(['rm', '-rf', code_root])
         gapic_yaml = gapic_api_yaml + gapic_language_yaml
         gapic_args = ['--gapic_yaml=' + os.path.abspath(yaml)
@@ -128,11 +134,14 @@ class GapicCopyTask(task_base.TaskBase):
 class GapicPackmanTask(packman_tasks.PackmanTaskBase):
     default_provides = 'package_dir'
 
-    def execute(self, language, api_name, final_repo_dir, skip_packman=False):
+    def execute(self, language, api_name, api_version, organization_name,
+                final_repo_dir, skip_packman=False):
         if not skip_packman:
+            api_full_name = task_utils.api_full_name(
+                api_name, api_version, organization_name)
             # TODO: Use TaskBase.exec_command()
             self.run_packman(language,
-                             task_utils.packman_api_name(api_name),
+                             task_utils.packman_api_name(api_full_name),
                              '--gax_dir=' + final_repo_dir,
                              '--template_root=templates/gax')
         return final_repo_dir
