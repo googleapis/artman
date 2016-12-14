@@ -28,11 +28,17 @@ RUN apt-get update && \
     python-pip \
     unzip \
     perl \
-    openjdk-7-jdk
+    software-properties-common
 
-# Define commonly used JAVA_HOME variable
-ENV JAVA_HOME /usr/lib/jvm/java-7-openjdk-amd64
+# Install Oracle JDK 8
+RUN add-apt-repository ppa:openjdk-r/ppa
+RUN apt-get update && apt-get install -y openjdk-8-jdk
 
+# Setup JAVA_HOME, this is useful for docker commandline
+ENV JAVA_HOME /usr/lib/jvm/java-8-openjdk-amd64/
+RUN export JAVA_HOME
+
+# Install NodeJS
 ADD ./scripts /scripts
 WORKDIR /scripts
 # This is need to install nodejs 4.x otherwise nodejs 0.x will be installed.
@@ -78,6 +84,8 @@ WORKDIR /
 RUN git clone https://github.com/googleapis/googleapis
 RUN git clone https://github.com/googleapis/toolkit
 ENV TOOLKIT_HOME /toolkit
+WORKDIR /toolkit
+RUN sudo ./gradlew install # Install toolkit. Must sudo to download gradle plugins.
 
 # Run the pipeline.
 # TODO(ethanbao): pipeline should be installed from package manager.
