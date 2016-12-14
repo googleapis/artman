@@ -489,7 +489,7 @@ class GrpcPackageMetadataGenTask(task_base.TaskBase):
             '--version=' + api_version
         ] + service_args
         self.exec_command(task_utils.gradle_task(
-            toolkit_path, 'runPackageMetadataGen', args))
+            toolkit_path, 'runGrpcMetadataGen', args))
         return pkg_dir
 
     # Separated so that this can be mocked for testing
