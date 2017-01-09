@@ -16,8 +16,8 @@
 
 from pipeline.pipelines import code_generation_pipeline as code_gen
 from pipeline.pipelines import batch_generation_pipeline as batch_gen
-from pipeline.tasks import gapic_tasks, format_tasks, protoc_tasks
-from pipeline.tasks import staging_tasks
+from pipeline.tasks import (gapic_tasks, format_tasks, package_metadata_tasks,
+                            protoc_tasks, staging_tasks)
 from pipeline.utils import task_utils
 
 
@@ -80,6 +80,7 @@ class GapicTaskFactoryBase(code_gen.TaskFactoryBase):
 
     def _get_gapic_codegen_tasks(self, **kwargs):
         return [protoc_tasks.ProtoDescGenTask,
+                package_metadata_tasks.PackageMetadataConfigGenTask,
                 gapic_tasks.GapicCodeGenTask,
                 format_tasks.get_format_task(kwargs['language'])]
 

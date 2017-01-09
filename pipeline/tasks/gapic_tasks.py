@@ -85,8 +85,8 @@ class GapicCodeGenTask(task_base.TaskBase):
     default_provides = 'gapic_code_dir'
 
     def execute(self, language, toolkit_path, descriptor_set, service_yaml,
-                gapic_api_yaml, gapic_language_yaml, output_dir, api_name,
-                api_version, organization_name):
+                gapic_api_yaml, gapic_language_yaml, package_metadata_yaml,
+                output_dir, api_name, api_version, organization_name):
         api_full_name = task_utils.api_full_name(
             api_name, api_version, organization_name)
         code_root = os.path.join(
@@ -98,8 +98,9 @@ class GapicCodeGenTask(task_base.TaskBase):
         service_args = ['--service_yaml=' + os.path.abspath(yaml)
                         for yaml in service_yaml]
         args = [
-            '--descriptor_set=' + os.path.abspath(descriptor_set), '--output='
-            + os.path.abspath(code_root)
+            '--descriptor_set=' + os.path.abspath(descriptor_set),
+            '--package_yaml=' + os.path.abspath(package_metadata_yaml),
+            '--output=' + os.path.abspath(code_root),
         ] + service_args + gapic_args
         self.exec_command(
             task_utils.gradle_task(toolkit_path, 'runCodeGen', args))
