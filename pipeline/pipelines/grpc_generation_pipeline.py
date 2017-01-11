@@ -65,6 +65,7 @@ class _PythonGrpcTaskFactory(GrpcTaskFactoryBase):
         return [python_grpc_tasks.PythonChangePackageTask,
                 protoc_tasks.ProtoDescGenTask,
                 protoc_tasks.ProtoAndGrpcCodeGenTask,
+                package_metadata_tasks.PackageMetadataConfigGenTask,
                 package_metadata_tasks.GrpcPackageMetadataGenTask]
 
 

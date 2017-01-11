@@ -52,4 +52,4 @@ class PackageMetadataConfigTest(unittest.TestCase):
         with open('test/testdata/google-cloud-fake-v1_package.yaml') as f:
             expected = yaml.load(f)
         # Don't compare files directly because yaml doesn't preserve ordering
-        self.assertDictEqual(expected, actual)
+        self.assertDictEqual(actual, expected)

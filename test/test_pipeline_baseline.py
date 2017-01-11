@@ -88,8 +88,6 @@ def _test_error(pipeline_name, language, config, pipeline_kwargs,
 
 @mock.patch('pipeline.utils.task_utils.get_gradle_task_output')
 @mock.patch('pipeline.tasks.package_metadata_tasks.'
-            'GrpcPackageMetadataGenTask._googleapis_dir')
-@mock.patch('pipeline.tasks.package_metadata_tasks.'
             'PackageMetadataConfigGenTask._write_yaml')
 @mock.patch('pipeline.tasks.python_grpc_tasks.PythonChangePackageTask.execute')
 @mock.patch('subprocess.call')
@@ -100,7 +98,7 @@ def _test_error(pipeline_name, language, config, pipeline_kwargs,
 def _test_baseline(pipeline_name, config, extra_args, baseline,
                    mock_chdir, mock_time, mock_check_output, mock_check_call,
                    mock_call, mock_python_pkg_task, mock__write_yaml,
-                   mock__googleapis_dir, mock_gradle_task):
+                   mock_gradle_task):
     reporoot = os.path.abspath('.')
 
     # Execute pipeline args
@@ -115,8 +113,6 @@ def _test_baseline(pipeline_name, config, extra_args, baseline,
 
     mock_call.return_value = 0
     mock_check_output.return_value = ''
-
-    mock__googleapis_dir.return_value = 'test/fake-repos'
 
     # Output_dir as defined in artman yaml file
     output_dir = os.path.join(reporoot, 'test/testdata/test_output')
