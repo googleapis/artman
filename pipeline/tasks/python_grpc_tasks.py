@@ -93,7 +93,7 @@ class PythonChangePackageTask(task_base.TaskBase):
         return os.path.sep.join(pkg.split('.'))
 
     def _transform(self, pkg, sep, common_protos):
-        """Add 'grpc' package after 'google' or 'google.cloud'
+        """Add 'proto' package after 'google' or 'google.cloud'
 
         Works with arbitrary separator (e.g., '/' for import statements,
         '.' for proto package statements, os.path.sep for filenames)
@@ -108,8 +108,8 @@ class PythonChangePackageTask(task_base.TaskBase):
 
         if pkg_list[0] == 'google':
             if pkg_list[1] == 'cloud':
-                return sep.join(['google', 'cloud', 'grpc'] + pkg_list[2:])
-            return sep.join(['google', 'cloud', 'grpc'] + pkg_list[1:])
+                return sep.join(['google', 'cloud', 'proto'] + pkg_list[2:])
+            return sep.join(['google', 'cloud', 'proto'] + pkg_list[1:])
         return sep.join(pkg_list)
 
     def _copy_proto(self, src, dest, common_protos):

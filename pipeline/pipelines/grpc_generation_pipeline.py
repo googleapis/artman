@@ -66,7 +66,7 @@ class _PythonGrpcTaskFactory(GrpcTaskFactoryBase):
                 protoc_tasks.ProtoDescGenTask,
                 protoc_tasks.ProtoAndGrpcCodeGenTask,
                 package_metadata_tasks.PackageMetadataConfigGenTask,
-                package_metadata_tasks.GrpcPackageMetadataGenTask]
+                package_metadata_tasks.ProtoPackageMetadataGenTask]
 
 
 class _GoGrpcTaskFactory(GrpcTaskFactoryBase):
