@@ -105,8 +105,8 @@ class _PythonGapicTaskFactory(GapicTaskFactoryBase):
 
     def _get_gapic_package_tasks(self, **kwargs):
         return [gapic_tasks.GapicCleanTask,
-                gapic_tasks.GapicCopyTask,
-                gapic_tasks.GapicPackmanTask]
+                gapic_tasks.GapicCopyTask] # ,
+                # gapic_tasks.GapicPackmanTask]
 
 
 class _RubyGapicTaskFactory(GapicTaskFactoryBase):
@@ -137,6 +137,7 @@ _GAPIC_TASK_FACTORY_DICT = {
 def get_gapic_task_factory(language):
     cls = _GAPIC_TASK_FACTORY_DICT.get(language)
     if cls:
+        print cls()._get_gapic_codegen_tasks(language='python')
         return cls()
     else:
         raise ValueError('No GAPIC task factory found for language: '

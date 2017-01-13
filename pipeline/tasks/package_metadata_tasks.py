@@ -28,6 +28,8 @@ class PackageMetadataConfigGenTask(task_base.TaskBase):
     def execute(self, api_name, api_version, organization_name, output_dir,
                 package_dependencies_yaml, package_defaults_yaml, repo_root,
                 src_proto_path):
+        print 'generating package metadata'
+
         googleapis_dir = os.path.join(repo_root, 'googleapis')
         googleapis_path = os.path.commonprefix(
             [os.path.relpath(p, googleapis_dir) for p in src_proto_path])
