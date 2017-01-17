@@ -89,7 +89,6 @@ class PythonChangePackageTask(task_base.TaskBase):
                     return os.path.sep.join(pkg.split('.'))
             return ''
 
-
     def _transform(self, pkg, sep, common_protos):
         """Add 'proto' package after 'google' or 'google.cloud'
 
