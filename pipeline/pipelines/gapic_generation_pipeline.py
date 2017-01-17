@@ -138,7 +138,6 @@ _GAPIC_TASK_FACTORY_DICT = {
 def get_gapic_task_factory(language):
     cls = _GAPIC_TASK_FACTORY_DICT.get(language)
     if cls:
-        print cls()._get_gapic_codegen_tasks(language='python')
         return cls()
     else:
         raise ValueError('No GAPIC task factory found for language: '
