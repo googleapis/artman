@@ -101,7 +101,7 @@ _GRPC_TASK_FACTORY_DICT = {
     'ruby': _RubyGrpcTaskFactory,
     'php': GrpcTaskFactoryBase,
     'csharp': _CSharpGrpcTaskFactory,
-    'nodejs': GrpcTaskFactoryBase
+    'nodejs': GrpcTaskFactoryBase,
 }
 
 
