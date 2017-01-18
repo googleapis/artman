@@ -488,7 +488,7 @@ class RubyGrpcCopyTask(task_base.TaskBase):
         print "Copying " + pkg_dir + "/* to " + final_output_dir
         if not os.path.exists(final_output_dir):
             self.exec_command(['mkdir', '-p', final_output_dir])
-        for entry in os.listdir(pkg_dir):
+        for entry in sorted(os.listdir(pkg_dir)):
             src_path = os.path.join(pkg_dir, entry)
             self.exec_command([
                 'cp', '-rf', src_path, final_output_dir])
