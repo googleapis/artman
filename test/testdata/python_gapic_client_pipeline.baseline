@@ -5,4 +5,3 @@ test/fake-repos/toolkit/gradlew -p test/fake-repos/toolkit runCodeGen -Pclargs=-
 rm -rf {OUTPUT}/final
 mkdir -p {OUTPUT}/final
 cp -rf {OUTPUT}/google-cloud-library-v1-gapic-gen-python/my_api.py {OUTPUT}/final
-gen-api-package --api_name=google/cloud/library/v1 -l python --gax_dir={OUTPUT}/final --template_root=templates/gax

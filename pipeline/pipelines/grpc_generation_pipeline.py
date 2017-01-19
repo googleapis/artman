@@ -66,7 +66,7 @@ class _PythonGrpcTaskFactory(GrpcTaskFactoryBase):
                 protoc_tasks.ProtoDescGenTask,
                 protoc_tasks.ProtoAndGrpcCodeGenTask,
                 package_metadata_tasks.PackageMetadataConfigGenTask,
-                package_metadata_tasks.GrpcPackageMetadataGenTask]
+                package_metadata_tasks.ProtoPackageMetadataGenTask]
 
 
 class _GoGrpcTaskFactory(GrpcTaskFactoryBase):
@@ -101,7 +101,7 @@ _GRPC_TASK_FACTORY_DICT = {
     'ruby': _RubyGrpcTaskFactory,
     'php': GrpcTaskFactoryBase,
     'csharp': _CSharpGrpcTaskFactory,
-    'nodejs': GrpcTaskFactoryBase
+    'nodejs': GrpcTaskFactoryBase,
 }
 
 

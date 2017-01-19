@@ -63,7 +63,7 @@ class PackageMetadataConfigGenTask(task_base.TaskBase):
             yaml.dump(config_dict, f, default_flow_style=False)
 
 
-class GrpcPackageMetadataGenTask(task_base.TaskBase):
+class ProtoPackageMetadataGenTask(task_base.TaskBase):
     default_provides = 'package_dir'
 
     def execute(self, api_name, api_version, organization_name, toolkit_path,
@@ -72,7 +72,7 @@ class GrpcPackageMetadataGenTask(task_base.TaskBase):
                 language):
         api_full_name = task_utils.api_full_name(
             api_name, api_version, organization_name)
-        pkg_dir = os.path.join(output_dir, 'python', 'grpc-' + api_full_name)
+        pkg_dir = os.path.join(output_dir, 'python', 'proto-' + api_full_name)
 
         service_args = ['--service_yaml=' + os.path.abspath(yaml)
                         for yaml in service_yaml]
