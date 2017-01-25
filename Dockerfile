@@ -17,7 +17,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libssl-dev \
     curl \
     kdiff3 \
-    git
+    git \
+    vim # for debug
 
 # Install runtime packages.
 RUN apt-get update && \
@@ -87,10 +88,15 @@ ENV TOOLKIT_HOME /toolkit
 WORKDIR /toolkit
 RUN sudo ./gradlew install # Install toolkit. Must sudo to download gradle plugins.
 
-# Run the pipeline.
+# Install googleapis protocol compiler plugin which is needed to build gapic resource classes.
+RUN pip install --upgrade pip
+RUN pip install -e git+https://github.com/googleapis/proto-compiler-plugin#egg=remote
+
+# Install artman.
 # TODO(ethanbao): pipeline should be installed from package manager.
 ADD . /src
 WORKDIR /src
-RUN pip install --upgrade pip
 RUN pip install -r requirements.txt
+
+# Start artman conductor.
 CMD python start_conductor.py
