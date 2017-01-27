@@ -60,7 +60,7 @@ class PackageMetadataConfigGenTask(task_base.TaskBase):
     # Separated so that this can be mocked for testing
     def _write_yaml(self, config_dict, dest):
         with open(dest, 'w') as f:
-            yaml.dump(config_dict, f, default_flow_style=False)
+            yaml.safe_dump(config_dict, f, default_flow_style=False)
 
 
 class ProtoPackageMetadataGenTask(task_base.TaskBase):
