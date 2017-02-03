@@ -26,8 +26,8 @@ class PackageMetadataConfigGenTask(task_base.TaskBase):
     default_provides = 'package_metadata_yaml'
 
     def execute(self, api_name, api_version, organization_name, output_dir,
-                package_dependencies_yaml, package_defaults_yaml, repo_root,
-                src_proto_path):
+                package_dependencies_yaml, package_defaults_yaml, proto_deps,
+                repo_root, src_proto_path):
         googleapis_dir = os.path.join(repo_root, 'googleapis')
         googleapis_path = os.path.commonprefix(
             [os.path.relpath(p, googleapis_dir) for p in src_proto_path])
@@ -45,7 +45,8 @@ class PackageMetadataConfigGenTask(task_base.TaskBase):
             'proto_path': googleapis_path,
             'package_name': {
                 'default': api_full_name
-            }
+            },
+            'proto_deps': proto_deps
         }
 
         config.update(package_dependencies)

@@ -44,6 +44,7 @@ class PackageMetadataConfigTest(unittest.TestCase):
                      output_dir=str(self.output_dir),
                      package_dependencies_yaml=package_dependencies_yaml,
                      package_defaults_yaml=package_defaults_yaml,
+                     proto_deps=['googleapis-common-protos'],
                      repo_root=repo_root,
                      src_proto_path=['path/to/protos'])
         with open(os.path.join(str(self.output_dir),

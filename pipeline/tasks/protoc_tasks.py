@@ -459,12 +459,12 @@ class JavaGrpcPackmanTask(GrpcPackmanTask):
 
     def execute(self, language, api_name, api_version, organization_name,
                 output_dir, src_proto_path, import_proto_path, gapic_api_yaml,
-                packman_flags=None, repo_dir=None, proto_gen_pkg_deps=None):
-        proto_gen_pkg_deps = proto_gen_pkg_deps or []
+                packman_flags=None, repo_dir=None, proto_deps=None):
+        proto_deps = proto_deps or []
         packman_flags = packman_flags or []
         if len(packman_flags) == 0:
             packman_flags.append('--experimental_alt_java')
-            for dep in proto_gen_pkg_deps:
+            for dep in proto_deps:
                 packman_flags.append('--proto_gen_pkg_dep')
                 packman_flags.append(dep)
             if len(gapic_api_yaml) > 0:

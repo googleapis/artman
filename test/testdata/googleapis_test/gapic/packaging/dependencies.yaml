@@ -51,7 +51,7 @@ proto_version:
   php:
     lower: '0.7.*'
 
-common_protos_version:
+googleapis-common-protos_version:
   python:
     lower: '1.5.0'
     upper: '2.0dev'
