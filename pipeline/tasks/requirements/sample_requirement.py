@@ -16,10 +16,10 @@
 
 import subprocess
 
-from task_requirement_base import TaskRequirementBase
+from pipeline.tasks.requirements import task_requirement_base
 
 
-class SampleRequirement(TaskRequirementBase):
+class SampleRequirement(task_requirement_base.TaskRequirementBase):
 
     @classmethod
     def install(cls):

@@ -46,6 +46,6 @@ def var_replace_config_data(data, repl_vars):
 
 def var_replace(in_str, repl_vars):
     new_str = in_str
-    for (k, v) in repl_vars.iteritems():
+    for (k, v) in repl_vars.items():
         new_str = new_str.replace('${' + k + '}', v)
     return new_str

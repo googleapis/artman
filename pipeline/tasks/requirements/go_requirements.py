@@ -14,12 +14,13 @@
 
 """Requirements classes related to Go."""
 
+from __future__ import absolute_import
 import os
 
-from task_requirement_base import TaskRequirementBase
+from pipeline.tasks.requirements import task_requirement_base
 
 
-class GoPathRequirements(TaskRequirementBase):
+class GoPathRequirements(task_requirement_base.TaskRequirementBase):
 
     @classmethod
     def install(cls):
@@ -36,7 +37,7 @@ class GoPathRequirements(TaskRequirementBase):
         return 'GOPATH' in os.environ
 
 
-class GoFormatRequirements(TaskRequirementBase):
+class GoFormatRequirements(task_requirement_base.TaskRequirementBase):
 
     @classmethod
     def install(cls):

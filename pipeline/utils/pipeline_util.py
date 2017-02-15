@@ -13,9 +13,11 @@
 # limitations under the License.
 """Utils related to pipeline"""
 
+from __future__ import print_function
 import os
 import subprocess
-import urlparse
+
+from six.moves import urllib
 
 from pipeline.tasks import io_tasks
 from taskflow import engines
@@ -35,16 +37,16 @@ def validate_does_not_exist(unsupported, **kwargs):
 
 
 def download(url, directory):
-    filename = os.path.basename(urlparse.urlsplit(url).path)
+    filename = os.path.basename(urllib.parse.urlsplit(url).path)
     if not os.path.isfile(os.path.join(directory, filename)):
         subprocess.check_call(['mkdir', '-p', directory])
-        print 'Downloading file from URL:' + url
+        print('Downloading file from URL: %s' % url)
         subprocess.check_call(['curl', '-o', directory + filename, '-sL', url])
     return directory + filename
 
 
 def task_transition(state, details):
-    print("Task '%s' transition to state %s" % (details['task_name'], state))
+    print('Task "%s" transition to state %s.' % (details['task_name'], state))
 
 
 def download_from_gcs(bucket_name, path, output_dir):

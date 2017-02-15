@@ -17,10 +17,14 @@ import os.path
 import re
 import subprocess
 
+import six
+
 
 def get_gradle_task_output(task_name, task_path):
-    output = subprocess.check_output(
-        ['./gradlew', task_name], cwd=task_path)
+    output = subprocess.check_output(['./gradlew', task_name], cwd=task_path)
+    if isinstance(output, six.binary_type):
+        output = output.decode('ascii')
+
     # It is a convention that gradle task uses 'output: ' as
     # prefix in their output
     prefix = 'output: '

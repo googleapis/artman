@@ -124,7 +124,7 @@ class GapicCopyTask(task_base.TaskBase):
     """
 
     def execute(self, final_repo_dir, gapic_code_dir):
-        print "Copying " + gapic_code_dir + "/* to " + final_repo_dir
+        print('Copying %s/* to %s.' % (gapic_code_dir, final_repo_dir))
         self.exec_command(['mkdir', '-p', final_repo_dir])
         for entry in os.listdir(gapic_code_dir):
             src_path = os.path.join(gapic_code_dir, entry)

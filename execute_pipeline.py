@@ -34,12 +34,12 @@ Example:
   python execute_pipeline.py --pipeline_kwargs "{'sleep_secs':4}" SamplePipeline
 
 """
-
-import sys
+from __future__ import print_function
 import argparse
 import ast
 import base64
 import os
+import sys
 import tempfile
 import time
 import uuid
@@ -47,7 +47,9 @@ import yaml
 
 from gcloud import storage
 from gcloud import logging
+
 from taskflow import engines, task, states
+
 from pipeline.pipelines import pipeline_factory
 from pipeline.utils import job_util, pipeline_util, config_util
 
@@ -177,9 +179,9 @@ def _parse_args(args):
 
     cmd_args = ast.literal_eval(flags.pipeline_kwargs)
     pipeline_args.update(cmd_args)
-    print 'Final args:'
-    for (k, v) in pipeline_args.iteritems():
-        print ' ', k, ':', v
+    print('Final args:')
+    for (k, v) in pipeline_args.items():
+        print(' {k}: {v}'.format(k=k, v=v))
 
     return (flags.pipeline_name,
             pipeline_args,
@@ -227,7 +229,7 @@ def _print_log(pipeline_id):
       logger = client.logger(pipeline_id)
       entries, token = logger.list_entries()
       for entry in entries:
-          print entry.payload
+          print(entry.payload)
   except:
       pass
 

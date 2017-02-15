@@ -40,7 +40,7 @@ _EXPECTED_POST_ARGS = [
                                [{'path': 'blank.txt',
                                  'mode': github_utils._FILE_MODE,
                                  'type': 'blob',
-                                 'content': ''}]}),
+                                 'content': ''}]}, sort_keys=True),
               auth=(_USERNAME, _PASSWORD)),
     mock.call(_POST_TREE_URL,
               data=json.dumps({'base_tree': 'main_sha',
@@ -52,7 +52,7 @@ _EXPECTED_POST_ARGS = [
                                 {'path': 'hello.txt',
                                  'mode': github_utils._FILE_MODE,
                                  'type': 'blob',
-                                 'content': 'hello local\n'}]}),
+                                 'content': 'hello local\n'}]}, sort_keys=True),
               auth=(_USERNAME, _PASSWORD)),
     mock.call(_POST_TREE_URL,
               data=json.dumps(
@@ -60,7 +60,7 @@ _EXPECTED_POST_ARGS = [
                    [{'path': 'executable.py',
                      'mode': github_utils._EXEC_MODE,
                      'type': 'blob',
-                     'content': '#!/usr/bin/env python\n'}]}),
+                     'content': '#!/usr/bin/env python\n'}]}, sort_keys=True),
               auth=(_USERNAME, _PASSWORD)),
     mock.call(_POST_TREE_URL,
               data=json.dumps({'base_tree': 'root_sha',
@@ -72,17 +72,17 @@ _EXPECTED_POST_ARGS = [
                                 {'path': 'util',
                                  'mode': github_utils._TREE_MODE,
                                  'type': 'tree',
-                                 'sha': 'util-tree-sha'}]}),
+                                 'sha': 'util-tree-sha'}]}, sort_keys=True),
               auth=(_USERNAME, _PASSWORD)),
     mock.call(_POST_COMMIT_URL,
               data=json.dumps({'tree': 'root-tree-sha',
                                'parents': ['fake-commit-sha'],
-                               'message': 'fake-message'}),
+                               'message': 'fake-message'}, sort_keys=True),
               auth=(_USERNAME, _PASSWORD))]
 _EXPECTED_PATCH_ARGS = [
     mock.call(_PATCH_REF_URL,
               data=json.dumps({'sha': 'fake-commit-sha',
-                               'force': True}),
+                               'force': True}, sort_keys=True),
               auth=(_USERNAME, _PASSWORD))]
 _GET_SIDE_EFFECT = [
     mock.Mock(
@@ -96,13 +96,13 @@ _GET_SIDE_EFFECT = [
                   {'sha': 'root_sha',
                    'tree': [{'path': 'main',
                              'mode': github_utils._TREE_MODE,
-                             'sha': 'main_sha'}]})),
+                             'sha': 'main_sha'}]}), sort_keys=True),
     mock.Mock(ok=True,
               content=json.dumps(
                   {'sha': 'main_sha',
                    'tree': [{'path': 'hello.txt',
                              'mode': github_utils._FILE_MODE,
-                             'sha': 'hello.txt_sha'}]}))]
+                             'sha': 'hello.txt_sha'}]}, sort_keys=True))]
 _POST_SIDE_EFFECT = [
     mock.Mock(ok=True,
               content=json.dumps({'sha': 'subdir-tree-sha'})),
@@ -124,7 +124,7 @@ fs.CreateFile('/util/executable.py', contents='#!/usr/bin/env python\n',
 os_module = fake_fs.FakeOsModule(fs)
 
 
-@mock.patch('__builtin__.open', side_effect=fake_fs.FakeFileOpen(fs))
+@mock.patch.object(github_utils, 'open', side_effect=fake_fs.FakeFileOpen(fs))
 @mock.patch('os.access', side_effect=os_module.access)
 @mock.patch('os.path.isfile', side_effect=os_module.path.isfile)
 @mock.patch('os.path.isdir', side_effect=os_module.path.isdir)

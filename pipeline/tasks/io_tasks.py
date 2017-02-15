@@ -14,11 +14,13 @@
 
 """Tasks related to I/O."""
 
+from __future__ import print_function
 import base64
 import os
 import shutil
-import urllib
 import zipfile
+
+from six.moves import urllib
 
 from gcloud import storage
 from pipeline.tasks import task_base
@@ -40,13 +42,13 @@ class BlobUploadTask(task_base.TaskBase):
                 bucket_name,
                 src_path,
                 dest_path):
-        print "Start blob upload"
+        print('Start blob upload')
         client = storage.Client()
         bucket = client.get_bucket(bucket_name)
         blob = bucket.blob(dest_path)
         with open(src_path, 'r') as f:
             blob.upload_from_file(f)
-        print "Uploaded to %s" % blob.public_url
+        print('Uploaded to %s' % blob.public_url)
 
         return bucket_name, dest_path, blob.public_url
 
@@ -61,7 +63,7 @@ class BlobDownloadTask(task_base.TaskBase):
         bucket = client.get_bucket(bucket_name)
         blob = bucket.get_blob(path)
         if not blob:
-            print 'Cannot find the output from GCS.'
+            print('Cannot find the output from GCS.')
             return
         filename = os.path.join(output_dir, path)
         if not os.path.exists(os.path.dirname(filename)):
@@ -71,7 +73,7 @@ class BlobDownloadTask(task_base.TaskBase):
                 raise
         with open(filename, "w") as f:
             blob.download_to_file(f)
-            print 'File downloaded to %s' % f.name
+            print('File downloaded to %s.' % f.name)
 
 
 def _validate_upload_size(size, limit):
@@ -116,7 +118,7 @@ class PrepareGoogleapisDirTask(task_base.TaskBase):
             os.makedirs(repo_root)
         except OSError as e:
             raise e
-        testfile = urllib.FancyURLopener()
+        testfile = urllib.request.FancyURLopener()
         tmp_repo_file = os.path.join(repo_root, "file.zip")
         testfile.retrieve(
             "https://github.com/googleapis/googleapis/archive/master.zip",
@@ -130,7 +132,7 @@ class PrepareGoogleapisDirTask(task_base.TaskBase):
         repo_dir = os.path.join(repo_root, "googleapis")
         # Write/overwrite the additonal files into the repo_dir so that user
         # can include additional files which are not in the public repo.
-        for f, content in files_dict.iteritems():
+        for f, content in files_dict.items():
             filename = os.path.join(repo_dir, f)
             if not os.path.exists(os.path.dirname(filename)):
                 os.makedirs(os.path.dirname(filename))

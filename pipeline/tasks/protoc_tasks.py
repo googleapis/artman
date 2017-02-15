@@ -19,6 +19,8 @@ import re
 import subprocess
 import yaml
 
+import six
+
 from pipeline.tasks import packman_tasks
 from pipeline.tasks import task_base
 from pipeline.tasks.requirements import grpc_requirements
@@ -42,7 +44,8 @@ class _SimpleProtoParams:
         if self.path is None:
             self.path = subprocess.check_output(
                 ['which', 'grpc_{}_plugin'.format(self.language)],
-                stderr=subprocess.STDOUT)[:-1]
+                stderr=subprocess.STDOUT)
+            self.path = six.text_type(self.path)[:-1]
         return self.path
 
     def grpc_out_param(self, output_dir):
@@ -66,7 +69,7 @@ class _JavaProtoParams:
 
     def grpc_plugin_path(self, toolkit_path):
         if self.path is None:
-            print 'start gradle process to locate GRPC Java plugin'
+            print('start gradle process to locate GRPC Java plugin')
             self.path = task_utils.get_gradle_task_output(
                 'showGrpcJavaPluginPath', toolkit_path)
         return self.path
@@ -122,7 +125,8 @@ class _PhpProtoParams:
     def grpc_plugin_path(self, dummy_toolkit_path):
         if self.path is None:
             self.path = subprocess.check_output(
-                ['which', 'protoc-gen-php'], stderr=subprocess.STDOUT)[:-1]
+                ['which', 'protoc-gen-php'], stderr=subprocess.STDOUT)
+            self.path = six.text_type(self.path)[:-1]
         return self.path
 
     def grpc_out_param(self, output_dir):
@@ -191,7 +195,7 @@ _PROTO_PARAMS_MAP = {
 
 def _find_protobuf_path(toolkit_path):
     """Fetch and locate protobuf source"""
-    print 'Searching for latest protobuf source'
+    print('Searching for latest protobuf source')
     return task_utils.get_gradle_task_output(
         'showProtobufPath', toolkit_path)
 
@@ -273,7 +277,7 @@ class ProtoDescGenTask(task_base.TaskBase):
         header_proto_path.extend(src_proto_path)
         desc_out_file = task_utils.api_full_name(
             api_name, api_version, organization_name) + '.desc'
-        print 'Compiling descriptors for {0}'.format(desc_protos)
+        print('Compiling descriptors for {0}'.format(desc_protos))
         self.exec_command(['mkdir', '-p', output_dir])
         # DescGen don't use _group_by_dirname right now because
         #   - it doesn't have to
@@ -395,11 +399,11 @@ class GoLangUpdateImportsTask(task_base.TaskBase):
                 go_import_base, output_dir, final_repo_dir):
         pkg_dir = _prepare_pkg_dir(output_dir, api_name, api_version,
                                    organization_name, language)
-        print pkg_dir
+        print(pkg_dir)
         for pbfile in self.find_pb_files(pkg_dir):
             out_file = os.path.join(final_repo_dir, 'proto',
                                     os.path.relpath(pbfile, pkg_dir))
-            print 'outfile {}'.format(out_file)
+            print('outfile {}'.format(out_file))
             out_dir = os.path.dirname(out_file)
             if not os.path.exists(out_dir):
                 os.makedirs(out_dir)
@@ -485,7 +489,7 @@ class RubyGrpcCopyTask(task_base.TaskBase):
         pkg_dir = _pkg_root_dir(
             output_dir, api_name, api_version, organization_name, language)
         final_output_dir = os.path.join(final_repo_dir, 'lib')
-        print "Copying " + pkg_dir + "/* to " + final_output_dir
+        print('Copying %s/* to %s.' % (pkg_dir, final_output_dir))
         if not os.path.exists(final_output_dir):
             self.exec_command(['mkdir', '-p', final_output_dir])
         for entry in sorted(os.listdir(pkg_dir)):

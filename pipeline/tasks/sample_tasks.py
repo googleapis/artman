@@ -17,7 +17,7 @@
 import time
 
 from pipeline.tasks import task_base
-from requirements import sample_requirement
+from pipeline.tasks.requirements import sample_requirement
 
 
 class SampleTask(task_base.TaskBase):

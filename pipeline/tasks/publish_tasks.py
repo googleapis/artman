@@ -15,7 +15,8 @@
 """Tasks for publishing artman output"""
 
 import os
-import urlparse
+
+from six.moves import urllib
 
 from pipeline.tasks import task_base
 from pipeline.utils import github_utils
@@ -26,7 +27,8 @@ class PypiUploadTask(task_base.TaskBase):
 
     def execute(self, repo_url, username, password, publish_env,
                 package_dir):
-        upload_url = urlparse.urljoin(repo_url, username) + '/' + publish_env
+        upload_url = '%s/%s' % (urllib.parse.urljoin(repo_url, username),
+                                publish_env)
         self.exec_command(
             ['devpi',
              'login',

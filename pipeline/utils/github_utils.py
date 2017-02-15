@@ -15,10 +15,12 @@
 """Utility functions related to GitHub interaction. Uses the GitHub API with
 reference https://developer.github.com/v3/"""
 
+from __future__ import absolute_import
 import requests
 import json
 import os
-from urllib2 import HTTPError
+
+from six.moves import urllib
 
 _API_URL = 'https://api.github.com'
 # modes for git objects
@@ -54,8 +56,8 @@ def _exec_request(http_method, url, req_data=None, username=None,
     if attempt.ok:
         return json.loads(attempt.content)
     else:
-        raise HTTPError(url, attempt.status_code, attempt.content,
-                        attempt.headers, None)
+        raise urllib.error.HTTPError(url, attempt.status_code, attempt.content,
+                                     attempt.headers, None)
 
 
 def _get_file_mode(el):
@@ -118,7 +120,8 @@ def _extend_git_tree(curr_dir, username, password, base_url,
         if orig_tree_sha:
             data_dict['base_tree'] = orig_tree_sha
         return _exec_request(requests.post, base_url + 'git/trees',
-                             json.dumps(data_dict), username, password)
+                             json.dumps(data_dict, sort_keys=True),
+                             username, password)
 
 
 def push_dir_to_github(local_dir, username, password, owner, repo, branch,
@@ -149,8 +152,11 @@ def push_dir_to_github(local_dir, username, password, owner, repo, branch,
         raise ValueError('Cannot push empty folder {0}'.format(local_dir))
     # make a new commit using the built tree, with the previous commit as its
     # only parent
-    req_data = json.dumps({'tree': root_tree['sha'],
-                           'parents': [commit_sha], 'message': message})
+    req_data = json.dumps({
+        'message': message,
+        'parents': [commit_sha],
+        'tree': root_tree['sha'],
+    }, sort_keys=True)
     new_commit_item = _exec_request(requests.post,
                                     base_url + 'git/commits', req_data,
                                     username, password)
@@ -158,5 +164,5 @@ def push_dir_to_github(local_dir, username, password, owner, repo, branch,
     _exec_request(requests.patch,
                   base_url + 'git/refs/heads/{0}'.format(branch),
                   json.dumps({'sha': new_commit_item['sha'],
-                              'force': True}),
+                              'force': True}, sort_keys=True),
                   username, password)

@@ -11,9 +11,9 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Util class for job-related operations.
-"""
+"""Util class for job-related operations."""
 
+from __future__ import print_function
 import contextlib
 import os
 import time
@@ -58,14 +58,14 @@ def post_remote_pipeline_job_and_wait(pipeline, jobboard_name):
                                          backend=persist_backend)
             # Post, and be done with it!
             jb = jobboard.post("job-from-%s" % my_name, book=lb)
-            print("Posted: %s" % jb)
+            print('Posted: %s' % jb)
             # TODO(cbao): Move wait until into a seperate method.
             state = states.UNCLAIMED
-            print 'Job status: %s' % state
+            print('Job status: %s' % state)
             while state != states.COMPLETE:
                 if (jb.state != state):
                     state = jb.state
-                    print 'Job status: %s' % state
+                    print('Job status: %s' % state)
                 time.sleep(1)
             return jb
 

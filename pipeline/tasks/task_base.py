@@ -17,6 +17,7 @@
 This base class extends taskflow Task class, with additional methods and
 properties used by the GAPIC pipeline."""
 
+from __future__ import print_function
 import subprocess
 
 from gcloud import logging as cloud_logging
@@ -47,7 +48,7 @@ class TaskBase(Task):
         if self.cloud_logger:
             # TODO(ethanbao): Do batch logging.
             self.cloud_logger.log_text(msg)
-        print msg
+        print(msg)
 
     def exec_command(self, args):
         """ Execute command and return output.

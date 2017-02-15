@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from __future__ import print_function
 import mock
 import os
 import pytest
@@ -118,7 +119,7 @@ def _test_baseline(pipeline_name, config, extra_args, baseline,
     output_dir = os.path.join(reporoot, 'test/testdata/test_output')
 
     # Run pipeline
-    print 'executing with args: ' + str(args)
+    print('executing with args: %r.' % (args,))
     execute_pipeline.main(args)
 
     bindings = {'CWD': reporoot, 'OUTPUT': output_dir}
