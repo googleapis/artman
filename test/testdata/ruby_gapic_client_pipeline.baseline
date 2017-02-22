@@ -4,4 +4,3 @@ rm -rf {OUTPUT}/google-cloud-library-v1-gapic-gen-ruby
 test/fake-repos/toolkit/gradlew -p test/fake-repos/toolkit runCodeGen -Pclargs=--descriptor_set={OUTPUT}/google-cloud-library-v1.desc,--package_yaml={OUTPUT}/google-cloud-library-v1_package.yaml,--output={OUTPUT}/google-cloud-library-v1-gapic-gen-ruby,--service_yaml={CWD}/test/testdata/gapi-example-library-proto/src/main/proto/google/example/library/library.yaml,--gapic_yaml={CWD}/test/testdata/gapi-example-library-proto/src/main/proto/google/example/library/library_gapic.yaml,--gapic_yaml={CWD}/test/testdata/gapi-example-library-proto/src/main/proto/google/example/library/ruby_gapic.yaml
 mkdir -p {OUTPUT}/final
 cp -rf {OUTPUT}/google-cloud-library-v1-gapic-gen-ruby/my_api.rb {OUTPUT}/final
-gen-api-package --api_name=google/cloud/library/v1 -l ruby --gax_dir={OUTPUT}/final --template_root=templates/gax

@@ -113,8 +113,7 @@ class _PythonGapicTaskFactory(GapicTaskFactoryBase):
 class _RubyGapicTaskFactory(GapicTaskFactoryBase):
 
     def _get_gapic_package_tasks(self, **kwargs):
-        return [gapic_tasks.GapicCopyTask,
-                gapic_tasks.GapicPackmanTask]
+        return [gapic_tasks.GapicCopyTask]
 
 
 class _NodeJSGapicTaskFactory(GapicTaskFactoryBase):
