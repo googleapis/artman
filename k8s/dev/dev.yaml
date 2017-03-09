@@ -1,0 +1,27 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    run: dev
+  name: dev
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      run: dev
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        run: dev
+    spec:
+      containers:
+      - image: gcr.io/vkit-pipeline/github-googleapis-artman:latest
+        imagePullPolicy: Always
+        name: dev
+        resources: {}
+        command: ["python"]
+        args: ["start_conductor.py",  "--jobboard_name=dev"]
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      securityContext: {}

@@ -97,6 +97,3 @@ RUN pip install -e git+https://github.com/googleapis/proto-compiler-plugin#egg=r
 ADD . /src
 WORKDIR /src
 RUN pip install -r requirements.txt
-
-# Start artman conductor.
-CMD python start_conductor.py
