@@ -71,9 +71,21 @@ class _CSharpCoreTaskFactory(CoreTaskFactoryBase):
         return [protoc_tasks.ProtoCodeGenTask]
 
 
+class _JavaCoreTaskFactory(CoreTaskFactoryBase):
+    """Responsible for the protobuf flow for Java language.
+
+    TODO(shinfan): Add packaging tasks
+    """
+
+    def _get_core_codegen_tasks(self, **kwargs):
+        return [protoc_tasks.ProtoCodeGenTask,
+                protoc_tasks.JavaCoreProtoCopyTask]
+
+
 _CORE_TASK_FACTORY_DICT = {
     'go': _GoCoreTaskFactory,
     'csharp': _CSharpCoreTaskFactory,
+    'java': _JavaCoreTaskFactory,
 }
 
 

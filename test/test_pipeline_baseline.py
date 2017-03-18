@@ -212,6 +212,8 @@ def test_generator_errors(pipeline_name, language, extra_kwargs,
          'csharp_grpc_client_pipeline'),
         ('GapicClientPipeline', 'csharp', [],
          'csharp_gapic_client_pipeline'),
+        ('CoreProtoPipeline', 'java', [],
+         'java_core_proto_pipeline'),
     ])
 def test_generator(pipeline_name, language, extra_args, baseline):
     artman_api_yaml = 'test/testdata/googleapis_test/gapic/api/' \

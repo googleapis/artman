@@ -517,3 +517,31 @@ class GoExtractImportBaseTask(task_base.TaskBase):
                 continue
             if 'package_name' in go_settings:
                 return go_settings.get('package_name')
+
+class JavaCoreProtoCopyTask(task_base.TaskBase):
+    """Copies the core proto sources to the common-protos output directory
+    """
+    def execute(self, src_proto_path, api_name,
+                api_version, language, organization_name, output_dir):
+        pkg_dir = _prepare_pkg_dir(
+            output_dir, api_name, api_version, organization_name, language)
+        proto_output_dir = os.path.join(pkg_dir, 'protos', 'com')
+        for proto_path in src_proto_path:
+            path_components = proto_path.split('/')
+            is_relative_path = False
+            relative_path = []
+            # Construct the relative proto path e.g. google/api/
+            for path_component in path_components:
+                if path_component == 'google':
+                    is_relative_path = True
+                if is_relative_path:
+                    relative_path.append(path_component)
+            output_path = os.path.join(proto_output_dir, *relative_path[:-1])
+            self.exec_command(['mkdir', '-p', output_path])
+            self.exec_command([
+                'cp', '-rf', proto_path, output_path])
+        # Clean up non proto files
+        for root, dirs, files in os.walk(proto_output_dir):
+            for file_ in files:
+                if not os.path.splitext(file_)[1] == '.proto':
+                    os.remove(os.path.join(root, file_))

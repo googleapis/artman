@@ -1,0 +1,5 @@
+mkdir -p {CWD}/test/testdata/test_output/google-cloud-library-v1-gen-java/src/main/java
+protoc --proto_path=test/fake-repos/gapi-core-proto/src/main/proto/ --proto_path=test/fake-repos/fake-proto --proto_path=MOCK_GRADLE_TASK_OUTPUT --java_out={CWD}/test/testdata/test_output/google-cloud-library-v1-gen-java/src/main/java test/fake-repos/fake-proto/fake.proto
+mkdir -p {CWD}/test/testdata/test_output/google-cloud-library-v1-gen-java/src/main/java
+mkdir -p {CWD}/test/testdata/test_output/google-cloud-library-v1-gen-java/protos/com
+cp -rf test/fake-repos/fake-proto {CWD}/test/testdata/test_output/google-cloud-library-v1-gen-java/protos/com
