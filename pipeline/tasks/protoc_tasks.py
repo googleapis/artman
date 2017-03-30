@@ -518,14 +518,15 @@ class GoExtractImportBaseTask(task_base.TaskBase):
             if 'package_name' in go_settings:
                 return go_settings.get('package_name')
 
-class JavaCoreProtoCopyTask(task_base.TaskBase):
-    """Copies the core proto sources to the common-protos output directory
+
+class JavaProtoCopyTask(task_base.TaskBase):
+    """Copies the protos to the common-protos package directory
     """
-    def execute(self, src_proto_path, api_name,
-                api_version, language, organization_name, output_dir):
-        pkg_dir = _prepare_pkg_dir(
-            output_dir, api_name, api_version, organization_name, language)
-        proto_output_dir = os.path.join(pkg_dir, 'protos', 'com')
+    def execute(self, src_proto_path, api_name, intermediate_package_dir,
+                api_version, language, organization_name, output_dir, package_dir):
+
+        # Copy raw proto files
+        proto_output_dir = os.path.join(package_dir, 'protos', 'com')
         for proto_path in src_proto_path:
             path_components = proto_path.split('/')
             is_relative_path = False
@@ -540,8 +541,17 @@ class JavaCoreProtoCopyTask(task_base.TaskBase):
             self.exec_command(['mkdir', '-p', output_path])
             self.exec_command([
                 'cp', '-rf', proto_path, output_path])
-        # Clean up non proto files
+
+        # Copy files generated from protos
+        self.exec_command([
+            'cp', '-rf', os.path.join(intermediate_package_dir, 'src'), package_dir])
+
+        # Clean up non-proto files
         for root, dirs, files in os.walk(proto_output_dir):
             for file_ in files:
                 if not os.path.splitext(file_)[1] == '.proto':
                     os.remove(os.path.join(root, file_))
+
+        # Remove intermediate output
+        self.exec_command(['rm', '-r', intermediate_package_dir])
+        print('Task succeeded. Proto package is available at: ' + package_dir)

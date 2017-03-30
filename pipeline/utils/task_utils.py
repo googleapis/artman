@@ -43,7 +43,10 @@ def gradle_task(toolkit_path, task_name, task_args):
 def api_full_name(api_name, api_version, organization_name):
     """Canonical full name for an API; used to generate output directories and
     package name"""
-    return '-'.join([organization_name, api_name, api_version])
+    if api_version:
+        return '-'.join([organization_name, api_name, api_version])
+    else:
+        return '-'.join([organization_name, api_name])
 
 
 def packman_api_name(api_name):

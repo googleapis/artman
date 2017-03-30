@@ -18,6 +18,7 @@ language contains the well known types, defined by protobuf, for that language.
 
 from pipeline.pipelines import code_generation_pipeline as code_gen
 from pipeline.tasks import protoc_tasks
+from pipeline.tasks import package_metadata_tasks
 from pipeline.utils import task_utils
 
 
@@ -72,14 +73,14 @@ class _CSharpCoreTaskFactory(CoreTaskFactoryBase):
 
 
 class _JavaCoreTaskFactory(CoreTaskFactoryBase):
-    """Responsible for the protobuf flow for Java language.
-
-    TODO(shinfan): Add packaging tasks
-    """
+    """Responsible for the core protobuf flow for Java language."""
 
     def _get_core_codegen_tasks(self, **kwargs):
-        return [protoc_tasks.ProtoCodeGenTask,
-                protoc_tasks.JavaCoreProtoCopyTask]
+        return [protoc_tasks.ProtoDescGenTask,
+                protoc_tasks.ProtoCodeGenTask,
+                package_metadata_tasks.PackageMetadataConfigGenTask,
+                package_metadata_tasks.ProtoPackageMetadataGenTask,
+                protoc_tasks.JavaProtoCopyTask]
 
 
 _CORE_TASK_FACTORY_DICT = {

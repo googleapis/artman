@@ -44,7 +44,8 @@ class PackageMetadataConfigGenTask(task_base.TaskBase):
             'major_version': api_version,
             'proto_path': googleapis_path,
             'package_name': {
-                'default': api_full_name
+                'default': api_full_name,
+                'java': 'grpc-' + api_full_name
             },
             'proto_deps': proto_deps
         }
@@ -73,7 +74,7 @@ class ProtoPackageMetadataGenTask(task_base.TaskBase):
                 language):
         api_full_name = task_utils.api_full_name(
             api_name, api_version, organization_name)
-        pkg_dir = os.path.join(output_dir, 'python', 'proto-' + api_full_name)
+        pkg_dir = os.path.join(output_dir, language, 'proto-' + api_full_name)
 
         service_args = ['--service_yaml=' + os.path.abspath(yaml)
                         for yaml in service_yaml]
