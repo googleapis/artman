@@ -29,7 +29,8 @@ RUN apt-get update && \
     python-pip \
     unzip \
     perl \
-    software-properties-common
+    software-properties-common \
+    php-pear
 
 # Install Oracle JDK 8
 RUN add-apt-repository ppa:openjdk-r/ppa
@@ -91,6 +92,15 @@ RUN sudo ./gradlew install # Install toolkit. Must sudo to download gradle plugi
 # Install googleapis protocol compiler plugin which is needed to build gapic resource classes.
 RUN pip install --upgrade pip
 RUN pip install -e git+https://github.com/googleapis/proto-compiler-plugin#egg=remote
+
+# Install PHP protobuf plugin
+WORKDIR /
+RUN apt-get install -y ruby2.0 ruby2.0-dev
+RUN /usr/bin/gem2.0 install ronn --no-ri --no-rdoc
+RUN git clone https://github.com/stanley-cheung/Protobuf-PHP.git
+WORKDIR /Protobuf-PHP
+RUN rake pear:package version=1.0 --trace
+RUN pear install Protobuf-1.0.tgz
 
 # Install artman.
 # TODO(ethanbao): pipeline should be installed from package manager.
