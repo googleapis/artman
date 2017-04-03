@@ -109,6 +109,11 @@ WORKDIR /Protobuf-PHP
 RUN rake pear:package version=1.0 --trace
 RUN pear install Protobuf-1.0.tgz
 
+# Install PHP formatting tools
+RUN pear install PHP_CodeSniffer-2.7.0
+RUN curl -L https://github.com/FriendsOfPHP/PHP-CS-Fixer/releases/download/v1.11.8/php-cs-fixer.phar -o /usr/local/bin/php-cs-fixer
+RUN chmod a+x /usr/local/bin/php-cs-fixer
+
 # Install artman.
 # TODO(ethanbao): pipeline should be installed from package manager.
 ADD . /src
