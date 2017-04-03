@@ -46,7 +46,9 @@ class PackageMetadataConfigTest(unittest.TestCase):
                      package_defaults_yaml=package_defaults_yaml,
                      proto_deps=['googleapis-common-protos'],
                      repo_root=repo_root,
-                     src_proto_path=['path/to/protos'])
+                     src_proto_path=['path/to/protos'],
+                     package_type="grpc_client",
+                     gapic_api_yaml=[])
         with open(os.path.join(str(self.output_dir),
                                'google-cloud-fake-v1_package.yaml')) as f:
             actual = yaml.load(f)

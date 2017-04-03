@@ -56,7 +56,11 @@ class _RubyGrpcTaskFactory(GrpcTaskFactoryBase):
 class _JavaGrpcTaskFactory(GrpcTaskFactoryBase):
 
     def _get_grpc_codegen_tasks(self, **kwargs):
-        return [protoc_tasks.JavaGrpcPackmanTask]
+        return [protoc_tasks.ProtoDescGenTask,
+                protoc_tasks.ProtoCodeGenTask,
+                package_metadata_tasks.PackageMetadataConfigGenTask,
+                package_metadata_tasks.ProtoPackageMetadataGenTask,
+                protoc_tasks.JavaProtoCopyTask]
 
 
 class _PythonGrpcTaskFactory(GrpcTaskFactoryBase):

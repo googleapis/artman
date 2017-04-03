@@ -58,3 +58,5 @@ short_name: fake
 major_version: v1
 proto_deps:
 - googleapis-common-protos
+package_type: grpc_client
+gapic_config_name: ''

@@ -459,27 +459,6 @@ class GrpcPackmanTask(packman_tasks.PackmanTaskBase):
         return os.path.join(pkg_dir, language)
 
 
-class JavaGrpcPackmanTask(GrpcPackmanTask):
-
-    def execute(self, language, api_name, api_version, organization_name,
-                output_dir, src_proto_path, import_proto_path, gapic_api_yaml,
-                packman_flags=None, repo_dir=None, proto_deps=None):
-        proto_deps = proto_deps or []
-        packman_flags = packman_flags or []
-        if len(packman_flags) == 0:
-            packman_flags.append('--experimental_alt_java')
-            for dep in proto_deps:
-                packman_flags.append('--proto_gen_pkg_dep')
-                packman_flags.append(dep)
-            if len(gapic_api_yaml) > 0:
-                gapic_yaml = os.path.abspath(gapic_api_yaml[0])
-                packman_flags += ['--gapic_yaml', gapic_yaml]
-        return super(JavaGrpcPackmanTask, self).execute(
-            language, api_name, api_version, organization_name, output_dir,
-            src_proto_path, import_proto_path, packman_flags=packman_flags,
-            repo_dir=repo_dir)
-
-
 class RubyGrpcCopyTask(task_base.TaskBase):
     """Copies the generated protos and gRPC client library to
     the final_repo_dir/lib.

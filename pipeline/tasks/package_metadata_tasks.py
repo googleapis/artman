@@ -27,7 +27,7 @@ class PackageMetadataConfigGenTask(task_base.TaskBase):
 
     def execute(self, api_name, api_version, organization_name, output_dir,
                 package_dependencies_yaml, package_defaults_yaml, proto_deps,
-                repo_root, src_proto_path):
+                repo_root, src_proto_path, package_type, gapic_api_yaml):
         googleapis_dir = os.path.join(repo_root, 'googleapis')
         googleapis_path = os.path.commonprefix(
             [os.path.relpath(p, googleapis_dir) for p in src_proto_path])
@@ -39,6 +39,10 @@ class PackageMetadataConfigGenTask(task_base.TaskBase):
         with open(package_defaults_yaml) as dep_file:
             package_defaults = yaml.load(dep_file)
 
+        gapic_config_name = ''
+        if len(gapic_api_yaml) > 0:
+            gapic_config_name = os.path.basename(gapic_api_yaml[0])
+
         config = {
             'short_name': api_name,
             'major_version': api_version,
@@ -47,7 +51,9 @@ class PackageMetadataConfigGenTask(task_base.TaskBase):
                 'default': api_full_name,
                 'java': 'grpc-' + api_full_name
             },
-            'proto_deps': proto_deps
+            'proto_deps': proto_deps,
+            'package_type': package_type,
+            'gapic_config_name': gapic_config_name
         }
 
         config.update(package_dependencies)
