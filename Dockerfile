@@ -57,6 +57,14 @@ ENV SHELL /bin/bash
 RUN yes |ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Linuxbrew/install/master/install)"
 RUN brew doctor || true
 
+# Manually install protobuf with --no-binary flag before installing protoc
+# Python and pip are installed by 'brew install --with-plugins grpc'. We need
+# to install them preemptively, and then install the protobuf package with
+# the --no-binary flag to work around https://github.com/google/protobuf/issues/2895
+RUN brew install python
+RUN pip install --upgrade pip
+RUN pip install protobuf==3.2.0 --no-binary protobuf
+
 # Install protoc and grpc.
 RUN brew tap grpc/grpc
 RUN brew install --with-plugins grpc
@@ -90,7 +98,6 @@ WORKDIR /toolkit
 RUN sudo ./gradlew install # Install toolkit. Must sudo to download gradle plugins.
 
 # Install googleapis protocol compiler plugin which is needed to build gapic resource classes.
-RUN pip install --upgrade pip
 RUN pip install -e git+https://github.com/googleapis/proto-compiler-plugin#egg=remote
 
 # Install PHP protobuf plugin
