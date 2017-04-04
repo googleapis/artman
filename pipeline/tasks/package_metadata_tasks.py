@@ -20,6 +20,10 @@ import yaml
 from pipeline.tasks import task_base
 from pipeline.utils import task_utils
 
+_PROTO_PREFIX_MAP = {
+    'java': 'grpc-',
+    'python': 'proto-'
+}
 
 class PackageMetadataConfigGenTask(task_base.TaskBase):
     """Generates package metadata config"""
@@ -80,7 +84,8 @@ class ProtoPackageMetadataGenTask(task_base.TaskBase):
                 language):
         api_full_name = task_utils.api_full_name(
             api_name, api_version, organization_name)
-        pkg_dir = os.path.join(output_dir, language, 'proto-' + api_full_name)
+        pkg_dir = os.path.join(
+            output_dir, language, _PROTO_PREFIX_MAP[language] + api_full_name)
 
         service_args = ['--service_yaml=' + os.path.abspath(yaml)
                         for yaml in service_yaml]

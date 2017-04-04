@@ -502,10 +502,11 @@ class JavaProtoCopyTask(task_base.TaskBase):
     """Copies the protos to the common-protos package directory
     """
     def execute(self, src_proto_path, api_name, intermediate_package_dir,
-                api_version, language, organization_name, output_dir, package_dir):
+                gapic_api_yaml, api_version, language, organization_name,
+                output_dir, package_dir):
 
         # Copy raw proto files
-        proto_output_dir = os.path.join(package_dir, 'protos', 'com')
+        proto_output_dir = os.path.join(package_dir, 'src', 'main', 'proto')
         for proto_path in src_proto_path:
             path_components = proto_path.split('/')
             is_relative_path = False
@@ -521,15 +522,10 @@ class JavaProtoCopyTask(task_base.TaskBase):
             self.exec_command([
                 'cp', '-rf', proto_path, output_path])
 
-        # Copy files generated from protos
-        self.exec_command([
-            'cp', '-rf', os.path.join(intermediate_package_dir, 'src'), package_dir])
+        # Copy API gapic config (if any)
+        if len(gapic_api_yaml) > 0:
+            self.exec_command(['cp', gapic_api_yaml[0], package_dir])
 
-        # Clean up non-proto files
-        for root, dirs, files in os.walk(proto_output_dir):
-            for file_ in files:
-                if not os.path.splitext(file_)[1] == '.proto':
-                    os.remove(os.path.join(root, file_))
 
         # Remove intermediate output
         self.exec_command(['rm', '-r', intermediate_package_dir])
