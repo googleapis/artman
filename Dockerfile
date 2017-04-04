@@ -119,3 +119,7 @@ RUN chmod a+x /usr/local/bin/php-cs-fixer
 ADD . /src
 WORKDIR /src
 RUN pip install -r requirements.txt
+
+# Run smoketests
+# TODO(ethanbao): this should be part of artman CI.
+RUN python test/smoketest.py
