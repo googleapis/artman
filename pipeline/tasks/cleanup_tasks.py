@@ -14,17 +14,18 @@
 
 """Tasks that perform cleanup after code generation"""
 
-from __future__ import print_function
 import os
 import subprocess
+
 from pipeline.tasks import task_base
+from pipeline.utils.logger import logger
 
 
 class CleanUpTask(task_base.TaskBase):
     """Recursively removes all entries in `output_dir` that are not included in
     `saved_dirs`"""
     def execute(self, output_dir, saved_dirs):
-        print('Cleaning up temporary files')
+        logger.info('Cleaning up temporary files.')
         for entry in os.listdir(output_dir):
             if entry not in saved_dirs:
                 subprocess.check_call(

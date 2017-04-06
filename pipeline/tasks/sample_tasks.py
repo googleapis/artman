@@ -18,13 +18,14 @@ import time
 
 from pipeline.tasks import task_base
 from pipeline.tasks.requirements import sample_requirement
+from pipeline.utils.logger import logger
 
 
 class SampleTask(task_base.TaskBase):
     """A sample task"""
 
     def execute(self, sleep_secs):
-        print('Sleep %d sec.' % sleep_secs)
+        logger.info('Sleep %d sec.' % sleep_secs)
         time.sleep(sleep_secs)
 
     def validate(self):

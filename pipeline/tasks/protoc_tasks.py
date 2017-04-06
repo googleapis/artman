@@ -26,6 +26,7 @@ from pipeline.tasks import task_base
 from pipeline.tasks.requirements import grpc_requirements
 from pipeline.utils import lang_params
 from pipeline.utils import task_utils
+from pipeline.utils.logger import logger
 
 
 class _SimpleProtoParams:
@@ -69,7 +70,7 @@ class _JavaProtoParams:
 
     def grpc_plugin_path(self, toolkit_path):
         if self.path is None:
-            print('start gradle process to locate GRPC Java plugin')
+            logger.info('start gradle process to locate GRPC Java plugin')
             self.path = task_utils.get_gradle_task_output(
                 'showGrpcJavaPluginPath', toolkit_path)
         return self.path
@@ -195,7 +196,7 @@ _PROTO_PARAMS_MAP = {
 
 def _find_protobuf_path(toolkit_path):
     """Fetch and locate protobuf source"""
-    print('Searching for latest protobuf source')
+    logger.info('Searching for latest protobuf source')
     return task_utils.get_gradle_task_output(
         'showProtobufPath', toolkit_path)
 
@@ -277,7 +278,7 @@ class ProtoDescGenTask(task_base.TaskBase):
         header_proto_path.extend(src_proto_path)
         desc_out_file = task_utils.api_full_name(
             api_name, api_version, organization_name) + '.desc'
-        print('Compiling descriptors for {0}'.format(desc_protos))
+        logger.info('Compiling descriptors for {0}'.format(desc_protos))
         self.exec_command(['mkdir', '-p', output_dir])
         # DescGen don't use _group_by_dirname right now because
         #   - it doesn't have to
@@ -399,11 +400,11 @@ class GoLangUpdateImportsTask(task_base.TaskBase):
                 go_import_base, output_dir, final_repo_dir):
         pkg_dir = _prepare_pkg_dir(output_dir, api_name, api_version,
                                    organization_name, language)
-        print(pkg_dir)
+        logger.info(pkg_dir)
         for pbfile in self.find_pb_files(pkg_dir):
             out_file = os.path.join(final_repo_dir, 'proto',
                                     os.path.relpath(pbfile, pkg_dir))
-            print('outfile {}'.format(out_file))
+            logger.info('outfile {}'.format(out_file))
             out_dir = os.path.dirname(out_file)
             if not os.path.exists(out_dir):
                 os.makedirs(out_dir)
@@ -468,7 +469,7 @@ class RubyGrpcCopyTask(task_base.TaskBase):
         pkg_dir = _pkg_root_dir(
             output_dir, api_name, api_version, organization_name, language)
         final_output_dir = os.path.join(final_repo_dir, 'lib')
-        print('Copying %s/* to %s.' % (pkg_dir, final_output_dir))
+        logger.info('Copying %s/* to %s.' % (pkg_dir, final_output_dir))
         if not os.path.exists(final_output_dir):
             self.exec_command(['mkdir', '-p', final_output_dir])
         for entry in sorted(os.listdir(pkg_dir)):
@@ -529,4 +530,5 @@ class JavaProtoCopyTask(task_base.TaskBase):
 
         # Remove intermediate output
         self.exec_command(['rm', '-r', intermediate_package_dir])
-        print('Task succeeded. Proto package is available at: ' + package_dir)
+        logger.info('Task succeeded. Proto package is available at: %s' %
+                    package_dir)

@@ -19,6 +19,7 @@ from pipeline.tasks import packman_tasks
 from pipeline.tasks import task_base
 from pipeline.utils import task_utils
 from pipeline.tasks.requirements import gapic_requirements
+from pipeline.utils.logger import logger
 
 
 class GapicConfigGenTask(task_base.TaskBase):
@@ -124,7 +125,7 @@ class GapicCopyTask(task_base.TaskBase):
     """
 
     def execute(self, final_repo_dir, gapic_code_dir):
-        print('Copying %s/* to %s.' % (gapic_code_dir, final_repo_dir))
+        logger.info('Copying %s/* to %s.' % (gapic_code_dir, final_repo_dir))
         self.exec_command(['mkdir', '-p', final_repo_dir])
         for entry in os.listdir(gapic_code_dir):
             src_path = os.path.join(gapic_code_dir, entry)

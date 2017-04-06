@@ -14,20 +14,22 @@
 
 """Tasks related to format"""
 
-from __future__ import print_function
 import os
 import subprocess
+
 from pipeline.tasks import task_base
 from pipeline.tasks.requirements import go_requirements
 from pipeline.tasks.requirements import php_requirements
 from pipeline.utils import task_utils
+from pipeline.utils.logger import logger
 
 
 # TODO: Store both intermediate and final output in all format tasks.
 
 class JavaFormatTask(task_base.TaskBase):
     def execute(self, gapic_code_dir, toolkit_path):
-        print('Formatting files in %s.' % os.path.abspath(gapic_code_dir))
+        logger.info('Formatting files in %s.' %
+                    os.path.abspath(gapic_code_dir))
         # TODO(shinfan): Move gradle task into requirement
         path = task_utils.get_gradle_task_output(
                 'showJavaFormatterPath', toolkit_path)
@@ -46,7 +48,8 @@ class JavaFormatTask(task_base.TaskBase):
 
 class PythonFormatTask(task_base.TaskBase):
     def execute(self, gapic_code_dir):
-        print('Formatting files in %s.' % os.path.abspath(gapic_code_dir))
+        logger.info('Formatting files in %s.' %
+                    os.path.abspath(gapic_code_dir))
         targetFiles = []
         for root, dirs, files in os.walk(gapic_code_dir):
             for filename in files:
@@ -66,7 +69,8 @@ class PythonFormatTask(task_base.TaskBase):
 
 class GoFormatTask(task_base.TaskBase):
     def execute(self, gapic_code_dir):
-        print('Formatting files in %s.' % os.path.abspath(gapic_code_dir))
+        logger.info('Formatting files in %s.' %
+                    os.path.abspath(gapic_code_dir))
         self.exec_command(['gofmt', '-w', gapic_code_dir])
 
     def validate(self):
@@ -76,14 +80,14 @@ class GoFormatTask(task_base.TaskBase):
 class PhpFormatTask(task_base.TaskBase):
     def execute(self, gapic_code_dir):
         abs_code_dir = os.path.abspath(gapic_code_dir)
-        print('Formatting file using php-cs-fixer in %s.' % abs_code_dir)
+        logger.info('Formatting file using php-cs-fixer in %s.' % abs_code_dir)
         subprocess.call(['php-cs-fixer', 'fix', gapic_code_dir])
         # We require a second call to php-cs-fixer because instances of @type
         # have been converted to @var. We cannot disable this conversion in
         # the first call without affecting other aspects of the formatting.
         subprocess.call(['php-cs-fixer', 'fix', gapic_code_dir,
                          '--fixers=phpdoc_var_to_type'])
-        print('Formatting file using phpcbf in %s.' % abs_code_dir)
+        logger.info('Formatting file using phpcbf in %s.' % abs_code_dir)
         subprocess.call(['phpcbf', '--standard=PSR2', '--no-patch', gapic_code_dir])
 
     def validate(self):

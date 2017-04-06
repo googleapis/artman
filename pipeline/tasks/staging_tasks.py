@@ -14,11 +14,11 @@
 
 """Tasks related to generation of GAPIC wrappers"""
 
-from __future__ import print_function
 import os
 
 from pipeline.tasks import task_base
 from pipeline.utils import task_utils
+from pipeline.utils.logger import logger
 
 
 class StagingOutputDirTask(task_base.TaskBase):
@@ -47,7 +47,8 @@ class StagingCopyTask(task_base.TaskBase):
     """
 
     def execute(self, language, staging_lang_api_dir, staging_code_dir):
-        print('Copying %s/* to %s.' % (staging_code_dir, staging_lang_api_dir))
+        logger.info('Copying %s/* to %s.' %
+                    (staging_code_dir, staging_lang_api_dir))
         self.exec_command(['mkdir', '-p', staging_lang_api_dir])
         for entry in os.listdir(staging_code_dir):
             src_path = os.path.join(staging_code_dir, entry)

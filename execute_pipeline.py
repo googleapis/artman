@@ -34,7 +34,8 @@ Example:
   python execute_pipeline.py --pipeline_kwargs "{'sleep_secs':4}" SamplePipeline
 
 """
-from __future__ import print_function
+from __future__ import absolute_import, unicode_literals
+from logging import DEBUG, INFO
 import argparse
 import ast
 import base64
@@ -52,6 +53,7 @@ from taskflow import engines, task, states
 
 from pipeline.pipelines import pipeline_factory
 from pipeline.utils import job_util, pipeline_util, config_util
+from pipeline.utils.logger import logger, setup_logging
 
 
 def main(args):
@@ -139,12 +141,27 @@ def _CreateArgumentParser():
         action='store_true',
         help='Control whether to add the generated output to the staging '
              'repository.')
+    parser.add_argument('-v', '--verbose',
+        action='store_const',
+        const=10,
+        default=20,
+        dest='verbosity',
+        help='Show verbose / debug output.',
+    )
+    parser.add_argument('-q', '--quiet',
+        action='store_const',
+        const=30,
+        default=20,
+        dest='verbosity',
+        help='Suppress output.',
+    )
     return parser
 
 
 def _parse_args(args):
     parser = _CreateArgumentParser()
     flags = parser.parse_args(args=args)
+    setup_logging(flags.verbosity)
 
     repo_root = flags.reporoot
     language = flags.language
@@ -179,9 +196,9 @@ def _parse_args(args):
 
     cmd_args = ast.literal_eval(flags.pipeline_kwargs)
     pipeline_args.update(cmd_args)
-    print('Final args:')
+    logger.info('Final args:')
     for (k, v) in pipeline_args.items():
-        print(' {k}: {v}'.format(k=k, v=v))
+        logger.info(' {k}: {v}'.format(k=k, v=v))
 
     return (flags.pipeline_name,
             pipeline_args,
@@ -219,23 +236,28 @@ def _normalize_path(path):
 
 
 def _print_log(pipeline_id):
-  # Fetch the cloud logging entry if the exection fails. Wait for 30 secs,
-  # because it takes a while for the logging to become available.
-  print('The remote pipeline execution failed. It will wait for 30 secs before '
-        'fetching the log for remote pipeline execution.')
-  time.sleep(30)
-  try:
-      client = logging.Client()
-      logger = client.logger(pipeline_id)
-      entries, token = logger.list_entries()
-      for entry in entries:
-          print(entry.payload)
-  except:
-      pass
+    # Fetch the cloud logging entry if the exection fails. Wait for 30 secs,
+    # because it takes a while for the logging to become available.
+    logger.critical(
+        'The remote pipeline execution failed. It will wait for 30 '
+        'seconds before fetching the log for remote pipeline execution.',
+    )
+    time.sleep(30)
+    try:
+        client = logging.Client()
+        pipeline_logger = client.logger(pipeline_id)
+        entries, token = pipeline_logger.list_entries()
+        for entry in entries:
+            logger.error(entry.payload)
+    except:
+        pass
 
-  print('You can always run the following command to fetch the log entry:\n'
-        '    gcloud beta logging read "logName=projects/vkit-pipeline/logs/%s"' % pipeline_id)
+    logger.info(
+        'You can always run the following command to fetch the log entry:\n'
+        '    gcloud beta logging read "logName=projects/vkit-pipeline/logs/%s"'
+        % pipeline_id,
+    )
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main(sys.argv[1:])

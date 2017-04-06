@@ -18,12 +18,15 @@ import contextlib
 import os
 import time
 
+from oslo_utils import uuidutils
+
 from taskflow import engines
 from taskflow import states
 from taskflow.persistence import logbook
-from oslo_utils import uuidutils
+
 from pipeline.pipelines import pipeline_factory
 from pipeline.utils import backend_helper
+from pipeline.utils.logger import logger
 
 # TODO(cbao): Include machine name
 POSTER_NAME = "poster-%s" % os.getpid()
@@ -32,7 +35,7 @@ POSTER_NAME = "poster-%s" % os.getpid()
 def post_remote_pipeline_job_and_wait(pipeline, jobboard_name):
     """Post a pipeline job and wait until it is finished."""
     my_name = POSTER_NAME
-    print("Starting poster with name: %s" % my_name)
+    logger.info("Starting poster with name: %s" % my_name)
     persist_backend = backend_helper.default_persistence_backend()
     with contextlib.closing(persist_backend):
         with contextlib.closing(persist_backend.get_connection()) as conn:
@@ -58,8 +61,9 @@ def post_remote_pipeline_job_and_wait(pipeline, jobboard_name):
                                          backend=persist_backend)
             # Post, and be done with it!
             jb = jobboard.post("job-from-%s" % my_name, book=lb)
-            print('Posted: %s' % jb)
+            logger.info('Posted: %s' % jb)
             # TODO(cbao): Move wait until into a seperate method.
+            # TODO(lukesneeringer): ...and fix the logging.
             state = states.UNCLAIMED
             print('Job status: %s' % state)
             while state != states.COMPLETE:

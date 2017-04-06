@@ -21,6 +21,7 @@ import os
 from taskflow.conductors import backends as conductor_backends
 
 from pipeline.utils import backend_helper
+from pipeline.utils.logger import logger
 
 
 # TODO(cbao): This is now a common conductor which will execute all pipeline
@@ -29,7 +30,7 @@ from pipeline.utils import backend_helper
 # be installed before conductor starts claiming jobs.
 def run(jobboard_name):
     conductor_id = os.getpid()
-    print('Starting GAPIC conductor with pid: %s' % conductor_id)
+    logger.info('Starting GAPIC conductor with pid: %s' % conductor_id)
     my_name = 'conductor-%s' % conductor_id
     persist_backend = backend_helper.default_persistence_backend()
     with contextlib.closing(persist_backend):
@@ -45,9 +46,9 @@ def run(jobboard_name):
                                             engine='serial')
             # Run forever, and kill -9 or ctrl-c me...
             try:
-                print('Conductor %s is running' % my_name)
+                logger.info('Conductor %s is running' % my_name)
                 cond.run()
             finally:
-                print('Conductor %s is stopping' % my_name)
+                logger.info('Conductor %s is stopping' % my_name)
                 cond.stop()
                 cond.wait()

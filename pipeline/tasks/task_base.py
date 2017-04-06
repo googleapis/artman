@@ -17,11 +17,14 @@
 This base class extends taskflow Task class, with additional methods and
 properties used by the GAPIC pipeline."""
 
-from __future__ import print_function
+import logging
 import subprocess
 
 from gcloud import logging as cloud_logging
 from taskflow.task import Task
+
+from pipeline.utils.logger import logger as artman_logger
+from pipeline.utils.logger import output_logger
 
 
 class TaskBase(Task):
@@ -43,21 +46,22 @@ class TaskBase(Task):
         """
         raise NotImplementedError("Subclass must implement abstract method")
 
-    def log(self, msg):
+    def log(self, msg, logger=artman_logger, level=logging.INFO):
         """Do local logging, and optionally cloud logging."""
         if self.cloud_logger:
             # TODO(ethanbao): Do batch logging.
             self.cloud_logger.log_text(msg)
-        print(msg)
+        logger.log(level, msg)
 
     def exec_command(self, args):
         """ Execute command and return output.
 
         TODO(ethanbao): Use subprocess.Popen which is recommended."""
         try:
+            self.log(' '.join(args), level=logging.DEBUG)
             output = subprocess.check_output(args, stderr=subprocess.STDOUT)
             if output:
-                self.log(output)
+                self.log(output, logger=output_logger)
             return output
         except subprocess.CalledProcessError as e:
             self.log(e.output)

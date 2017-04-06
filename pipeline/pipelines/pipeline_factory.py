@@ -22,6 +22,7 @@ from pipeline.pipelines import gapic_generation_pipeline  # noqa
 from pipeline.pipelines import grpc_generation_pipeline  # noqa
 from pipeline.pipelines import core_generation_pipeline  # noqa
 from pipeline.pipelines import batch_generation_pipeline  # noqa
+from pipeline.utils.logger import logger
 
 
 def make_pipeline_flow(pipeline_name, remote_mode=False, **kwargs):
@@ -44,7 +45,7 @@ def make_pipeline_flow(pipeline_name, remote_mode=False, **kwargs):
 def make_pipeline(pipeline_name, remote_mode=False, **kwargs):
     for cls in _rec_subclasses(pipeline_base.PipelineBase):
         if cls.__name__ == pipeline_name:
-            print("Create %s instance." % pipeline_name)
+            logger.info("Create %s instance." % pipeline_name)
             return cls(remote_mode=remote_mode, **kwargs)
     raise ValueError("Invalid pipeline name: %s" % pipeline_name)
 

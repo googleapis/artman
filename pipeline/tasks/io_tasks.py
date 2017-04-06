@@ -14,7 +14,6 @@
 
 """Tasks related to I/O."""
 
-from __future__ import print_function
 import base64
 import os
 import shutil
@@ -42,13 +41,13 @@ class BlobUploadTask(task_base.TaskBase):
                 bucket_name,
                 src_path,
                 dest_path):
-        print('Start blob upload')
+        logger.info('Start blob upload')
         client = storage.Client()
         bucket = client.get_bucket(bucket_name)
         blob = bucket.blob(dest_path)
         with open(src_path, 'r') as f:
             blob.upload_from_file(f)
-        print('Uploaded to %s' % blob.public_url)
+        logger.info('Uploaded to %s' % blob.public_url)
 
         return bucket_name, dest_path, blob.public_url
 
@@ -56,14 +55,14 @@ class BlobUploadTask(task_base.TaskBase):
 class BlobDownloadTask(task_base.TaskBase):
     """A task which downloads file to Google Cloud Storage.
 
-    It requires authentication be properly configured."""
-
+    It requires authentication be properly configured.
+    """
     def execute(self, bucket_name, path, output_dir):
         client = storage.Client()
         bucket = client.get_bucket(bucket_name)
         blob = bucket.get_blob(path)
         if not blob:
-            print('Cannot find the output from GCS.')
+            logger.error('Cannot find the output from GCS.')
             return
         filename = os.path.join(output_dir, path)
         if not os.path.exists(os.path.dirname(filename)):
@@ -73,7 +72,7 @@ class BlobDownloadTask(task_base.TaskBase):
                 raise
         with open(filename, "w") as f:
             blob.download_to_file(f)
-            print('File downloaded to %s.' % f.name)
+            logger.info('File downloaded to %s.' % f.name)
 
 
 def _validate_upload_size(size, limit):
@@ -113,7 +112,7 @@ class PrepareGoogleapisDirTask(task_base.TaskBase):
             # Do nothing if the repo_root exists. The repo_root exists if
             # artman is running locally.
             return
-        print('root repo: %s' % repo_root)
+        logger.info('root repo: %s' % repo_root)
         try:
             os.makedirs(repo_root)
         except OSError as e:
