@@ -22,7 +22,9 @@ import zipfile
 from six.moves import urllib
 
 from gcloud import storage
+
 from pipeline.tasks import task_base
+from pipeline.utils.logger import logger
 
 
 # Maximum amount of data, in bytes, that can be stored in a zookeeper node. See
