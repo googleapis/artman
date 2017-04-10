@@ -34,7 +34,7 @@ ARTMAN_CONFIG_BLACKLIST= [
 ]
 
 # Not ready to test Go and Csharp yet.
-SUPPORTED_LANGS = ['python', 'java', 'ruby', 'nodejs', 'php']
+SUPPORTED_LANGS = ['python', 'java', 'ruby', 'nodejs', 'php', 'go']
 
 def run_smoke_test():
   artman_config_dir = '../googleapis/gapic/api'

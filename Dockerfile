@@ -77,6 +77,7 @@ USER root
 ENV GOPATH /go
 ENV PATH $GOPATH/bin:/home/linuxbrew/.linuxbrew/opt/go/libexec/bin:$PATH
 RUN mkdir -p "$GOPATH/src" "$GOPATH/bin" && chmod -R 777 "$GOPATH"
+RUN go get -u github.com/golang/protobuf/proto github.com/golang/protobuf/protoc-gen-go
 
 # Install packman
 # TODO: consider installing released packages once artman is versioned (so that
