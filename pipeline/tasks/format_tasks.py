@@ -88,7 +88,8 @@ class PhpFormatTask(task_base.TaskBase):
         subprocess.call(['php-cs-fixer', 'fix', gapic_code_dir,
                          '--fixers=phpdoc_var_to_type'])
         logger.info('Formatting file using phpcbf in %s.' % abs_code_dir)
-        subprocess.call(['phpcbf', '--standard=PSR2', '--no-patch', gapic_code_dir])
+        subprocess.call(['phpcbf', '--standard=PSR2', '--no-patch',
+                         gapic_code_dir])
 
     def validate(self):
         return [php_requirements.PhpFormatRequirements]

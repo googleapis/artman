@@ -527,7 +527,6 @@ class JavaProtoCopyTask(task_base.TaskBase):
         if len(gapic_api_yaml) > 0:
             self.exec_command(['cp', gapic_api_yaml[0], package_dir])
 
-
         # Remove intermediate output
         self.exec_command(['rm', '-r', intermediate_package_dir])
         logger.info('Task succeeded. Proto package is available at: %s' %

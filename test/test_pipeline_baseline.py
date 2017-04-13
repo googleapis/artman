@@ -230,7 +230,9 @@ def test_generator(pipeline_name, language, extra_args, baseline):
     'extra_args, baseline',
     [
         ([], 'gapic_batch_pipeline'),
-        (['--stage_output'], 'gapic_batch_staging_pipeline')
+        (['--stage_output'], 'gapic_batch_staging_pipeline'),
+        ([], 'grpc_batch_pipeline'),
+        (['--stage_output'], 'grpc_batch_staging_pipeline')
     ]
 )
 def test_generator_batch(extra_args, baseline):

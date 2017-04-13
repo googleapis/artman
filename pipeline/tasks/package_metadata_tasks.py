@@ -25,6 +25,7 @@ _PROTO_PREFIX_MAP = {
     'python': 'proto-'
 }
 
+
 class PackageMetadataConfigGenTask(task_base.TaskBase):
     """Generates package metadata config"""
     default_provides = 'package_metadata_yaml'

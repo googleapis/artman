@@ -34,6 +34,20 @@ class StagingOutputDirTask(task_base.TaskBase):
                 os.path.join(staging_repo_dir, language, api_full_name)]
 
 
+class StagingGrpcOutputDirTask(task_base.TaskBase):
+    """Output the code gen dir as staging_code_dir
+    """
+    default_provides = ['staging_code_dir', 'staging_lang_api_dir']
+
+    def execute(self, language, api_name, api_version, organization_name,
+                package_dir, staging_repo_dir):
+        api_full_name = task_utils.api_full_name(
+            api_name, api_version, organization_name)
+        staging_lang_api_dir = os.path.join(
+            staging_repo_dir, language, 'grpc-' + api_full_name)
+        return [package_dir, staging_lang_api_dir]
+
+
 class StagingCleanTask(task_base.TaskBase):
     """Delete all of the files in the staging_lang_api_dir.
     """

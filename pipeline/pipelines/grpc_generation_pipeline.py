@@ -15,8 +15,9 @@
 """Pipelines that run gRPC codegen"""
 
 from pipeline.pipelines import code_generation_pipeline as code_gen
-from pipeline.tasks import (package_metadata_tasks, protoc_tasks,
-                            publish_tasks, python_grpc_tasks)
+from pipeline.pipelines import batch_generation_pipeline as batch_gen
+from pipeline.tasks import protoc_tasks, publish_tasks, python_grpc_tasks
+from pipeline.tasks import staging_tasks, package_metadata_tasks
 from pipeline.utils import task_utils
 
 
@@ -30,7 +31,8 @@ class GrpcClientPipeline(code_gen.CodeGenerationPipelineBase):
 class GrpcTaskFactoryBase(code_gen.TaskFactoryBase):
 
     def get_tasks(self, **kwargs):
-        tasks = self._get_grpc_codegen_tasks(**kwargs)
+        tasks = (self._get_grpc_codegen_tasks(**kwargs)
+                 + self._get_grpc_staging_tasks(**kwargs))
         if 'publish_env' in kwargs:
             tasks.append(publish_tasks.get_publish_task(
                 kwargs['language']))
@@ -39,11 +41,32 @@ class GrpcTaskFactoryBase(code_gen.TaskFactoryBase):
     def _get_grpc_codegen_tasks(self, **kwargs):
         return [protoc_tasks.GrpcPackmanTask]
 
+    def _get_grpc_staging_tasks(self, **kwargs):
+        if kwargs['stage_output']:
+            return [staging_tasks.StagingGrpcOutputDirTask,
+                    staging_tasks.StagingCleanTask,
+                    staging_tasks.StagingCopyTask]
+        return []
+
     def get_validate_kwargs(self):
         return code_gen.COMMON_REQUIRED
 
     def get_invalid_kwargs(self):
         return []
+
+
+class GrpcClientBatchPipeline(batch_gen.BatchPipeline):
+
+    def __init__(self, **kwargs):
+        super(GrpcClientBatchPipeline, self).__init__(
+            _make_batch_pipeline_tasks, **kwargs)
+
+
+def _make_batch_pipeline_tasks(**kwargs):
+    task_factory = _get_grpc_task_factory(kwargs)
+    tasks = (task_factory._get_grpc_codegen_tasks(**kwargs)
+             + task_factory._get_grpc_staging_tasks(**kwargs))
+    return task_utils.instantiate_tasks(tasks, kwargs)
 
 
 class _RubyGrpcTaskFactory(GrpcTaskFactoryBase):

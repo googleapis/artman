@@ -79,6 +79,8 @@ def instantiate_tasks(task_class_list, inject):
             name += '-' + inject['language']
         if inject.get('api_name'):
             name += '-' + inject['api_name']
+        if inject.get('api_version'):
+            name += '-' + inject['api_version']
         tasks.append(task_class(name, inject=inject))
     return tasks
 
