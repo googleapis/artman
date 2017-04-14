@@ -71,7 +71,7 @@ You’ll have to create a development environment to hack on
 
     # Configure remotes such that you can pull changes from the artman
     # repository into your local repository.
-    git remote add upstream https://github.com:google/artman
+    git remote add upstream https://github.com/googleapis/artman.git
 
     # fetch and merge changes from upstream into master
     git fetch upstream
