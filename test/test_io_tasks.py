@@ -14,7 +14,7 @@
 
 import unittest
 
-from pipeline.tasks import io_tasks
+from artman.tasks import io_tasks
 
 
 _UPLOAD_LIMIT = 123

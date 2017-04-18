@@ -17,9 +17,9 @@ import uuid
 from multiprocessing import Process
 import unittest
 
-from pipeline.pipelines import pipeline_factory
-from pipeline.utils import job_util
-from pipeline.conductors import gapic_conductor
+from artman.pipelines import pipeline_factory
+from artman.utils import job_util
+from artman.conductors import gapic_conductor
 
 
 class ConductorE2ETest(unittest.TestCase):

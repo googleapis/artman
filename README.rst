@@ -19,26 +19,46 @@ from the protobuf source IDL and additional configuration in YAML files.
 Installation
 ------------
 
-At the moment, this library is under development, so please see
-`using a development checkout`_ for installation instructions
+You can now install artman directly from pip:
 
-.. _`using a development checkout`: https://github.com/googleapis/artman/blob/master/CONTRIBUTING.rst#using-a-development-checkout
+.. code::
+
+    pip install googleapis-artman
+
+You may need root privileges if you are not installing inside of a virtualenv.
+This will make the ``artman`` command available on your system.
 
 
 Usage
 -----
 
-Currently, this tool can only be run in the development environment of the
-development team, as some dependencies are yet to be published. See USAGE_ for
-details.
+Before you can use artman, you will need a configuration file. You can run
+``artman init`` to create a simple configuration file.
 
-.. _USAGE: https://github.com/googleapis/artman/blob/master/USAGE.rst
+For building a GAPIC (the most common task), the usage looks like:
+
+.. code::
+
+    artman --api pubsub --language python
+
+This assumes that you have checkouts of both `googleapis`_ and `toolkit`_
+on your system (and that toolkit is able to run; e.g. you need Java).
+
+Some languages may have additional dependencies; refer to the ``Dockerfile``
+in this repository for canonical installation requirements.
+
+.. _`googleapis`: https://github.com/googleapis/googleapis
+.. _`toolkit`: https://github.com/googleapis/toolkit
+
+Artman also takes a ``--publish`` argument to decide where to stage the
+code. Using ``--publish github`` will create a pull request on GitHub
+automatically.
 
 
 Python Versions
 ---------------
 
-artman is currently tested with Python 2.7.
+artman is currently tested with Python 2.7 and Python 3.4.
 
 
 Contributing
@@ -46,7 +66,8 @@ Contributing
 
 Contributions to this library are always welcome and highly encouraged.
 
-See the `CONTRIBUTING`_ documentation for more information on how to get started.
+See the `CONTRIBUTING`_ documentation for more information on how to get
+started.
 
 .. _`CONTRIBUTING`: https://github.com/googleapis/artman/blob/master/CONTRIBUTING.rst
 
@@ -66,7 +87,8 @@ stable.
 Details
 -------
 
-For detailed documentation of the modules in artman, please watch `DOCUMENTATION`_.
+For detailed documentation of the modules in artman, please watch
+`DOCUMENTATION`_.
 
 .. _`DOCUMENTATION`: https://googleapis-artman.readthedocs.org/
 

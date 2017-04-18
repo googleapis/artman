@@ -1,12 +1,13 @@
 [run]
 branch = True
-source = pipeline/
+source = artman/
 
 [report]
+# fail_under = 75
 show_missing = True
 exclude_lines =
     # Re-enable the standard pragma
     pragma: no-cover
-    
+
     # Ignore debug-only repr
     def __repr__

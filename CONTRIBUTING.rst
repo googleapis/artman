@@ -34,12 +34,14 @@ requests. Fork the repository, and make your changes in the forked repository.
 Include tests
 -------------
 
-Be sure to add relevant tests and run then them using :code:`tox` before making the pull request.
-Docs will be updated automatically when we merge to `master`, but
-you should also build the docs yourself via :code:`tox -e docs`, making sure that the docs build OK
-and that they are readable.
+Be sure to add relevant tests and run then them using :code:`nox` befor
+ making the pull request.
 
-.. _`tox`: https://tox.readthedocs.org/en/latest/
+Docs will be updated automatically when we merge to `master`, but
+you should also build the docs yourself via :code:`nox -e docs`, making sure
+that the docs build OK and that they are readable.
+
+.. _`nox`: https://nox.readthedocs.io/en/latest/
 
 Make the pull request
 ---------------------
@@ -56,7 +58,8 @@ Using a Development Checkout
 You’ll have to create a development environment to hack on
 `artman`_, using a Git checkout:
 
--   While logged into your GitHub account, navigate to the `artman repo`_ on GitHub.
+-   While logged into your GitHub account, navigate to the
+    `artman repo`_ on GitHub.
 -   Fork and clone the `artman` repository to your GitHub account
     by clicking the "Fork" button.
 -   Clone your fork of `artman` from your GitHub account to your
@@ -81,21 +84,19 @@ You’ll have to create a development environment to hack on
 Now your local repo is set up such that you will push changes to your
 GitHub repo, from which you can submit a pull request.
 
--   Create use tox to create development virtualenv in which `artman`_ is installed:
-
   .. code:: bash
 
-    sudo pip install tox
-    cd ~/hack-on-artman
-    tox -e devenv
+    sudo pip install virtualenv virtualenvwrapper
+    mkvirtualenv --python=`which python3` artman
+    pip install -e .
 
--   This is creates a tox virtualenv named `development` that has artman installed.
+-   This is creates a virtualenv named `artman` that has artman installed.
     Activate it to use artman locally, e.g, from the python prompt.
 
   .. code:: bash
 
     cd ~/hack-on-artman
-    . ./tox/develop/bin/activate
+    workon artman
 
 .. _`artman`: https://github.com/googleapis/artman
 .. _`artman repo`: https://github.com/googleapis/artman
@@ -105,19 +106,19 @@ Running Tests
 -------------
 
 -   To run the full set of `artman` tests on all platforms, install
-    `tox`_ into a system Python.  The :code:`tox` console script will be
+    `nox`_ into a system Python.  The :code:`nox` console script will be
     installed into the scripts location for that Python.  While in the
-    `artman` checkout root directory (it contains :code:`tox.ini`),
-    invoke the `tox` console script.  This will read the :code:`tox.ini` file and
-    execute the tests on multiple Python versions and platforms; while it runs,
-    it creates a virtualenv for each version/platform combination.  For
+    `artman` checkout root directory (it contains :code:`nox.py`),
+    invoke the `nox` console script.  This will read the :code:`nox.py` file
+    and execute the tests on multiple Python versions and platforms; while
+    it runs, it creates a virtualenv for each version/platform combination. For
     example:
 
   .. code:: bash
 
-      sudo pip install tox
+      sudo pip install nox-automation
       cd ~/hack-on-artman
-      tox
+      nox
 
 Contributor License Agreements
 ------------------------------

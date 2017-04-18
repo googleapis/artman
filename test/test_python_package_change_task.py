@@ -16,7 +16,7 @@ import mock
 import os
 import unittest
 
-from pipeline.tasks import python_grpc_tasks
+from artman.tasks import python_grpc_tasks
 
 
 class PythonPackageChangeTest(unittest.TestCase):

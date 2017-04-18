@@ -18,8 +18,8 @@
 
 It generates both grpc and gapic client libraries for Google APIs in googleapis
 repo (except those being blacklisted), and fails if any generation fails.
-The test currently assumes that artman and googleapis folders are under the same
-parent folder.
+The test currently assumes that artman and googleapis folders are under the
+same parent folder.
 """
 
 import os
@@ -28,58 +28,53 @@ import subprocess
 import sys
 
 ARTMAN_CONFIG_BLACKLIST= [
-  'artman_spanner_admin_instance.yaml',
-  'artman_spanner_admin_database.yaml',
-  'artman_bigtable_admin.yaml'
+    'artman_spanner_admin_instance.yaml',
+    'artman_spanner_admin_database.yaml',
+    'artman_bigtable_admin.yaml'
 ]
 
 # Not ready to test Go and Csharp yet.
 SUPPORTED_LANGS = ['python', 'java', 'ruby', 'nodejs', 'php', 'go']
 
 def run_smoke_test():
-  artman_config_dir = '../googleapis/gapic/api'
-  failure = []
-  for root, dirs, files in os.walk(artman_config_dir):
-    for f in fnmatch.filter(files, 'artman_*.yaml'):
-      if f in ARTMAN_CONFIG_BLACKLIST:
-        # Do not run generation tests for those in the blacklist.
-        continue
-      filename = os.path.join(root, f)
-      content = open(filename).read()
-      for lang in SUPPORTED_LANGS:
-        if '%s:' % lang in content:
-          if generate_grpc_library(filename, lang):
-            failure.append(
-              "Failed to generate grpc %s library using %s config."
-              % (lang, filename))
-          if generate_gapic_library(filename, lang):
-            failure.append(
-              "Failed to generate gapic %s library using %s config."
-              % (lang, filename))
-  if failure:
-    sys.exit("Smoke test failed with %s" % " ".join(failure))
+    artman_config_dir = '../googleapis/gapic/api'
+    failure = []
+    for root, dirs, files in os.walk(artman_config_dir):
+        for f in fnmatch.filter(files, 'artman_*.yaml'):
+            if f in ARTMAN_CONFIG_BLACKLIST:
+                # Do not run generation tests for those in the blacklist.
+                continue
+            filename = os.path.join(root, f)
+            content = open(filename).read()
+            for lang in SUPPORTED_LANGS:
+                if '%s:' % lang in content:
+                    if generate_grpc_library(filename, lang):
+                        failure.append('Failed to generate grpc %s library '
+                                       'using %s config.' % (lang, filename))
+                    if generate_gapic_library(filename, lang):
+                        failure.append('Failed to generate gapic %s library '
+                                       'using %s config.' % (lang, filename))
+    if failure:
+        sys.exit('Smoke test failed with %s' % ' '.join(failure))
 
 def generate_grpc_library(artman_config, lang):
-  grpc_pipeline_args = [
-    'python',
-    "execute_pipeline.py",
-    '--config',
-     '%s,../googleapis/gapic/lang/common.yaml' % artman_config,
-    '--language',
-    lang,
-    'GrpcClientPipeline']
-  return subprocess.call(grpc_pipeline_args, stdout=subprocess.PIPE)
+    grpc_pipeline_args = [
+        'artman', 'build',
+        '--config', '%s,../googleapis/gapic/lang/common.yaml' % artman_config,
+        '--language', lang,
+        '--pipeline', 'GrpcClientPipeline',
+        '--publish', 'noop',
+    ]
+    return subprocess.call(grpc_pipeline_args, stdout=subprocess.PIPE)
 
 def generate_gapic_library(artman_config, lang):
-  gapic_pipeline_args = [
-    'python',
-    "execute_pipeline.py",
-    '--config',
-     '%s,../googleapis/gapic/lang/common.yaml' % artman_config,
-    '--language',
-    lang,
-    'GapicClientPipeline']
-  return subprocess.call(gapic_pipeline_args, stdout=subprocess.PIPE)
+    gapic_pipeline_args = [
+        'artman', 'build',
+        '--config', '%s,../googleapis/gapic/lang/common.yaml' % artman_config,
+        '--language', lang,
+        '--publish', 'noop',
+    ]
+    return subprocess.call(gapic_pipeline_args, stdout=subprocess.PIPE)
 
 if __name__ == "__main__":
     run_smoke_test()

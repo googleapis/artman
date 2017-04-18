@@ -18,16 +18,16 @@ common:
   output_dir: ${REPOROOT}/test/testdata/test_output
   enable_batch_generation: True
 java:
-  final_repo_dir: ${REPOROOT}/test/testdata/test_output/final
+  gapic_code_dir: ${REPOROOT}/test/testdata/test_output/final
 python:
-  final_repo_dir: ${REPOROOT}/test/testdata/test_output/final
+  gapic_code_dir: ${REPOROOT}/test/testdata/test_output/final
 go:
-  final_repo_dir: ${REPOROOT}/test/testdata/test_output/final
+  gapic_code_dir: ${REPOROOT}/test/testdata/test_output/final
 csharp:
-  final_repo_dir: ${REPOROOT}/test/testdata/test_output/final
+  gapic_code_dir: ${REPOROOT}/test/testdata/test_output/final
 php:
-  final_repo_dir: ${REPOROOT}/test/testdata/test_output/final
+  gapic_code_dir: ${REPOROOT}/test/testdata/test_output/final
 ruby:
-  final_repo_dir: ${REPOROOT}/test/testdata/test_output/final
+  gapic_code_dir: ${REPOROOT}/test/testdata/test_output/final
 nodejs:
-  final_repo_dir: ${REPOROOT}/test/testdata/test_output/final
+  gapic_code_dir: ${REPOROOT}/test/testdata/test_output/final
