@@ -18,14 +18,16 @@
 """Setup tool for artman."""
 
 import io
+import os
 import setuptools
 
-with io.open('requirements.txt') as requirements_file:
+cur_dir = os.path.realpath(os.path.dirname(__file__))
+with io.open('%s/requirements.txt' % cur_dir) as requirements_file:
     requirements = requirements_file.read().strip().split('\n')
 
 setuptools.setup(
     name='googleapis-artman',
-    version='0.2.0',
+    version='0.2.1',
     description='Google API artifact manager',
     author='Google Inc',
     author_email='googleapis-packages@google.com',
