@@ -33,7 +33,7 @@ Usage
 -----
 
 Before you can use artman, you will need a configuration file. You can run
-``artman init`` to create a simple configuration file.
+``configure-artman`` to create a simple configuration file.
 
 For building a GAPIC (the most common task), the usage looks like:
 
