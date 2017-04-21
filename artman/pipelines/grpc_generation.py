@@ -31,6 +31,13 @@ class GrpcClientPipeline(code_gen.CodeGenerationPipelineBase):
             _get_grpc_task_factory(kwargs), **kwargs)
 
 
+class ProtoClientPipeline(code_gen.CodeGenerationPipelineBase):
+
+    def __init__(self, **kwargs):
+        super(ProtoClientPipeline, self).__init__(
+            _get_proto_task_factory(kwargs), **kwargs)
+
+
 class GrpcTaskFactoryBase(code_gen.TaskFactoryBase):
 
     def get_tasks(self, **kwargs):
@@ -82,10 +89,22 @@ class _JavaGrpcTaskFactory(GrpcTaskFactoryBase):
     def _get_grpc_codegen_tasks(self, **kwargs):
         return [
             protoc_tasks.ProtoDescGenTask,
-            protoc_tasks.ProtoCodeGenTask,
+            protoc_tasks.GrpcCodeGenTask,
+            package_metadata_tasks.JavaGrpcPackageTypeTask,
             package_metadata_tasks.PackageMetadataConfigGenTask,
             package_metadata_tasks.ProtoPackageMetadataGenTask,
-            protoc_tasks.JavaProtoCopyTask,
+        ]
+
+
+class _JavaProtoTaskFactory(GrpcTaskFactoryBase):
+
+    def _get_grpc_codegen_tasks(self, **kwargs):
+        return [
+            protoc_tasks.ProtoDescGenTask,
+            protoc_tasks.ProtoCodeGenTask,
+            package_metadata_tasks.JavaProtoPackageTypeTask,
+            package_metadata_tasks.PackageMetadataConfigGenTask,
+            package_metadata_tasks.ProtoPackageMetadataGenTask,
         ]
 
 
@@ -141,6 +160,11 @@ _GRPC_TASK_FACTORY_DICT = {
 }
 
 
+_PROTO_TASK_FACTORY_DICT = {
+    'java': _JavaProtoTaskFactory,
+}
+
+
 def _get_grpc_task_factory(kwargs):
     if 'language' not in kwargs:
         raise ValueError('Valid --language argument required for gRPC codegen')
@@ -151,4 +175,17 @@ def _get_grpc_task_factory(kwargs):
         return cls()
     else:
         raise ValueError('No gRPC task factory found for language: '
+                         + language)
+
+
+def _get_proto_task_factory(kwargs):
+    if 'language' not in kwargs:
+        raise ValueError('Valid --language argument required for gRPC codegen')
+
+    language = kwargs['language']
+    cls = _PROTO_TASK_FACTORY_DICT.get(language)
+    if cls:
+        return cls()
+    else:
+        raise ValueError('No proto task factory found for language: '
                          + language)

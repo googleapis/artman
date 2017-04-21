@@ -52,10 +52,10 @@ googleapis-common-protos_version:
     lower: '0.8.2'
 package_name:
   default: google-cloud-fake-v1
-  java: grpc-google-cloud-fake-v1
 proto_path: ../path/to/protos
 short_name: fake
 major_version: v1
+generation_layer:
 proto_deps:
 - googleapis-common-protos
 package_type: grpc_client

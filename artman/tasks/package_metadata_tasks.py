@@ -33,7 +33,8 @@ class PackageMetadataConfigGenTask(task_base.TaskBase):
 
     def execute(self, api_name, api_version, organization_name, output_dir,
                 package_dependencies_yaml, package_defaults_yaml, proto_deps,
-                local_paths, src_proto_path, package_type, gapic_api_yaml):
+                local_paths, src_proto_path, package_type, gapic_api_yaml,
+                generation_layer=None):
         googleapis_dir = local_paths['googleapis']
         googleapis_path = os.path.commonprefix(
             [os.path.relpath(p, googleapis_dir) for p in src_proto_path])
@@ -55,11 +56,11 @@ class PackageMetadataConfigGenTask(task_base.TaskBase):
             'proto_path': googleapis_path,
             'package_name': {
                 'default': api_full_name,
-                'java': 'grpc-' + api_full_name
             },
             'proto_deps': proto_deps,
             'package_type': package_type,
-            'gapic_config_name': gapic_config_name
+            'gapic_config_name': gapic_config_name,
+            'generation_layer': generation_layer
         }
 
         config.update(package_dependencies)
@@ -77,18 +78,35 @@ class PackageMetadataConfigGenTask(task_base.TaskBase):
             yaml.safe_dump(config_dict, f, default_flow_style=False)
 
 
+class JavaGrpcPackageTypeTask(task_base.TaskBase):
+    default_provides = 'generation_layer'
+
+    def execute(self):
+        return 'grpc'
+
+class JavaProtoPackageTypeTask(task_base.TaskBase):
+    default_provides = 'generation_layer'
+
+    def execute(self):
+        return 'proto'
+
+
 class ProtoPackageMetadataGenTask(task_base.TaskBase):
     default_provides = 'grpc_code_dir'
 
     def execute(self, api_name, api_version, organization_name, local_paths,
                 descriptor_set, src_proto_path, service_yaml,
                 grpc_code_dir, output_dir, package_metadata_yaml,
-                language):
+                language, generation_layer=None):
         toolkit_path = local_paths['toolkit']
         api_full_name = task_utils.api_full_name(
             api_name, api_version, organization_name)
+        if generation_layer:
+            proto_prefix = generation_layer + '-'
+        else:
+            proto_prefix = _PROTO_PREFIX_MAP[language]
         pkg_dir = os.path.join(
-            output_dir, language, _PROTO_PREFIX_MAP[language] + api_full_name)
+            output_dir, language, proto_prefix + api_full_name)
 
         service_args = ['--service_yaml=' + os.path.abspath(yaml)
                         for yaml in service_yaml]
