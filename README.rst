@@ -18,15 +18,54 @@ from the protobuf source IDL and additional configuration in YAML files.
 
 Installation
 ------------
+1. Optional: set up a virtualenv for your Python work. Choose one of
+   the following:
 
-You can now install artman directly from pip:
+   1. (recommended) `virtualenvwrapper`_ so you don't have to keep
+      track of where your virtualenv is on the filesystem:
+      
+      .. code::
+         
+         sudo pip install virtualenv virtualenvwrapper
+         mkvirtualenv --python=`which python3` artman
 
-.. code::
+      To use this virtual environment later:
+      
+      .. code ::
+      
+         workon artman
 
-    pip install googleapis-artman
+   2. `virtualenv`_ in your current directory:
+      
+      .. code::
+         
+         sudo pip install virtualenv
+         virtualenv env
+         source env/bin/activate
+
+2. Install artman directly from pip:
+
+   .. code::
+
+      pip install googleapis-artman
 
 You may need root privileges if you are not installing inside of a virtualenv.
 This will make the ``artman`` command available on your system.
+
+.. _`virtualenvwrapper`: https://virtualenvwrapper.readthedocs.io/en/latest/
+.. _`virtualenv`: https://pypi.python.org/pypi/virtualenv
+
+
+Prerequisites
+-------------
+1. Install `googleapis`_
+2. Install `toolkit`_
+3. Install Java
+4. Some languages may have additional dependencies; refer to the ``Dockerfile``
+   in this repository for canonical installation requirements.
+
+.. _`googleapis`: https://github.com/googleapis/googleapis
+.. _`toolkit`: https://github.com/googleapis/toolkit
 
 
 Usage
@@ -40,15 +79,6 @@ For building a GAPIC (the most common task), the usage looks like:
 .. code::
 
     artman --api pubsub --language python
-
-This assumes that you have checkouts of both `googleapis`_ and `toolkit`_
-on your system (and that toolkit is able to run; e.g. you need Java).
-
-Some languages may have additional dependencies; refer to the ``Dockerfile``
-in this repository for canonical installation requirements.
-
-.. _`googleapis`: https://github.com/googleapis/googleapis
-.. _`toolkit`: https://github.com/googleapis/toolkit
 
 Artman also takes a ``--publish`` argument to decide where to stage the
 code. Using ``--publish github`` will create a pull request on GitHub
