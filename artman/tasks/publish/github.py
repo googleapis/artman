@@ -141,11 +141,6 @@ class CreateGitHubPullRequest(task_base.TaskBase):
         """Create a pull request on GitHub.
 
         Args:
-            git_repo (dict): Information about the git repository.
-            github (dict): GitHub credentials.
-            branch_name (str): The name of the branch.
-            api_name (str): The name of the API. Used in the title of the
-                pull request.
             api_version (str): The version of the API. Used in the title of
                 the pull request.
             language (str): The name of the language. Used in the title
@@ -194,4 +189,7 @@ class CreateGitHubPullRequest(task_base.TaskBase):
         return pr
 
 
-TASKS = (CreateGitHubBranch, CreateGitHubPullRequest)
+TASKS = (
+    CreateGitHubBranch,
+    CreateGitHubPullRequest,
+)

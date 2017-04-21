@@ -29,9 +29,12 @@ class LocalStagingTests(unittest.TestCase):
         task = local.LocalStagingTask()
         task.execute(
             gapic_code_dir=os.path.expanduser('~/foo/bar'),
-            git_repo={'gapic_subpath': 'pubsub'},
+            git_repo={
+                'gapic_subpath': 'pubsub',
+                'location': 'api-client-staging.git',
+            },
             local_paths={'api_client_staging': '/path/to/acs'},
-            output_dir='/path/to/output'
+            output_dir='/path/to/output',
         )
 
         # Ensure we executed the commands we expect.
@@ -53,9 +56,12 @@ class LocalStagingTests(unittest.TestCase):
         task = local.LocalStagingTask()
         task.execute(
             gapic_code_dir=os.path.expanduser('~/foo/bar'),
-            git_repo={'gapic_subpath': 'pubsub'},
+            git_repo={
+                'gapic_subpath': 'pubsub',
+                'location': 'api-client-staging.git',
+            },
             local_paths={'api_client_staging': '/path/to/acs'},
-            output_dir='/path/to'
+            output_dir='/path/to',
         )
 
         # Ensure we executed the commands we expect.

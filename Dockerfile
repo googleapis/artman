@@ -123,4 +123,4 @@ RUN pip install -r requirements.txt
 
 # Run smoketests
 # TODO(ethanbao): this should be part of artman CI.
-# RUN python test/smoketest.py
+RUN python test/smoketest.py

@@ -113,13 +113,19 @@ def parse_args(*args):
              '/path/to/config.yaml:config_section_A|config_section_B. '
              'This is an advanced feature; for most cases, use `--api`.',
     )
-    parser.add_argument(
-        '--publish',
+    parser.add_argument('--publish',
         choices=('github', 'local', 'maven', 'noop'),
         default=None,
         help='Set where to publish the code. Options are "github", "local", '
              '"maven", and "noop". The default is "github". This can also be '
              'set in the user config file.',
+    )
+    parser.add_argument('--target',
+        default=None,
+        dest='target',
+        help='If the "github" or "local" publisher is used, define which '
+             'repository to publish to. The artman config YAML may specify '
+             'a default for this, in which case this argument may be omitted.',
     )
     parser.add_argument('--pipeline',
         default='GapicClientPipeline',
@@ -290,6 +296,22 @@ def normalize_flags(flags, user_config):
         cmd_args = ast.literal_eval(flags.pipeline_kwargs)
         pipeline_args.update(cmd_args)
 
+    # Coerce `git_repos` and `target_repo` into a single git_repo.
+    if pipeline_args['publish'] in ('github', 'local'):
+        # Temporarily give our users a nice error if they have an older
+        # googleapis checkout.
+        # DEPRECATED: 2017-04-20
+        # REMOVE: 2017-05-20
+        if 'git_repo' in pipeline_args:
+            logger.error('Your git repos are configured in your artman YAML '
+                         'using a older format. Please git pull.')
+            sys.exit(96)
+
+        # Pop the git repos off of the pipeline args and select the
+        # correct one.
+        repos = pipeline_args.pop('git_repos')
+        pipeline_args['git_repo'] = select_git_repo(repos, flags.target)
+
     # Print out the final arguments to stdout, to help the user with
     # possible debugging.
     pipeline_args_repr = yaml.dump(pipeline_args,
@@ -311,6 +333,34 @@ def normalize_flags(flags, user_config):
         pipeline_args,
         'remote' if flags.remote else None,
     )
+
+
+def select_git_repo(git_repos, target_repo):
+    """Select the appropriate Git repo based on YAML config and CLI arguments.
+
+    Args:
+        git_repos (dict): Information about git repositories.
+        target_repo (str): The user-selected target repository. May be None.
+
+    Returns:
+        dict: The selected GitHub repo.
+    """
+    # If there is a specified target_repo, this task is trivial; just grab
+    # that git repo. Otherwise, find the default.
+    if target_repo:
+        git_repo = git_repos.get(target_repo)
+        if not git_repo:
+            logger.critical('The requested target repo is not defined '
+                            'for that API and language.')
+            sys.exit(32)
+        return git_repo
+
+    # Okay, none is specified. Check for a default, and use "staging" if no
+    # default is defined.
+    for repo in git_repos.values():
+        if repo.get('default', False):
+            return repo
+    return git_repos['staging']
 
 
 def _load_local_repo(private_repo_root, **pipeline_kwargs):
