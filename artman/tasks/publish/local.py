@@ -42,9 +42,19 @@ class LocalStagingTask(task_base.TaskBase):
                 it would remove the final destination directories.
             grpc_code_dir (str): The location of the GRPC code, if any.
         """
-        # Where is api_client_staging located?
-        api_repo = local_paths.get('api_client_staging',
-            os.path.realpath('../api_client_staging'),
+        # Determine the actual repository name.
+        # We can use this to derive the probable OS system path, as well
+        # as the key we expect in `local_paths` for an override.
+        repo_name = git_repo['location'].rstrip('/').split('/')[-1]
+        if repo_name.endswith('.git'):
+            repo_name = repo_name[:-4]
+
+        # Where is the target git repo located?
+        # Start by checking for an explicit path in `local_paths`, and then
+        # if none is found, derive it from reporoot.
+        repo_name_underscore = repo_name.replace('-', '_')
+        api_repo = local_paths.get(repo_name_underscore,
+            os.path.join(local_paths.get('reporoot', '..'), repo_name),
         )
         api_repo = os.path.realpath(os.path.expanduser(api_repo))
 
@@ -82,4 +92,6 @@ class LocalStagingTask(task_base.TaskBase):
         logger.success('Code generated: {0}'.format(location))
 
 
-TASKS = (LocalStagingTask,)
+TASKS = (
+    LocalStagingTask,
+)

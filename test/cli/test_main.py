@@ -59,6 +59,7 @@ class ParseArgsTests(unittest.TestCase):
         assert flags.github_username is None
         assert flags.github_token is None
         assert flags.publish is None
+        assert flags.target is None
         assert flags.config is ''
         assert flags.verbosity is None
 
@@ -102,7 +103,7 @@ class NormalizeFlagTests(unittest.TestCase):
             github_username='lukesneeringer', github_token='1335020400',
             googleapis='%s/data' % self.CURDIR, language='python',
             pipeline_name='GapicClientPipeline', pipeline_kwargs='{}',
-            publish='local', remote=False, verbosity=60,
+            publish='local', remote=False, target='staging', verbosity=60,
         )
         self.user_config = {
             'local_paths': {'reporoot': os.path.realpath('..')},
