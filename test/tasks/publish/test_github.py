@@ -71,6 +71,57 @@ class CreateGitHubBranchTests(unittest.TestCase):
             _, args, _ = exec_call
             assert ' '.join(args[0]) == cmd
 
+    @mock.patch.object(github.CreateGitHubBranch, 'exec_command')
+    @mock.patch.object(os, 'chdir')
+    @mock.patch.object(uuid, 'uuid4')
+    def test_execute_with_grpc(self, uuid4, chdir, exec_command):
+        uuid4.return_value = uuid.UUID('00000000-0000-0000-0000-000000000000')
+
+        # Run the task.
+        task = github.CreateGitHubBranch()
+        branch_name = task.execute(
+            api_name='pubsub',
+            api_version='v1',
+            gapic_code_dir='/path/to/code',
+            grpc_code_dir='/path/to/grpc_code',
+            git_repo={
+                'location': 'git@github.com:me/repo.git',
+                'gapic_subpath': 'generated/python/gapic-pubsub-v1',
+                'grpc_subpath': 'generated/python/proto-pubsub-v1'
+            },
+            language='python',
+            output_dir='/path/to',
+        )
+
+        # List the commands that should have been executed.
+        expected_commands = (
+            'git clone git@github.com:me/repo.git /tmp/00000000',
+            'git checkout -b pubsub-python-v1-00000000',
+            ' '.join([
+                'git rm -r --force --ignore-unmatch',
+                'generated/python/gapic-pubsub-v1',
+            ]),
+            'cp -rf /path/to/code generated/python/gapic-pubsub-v1',
+            'git add generated/python/gapic-pubsub-v1',
+            'git commit -m Python GAPIC: pubsub v1',  # Close enough.
+            ' '.join([
+                'git rm -r --force --ignore-unmatch',
+                'generated/python/proto-pubsub-v1',
+            ]),
+            'cp -rf /path/to/grpc_code generated/python/proto-pubsub-v1',
+            'git add generated/python/proto-pubsub-v1',
+            'git commit -m Python GRPC/Proto: pubsub v1',  # Still good enough.
+            'git push origin pubsub-python-v1-00000000',
+            'rm -rf /path/to',
+            'rm -rf /tmp/00000000',
+        )
+
+        # Now prove that they were.
+        assert exec_command.call_count == len(expected_commands)
+        for cmd, exec_call in zip(expected_commands, exec_command.mock_calls):
+            _, args, _ = exec_call
+            assert ' '.join(args[0]) == cmd
+
 
 class CreateGitHubPullRequestTests(unittest.TestCase):
     def setUp(self):

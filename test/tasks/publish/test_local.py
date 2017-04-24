@@ -51,6 +51,26 @@ class LocalStagingTests(unittest.TestCase):
         assert rm_cmd_3[0] == ['rm', '-rf', '/path/to/output']
 
     @mock.patch.object(local.LocalStagingTask, 'exec_command')
+    def test_execute_git_location_without_dot_git(self, exec_command):
+        # Run the task.
+        # This time, send a location that does not end in ".git" (as an
+        # https location would not).
+        task = local.LocalStagingTask()
+        task.execute(
+            gapic_code_dir=os.path.expanduser('~/foo/bar'),
+            git_repo={
+                'gapic_subpath': 'pubsub',
+                'location': 'api-client-staging',
+            },
+            local_paths={'api_client_staging': '/path/to/acs'},
+            output_dir='/path/to/output',
+        )
+
+        # Ensure that the correct path is still determined.
+        for _, args, _ in exec_command.mock_calls[0:1]:
+            assert '/path/to/acs/pubsub' in args[0]
+
+    @mock.patch.object(local.LocalStagingTask, 'exec_command')
     def test_execute_output_dir_parent_of_gapic_dest(self, exec_command):
         # Run the task.
         task = local.LocalStagingTask()
@@ -74,3 +94,45 @@ class LocalStagingTests(unittest.TestCase):
         ]
         _, rm_cmd_2, _ = exec_command.mock_calls[2]
         assert rm_cmd_2[0] == ['rm', '-rf', os.path.expanduser('~/foo/bar')]
+
+    @mock.patch.object(local.LocalStagingTask, 'exec_command')
+    @mock.patch.object(logger, 'success')
+    def test_execute_with_grpc(self, success, exec_command):
+        # Run the task, this time with a registered grpc location.
+        task = local.LocalStagingTask()
+        task.execute(
+            gapic_code_dir='/path/to/gapic',
+            grpc_code_dir='/path/to/grpc',
+            git_repo={
+                'gapic_subpath': 'gapic/pubsub',
+                'grpc_subpath': 'grpc/pubsub',
+                'location': 'api-client-staging.git',
+            },
+            local_paths={'reporoot': '/rr'},
+            output_dir='/tmp/out',
+        )
+
+        # Establish the commands we expect to have been called.
+        expected_commands = (
+            'rm -rf /rr/api-client-staging/gapic/pubsub',
+            'cp -rf /path/to/gapic /rr/api-client-staging/gapic/pubsub',
+            'rm -rf /rr/api-client-staging/grpc/pubsub',
+            'cp -rf /path/to/grpc /rr/api-client-staging/grpc/pubsub',
+            'rm -rf /path/to/gapic',
+            'rm -rf /path/to/grpc',
+            'rm -rf /tmp/out',
+        )
+        assert len(exec_command.mock_calls) == len(expected_commands)
+        for cmd, call in zip(expected_commands, exec_command.mock_calls):
+            _, args, _ = call
+            assert ' '.join(args[0]) == cmd
+
+        # Establish the expected log entires.
+        expected_messages = (
+            'Code generated: /rr/api-client-staging/grpc/pubsub',
+            'Code generated: /rr/api-client-staging/gapic/pubsub',
+        )
+        assert len(success.mock_calls) == len(expected_messages)
+        for msg, call in zip(expected_messages, success.mock_calls):
+            _, args, _ = call
+            assert args[0] == msg
