@@ -100,7 +100,7 @@ def parse_args(*args):
     api.add_argument('--api',
         default=None,
         help='The name of the API to generate. It must match a file in '
-             '{googleapis}/gapic/api/artman_%s.yml',
+             '{googleapis}/gapic/api/artman_{api}.yml',
     )
     api.add_argument('--config',
         default='',
