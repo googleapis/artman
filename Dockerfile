@@ -119,7 +119,7 @@ RUN chmod a+x /usr/local/bin/php-cs-fixer
 # TODO(ethanbao): pipeline should be installed from package manager.
 ADD . /src
 WORKDIR /src
-RUN pip install -r requirements.txt
+RUN pip install -e .
 
 # Run smoketests
 # TODO(ethanbao): this should be part of artman CI.

@@ -59,7 +59,8 @@ def run_smoke_test():
 
 def generate_grpc_library(artman_config, lang):
     grpc_pipeline_args = [
-        'artman', 'build',
+        'artman',
+        '--user-config', 'test/artman_user_config_in_smoketest.yaml',
         '--config', '%s,../googleapis/gapic/lang/common.yaml' % artman_config,
         '--language', lang,
         '--pipeline', 'GrpcClientPipeline',
@@ -69,7 +70,8 @@ def generate_grpc_library(artman_config, lang):
 
 def generate_gapic_library(artman_config, lang):
     gapic_pipeline_args = [
-        'artman', 'build',
+        'artman',
+        '--user-config', 'test/artman_user_config_in_smoketest.yaml',
         '--config', '%s,../googleapis/gapic/lang/common.yaml' % artman_config,
         '--language', lang,
         '--publish', 'noop',
