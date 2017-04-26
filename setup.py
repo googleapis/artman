@@ -39,11 +39,9 @@ setuptools.setup(
         'console_scripts': [
             'artman = artman.cli.main:main',
             'configure-artman = artman.cli.configure:configure',
+            'start-artman-conductor = artman.cli.conductor:start',
         ],
     },
-    scripts=[
-        'scripts/start_conductor.py',
-    ],
     classifiers=[
         'Development Status :: 4 - Beta',
         'Environment :: Console',
