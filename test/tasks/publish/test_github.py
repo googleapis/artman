@@ -59,7 +59,7 @@ class CreateGitHubBranchTests(unittest.TestCase):
             ]),
             'cp -rf /path/to/code generated/ruby/gapic-google-cloud-pubsub-v1',
             'git add generated/ruby/gapic-google-cloud-pubsub-v1',
-            'git commit -m Ruby GAPIC: pubsub v1',  # Close enough.
+            'git commit --allow-empty -m Ruby GAPIC: pubsub v1', # Close enough
             'git push origin pubsub-ruby-v1-00000000',
             'rm -rf /path/to',
             'rm -rf /tmp/00000000',
@@ -103,14 +103,14 @@ class CreateGitHubBranchTests(unittest.TestCase):
             ]),
             'cp -rf /path/to/code generated/python/gapic-pubsub-v1',
             'git add generated/python/gapic-pubsub-v1',
-            'git commit -m Python GAPIC: pubsub v1',  # Close enough.
+            'git commit --allow-empty -m Python GAPIC: pubsub v1',
             ' '.join([
                 'git rm -r --force --ignore-unmatch',
                 'generated/python/proto-pubsub-v1',
             ]),
             'cp -rf /path/to/grpc_code generated/python/proto-pubsub-v1',
             'git add generated/python/proto-pubsub-v1',
-            'git commit -m Python GRPC/Proto: pubsub v1',  # Still good enough.
+            'git commit --allow-empty -m Python GRPC/Proto: pubsub v1',
             'git push origin pubsub-python-v1-00000000',
             'rm -rf /path/to',
             'rm -rf /tmp/00000000',

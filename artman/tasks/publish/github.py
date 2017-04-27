@@ -87,7 +87,7 @@ class CreateGitHubBranch(task_base.TaskBase):
             self.exec_command(['git', 'add', gapic_subpath])
 
             # Commit the GAPIC.
-            self.exec_command(['git', 'commit', '-m',
+            self.exec_command(['git', 'commit', '--allow-empty', '-m',
                 '{language} GAPIC: {api_name} {api_version}'.format(
                     api_name=api_name,
                     api_version=api_version,
@@ -102,7 +102,7 @@ class CreateGitHubBranch(task_base.TaskBase):
                                    '--ignore-unmatch', grpc_subpath])
                 self.exec_command(['cp', '-rf', grpc_code_dir, grpc_subpath])
                 self.exec_command(['git', 'add', grpc_subpath])
-                self.exec_command(['git', 'commit', '-m',
+                self.exec_command(['git', 'commit', '--allow-empty', '-m',
                     '{language} GRPC/Proto: {api_name} {api_version}'.format(
                         api_name=api_name,
                         api_version=api_version,
