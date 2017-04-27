@@ -8,12 +8,14 @@ generated_package_version:
   #       deleted but files still exist on the pypi servers and can prevent
   #       us from using the version number again.
   python:
-    lower: '0.14.0'
-    upper: '0.15dev'
+    lower: '0.17.29'
+    upper: '0.18dev'
   nodejs:
     lower: '0.7.1'
   php:
     lower: '0.1.0'
+release_level:
+  python: beta
 auth_version:
   python:
     lower: '2.0.0'

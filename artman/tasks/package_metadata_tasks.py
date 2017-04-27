@@ -33,8 +33,9 @@ class PackageMetadataConfigGenTask(task_base.TaskBase):
 
     def execute(self, api_name, api_version, organization_name, output_dir,
                 package_dependencies_yaml, package_defaults_yaml, proto_deps,
-                local_paths, src_proto_path, package_type, gapic_api_yaml,
-                generation_layer=None):
+                language, local_paths, src_proto_path, package_type,
+                gapic_api_yaml, generation_layer=None, release_level=None,
+                generated_package_version=None):
         googleapis_dir = local_paths['googleapis']
         googleapis_path = os.path.commonprefix(
             [os.path.relpath(p, googleapis_dir) for p in src_proto_path])
@@ -45,6 +46,15 @@ class PackageMetadataConfigGenTask(task_base.TaskBase):
             package_dependencies = yaml.load(dep_file, Loader=yaml.Loader)
         with open(package_defaults_yaml) as dep_file:
             package_defaults = yaml.load(dep_file, Loader=yaml.Loader)
+
+        # Apply package version and development status overrides if specified
+        # in the artman config
+        if generated_package_version is not None:
+            package_defaults['generated_package_version'][language] = (
+                generated_package_version)
+        if release_level is not None:
+            package_defaults['release_level'][language] = (
+                release_level)
 
         gapic_config_name = ''
         if len(gapic_api_yaml) > 0:
