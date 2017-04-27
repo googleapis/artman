@@ -51,47 +51,46 @@ class ConductorTests(unittest.TestCase):
 
     _FAKE_QUEUE_NAME = 'projects/foo/locations/bar/queues/baz'
 
-    @mock.patch.object(cloudtasks_conductor, '_create_tasks_client')
     @mock.patch.object(cloudtasks_conductor, '_prepare_dir')
     @mock.patch.object(main, 'main')
     @mock.patch.object(cloudtasks_conductor, '_cleanup_tmp_dir')
     def test_start_conductor_succeed(self, cleanup_tmp_dir, cli_main,
-                                     prepare_dir,
-                                     create_tasks_client):
+                                     prepare_dir):
         http = HttpMockSequence([
             ({'status': '200'}, self._FAKE_PULL_TASKS_RESPONSE),
             ({'status': '200'}, self._FAKE_ACK_TASK_RESPONSE),
         ])
 
         client = self._create_cloudtasks_client_testing(http=http)
-        create_tasks_client.return_value = client
         prepare_dir.return_value = '/tmp', '/tmp/artman-config.yaml'
         cli_main.return_value = None
         cleanup_tmp_dir.return_value = None
 
-        cloudtasks_conductor.run(queue_name=self._FAKE_QUEUE_NAME)
+        cloudtasks_conductor._pull_and_execute_tasks(
+            task_client=client,
+            queue_name=self._FAKE_QUEUE_NAME)
         cli_main.assert_called_once_with(
             u'--api', u'pubsub', u'--lang', u'python', '--user-config',
             '/tmp/artman-config.yaml')
         # Make sure ack is called when the task execution fails.
         cleanup_tmp_dir.assert_called_once()
 
-    @mock.patch.object(cloudtasks_conductor, '_create_tasks_client')
     @mock.patch.object(cloudtasks_conductor, '_prepare_dir')
     @mock.patch.object(main, 'main')
     @mock.patch.object(cloudtasks_conductor, '_cleanup_tmp_dir')
     def test_start_conductor_fail(self, cleanup_tmp_dir, cli_main,
-                                  prepare_dir, create_tasks_client):
+                                  prepare_dir):
         http = HttpMockSequence([
             ({'status': '200'}, self._FAKE_PULL_TASKS_RESPONSE),
             ({'status': '200'}, self._FAKE_CANCEL_TASK_LEASE_RESPONSE),
         ])
         client = self._create_cloudtasks_client_testing(http=http)
-        create_tasks_client.return_value = client
         prepare_dir.return_value = '/tmp', '/tmp/artman-config.yaml'
         cli_main.side_effect = RuntimeError('abc')
 
-        cloudtasks_conductor.run(queue_name=self._FAKE_QUEUE_NAME)
+        cloudtasks_conductor._pull_and_execute_tasks(
+            task_client=client,
+            queue_name=self._FAKE_QUEUE_NAME)
         cli_main.assert_called_once_with(
             u'--api', u'pubsub', u'--lang', u'python', '--user-config',
             '/tmp/artman-config.yaml')

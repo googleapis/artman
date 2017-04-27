@@ -31,26 +31,30 @@ from artman.utils.logger import logger, output_logger
 
 def run(queue_name):
     task_client = _create_tasks_client()
-    if True:  # TODO change to when
-        pull_task_response = _pull_task(task_client, queue_name)
-        tasks = pull_task_response.get('tasks', [])
-        if not tasks:
-            # Sleep for 30 seconds if there is no tasks returned.
-            logger.debug('There is no pending task. Sleep for 30 seconds.')
-            time.sleep(30)
-        for task in tasks:
-            tmp_reporoot, artman_user_config = _prepare_dir()
-            try:
-                logger.info('Starting to execute task %s' % task)
-                _execute_task(artman_user_config, task)
-                _ack_task(task_client, task)
-                logger.info('Task execution finished for %s' % task)
-            except:
-                logger.error('Task execution failed for %s' % task)
-                _cancel_task_lease(task_client, task)
-            finally:
-                logger.info('Cleanup tmp directory %s' % tmp_reporoot)
-                _cleanup_tmp_dir(tmp_reporoot)
+    while True:
+        _pull_and_execute_tasks(task_client, queue_name)
+
+
+def _pull_and_execute_tasks(task_client, queue_name):
+    pull_task_response = _pull_task(task_client, queue_name)
+    tasks = pull_task_response.get('tasks', [])
+    if not tasks:
+        # Sleep for 30 seconds if there is no tasks returned.
+        logger.debug('There is no pending task. Sleep for 30 seconds.')
+        time.sleep(30)
+    for task in tasks:
+        tmp_reporoot, artman_user_config = _prepare_dir()
+        try:
+            logger.info('Starting to execute task %s' % task)
+            _execute_task(artman_user_config, task)
+            _ack_task(task_client, task)
+            logger.info('Task execution finished for %s' % task)
+        except:
+            logger.error('Task execution failed for %s' % task)
+            _cancel_task_lease(task_client, task)
+        finally:
+            logger.info('Cleanup tmp directory %s' % tmp_reporoot)
+            _cleanup_tmp_dir(tmp_reporoot)
 
 
 def _create_tasks_client():
