@@ -74,6 +74,20 @@ class CreateGitHubBranch(task_base.TaskBase):
                 salt=str(uuid.uuid4())[0:8],
             )
             os.chdir(repo_temp_dir)
+
+            # If there is a base branch, switch to it.
+            #
+            # This command naively assumes that the default branch is named
+            # "master", which is not a guarantee, but this is good enough
+            # for now.
+            if git_repo.get('branch', 'master') != 'master':
+                baseline = git_repo['branch']
+                logger.info('Checking out the {0} branch to use as a '
+                            'baseline.'.format(baseline))
+                self.exec_command(['git', 'checkout', '--track', '-b',
+                                   baseline, 'origin/%s' % baseline])
+
+            # Create the new branch off of the base branch.
             logger.info('Creating the {0} branch.'.format(branch_name))
             self.exec_command(['git', 'checkout', '-b', branch_name])
 

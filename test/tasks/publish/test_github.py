@@ -74,6 +74,50 @@ class CreateGitHubBranchTests(unittest.TestCase):
     @mock.patch.object(github.CreateGitHubBranch, 'exec_command')
     @mock.patch.object(os, 'chdir')
     @mock.patch.object(uuid, 'uuid4')
+    def test_execute_with_non_master_base(self, uuid4, chdir, exec_command):
+        uuid4.return_value = uuid.UUID('00000000-0000-0000-0000-000000000000')
+
+        # Run the task.
+        task = github.CreateGitHubBranch()
+        branch_name = task.execute(
+            api_name='pubsub',
+            api_version='v1',
+            gapic_code_dir='/path/to/code',
+            git_repo={
+                'location': 'git@github.com:me/repo.git',
+                'branch': 'pubsub',
+                'gapic_subpath': 'generated/ruby/gapic-google-cloud-pubsub-v1',
+            },
+            language='ruby',
+            output_dir='/path/to',
+        )
+
+        # List the commands that should have been executed.
+        expected_commands = (
+            'git clone git@github.com:me/repo.git /tmp/00000000',
+            'git checkout --track -b pubsub origin/pubsub',
+            'git checkout -b pubsub-ruby-v1-00000000',
+            ' '.join([
+                'git rm -r --force --ignore-unmatch',
+                'generated/ruby/gapic-google-cloud-pubsub-v1',
+            ]),
+            'cp -rf /path/to/code generated/ruby/gapic-google-cloud-pubsub-v1',
+            'git add generated/ruby/gapic-google-cloud-pubsub-v1',
+            'git commit --allow-empty -m Ruby GAPIC: pubsub v1',
+            'git push origin pubsub-ruby-v1-00000000',
+            'rm -rf /path/to',
+            'rm -rf /tmp/00000000',
+        )
+
+        # Now prove that they were.
+        assert exec_command.call_count == len(expected_commands)
+        for cmd, exec_call in zip(expected_commands, exec_command.mock_calls):
+            _, args, _ = exec_call
+            assert ' '.join(args[0]) == cmd
+
+    @mock.patch.object(github.CreateGitHubBranch, 'exec_command')
+    @mock.patch.object(os, 'chdir')
+    @mock.patch.object(uuid, 'uuid4')
     def test_execute_with_grpc(self, uuid4, chdir, exec_command):
         uuid4.return_value = uuid.UUID('00000000-0000-0000-0000-000000000000')
 
