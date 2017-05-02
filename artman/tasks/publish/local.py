@@ -19,6 +19,8 @@ import uuid
 
 import github3
 
+import six
+
 from artman.tasks import task_base
 from artman.utils.logger import logger
 
@@ -58,38 +60,50 @@ class LocalStagingTask(task_base.TaskBase):
         )
         api_repo = os.path.realpath(os.path.expanduser(api_repo))
 
-        # Make the GAPIC code directory an absolute path, since we will be
-        # moving around.
-        gapic_code_dir = os.path.realpath(gapic_code_dir)
+        # Track our code directories, and use absolute paths, since we will
+        # be moving around.
+        code_dirs = {'gapic': os.path.abspath(gapic_code_dir)}
+        if grpc_code_dir:
+            code_dirs['grpc'] = os.path.abspath(grpc_code_dir)
+
+        # Keep track of all destinations so we are not too eager on wiping
+        # out code from the original output area.
+        #
+        # This also allows useful output to the user in the success message.
+        dests = []
 
         # Determine where the code belongs and stage it there.
-        repo_dest = '%s/%s' % (api_repo, git_repo.get('gapic_subpath', '.'))
-        component = git_repo.get('gapic_component', '.')
-        src_path = os.path.abspath(os.path.join(gapic_code_dir, component))
-        self.exec_command(['rm', '-rf', repo_dest])
-        self.exec_command(['cp', '-rf', src_path, repo_dest])
+        for path in git_repo.get('paths', ['.']):
+            # Piece together where we are copying code from and to.
+            if isinstance(path, (six.text_type, six.binary_type)):
+                path = {'dest': path}
+            src = path.get('src', '.')
+            dest = path.get('dest', '.')
+            artifact = path.get('artifact', 'gapic')
 
-        # Special case: If a grpc_subpath is given, copy that code.
-        grpc_dest = ''
-        if git_repo.get('grpc_subpath', None) and grpc_code_dir:
-            grpc_dest = '%s/%s' % (api_repo, git_repo['grpc_subpath'])
-            self.exec_command(['rm', '-rf', grpc_dest])
-            self.exec_command(['cp', '-rf', grpc_code_dir, grpc_dest])
+            # Convert everything to an absolute path.
+            src = os.path.abspath(os.path.join(code_dirs[artifact], src))
+            dest = os.path.abspath(os.path.join(api_repo, dest))
+
+            # Keep track of all code destinations, for output later.
+            dests.append(dest)
+
+            # Actually copy the code.
+            self.exec_command(['rm', '-rf', dest])
+            self.exec_command(['cp', '-rf', src, dest])
 
         # Remove the original paths.
         self.exec_command(['rm', '-rf', gapic_code_dir])
         if grpc_code_dir:
             self.exec_command(['rm', '-rf', grpc_code_dir])
-        if output_dir not in repo_dest and output_dir not in grpc_dest:
+        if all([output_dir not in d for d in dests]):
             self.exec_command(['rm', '-rf', output_dir])
 
         # Log a useful success message.
         userhome = os.path.expanduser('~')
-        if grpc_dest:
-            grpc_location = grpc_dest.replace(userhome, '~')
-            logger.success('Code generated: {0}'.format(grpc_location))
-        location = repo_dest.replace(userhome, '~')
-        logger.success('Code generated: {0}'.format(location))
+        for d in dests:
+            location = d.replace(userhome, '~')
+            logger.success('Code generated: {0}'.format(location))
 
 
 TASKS = (

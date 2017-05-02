@@ -30,7 +30,7 @@ class LocalStagingTests(unittest.TestCase):
         task.execute(
             gapic_code_dir=os.path.expanduser('~/foo/bar'),
             git_repo={
-                'gapic_subpath': 'pubsub',
+                'paths': ['pubsub'],
                 'location': 'api-client-staging.git',
             },
             local_paths={'api_client_staging': '/path/to/acs'},
@@ -59,7 +59,7 @@ class LocalStagingTests(unittest.TestCase):
         task.execute(
             gapic_code_dir=os.path.expanduser('~/foo/bar'),
             git_repo={
-                'gapic_subpath': 'pubsub',
+                'paths': ['pubsub'],
                 'location': 'api-client-staging',
             },
             local_paths={'api_client_staging': '/path/to/acs'},
@@ -77,7 +77,7 @@ class LocalStagingTests(unittest.TestCase):
         task.execute(
             gapic_code_dir=os.path.expanduser('~/foo/bar'),
             git_repo={
-                'gapic_subpath': 'pubsub',
+                'paths': ['pubsub'],
                 'location': 'api-client-staging.git',
             },
             local_paths={'api_client_staging': '/path/to/acs'},
@@ -104,8 +104,10 @@ class LocalStagingTests(unittest.TestCase):
             gapic_code_dir='/path/to/gapic',
             grpc_code_dir='/path/to/grpc',
             git_repo={
-                'gapic_subpath': 'gapic/pubsub',
-                'grpc_subpath': 'grpc/pubsub',
+                'paths': [
+                    'gapic/pubsub',
+                    {'artifact': 'grpc', 'dest': 'grpc/pubsub'},
+                ],
                 'location': 'api-client-staging.git',
             },
             local_paths={'reporoot': '/rr'},
@@ -129,8 +131,8 @@ class LocalStagingTests(unittest.TestCase):
 
         # Establish the expected log entires.
         expected_messages = (
-            'Code generated: /rr/api-client-staging/grpc/pubsub',
             'Code generated: /rr/api-client-staging/gapic/pubsub',
+            'Code generated: /rr/api-client-staging/grpc/pubsub',
         )
         assert len(success.mock_calls) == len(expected_messages)
         for msg, call in zip(expected_messages, success.mock_calls):

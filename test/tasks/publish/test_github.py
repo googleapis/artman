@@ -43,7 +43,7 @@ class CreateGitHubBranchTests(unittest.TestCase):
             gapic_code_dir='/path/to/code',
             git_repo={
                 'location': 'git@github.com:me/repo.git',
-                'gapic_subpath': 'generated/ruby/gapic-google-cloud-pubsub-v1',
+                'paths': ['generated/ruby/gapic-google-cloud-pubsub-v1'],
             },
             language='ruby',
             output_dir='/path/to',
@@ -59,7 +59,7 @@ class CreateGitHubBranchTests(unittest.TestCase):
             ]),
             'cp -rf /path/to/code generated/ruby/gapic-google-cloud-pubsub-v1',
             'git add generated/ruby/gapic-google-cloud-pubsub-v1',
-            'git commit --allow-empty -m Ruby GAPIC: pubsub v1', # Close enough
+            'git commit --allow-empty -m Ruby GAPIC: Pubsub v1', # Close enough
             'git push origin pubsub-ruby-v1-00000000',
             'rm -rf /path/to',
             'rm -rf /tmp/00000000',
@@ -86,7 +86,7 @@ class CreateGitHubBranchTests(unittest.TestCase):
             git_repo={
                 'location': 'git@github.com:me/repo.git',
                 'branch': 'pubsub',
-                'gapic_subpath': 'generated/ruby/gapic-google-cloud-pubsub-v1',
+                'paths': ['generated/ruby/gapic-google-cloud-pubsub-v1'],
             },
             language='ruby',
             output_dir='/path/to',
@@ -103,7 +103,7 @@ class CreateGitHubBranchTests(unittest.TestCase):
             ]),
             'cp -rf /path/to/code generated/ruby/gapic-google-cloud-pubsub-v1',
             'git add generated/ruby/gapic-google-cloud-pubsub-v1',
-            'git commit --allow-empty -m Ruby GAPIC: pubsub v1',
+            'git commit --allow-empty -m Ruby GAPIC: Pubsub v1',
             'git push origin pubsub-ruby-v1-00000000',
             'rm -rf /path/to',
             'rm -rf /tmp/00000000',
@@ -130,8 +130,13 @@ class CreateGitHubBranchTests(unittest.TestCase):
             grpc_code_dir='/path/to/grpc_code',
             git_repo={
                 'location': 'git@github.com:me/repo.git',
-                'gapic_subpath': 'generated/python/gapic-pubsub-v1',
-                'grpc_subpath': 'generated/python/proto-pubsub-v1'
+                'paths': [
+                    'generated/python/gapic-pubsub-v1',
+                    {
+                        'artifact': 'grpc',
+                        'dest': 'generated/python/proto-pubsub-v1',
+                    },
+                ],
             },
             language='python',
             output_dir='/path/to',
@@ -147,14 +152,69 @@ class CreateGitHubBranchTests(unittest.TestCase):
             ]),
             'cp -rf /path/to/code generated/python/gapic-pubsub-v1',
             'git add generated/python/gapic-pubsub-v1',
-            'git commit --allow-empty -m Python GAPIC: pubsub v1',
             ' '.join([
                 'git rm -r --force --ignore-unmatch',
                 'generated/python/proto-pubsub-v1',
             ]),
             'cp -rf /path/to/grpc_code generated/python/proto-pubsub-v1',
             'git add generated/python/proto-pubsub-v1',
-            'git commit --allow-empty -m Python GRPC/Proto: pubsub v1',
+            'git commit --allow-empty -m Python GAPIC: Pubsub v1',
+            'git push origin pubsub-python-v1-00000000',
+            'rm -rf /path/to',
+            'rm -rf /tmp/00000000',
+        )
+
+        # Now prove that they were.
+        assert exec_command.call_count == len(expected_commands)
+        for cmd, exec_call in zip(expected_commands, exec_command.mock_calls):
+            _, args, _ = exec_call
+            assert ' '.join(args[0]) == cmd
+
+    @mock.patch.object(github.CreateGitHubBranch, 'exec_command')
+    @mock.patch.object(os, 'chdir')
+    @mock.patch.object(uuid, 'uuid4')
+    def test_execute_with_grpc_explicit_src(self, uuid4, chdir, exec_command):
+        uuid4.return_value = uuid.UUID('00000000-0000-0000-0000-000000000000')
+
+        # Run the task.
+        task = github.CreateGitHubBranch()
+        branch_name = task.execute(
+            api_name='pubsub',
+            api_version='v1',
+            gapic_code_dir='/path/to/code',
+            grpc_code_dir='/path/to/grpc_code',
+            git_repo={
+                'location': 'git@github.com:me/repo.git',
+                'paths': [{
+                    'src': 'gapic',
+                    'dest': 'generated/python/gapic-pubsub-v1',
+                }, {
+                    'artifact': 'grpc',
+                    'src': 'proto',
+                    'dest': 'generated/python/proto-pubsub-v1',
+                }],
+            },
+            language='python',
+            output_dir='/path/to',
+        )
+
+        # List the commands that should have been executed.
+        expected_commands = (
+            'git clone git@github.com:me/repo.git /tmp/00000000',
+            'git checkout -b pubsub-python-v1-00000000',
+            ' '.join([
+                'git rm -r --force --ignore-unmatch',
+                'generated/python/gapic-pubsub-v1',
+            ]),
+            'cp -rf /path/to/code/gapic generated/python/gapic-pubsub-v1',
+            'git add generated/python/gapic-pubsub-v1',
+            ' '.join([
+                'git rm -r --force --ignore-unmatch',
+                'generated/python/proto-pubsub-v1',
+            ]),
+            'cp -rf /path/to/grpc_code/proto generated/python/proto-pubsub-v1',
+            'git add generated/python/proto-pubsub-v1',
+            'git commit --allow-empty -m Python GAPIC: Pubsub v1',
             'git push origin pubsub-python-v1-00000000',
             'rm -rf /path/to',
             'rm -rf /tmp/00000000',
@@ -207,7 +267,7 @@ class CreateGitHubPullRequestTests(unittest.TestCase):
             body='This pull request was generated by artman. '
                  'Please review it thoroughly before merging.',
             head='pubsub-python-v1',
-            title='Python GAPIC: pubsub v1',
+            title='Python GAPIC: Pubsub v1',
         )
 
     @mock.patch.object(github3, 'login')

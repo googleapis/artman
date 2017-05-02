@@ -28,45 +28,56 @@ go:
   git_repos:
     go:
       location: git@github.com:GoogleCloudPlatform/google-cloud-go.git
-      gapic_subpath: pubsub/apiv1
+      paths:
+        - dest: pubsub/apiv1
     staging:
-      gapic_subpath: google-pubsub-v1/cloud.google.com/go/pubsub/apiv1
+      paths:
+        - dest: google-pubsub-v1/cloud.google.com/go/pubsub/apiv1
 java:
   gapic_code_dir: ${REPOROOT}/artman/output/java/google-cloud-pubsub
   git_repos:
     java:
       location: git@github.com:GoogleCloudPlatform/google-cloud-java.git
-      gapic_subpath: google-cloud-pubsub
+      paths:
+        - dest: google-cloud-pubsub
     staging:
-      gapic_subpath: generated/java/google-cloud-pubsub-v1
+      paths:
+        - dest: generated/java/google-cloud-pubsub-v1
 nodejs:
   gapic_code_dir: ${REPOROOT}/artman/output/js/pubsub-v1
   git_repos:
     nodejs:
       location: git@github.com:GoogleCloudPlatform/google-cloud-node.git
-      gapic_component: src/v1
-      gapic_subpath: packages/pubsub/src/v1
+      paths:
+        - src: src/v1
+          dest: packages/pubsub/src/v1
     staging:
-      gapic_subpath: generated/nodejs/google-cloud-node/packages/pubsub
+      paths:
+        - dest: generated/nodejs/google-cloud-node/packages/pubsub
   skip_packman: True
 php:
   gapic_code_dir: ${REPOROOT}/artman/output/gcloud-php-pubsub
   git_repos:
     staging:
-      gapic_subpath: generated/php/google-cloud-pubsub-v1
+      paths:
+        - dest: generated/php/google-cloud-pubsub-v1
 python:
   gapic_code_dir: ${REPOROOT}/artman/output/gapic-google-cloud-pubsub-v1
   git_repos:
     staging:
-      gapic_subpath: generated/python/gapic-google-cloud-pubsub-v1
-      grpc_subpath: generated/python/proto-google-cloud-pubsub-v1
+      paths:
+        - dest: generated/python/gapic-google-cloud-pubsub-v1
+        - artifact: grpc
+          dest: generated/python/proto-google-cloud-pubsub-v1
 ruby:
   gapic_code_dir: ${REPOROOT}/artman/output/riby/google-cloud-pubsub
   git_repos:
     ruby:
       location: git@github.com:GoogleCloudPlatform/google-cloud-ruby.git
-      gapic_component: lib/google/cloud/pubsub/v1
-      gapic_subpath: google-cloud-pubsub/lib/google/cloud/pubsub/v1
+      paths:
+        - src: lib/google/cloud/pubsub/v1
+          dest: google-cloud-pubsub/lib/google/cloud/pubsub/v1
     staging:
-      gapic_subpath: generated/ruby/google-cloud-ruby/google-cloud-pubsub
+      paths:
+        - dest: generated/ruby/google-cloud-ruby/google-cloud-pubsub
   skip_packman: True

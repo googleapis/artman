@@ -15,6 +15,8 @@
 """Utils related to config files"""
 
 from __future__ import absolute_import
+import collections
+
 from ruamel import yaml
 
 import six
@@ -37,10 +39,7 @@ def load_config_spec(config_spec, config_sections, repl_vars, language):
     config = merge(*segments)
 
     # Perform final replacements.
-    var_replace_config_data(config, repl_vars)
-
-    # Done; return the complete configuration.
-    return config
+    return replace_vars(config, repl_vars)
 
 
 def merge(*dictionaries):
@@ -97,18 +96,22 @@ def merge(*dictionaries):
     return answer
 
 
-def var_replace_config_data(data, repl_vars):
-    for key, value in data.items():
-        if isinstance(value, dict):
-            var_replace_config_data(value, repl_vars)
-        elif isinstance(value, list):
-            data[key] = [var_replace(lv, repl_vars) for lv in value]
-        elif not isinstance(value, bool):
-            data[key] = var_replace(value, repl_vars)
+def replace_vars(data, repl_vars):
+    """Return the given data structure with appropriate variables replaced.
 
+    Args:
+        data (Any): Data of an arbitrary type.
 
-def var_replace(in_str, repl_vars):
-    new_str = in_str
-    for (k, v) in repl_vars.items():
-        new_str = new_str.replace('${' + k + '}', v)
-    return new_str
+    Returns:
+        Any: Data of the same time, possibly with replaced values.
+    """
+    if isinstance(data, (six.text_type, six.binary_type)):
+        for k, v in repl_vars.items():
+            data = data.replace('${' + k + '}', v)
+        return data
+    if isinstance(data, collections.Sequence):
+        return type(data)([replace_vars(d, repl_vars) for d in data])
+    if isinstance(data, collections.Mapping):
+        return type(data)([(k, replace_vars(v, repl_vars))
+                           for k, v in data.items()])
+    return data
