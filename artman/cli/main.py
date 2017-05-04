@@ -19,7 +19,6 @@ from logging import DEBUG, INFO
 import argparse
 import ast
 import base64
-import getpass
 import io
 import os
 import sys
@@ -27,16 +26,13 @@ import tempfile
 import time
 import uuid
 
-from gcloud import storage
 from gcloud import logging
 
 from ruamel import yaml
 
-from taskflow import engines, task, states
+from taskflow import engines
 
-from artman.cli.support import parse_github_credentials
-from artman.cli.support import parse_local_paths
-from artman.cli.support import resolve
+from artman.cli import support
 from artman.pipelines import pipeline_factory
 from artman.utils import job_util, pipeline_util, config_util
 from artman.utils.logger import logger, setup_logging
@@ -113,22 +109,38 @@ def parse_args(*args):
              '/path/to/config.yaml:config_section_A|config_section_B. '
              'This is an advanced feature; for most cases, use `--api`.',
     )
+    api.add_argument('--batch',
+        action='store_true',
+        help='Enables batch mode, which will generate all APIs for the '
+             'specified language (that have not disabled batch mode). This '
+             'will load the yaml config file '
+             '{googleapis}/gapic/batch/common.yaml and change the default '
+             'pipeline to GapicClientBatchPipeline. When --batch is '
+             'specified, the --publish argument will be defaulted to noop '
+             'unless another option is chosen on the command line (the '
+             'publish option specified in a user config file will be '
+             'ignored). Each API will be published to the default repository '
+             'specified in its artman yaml file (or staging if no default is '
+             'provided. This argument is incompatible with the --target '
+             'argument.',
+    )
     parser.add_argument('--publish',
         choices=('github', 'local', 'maven', 'noop'),
         default=None,
         help='Set where to publish the code. Options are "github", "local", '
-             '"maven", and "noop". The default is "github". This can also be '
-             'set in the user config file.',
+             '"maven", and "noop". The default is "local" (unless --batch is '
+             'specified). This can also be set in the user config file.',
     )
     parser.add_argument('--target',
         default=None,
         dest='target',
         help='If the "github" or "local" publisher is used, define which '
              'repository to publish to. The artman config YAML may specify '
-             'a default for this, in which case this argument may be omitted.',
+             'a default for this, in which case this argument may be omitted. '
+             'This argument in incompatible with the --batch argument.',
     )
     parser.add_argument('--pipeline',
-        default='GapicClientPipeline',
+        default='',
         dest='pipeline_name',
         type=str,
         help='The name of the pipeline to run',
@@ -226,25 +238,13 @@ def normalize_flags(flags, user_config):
     pipeline_args = {}
 
     # Determine logging verbosity and then set up logging.
-    verbosity = resolve('verbosity', user_config, flags, default=INFO)
+    verbosity = support.resolve('verbosity', user_config, flags, default=INFO)
     setup_logging(verbosity)
 
     # Save local paths, if applicable.
     # This allows the user to override the path to api-client-staging or
     # toolkit on his or her machine.
-    pipeline_args['local_paths'] = parse_local_paths(user_config, flags)
-
-    # Determine where to publish.
-    pipeline_args['publish'] = resolve('publish', user_config, flags,
-        default='github',
-    )
-
-    # Parse out the GitHub credentials iff we are publishing to GitHub.
-    if pipeline_args['publish'] == 'github':
-        pipeline_args['github'] = parse_github_credentials(
-            argv_flags=flags,
-            config=user_config.get('github', {}),
-        )
+    pipeline_args['local_paths'] = support.parse_local_paths(user_config, flags)
 
     # In most cases, we get a language.
     if flags.language:
@@ -264,7 +264,11 @@ def normalize_flags(flags, user_config):
         )
         pipeline_args['pipeline_id'] = pipeline_id
 
-    # If we were given just an API, then expand it into the --config
+    # Specify the default pipeline settings - this may change if
+    # BATCH is set
+    default_pipeline = 'GapicClientPipeline'
+
+    # If we were given just an API or BATCH, then expand it into the --config
     # syntax.
     if flags.api:
         googleapis = os.path.realpath(os.path.expanduser(
@@ -276,6 +280,41 @@ def normalize_flags(flags, user_config):
         ]).format(
             api=flags.api,
             googleapis=googleapis,
+        )
+    elif flags.batch:
+        googleapis = os.path.realpath(os.path.expanduser(
+            pipeline_args['local_paths']['googleapis'],
+        ))
+        flags.config = '{googleapis}/gapic/batch/common.yaml'.format(
+            googleapis=googleapis,
+        )
+        default_pipeline = 'GapicClientBatchPipeline'
+        if not flags.publish:
+            # If publish flag was not set by the user, set it here.
+            # This prevents the user config yaml from causing a
+            # publish event when batch mode is used.
+            flags.publish = 'noop'
+        if flags.target:
+            logger.critical('--target and --batch cannot both be specified; '
+                            'when using --batch, the repo must be the default '
+                            'specified in the artman config yaml file (or '
+                            'staging if no default is provided).')
+            sys.exit(64)
+
+    # Set the pipeline if none was specified
+    if not flags.pipeline_name:
+        flags.pipeline_name = default_pipeline
+
+    # Determine where to publish.
+    pipeline_args['publish'] = support.resolve('publish', user_config, flags,
+        default='local',
+    )
+
+    # Parse out the GitHub credentials iff we are publishing to GitHub.
+    if pipeline_args['publish'] == 'github':
+        pipeline_args['github'] = support.parse_github_credentials(
+            argv_flags=flags,
+            config=user_config.get('github', {}),
         )
 
     # Parse out the full configuration.
@@ -297,7 +336,7 @@ def normalize_flags(flags, user_config):
         pipeline_args.update(cmd_args)
 
     # Coerce `git_repos` and `target_repo` into a single git_repo.
-    if pipeline_args['publish'] in ('github', 'local'):
+    if pipeline_args['publish'] in ('github', 'local') and not flags.batch:
         # Temporarily give our users a nice error if they have an older
         # googleapis checkout.
         # DEPRECATED: 2017-04-20
@@ -310,7 +349,7 @@ def normalize_flags(flags, user_config):
         # Pop the git repos off of the pipeline args and select the
         # correct one.
         repos = pipeline_args.pop('git_repos')
-        pipeline_args['git_repo'] = select_git_repo(repos, flags.target)
+        pipeline_args['git_repo'] = support.select_git_repo(repos, flags.target)
 
     # Print out the final arguments to stdout, to help the user with
     # possible debugging.
@@ -333,34 +372,6 @@ def normalize_flags(flags, user_config):
         pipeline_args,
         'remote' if flags.remote else None,
     )
-
-
-def select_git_repo(git_repos, target_repo):
-    """Select the appropriate Git repo based on YAML config and CLI arguments.
-
-    Args:
-        git_repos (dict): Information about git repositories.
-        target_repo (str): The user-selected target repository. May be None.
-
-    Returns:
-        dict: The selected GitHub repo.
-    """
-    # If there is a specified target_repo, this task is trivial; just grab
-    # that git repo. Otherwise, find the default.
-    if target_repo:
-        git_repo = git_repos.get(target_repo)
-        if not git_repo:
-            logger.critical('The requested target repo is not defined '
-                            'for that API and language.')
-            sys.exit(32)
-        return git_repo
-
-    # Okay, none is specified. Check for a default, and use "staging" if no
-    # default is defined.
-    for repo in git_repos.values():
-        if repo.get('default', False):
-            return repo
-    return git_repos['staging']
 
 
 def _load_local_repo(private_repo_root, **pipeline_kwargs):

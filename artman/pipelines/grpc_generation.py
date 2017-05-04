@@ -18,9 +18,7 @@ from artman.pipelines import batch_generation as batch_gen
 from artman.pipelines import code_generation as code_gen
 from artman.tasks import package_metadata_tasks
 from artman.tasks import protoc_tasks
-from artman.tasks import publish
 from artman.tasks import python_grpc_tasks
-from artman.tasks import staging_tasks
 from artman.utils import task_utils
 
 
@@ -47,13 +45,6 @@ class GrpcTaskFactoryBase(code_gen.TaskFactoryBase):
     def _get_grpc_codegen_tasks(self, **kwargs):
         return [protoc_tasks.GrpcPackmanTask]
 
-    def _get_grpc_staging_tasks(self, **kwargs):
-        if kwargs['stage_output']:
-            return [staging_tasks.StagingGrpcOutputDirTask,
-                    staging_tasks.StagingCleanTask,
-                    staging_tasks.StagingCopyTask]
-        return []
-
     def get_validate_kwargs(self):
         return code_gen.COMMON_REQUIRED
 
@@ -65,13 +56,25 @@ class GrpcClientBatchPipeline(batch_gen.BatchPipeline):
 
     def __init__(self, **kwargs):
         super(GrpcClientBatchPipeline, self).__init__(
-            _make_batch_pipeline_tasks, **kwargs)
+            _make_grpc_batch_pipeline_tasks, **kwargs)
 
 
-def _make_batch_pipeline_tasks(**kwargs):
+def _make_grpc_batch_pipeline_tasks(**kwargs):
     task_factory = _get_grpc_task_factory(kwargs)
-    tasks = (task_factory._get_grpc_codegen_tasks(**kwargs)
-             + task_factory._get_grpc_staging_tasks(**kwargs))
+    tasks = task_factory._get_grpc_codegen_tasks(**kwargs)
+    return task_utils.instantiate_tasks(tasks, kwargs)
+
+
+class ProtoClientBatchPipeline(batch_gen.BatchPipeline):
+
+    def __init__(self, **kwargs):
+        super(ProtoClientBatchPipeline, self).__init__(
+            _make_proto_batch_pipeline_tasks, **kwargs)
+
+
+def _make_proto_batch_pipeline_tasks(**kwargs):
+    task_factory = _get_proto_task_factory(kwargs)
+    tasks = task_factory._get_grpc_codegen_tasks(**kwargs)
     return task_utils.instantiate_tasks(tasks, kwargs)
 
 
@@ -105,6 +108,7 @@ class _JavaProtoTaskFactory(GrpcTaskFactoryBase):
             package_metadata_tasks.JavaProtoPackageTypeTask,
             package_metadata_tasks.PackageMetadataConfigGenTask,
             package_metadata_tasks.ProtoPackageMetadataGenTask,
+            protoc_tasks.JavaProtoCopyTask,
         ]
 
 

@@ -102,3 +102,36 @@ class ResolveTests(unittest.TestCase):
         flags = argparse.Namespace(bacon='yummy!')
         result = support.resolve('bacon', user_config, flags, default='meh')
         assert result == 'yummy!'
+
+
+class SelectGitRepoTests(unittest.TestCase):
+    def setUp(self):
+        self.git_repos = {
+            'my_repo': {
+                'location': 'my_repo_url.git',
+            },
+            'staging': {
+                'location': 'my_staging_repo.git'
+            },
+            'my_default_repo': {
+                'location': 'my_default_repo_url.git',
+                'default': True
+            }
+        }
+
+    def test_target_repo(self):
+        result = support.select_git_repo(self.git_repos, 'my_repo')
+        assert result['location'] == 'my_repo_url.git'
+
+    def test_default_repo(self):
+        result = support.select_git_repo(self.git_repos, None)
+        assert result['location'] == 'my_default_repo_url.git'
+
+    def test_no_default_repo(self):
+        del self.git_repos['my_default_repo']['default']
+        result = support.select_git_repo(self.git_repos, None)
+        assert result['location'] == 'my_staging_repo.git'
+
+    def test_missing_repo(self):
+        with self.assertRaises(SystemExit):
+            support.select_git_repo(self.git_repos, 'not_a_repo')

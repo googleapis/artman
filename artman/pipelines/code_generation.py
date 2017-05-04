@@ -15,7 +15,6 @@
 
 """Base class for code generation pipelines."""
 
-import os
 import time
 import uuid
 

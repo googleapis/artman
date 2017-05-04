@@ -116,3 +116,33 @@ def resolve(name, user_config, flags, default=None):
     if getattr(flags, name, None):
         answer = getattr(flags, name)
     return answer
+
+
+def select_git_repo(git_repos, target_repo):
+    """Select the appropriate Git repo based on YAML config and CLI arguments.
+
+    Args:
+        git_repos (dict): Information about git repositories.
+        target_repo (str): The user-selected target repository. May be None.
+
+    Returns:
+        dict: The selected GitHub repo.
+    """
+    # If there is a specified target_repo, this task is trivial; just grab
+    # that git repo. Otherwise, find the default.
+    if target_repo:
+        git_repo = git_repos.get(target_repo)
+        if not git_repo:
+            logger.critical('The requested target repo is not defined '
+                            'for that API and language.')
+            sys.exit(32)
+        return git_repo
+
+    # Okay, none is specified. Check for a default, and use "staging" if no
+    # default is defined.
+    for repo in git_repos.values():
+        if repo.get('default', False):
+            return repo
+    return git_repos['staging']
+
+

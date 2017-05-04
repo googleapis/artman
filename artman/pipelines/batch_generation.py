@@ -14,12 +14,13 @@
 
 """Pipelines that run GAPIC"""
 
-from ruamel import yaml
 import glob
+import six
 
 from artman.pipelines import code_generation as code_gen
 from taskflow.patterns import linear_flow
-from artman.utils import config_util, task_utils
+from artman.utils import config_util
+from artman.cli.support import select_git_repo
 
 
 class BatchPipeline(code_gen.CodeGenerationPipelineBase):
@@ -37,98 +38,82 @@ class BatchTaskFactory(code_gen.TaskFactoryBase):
         super(BatchTaskFactory, self).__init__()
 
     def get_tasks(self, **kwargs):
-        # TODO(michaelbausor): convert to unordered flow if necessary
         batch_flow = linear_flow.Flow('BatchFlow')
         for single_flow in self.get_language_api_flows(**kwargs):
             batch_flow.add(single_flow)
+        return [batch_flow]
 
-        # TODO(michaelbausor): add task to create Github PR once staging repo
-        # is public on Github
-        final_tasks = []
-
-        flow = [batch_flow]
-        flow += task_utils.instantiate_tasks(final_tasks, kwargs)
-
-        return flow
-
-    def get_language_api_flows(self, batch_apis, batch_languages,
+    def get_language_api_flows(self, batch_apis, language,
                                api_config_pattern, artman_language_yaml,
-                               **kwargs):
+                               local_paths, **kwargs):
 
-        repo_root = kwargs['repo_root']
         artman_config_yamls = _get_artman_config_filenames(
             api_config_pattern, batch_apis)
 
         for api_kwargs in _get_api_kwarg_dicts(
                 artman_config_yamls,
-                batch_languages,
+                language,
                 artman_language_yaml,
-                repo_root):
+                local_paths):
 
             api_kwargs.update(kwargs)
 
-            tasks = self.make_pipeline_tasks_func(**api_kwargs)
+            # Coerce `git_repos` and `target_repo` into a single git_repo.
+            if api_kwargs['publish'] in ('github', 'local'):
+                # Pop the git repos off of the pipeline args and select the
+                # correct one.
+                repos = api_kwargs.pop('git_repos')
+                api_kwargs['git_repo'] = select_git_repo(repos, None)
 
-            single_flow = linear_flow.Flow('SingleLanguageApiFlow')
-            single_flow.add(*tasks)
-            yield single_flow
+            yield self.make_single_language_flow(**api_kwargs)
+
+    def make_single_language_flow(self, **kwargs):
+        single_flow = linear_flow.Flow('SingleLanguageApiFlow')
+        tasks = self.make_pipeline_tasks_func(**kwargs)
+        single_flow.add(*tasks)
+        return single_flow
 
     def get_validate_kwargs(self, **kwargs):
-        return ['batch_apis', 'batch_languages', 'api_config_pattern',
+        return ['batch_apis', 'language', 'api_config_pattern',
                 'artman_language_yaml', 'publish']
 
-    def get_invalid_kwargs(self, **kwargs):
-        return ['language']
+    def get_invalid_kwargs(self):
+        return []
 
 
 def _get_api_kwarg_dicts(
-        artman_config_yamls, batch_languages, artman_language_yaml, repo_root):
-    for language in _get_languages(artman_language_yaml, batch_languages):
-        lang_config = _load_artman_config(artman_language_yaml,
-                                          language,
-                                          repo_root)
-        # TODO(michaelbausor): change default to True once most API and
-        # language combinations are supported
-        if not lang_config.get('enable_batch_generation', False):
+        artman_config_yamls, language, artman_language_yaml, local_paths):
+    lang_config = _load_artman_config(artman_language_yaml,
+                                      language,
+                                      local_paths)
+    lang_config['language'] = language
+    for api_config_yaml in artman_config_yamls:
+        api_config = _load_artman_config(api_config_yaml,
+                                         language,
+                                         local_paths)
+        if not api_config.get('enable_batch_generation', True):
             continue
-        for api_config_yaml in artman_config_yamls:
-            api_config = _load_artman_config(api_config_yaml,
-                                             language,
-                                             repo_root)
-            # TODO(michaelbausor): change default to True once most API and
-            # language combinations are supported
-            if not api_config.get('enable_batch_generation', False):
-                continue
-            api_kwargs = lang_config.copy()
-            api_kwargs.update(api_config)
-            api_kwargs['language'] = language
-            yield api_kwargs
-
-
-def _get_languages(artman_language_yaml, batch_languages):
-    if batch_languages == '*':
-        with open(artman_language_yaml) as config_file:
-            batch_languages = sorted(yaml.load(config_file).keys())
-        if 'common' in batch_languages:
-            batch_languages.remove('common')
-        return batch_languages
-    else:
-        return batch_languages.split(',')
+        api_kwargs = lang_config.copy()
+        api_kwargs.update(api_config)
+        yield api_kwargs
 
 
 def _get_artman_config_filenames(api_config_pattern, batch_apis):
     if batch_apis == '*':
-        glob_pattern = config_util.var_replace(api_config_pattern,
+        glob_pattern = config_util.replace_vars(api_config_pattern,
                                                {'API_SHORT_NAME': '*'})
         return sorted(glob.glob(glob_pattern))
     else:
-        return [config_util.var_replace(api_config_pattern,
+        if isinstance(batch_apis, (six.text_type, six.binary_type)):
+            batch_apis = batch_apis.split(',')
+        return [config_util.replace_vars(api_config_pattern,
                                         {'API_SHORT_NAME': api})
-                for api in batch_apis.split(',')]
+                for api in batch_apis]
 
 
-def _load_artman_config(artman_yaml, language, repo_root):
-    sections = ['common']
-    repl_vars = {'REPOROOT': repo_root}
+def _load_artman_config(artman_yaml, language, local_paths):
     return config_util.load_config_spec(
-        artman_yaml, sections, repl_vars, language)
+        config_spec=artman_yaml,
+        config_sections=['common'],
+        repl_vars={k.upper(): v for k, v in local_paths.items()},
+        language=language)

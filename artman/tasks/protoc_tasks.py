@@ -78,9 +78,10 @@ class _JavaProtoParams(_SimpleProtoParams):
     def plugin_out_param(self, output_dir, plugin_args=None):
         # Java proto plugin requires the gapic yaml as a plugin arg
         if plugin_args:
-          return '--plgn_out={}:{}'.format(plugin_args, self.code_root(output_dir))
+            return '--plgn_out={}:{}'.format(plugin_args,
+                                             self.code_root(output_dir))
         else:
-          return None
+            return None
 
     def grpc_plugin_path(self, toolkit_path):
         if self.path is None:
@@ -519,3 +520,36 @@ class GoExtractImportBaseTask(task_base.TaskBase):
                 continue
             if 'package_name' in go_settings:
                 return go_settings.get('package_name')
+
+
+class JavaProtoCopyTask(task_base.TaskBase):
+    """Copies the .proto files into the grpc_code_dir directory
+    """
+    def execute(self, src_proto_path, grpc_code_dir):
+        grpc_proto_dir = os.path.join(grpc_code_dir, 'src', 'main', 'proto')
+        for proto_path in src_proto_path:
+            index = _find_google_dir_index(proto_path)
+            for src_proto_file in _find_proto_files(proto_path):
+                relative_proto_file = src_proto_file[index:]
+                dst_proto_file = os.path.join(
+                    grpc_proto_dir, relative_proto_file)
+                self.exec_command(
+                    ['mkdir', '-p', os.path.dirname(dst_proto_file)])
+                self.exec_command(['cp', src_proto_file, dst_proto_file])
+
+
+def _find_google_dir_index(src_proto_path):
+    matches = list(re.finditer('(?:\\A|[/\\\\])(google)(?=\\Z|[/\\\\])',
+                               src_proto_path))
+    if len(matches) == 0:
+        raise ValueError('src_proto_path did not contain "google" '
+                         'in path as expected. src_proto_path: '
+                         '"{}"'.format(src_proto_path))
+    return matches[-1].start(1)
+
+
+def _find_proto_files(proto_path):
+    for dirpath, subdirs, files in os.walk(proto_path):
+        for f in files:
+            if f.endswith('.proto'):
+                yield os.path.join(dirpath, f)

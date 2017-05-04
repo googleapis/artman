@@ -46,10 +46,15 @@ class ParseArgsTests(unittest.TestCase):
             main.parse_args('--api', 'pubsub', '--language', 'python',
                             '--config' '../googleapis/gapic/artman_pubsub.yml')
 
+    def test_api_or_batch_mutually_exclusive(self):
+        with pytest.raises(SystemExit):
+            main.parse_args('--api', 'pubsub', '--language', 'python',
+                            '--batch')
+
     def test_minimal_args(self):
         flags = main.parse_args('--language', 'python',
                                 '--api', 'pubsub')
-        assert flags.pipeline_name == 'GapicClientPipeline'
+        assert flags.pipeline_name == ''
         assert flags.pipeline_kwargs == '{}'
         assert flags.api == 'pubsub'
         assert flags.user_config == '~/.artman/config.yaml'
@@ -99,7 +104,7 @@ class NormalizeFlagTests(unittest.TestCase):
 
     def setUp(self):
         self.flags = Namespace(
-            api='pubsub', config=None,
+            api='pubsub', batch=False, config=None,
             github_username='lukesneeringer', github_token='1335020400',
             googleapis='%s/data' % self.CURDIR, language='python',
             pipeline_name='GapicClientPipeline', pipeline_kwargs='{}',
@@ -168,6 +173,23 @@ class NormalizeFlagTests(unittest.TestCase):
         _, args, _ = main.normalize_flags(self.flags, self.user_config)
         assert args['gapic_api_yaml'][0].endswith('pubsub_gapic.yaml')
         assert args['gapic_language_yaml'][0].endswith('python_gapic.yaml')
+
+    def test_batch(self):
+        self.flags.api = None
+        self.flags.batch = True
+        self.flags.pipeline_name = None
+        self.flags.target = None
+        self.flags.publish = None
+        name, args, _ = main.normalize_flags(self.flags, self.user_config)
+        assert name == 'GapicClientBatchPipeline'
+        assert args['batch_apis'] == '*'
+        assert args['publish'] == 'noop'
+
+    def test_batch_with_target(self):
+        self.flags.api = None
+        self.flags.batch = True
+        with pytest.raises(SystemExit):
+            main.normalize_flags(self.flags, self.user_config)
 
 
 class PrintLogTests(unittest.TestCase):

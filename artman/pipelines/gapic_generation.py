@@ -76,8 +76,7 @@ class GapicClientBatchPipeline(batch_gen.BatchPipeline):
 
     def _make_batch_pipeline_tasks(self, **kwargs):
         task_factory = GapicTaskFactory()
-        answer = task_factory.get_tasks(**kwargs)
-        return task_utils.instantiate_tasks(answer, kwargs)
+        return task_factory.get_tasks(**kwargs)
 
 
 class GapicTaskFactory(code_gen.TaskFactoryBase):

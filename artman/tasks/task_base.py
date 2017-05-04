@@ -22,8 +22,6 @@ import subprocess
 
 from gcloud import logging as cloud_logging
 
-import six
-
 from taskflow.task import Task
 
 from artman.utils.logger import logger as artman_logger

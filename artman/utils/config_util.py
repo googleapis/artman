@@ -70,7 +70,7 @@ def merge(*dictionaries):
 
             # If the values are both lists, append them to one another.
             if isinstance(answer[k], list):
-                if not instance(v, list):
+                if not isinstance(v, list):
                     raise ValueError('Attempt to merge a list and non-list.')
                 answer[k] = answer[k] + v
                 continue

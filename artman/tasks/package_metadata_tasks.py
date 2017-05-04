@@ -94,6 +94,7 @@ class JavaGrpcPackageTypeTask(task_base.TaskBase):
     def execute(self):
         return 'grpc'
 
+
 class JavaProtoPackageTypeTask(task_base.TaskBase):
     default_provides = 'generation_layer'
 

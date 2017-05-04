@@ -14,8 +14,6 @@
 
 """Tasks for publishing artman output"""
 
-import os
-
 from artman.tasks import task_base
 from artman.utils.logger import logger
 

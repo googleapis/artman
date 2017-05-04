@@ -19,7 +19,6 @@ from artman.tasks import packman_tasks
 from artman.tasks import task_base
 from artman.utils import task_utils
 from artman.tasks.requirements import gapic_requirements
-from artman.utils.logger import logger
 
 
 class GapicConfigGenTask(task_base.TaskBase):
@@ -87,8 +86,6 @@ class GapicCodeGenTask(task_base.TaskBase):
     def execute(self, language, toolkit_path, descriptor_set, service_yaml,
                 gapic_api_yaml, gapic_language_yaml, package_metadata_yaml,
                 gapic_code_dir, api_name, api_version, organization_name):
-        api_full_name = task_utils.api_full_name(
-            api_name, api_version, organization_name)
         self.exec_command(['rm', '-rf', '%s/*' % gapic_code_dir])
         gapic_yaml = gapic_api_yaml + gapic_language_yaml
         gapic_args = ['--gapic_yaml=' + os.path.abspath(yaml)
