@@ -72,8 +72,14 @@ class LocalStagingTask(task_base.TaskBase):
         # This also allows useful output to the user in the success message.
         dests = []
 
+        # Sanity check: The git repository must explicitly define the paths
+        # where the generated code goes. If that is missing, fail now.
+        if not git_repo.get('paths'):
+            raise RuntimeError('This git repository entry in the artman YAML '
+                               'does not define module paths.')
+            
         # Determine where the code belongs and stage it there.
-        for path in git_repo.get('paths', ['.']):
+        for path in git_repo['paths']:
             # Piece together where we are copying code from and to.
             if isinstance(path, (six.text_type, six.binary_type)):
                 path = {'dest': path}

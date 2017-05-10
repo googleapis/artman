@@ -26,57 +26,57 @@ go:
   gapic_code_dir: ${REPOROOT}/gapi-pubsub-go
   git_repos:
     go:
-      location: git@github.com:GoogleCloudPlatform/google-cloud-go.git
       paths:
-        - dest: pubsub/apiv1
+        - pubsub/apiv1
+      location: git@github.com:GoogleCloudPlatform/google-cloud-go.git
     staging:
       paths:
-        - dest: google-pubsub-v1/cloud.google.com/go/pubsub/apiv1
+        - generated/go/google-pubsub-v1
 java:
   gapic_code_dir: ${REPOROOT}/artman/output/java/google-cloud-pubsub
   git_repos:
     java:
       location: git@github.com:GoogleCloudPlatform/google-cloud-java.git
       paths:
-        - dest: google-cloud-pubsub
+        - google-cloud-pubsub
     staging:
       paths:
-        - dest: generated/java/google-cloud-pubsub-v1
+        - generated/java/google-cloud-pubsub-v1
 nodejs:
   gapic_code_dir: ${REPOROOT}/artman/output/js/pubsub-v1
   git_repos:
     nodejs:
-      location: git@github.com:GoogleCloudPlatform/google-cloud-node.git
       paths:
         - src: src/v1
           dest: packages/pubsub/src/v1
+      location: git@github.com:GoogleCloudPlatform/google-cloud-node.git
     staging:
       paths:
-        - dest: generated/nodejs/google-cloud-node/packages/pubsub
+        - generated/nodejs/google-cloud-node/packages/pubsub
   skip_packman: True
 php:
   gapic_code_dir: ${REPOROOT}/artman/output/gcloud-php-pubsub
   git_repos:
     staging:
       paths:
-        - dest: generated/php/google-cloud-pubsub-v1
+        - generated/php/google-cloud-pubsub-v1
 python:
   gapic_code_dir: ${REPOROOT}/artman/output/gapic-google-cloud-pubsub-v1
   git_repos:
     staging:
       paths:
-        - dest: generated/python/gapic-google-cloud-pubsub-v1
+        - generated/python/gapic-google-cloud-pubsub-v1
         - artifact: grpc
           dest: generated/python/proto-google-cloud-pubsub-v1
 ruby:
   gapic_code_dir: ${REPOROOT}/artman/output/riby/google-cloud-pubsub
   git_repos:
     ruby:
-      location: git@github.com:GoogleCloudPlatform/google-cloud-ruby.git
       paths:
         - src: lib/google/cloud/pubsub/v1
           dest: google-cloud-pubsub/lib/google/cloud/pubsub/v1
+      location: git@github.com:GoogleCloudPlatform/google-cloud-ruby.git
     staging:
       paths:
-        - dest: generated/ruby/google-cloud-ruby/google-cloud-pubsub
+        - generated/ruby/google-cloud-ruby/google-cloud-pubsub
   skip_packman: True
