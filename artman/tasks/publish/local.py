@@ -31,7 +31,7 @@ class LocalStagingTask(task_base.TaskBase):
     This task requires WRITE access to the applicable repository.
     """
     def execute(self, gapic_code_dir, git_repo, local_paths,
-                output_dir, grpc_code_dir=None):
+                output_dir, grpc_code_dir=None, proto_code_dir=None):
         """Copy the code to the correct local staging location.
 
         Args:
@@ -65,6 +65,8 @@ class LocalStagingTask(task_base.TaskBase):
         code_dirs = {'gapic': os.path.abspath(gapic_code_dir)}
         if grpc_code_dir:
             code_dirs['grpc'] = os.path.abspath(grpc_code_dir)
+        if proto_code_dir:
+            code_dirs['proto'] = os.path.abspath(proto_code_dir)
 
         # Keep track of all destinations so we are not too eager on wiping
         # out code from the original output area.

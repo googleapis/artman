@@ -20,6 +20,7 @@ import mock
 import pytest
 
 from artman.tasks import protoc_tasks
+from artman.utils import protoc_utils
 
 
 class JavaProtoCopyTaskTests(unittest.TestCase):
@@ -60,7 +61,7 @@ def test_find_google_dir_index():
         ('googlea/google/googleb/cgoogle/Google', 8),
     ]
     for path, index in expected:
-        assert protoc_tasks._find_google_dir_index(path) == index
+        assert protoc_utils.find_google_dir_index(path) == index
 
     failing = [
         '',
@@ -71,4 +72,4 @@ def test_find_google_dir_index():
     ]
     for path in failing:
         with pytest.raises(ValueError):
-            protoc_tasks._find_google_dir_index(path)
+            protoc_utils.find_google_dir_index(path)

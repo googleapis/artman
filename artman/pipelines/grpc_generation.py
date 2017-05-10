@@ -26,23 +26,23 @@ class GrpcClientPipeline(code_gen.CodeGenerationPipelineBase):
 
     def __init__(self, **kwargs):
         super(GrpcClientPipeline, self).__init__(
-            _get_grpc_task_factory(kwargs), **kwargs)
+            get_grpc_task_factory(kwargs), **kwargs)
 
 
 class ProtoClientPipeline(code_gen.CodeGenerationPipelineBase):
 
     def __init__(self, **kwargs):
         super(ProtoClientPipeline, self).__init__(
-            _get_proto_task_factory(kwargs), **kwargs)
+            get_proto_task_factory(kwargs), **kwargs)
 
 
 class GrpcTaskFactoryBase(code_gen.TaskFactoryBase):
 
     def get_tasks(self, **kwargs):
-        tasks = self._get_grpc_codegen_tasks(**kwargs)
+        tasks = self.get_grpc_codegen_tasks(**kwargs)
         return task_utils.instantiate_tasks(tasks, kwargs)
 
-    def _get_grpc_codegen_tasks(self, **kwargs):
+    def get_grpc_codegen_tasks(self, **kwargs):
         return [protoc_tasks.GrpcPackmanTask]
 
     def get_validate_kwargs(self):
@@ -60,8 +60,8 @@ class GrpcClientBatchPipeline(batch_gen.BatchPipeline):
 
 
 def _make_grpc_batch_pipeline_tasks(**kwargs):
-    task_factory = _get_grpc_task_factory(kwargs)
-    tasks = task_factory._get_grpc_codegen_tasks(**kwargs)
+    task_factory = get_grpc_task_factory(kwargs)
+    tasks = task_factory.get_grpc_codegen_tasks(**kwargs)
     return task_utils.instantiate_tasks(tasks, kwargs)
 
 
@@ -73,14 +73,14 @@ class ProtoClientBatchPipeline(batch_gen.BatchPipeline):
 
 
 def _make_proto_batch_pipeline_tasks(**kwargs):
-    task_factory = _get_proto_task_factory(kwargs)
-    tasks = task_factory._get_grpc_codegen_tasks(**kwargs)
+    task_factory = get_proto_task_factory(kwargs)
+    tasks = task_factory.get_grpc_codegen_tasks(**kwargs)
     return task_utils.instantiate_tasks(tasks, kwargs)
 
 
 class _RubyGrpcTaskFactory(GrpcTaskFactoryBase):
 
-    def _get_grpc_codegen_tasks(self, **kwargs):
+    def get_grpc_codegen_tasks(self, **kwargs):
         return [
             protoc_tasks.ProtoAndGrpcCodeGenTask,
             protoc_tasks.RubyGrpcCopyTask,
@@ -89,24 +89,22 @@ class _RubyGrpcTaskFactory(GrpcTaskFactoryBase):
 
 class _JavaGrpcTaskFactory(GrpcTaskFactoryBase):
 
-    def _get_grpc_codegen_tasks(self, **kwargs):
+    def get_grpc_codegen_tasks(self, **kwargs):
         return [
             protoc_tasks.ProtoDescGenTask,
             protoc_tasks.GrpcCodeGenTask,
-            package_metadata_tasks.JavaGrpcPackageTypeTask,
-            package_metadata_tasks.PackageMetadataConfigGenTask,
-            package_metadata_tasks.ProtoPackageMetadataGenTask,
+            package_metadata_tasks.JavaGrpcPackageMetadataConfigGenTask,
+            package_metadata_tasks.JavaGrpcPackageMetadataGenTask,
         ]
 
 
 class _JavaProtoTaskFactory(GrpcTaskFactoryBase):
 
-    def _get_grpc_codegen_tasks(self, **kwargs):
+    def get_grpc_codegen_tasks(self, **kwargs):
         return [
             protoc_tasks.ProtoDescGenTask,
             protoc_tasks.ProtoCodeGenTask,
-            package_metadata_tasks.JavaProtoPackageTypeTask,
-            package_metadata_tasks.PackageMetadataConfigGenTask,
+            package_metadata_tasks.JavaProtoPackageMetadataConfigGenTask,
             package_metadata_tasks.ProtoPackageMetadataGenTask,
             protoc_tasks.JavaProtoCopyTask,
         ]
@@ -114,7 +112,7 @@ class _JavaProtoTaskFactory(GrpcTaskFactoryBase):
 
 class _PythonGrpcTaskFactory(GrpcTaskFactoryBase):
 
-    def _get_grpc_codegen_tasks(self, **kwargs):
+    def get_grpc_codegen_tasks(self, **kwargs):
         return [
             python_grpc_tasks.PythonChangePackageTask,
             protoc_tasks.ProtoDescGenTask,
@@ -133,7 +131,7 @@ class _GoGrpcTaskFactory(GrpcTaskFactoryBase):
     which is taken care of by GoLangUpdateProtoImportsTask.
     """
 
-    def _get_grpc_codegen_tasks(self, **kwargs):
+    def get_grpc_codegen_tasks(self, **kwargs):
         return [
             protoc_tasks.ProtoAndGrpcCodeGenTask,
             protoc_tasks.GoExtractImportBaseTask,
@@ -146,14 +144,14 @@ class _GoGrpcTaskFactory(GrpcTaskFactoryBase):
 
 class _CSharpGrpcTaskFactory(GrpcTaskFactoryBase):
 
-    def _get_grpc_codegen_tasks(self, **kwargs):
+    def get_grpc_codegen_tasks(self, **kwargs):
         return [
             protoc_tasks.ProtoCodeGenTask,
             protoc_tasks.GrpcCodeGenTask,
         ]
 
 
-_GRPC_TASK_FACTORY_DICT = {
+GRPC_TASK_FACTORY_DICT = {
     'java': _JavaGrpcTaskFactory,
     'python': _PythonGrpcTaskFactory,
     'go': _GoGrpcTaskFactory,
@@ -164,17 +162,17 @@ _GRPC_TASK_FACTORY_DICT = {
 }
 
 
-_PROTO_TASK_FACTORY_DICT = {
+PROTO_TASK_FACTORY_DICT = {
     'java': _JavaProtoTaskFactory,
 }
 
 
-def _get_grpc_task_factory(kwargs):
+def get_grpc_task_factory(kwargs):
     if 'language' not in kwargs:
         raise ValueError('Valid --language argument required for gRPC codegen')
 
     language = kwargs['language']
-    cls = _GRPC_TASK_FACTORY_DICT.get(language)
+    cls = GRPC_TASK_FACTORY_DICT.get(language)
     if cls:
         return cls()
     else:
@@ -182,12 +180,12 @@ def _get_grpc_task_factory(kwargs):
                          + language)
 
 
-def _get_proto_task_factory(kwargs):
+def get_proto_task_factory(kwargs):
     if 'language' not in kwargs:
         raise ValueError('Valid --language argument required for gRPC codegen')
 
     language = kwargs['language']
-    cls = _PROTO_TASK_FACTORY_DICT.get(language)
+    cls = PROTO_TASK_FACTORY_DICT.get(language)
     if cls:
         return cls()
     else:

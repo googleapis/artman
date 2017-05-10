@@ -100,6 +100,11 @@ class GapicTaskFactory(code_gen.TaskFactoryBase):
         for grpc_task in self._get_grpc_codegen_tasks(**kwargs):
             if grpc_task not in answer:
                 answer.append(grpc_task)
+
+        for proto_task in self._get_proto_codegen_tasks(**kwargs):
+            if proto_task not in answer:
+                answer.append(proto_task)
+
         answer += self._get_gapic_publish_tasks(**kwargs)
         return task_utils.instantiate_tasks(answer, kwargs)
 
@@ -147,14 +152,34 @@ class GapicTaskFactory(code_gen.TaskFactoryBase):
         Returns:
             list: A list of Task subclasses defined by the GRPC task factory.
         """
-        # Sanity check: Java and C# currently have an unusual workflow and
+        # Sanity check: C# currently has an unusual workflow and
         # still must generate the grpc and gapic packages separately.
-        if language in ('java', 'csharp'):
+        if language in ('csharp',):
             return []
 
         # Instantiate the GRPC task factory.
-        grpc_factory = grpc_gen._GRPC_TASK_FACTORY_DICT[language]()
-        return grpc_factory._get_grpc_codegen_tasks(language=language, **kw)
+        grpc_factory = grpc_gen.GRPC_TASK_FACTORY_DICT[language]()
+        return grpc_factory.get_grpc_codegen_tasks(language=language, **kw)
+
+    def _get_proto_codegen_tasks(self, language, **kw):
+        """Return the code generation tasks for making a Proto package.
+           This is currently only required by Java since Java has separated
+           GRPC and Proto packages.
+
+        Args:
+            language (str): The language code is being generated in.
+            kw (dict): Additional keyword arguments passed through to the
+                proto codegen task factory.
+
+        Returns:
+            list: A list of Task subclasses defined by the Proto task factory.
+        """
+
+        # Instantiate the Proto task factory.
+        if language in grpc_gen.PROTO_TASK_FACTORY_DICT:
+            proto_factory = grpc_gen.PROTO_TASK_FACTORY_DICT[language]()
+            return proto_factory.get_grpc_codegen_tasks(language=language, **kw)
+        return []
 
     def get_validate_kwargs(self):
         return _GAPIC_REQUIRED + code_gen.COMMON_REQUIRED

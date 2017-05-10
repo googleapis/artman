@@ -57,7 +57,6 @@ package_name:
 proto_path: ../path/to/protos
 short_name: fake
 major_version: v1
-generation_layer:
 proto_deps:
 - googleapis-common-protos
 package_type: grpc_client

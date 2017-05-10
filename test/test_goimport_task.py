@@ -22,7 +22,8 @@ def test_golang_update_imports_task(tmpdir):
     task = protoc_tasks.GoLangUpdateImportsTask('test')
     output_dir = tmpdir.mkdir('out')
     gapic_code_dir = tmpdir.mkdir('final')
-    pkg_dir = output_dir.mkdir('google-cloud-fake-v1-gen-go')
+    go_dir = output_dir.mkdir('go')
+    pkg_dir = go_dir.mkdir('grpc-google-cloud-fake-v1')
     shutil.copy('test/fake-repos/fake-proto/fake.pb.go', str(pkg_dir))
     task.execute(api_name='fake', api_version='v1', language='go',
                  organization_name='google-cloud',

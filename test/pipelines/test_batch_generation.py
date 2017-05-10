@@ -149,16 +149,16 @@ def test_get_artman_config_filenames_list():
 class GapicTaskFactoryTests(unittest.TestCase):
     def test_grpc_codegen_java(self):
         gtf = gapic_generation.GapicTaskFactory()
-        grpc_tf = grpc_generation._GRPC_TASK_FACTORY_DICT['java']
-        with mock.patch.object(grpc_tf, '_get_grpc_codegen_tasks') as get:
+        grpc_tf = grpc_generation.GRPC_TASK_FACTORY_DICT['java']
+        with mock.patch.object(grpc_tf, 'get_grpc_codegen_tasks') as get:
             tasks_ = gtf._get_grpc_codegen_tasks(language='java')
-            assert tasks_ == []
-            assert get.call_count == 0
+            assert tasks_ ==  get.return_value
+            get.assert_called_once_with(language='java')
 
     def test_grpc_codegen_python(self):
         gtf = gapic_generation.GapicTaskFactory()
-        grpc_tf = grpc_generation._GRPC_TASK_FACTORY_DICT['python']
-        with mock.patch.object(grpc_tf, '_get_grpc_codegen_tasks') as get:
+        grpc_tf = grpc_generation.GRPC_TASK_FACTORY_DICT['python']
+        with mock.patch.object(grpc_tf, 'get_grpc_codegen_tasks') as get:
             tasks_ = gtf._get_grpc_codegen_tasks(language='python')
             assert tasks_ == get.return_value
             get.assert_called_once_with(language='python')

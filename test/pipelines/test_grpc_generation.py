@@ -26,7 +26,7 @@ from artman.pipelines import grpc_generation
 
 
 class GrpcClientPipelineTests(unittest.TestCase):
-    @mock.patch.object(grpc_generation, '_get_grpc_task_factory')
+    @mock.patch.object(grpc_generation, 'get_grpc_task_factory')
     @mock.patch.object(code_generation.CodeGenerationPipelineBase, '__init__')
     def test_constructor(self, cgpb, ggtf):
         grpc_generation.GrpcClientPipeline(foo='bar')
@@ -34,7 +34,7 @@ class GrpcClientPipelineTests(unittest.TestCase):
 
 
 class ProtoClientPipelineTests(unittest.TestCase):
-    @mock.patch.object(grpc_generation, '_get_proto_task_factory')
+    @mock.patch.object(grpc_generation, 'get_proto_task_factory')
     @mock.patch.object(code_generation.CodeGenerationPipelineBase, '__init__')
     def test_constructor(self, cgpb, gptf):
         grpc_generation.ProtoClientPipeline(foo='bar')
@@ -80,9 +80,8 @@ class MakeGrpcBatchPipelineTasksTest(unittest.TestCase):
         expected = [
             protoc_tasks.ProtoDescGenTask,
             protoc_tasks.GrpcCodeGenTask,
-            package_metadata_tasks.JavaGrpcPackageTypeTask,
-            package_metadata_tasks.PackageMetadataConfigGenTask,
-            package_metadata_tasks.ProtoPackageMetadataGenTask,
+            package_metadata_tasks.JavaGrpcPackageMetadataConfigGenTask,
+            package_metadata_tasks.JavaGrpcPackageMetadataGenTask,
         ]
         actual = grpc_generation._make_grpc_batch_pipeline_tasks(language='java')
         for task, class_ in zip(actual, expected):
@@ -102,8 +101,7 @@ class MakeProtoBatchPipelineTasksTest(unittest.TestCase):
         expected = [
             protoc_tasks.ProtoDescGenTask,
             protoc_tasks.ProtoCodeGenTask,
-            package_metadata_tasks.JavaProtoPackageTypeTask,
-            package_metadata_tasks.PackageMetadataConfigGenTask,
+            package_metadata_tasks.JavaProtoPackageMetadataConfigGenTask,
             package_metadata_tasks.ProtoPackageMetadataGenTask,
             protoc_tasks.JavaProtoCopyTask,
         ]

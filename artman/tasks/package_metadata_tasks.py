@@ -21,11 +21,6 @@ from ruamel import yaml
 from artman.tasks import task_base
 from artman.utils import task_utils
 
-_PROTO_PREFIX_MAP = {
-    'java': 'grpc-',
-    'python': 'proto-'
-}
-
 
 class PackageMetadataConfigGenTask(task_base.TaskBase):
     """Generates package metadata config"""
@@ -34,13 +29,30 @@ class PackageMetadataConfigGenTask(task_base.TaskBase):
     def execute(self, api_name, api_version, organization_name, output_dir,
                 package_dependencies_yaml, package_defaults_yaml, proto_deps,
                 language, local_paths, src_proto_path, package_type,
-                gapic_api_yaml, generation_layer=None, release_level=None,
-                generated_package_version=None):
+                gapic_api_yaml, release_level=None, generated_package_version=None):
+        api_full_name = task_utils.api_full_name(
+            api_name, api_version, organization_name)
+
+        config = self._create_config(
+            api_name, api_version, api_full_name, output_dir,
+            package_dependencies_yaml, package_defaults_yaml, proto_deps,
+            language, local_paths, src_proto_path, package_type,
+            gapic_api_yaml, release_level=release_level, 
+            generated_package_version=generated_package_version)
+
+        package_metadata_config = os.path.join(
+            output_dir, api_full_name + '_package.yaml')
+        self._write_yaml(config, package_metadata_config)
+
+        return package_metadata_config
+
+    def _create_config(self, api_name, api_version, api_full_name, output_dir,
+                       package_dependencies_yaml, package_defaults_yaml, proto_deps,
+                       language, local_paths, src_proto_path, package_type,
+                       gapic_api_yaml, release_level=None, generated_package_version=None):
         googleapis_dir = local_paths['googleapis']
         googleapis_path = os.path.commonprefix(
             [os.path.relpath(p, googleapis_dir) for p in src_proto_path])
-        api_full_name = task_utils.api_full_name(
-            api_name, api_version, organization_name)
 
         with open(package_dependencies_yaml) as dep_file:
             package_dependencies = yaml.load(dep_file, Loader=yaml.Loader)
@@ -70,52 +82,29 @@ class PackageMetadataConfigGenTask(task_base.TaskBase):
             'proto_deps': proto_deps,
             'package_type': package_type,
             'gapic_config_name': gapic_config_name,
-            'generation_layer': generation_layer
         }
 
         config.update(package_dependencies)
         config.update(package_defaults)
 
-        package_metadata_config = os.path.join(
-            output_dir, api_full_name + '_package.yaml')
-        self._write_yaml(config, package_metadata_config)
-
-        return package_metadata_config
+        return config
 
     # Separated so that this can be mocked for testing
     def _write_yaml(self, config_dict, dest):
         with open(dest, 'w') as f:
             yaml.safe_dump(config_dict, f, default_flow_style=False)
 
-
-class JavaGrpcPackageTypeTask(task_base.TaskBase):
-    default_provides = 'generation_layer'
-
-    def execute(self):
-        return 'grpc'
-
-
-class JavaProtoPackageTypeTask(task_base.TaskBase):
-    default_provides = 'generation_layer'
-
-    def execute(self):
-        return 'proto'
-
-
 class ProtoPackageMetadataGenTask(task_base.TaskBase):
-    default_provides = 'grpc_code_dir'
+    default_provides = 'proto_pkg_dir'
 
     def execute(self, api_name, api_version, organization_name, local_paths,
                 descriptor_set, src_proto_path, service_yaml,
                 grpc_code_dir, output_dir, package_metadata_yaml,
-                language, generation_layer=None):
+                language):
         toolkit_path = local_paths['toolkit']
         api_full_name = task_utils.api_full_name(
             api_name, api_version, organization_name)
-        if generation_layer:
-            proto_prefix = generation_layer + '-'
-        else:
-            proto_prefix = _PROTO_PREFIX_MAP[language]
+        proto_prefix = self._get_proto_prefix()
         pkg_dir = os.path.join(
             output_dir, language, proto_prefix + api_full_name)
 
@@ -130,7 +119,46 @@ class ProtoPackageMetadataGenTask(task_base.TaskBase):
         ] + service_args
         self.exec_command(task_utils.gradle_task(
             toolkit_path, 'runGrpcMetadataGen', args))
-        self.exec_command(['rm', '-rf', grpc_code_dir])
 
-        # This becomes the new `grpc_code_dir` for subsequent tasks.
         return pkg_dir
+
+    # Separated so that this can be overriden by each language subclass
+    def _get_proto_prefix(self):
+        return 'proto-'
+
+
+class JavaGrpcPackageMetadataGenTask(ProtoPackageMetadataGenTask):
+    default_provides = 'grpc_pkg_dir'
+
+    def _get_proto_prefix(self):
+        return 'grpc-'
+
+class JavaGrpcPackageMetadataConfigGenTask(PackageMetadataConfigGenTask):
+    def _create_config(self, api_name, api_version, api_full_name, output_dir,
+                package_dependencies_yaml, package_defaults_yaml, proto_deps,
+                language, local_paths, src_proto_path, package_type,
+                gapic_api_yaml, release_level=None, generated_package_version=None):
+        config = super(JavaGrpcPackageMetadataConfigGenTask, self)._create_config(
+            api_name, api_version, api_full_name, output_dir,
+            package_dependencies_yaml, package_defaults_yaml, proto_deps,
+            language, local_paths, src_proto_path, package_type,
+            gapic_api_yaml, release_level=release_level,
+            generated_package_version=generated_package_version)
+        config['generation_layer'] = 'grpc'
+
+        return config
+
+class JavaProtoPackageMetadataConfigGenTask(PackageMetadataConfigGenTask):
+    def _create_config(self, api_name, api_version, api_full_name, output_dir,
+                package_dependencies_yaml, package_defaults_yaml, proto_deps,
+                language, local_paths, src_proto_path, package_type,
+                gapic_api_yaml, release_level=None, generated_package_version=None):
+        config = super(JavaProtoPackageMetadataConfigGenTask, self)._create_config(
+            api_name, api_version, api_full_name, output_dir,
+            package_dependencies_yaml, package_defaults_yaml, proto_deps,
+            language, local_paths, src_proto_path, package_type,
+            gapic_api_yaml, release_level=release_level,
+            generated_package_version=generated_package_version)
+        config['generation_layer'] = 'proto'
+
+        return config
