@@ -121,6 +121,10 @@ ADD . /src
 WORKDIR /src
 RUN pip install -e .
 
+# Setup artman user config
+RUN mkdir /root/.artman
+ADD artman-user-config-in-docker.yaml /root/.artman/config.yaml
+
 # Run smoketests
 # TODO(ethanbao): this should be part of artman CI.
 RUN python test/smoketest.py
