@@ -37,7 +37,7 @@ class PackageMetadataConfigGenTask(task_base.TaskBase):
             api_name, api_version, api_full_name, output_dir,
             package_dependencies_yaml, package_defaults_yaml, proto_deps,
             language, local_paths, src_proto_path, package_type,
-            gapic_api_yaml, release_level=release_level, 
+            gapic_api_yaml, release_level=release_level,
             generated_package_version=generated_package_version)
 
         package_metadata_config = os.path.join(
@@ -125,6 +125,11 @@ class ProtoPackageMetadataGenTask(task_base.TaskBase):
     # Separated so that this can be overriden by each language subclass
     def _get_proto_prefix(self):
         return 'proto-'
+
+
+class PythonProtoPackageMetadataGenTask(ProtoPackageMetadataGenTask):
+    def _get_proto_prefix(self):
+        return 'grpc-'
 
 
 class JavaGrpcPackageMetadataGenTask(ProtoPackageMetadataGenTask):
