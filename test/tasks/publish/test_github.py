@@ -45,13 +45,17 @@ class CreateGitHubBranchTests(unittest.TestCase):
                 'location': 'git@github.com:me/repo.git',
                 'paths': ['generated/ruby/gapic-google-cloud-pubsub-v1'],
             },
+            github={
+                'username': 'test',
+                'token': 'TOKEN',
+            },
             language='ruby',
             output_dir='/path/to',
         )
 
         # List the commands that should have been executed.
         expected_commands = (
-            'git clone git@github.com:me/repo.git /tmp/00000000',
+            'git clone https://test:TOKEN@github.com/me/repo.git /tmp/00000000',
             'git checkout -b pubsub-ruby-v1-00000000',
             ' '.join([
                 'git rm -r --force --ignore-unmatch',
@@ -88,13 +92,17 @@ class CreateGitHubBranchTests(unittest.TestCase):
                 'branch': 'pubsub',
                 'paths': ['generated/ruby/gapic-google-cloud-pubsub-v1'],
             },
+            github={
+                'username': 'test',
+                'token': 'TOKEN',
+            },
             language='ruby',
             output_dir='/path/to',
         )
 
         # List the commands that should have been executed.
         expected_commands = (
-            'git clone git@github.com:me/repo.git /tmp/00000000',
+            'git clone https://test:TOKEN@github.com/me/repo.git /tmp/00000000',
             'git checkout --track -b pubsub origin/pubsub',
             'git checkout -b pubsub-ruby-v1-00000000',
             ' '.join([
@@ -138,13 +146,17 @@ class CreateGitHubBranchTests(unittest.TestCase):
                     },
                 ],
             },
+            github={
+                'username': 'test',
+                'token': 'TOKEN',
+            },
             language='python',
             output_dir='/path/to',
         )
 
         # List the commands that should have been executed.
         expected_commands = (
-            'git clone git@github.com:me/repo.git /tmp/00000000',
+            'git clone https://test:TOKEN@github.com/me/repo.git /tmp/00000000',
             'git checkout -b pubsub-python-v1-00000000',
             ' '.join([
                 'git rm -r --force --ignore-unmatch',
@@ -194,13 +206,17 @@ class CreateGitHubBranchTests(unittest.TestCase):
                     'dest': 'generated/python/proto-pubsub-v1',
                 }],
             },
+            github={
+                'username': 'test',
+                'token': 'TOKEN',
+            },
             language='python',
             output_dir='/path/to',
         )
 
         # List the commands that should have been executed.
         expected_commands = (
-            'git clone git@github.com:me/repo.git /tmp/00000000',
+            'git clone https://test:TOKEN@github.com/me/repo.git /tmp/00000000',
             'git checkout -b pubsub-python-v1-00000000',
             ' '.join([
                 'git rm -r --force --ignore-unmatch',

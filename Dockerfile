@@ -121,6 +121,10 @@ ADD . /src
 WORKDIR /src
 RUN pip install -e .
 
+# Setup git config used by github commit pushing.
+RUN git config --global user.email googleapis-publisher@google.com \
+  && git config --global user.name "Googleapis Publisher"
+
 # Setup artman user config
 RUN mkdir /root/.artman
 ADD artman-user-config-in-docker.yaml /root/.artman/config.yaml

@@ -32,7 +32,7 @@ class CreateGitHubBranch(task_base.TaskBase):
     """
     default_provides = 'branch_name'
 
-    def execute(self, git_repo, api_name, api_version, language,
+    def execute(self, git_repo, api_name, api_version, language, github,
                 output_dir, gapic_code_dir, grpc_code_dir=None):
         """Clone a repository from GitHub into a temporary location.
 
@@ -41,6 +41,7 @@ class CreateGitHubBranch(task_base.TaskBase):
             api_name (str): The name of the API.
             api_version (str): The version of the API.
             language (str): The name of the language.
+            github (dict): github config including username and token.
             output_dir (str): The name of the original output directory.
                 This directory is removed entirely.
             gapic_code_dir (str): The location of the GAPIC code.
@@ -67,6 +68,9 @@ class CreateGitHubBranch(task_base.TaskBase):
         repo = git_repo['location']
         logger.info('Checking out fresh clone of %s.' % repo)
         try:
+            if repo.startswith('git@github.com:'):
+                repo = 'https://%s:%s@github.com/%s' % (
+                    github['username'], github['token'], repo[15:])
             self.exec_command(['git', 'clone', repo, repo_temp_dir])
 
             # Create a new branch for this API.

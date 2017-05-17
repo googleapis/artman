@@ -37,6 +37,26 @@ class ConductorTests(unittest.TestCase):
                     # Decoded string is "--api pubsub --lang python"
                     'payload': 'LS1hcGkgcHVic3ViIC0tbGFuZyBweXRob24='
                     },
+                'taskStatus': {
+                    'attemptDispatchCount': '0'
+                    },
+                'scheduleTime': '',
+                'view': 'FULL'
+            }
+        ]
+    })
+
+    _FAKE_PULL_TASKS_RESPONSE_WITH_ATTEMPTS = json.dumps({
+        'tasks': [
+            {
+                'name': 'projects/foo/locations/bar/queues/baz/tasks/fake',
+                'pullTaskTarget': {
+                    # Decoded string is "--api pubsub --lang python"
+                    'payload': 'LS1hcGkgcHVic3ViIC0tbGFuZyBweXRob24='
+                    },
+                'taskStatus': {
+                    'attemptDispatchCount': '4'
+                    },
                 'scheduleTime': '',
                 'view': 'FULL'
             }
@@ -44,6 +64,8 @@ class ConductorTests(unittest.TestCase):
     })
 
     _FAKE_ACK_TASK_RESPONSE = json.dumps({})
+
+    _FAKE_DELETE_TASK_RESPONSE = json.dumps({})
 
     _FAKE_CANCEL_TASK_LEASE_RESPONSE = json.dumps({
         'name': 'projects/foo/locations/bar/queues/baz/tasks/fake'
@@ -53,18 +75,20 @@ class ConductorTests(unittest.TestCase):
 
     @mock.patch.object(cloudtasks_conductor, '_prepare_dir')
     @mock.patch.object(main, 'main')
-    @mock.patch.object(cloudtasks_conductor, '_cleanup_tmp_dir')
-    def test_start_conductor_succeed(self, cleanup_tmp_dir, cli_main,
-                                     prepare_dir):
+    @mock.patch.object(cloudtasks_conductor, '_write_to_cloud_logging')
+    @mock.patch.object(cloudtasks_conductor, '_cleanup')
+    def test_execute_task_succeed(self, cleanup, write_to_cloud_logging,
+                                  cli_main, prepare_dir):
         http = HttpMockSequence([
             ({'status': '200'}, self._FAKE_PULL_TASKS_RESPONSE),
             ({'status': '200'}, self._FAKE_ACK_TASK_RESPONSE),
         ])
 
         client = self._create_cloudtasks_client_testing(http=http)
-        prepare_dir.return_value = '/tmp', '/tmp/artman-config.yaml'
-        cli_main.return_value = None
-        cleanup_tmp_dir.return_value = None
+        prepare_dir.return_value = (
+            'task_id', '/tmp', '/tmp/artman-config.yaml', '/tmp/artman.log')
+        write_to_cloud_logging.return_value = None
+        cleanup.return_value = None
 
         cloudtasks_conductor._pull_and_execute_tasks(
             task_client=client,
@@ -72,21 +96,50 @@ class ConductorTests(unittest.TestCase):
         cli_main.assert_called_once_with(
             u'--api', u'pubsub', u'--lang', u'python', '--user-config',
             '/tmp/artman-config.yaml')
-        # Make sure ack is called when the task execution fails.
-        cleanup_tmp_dir.assert_called_once()
+        # Make sure ack is called when the task execution succeeds.
+        cleanup.assert_called_once()
+        write_to_cloud_logging.assert_called_with('task_id', '/tmp/artman.log')
+
+    @mock.patch.object(cloudtasks_conductor, '_prepare_dir')
+    @mock.patch.object(cloudtasks_conductor, '_delete_task')
+    @mock.patch.object(cloudtasks_conductor, '_write_to_cloud_logging')
+    @mock.patch.object(cloudtasks_conductor, '_cleanup')
+    def test_execute_task_exceeding_max_attmpts(self, cleanup,
+                                                write_to_cloud_logging,
+                                                delete_task, prepare_dir):
+        http = HttpMockSequence([
+            ({'status': '200'}, self._FAKE_PULL_TASKS_RESPONSE_WITH_ATTEMPTS),
+            ({'status': '200'}, self._FAKE_DELETE_TASK_RESPONSE),
+        ])
+        client = self._create_cloudtasks_client_testing(http=http)
+        prepare_dir.return_value = (
+            'task_id', '/tmp', '/tmp/artman-config.yaml', '/tmp/artman.log')
+        write_to_cloud_logging.return_value = None
+        cleanup.return_value = None
+
+        cloudtasks_conductor._pull_and_execute_tasks(
+            task_client=client,
+            queue_name=self._FAKE_QUEUE_NAME)
+        delete_task.assert_called_once()
+        cleanup.assert_called_once()
+        write_to_cloud_logging.assert_called_with('task_id', '/tmp/artman.log')
 
     @mock.patch.object(cloudtasks_conductor, '_prepare_dir')
     @mock.patch.object(main, 'main')
-    @mock.patch.object(cloudtasks_conductor, '_cleanup_tmp_dir')
-    def test_start_conductor_fail(self, cleanup_tmp_dir, cli_main,
-                                  prepare_dir):
+    @mock.patch.object(cloudtasks_conductor, '_write_to_cloud_logging')
+    @mock.patch.object(cloudtasks_conductor, '_cleanup')
+    def test_execute_task_fail(self, cleanup, write_to_cloud_logging,
+                               cli_main, prepare_dir):
         http = HttpMockSequence([
             ({'status': '200'}, self._FAKE_PULL_TASKS_RESPONSE),
             ({'status': '200'}, self._FAKE_CANCEL_TASK_LEASE_RESPONSE),
         ])
         client = self._create_cloudtasks_client_testing(http=http)
-        prepare_dir.return_value = '/tmp', '/tmp/artman-config.yaml'
+        prepare_dir.return_value = (
+            'task_id', '/tmp', '/tmp/artman-config.yaml', '/tmp/artman.log')
         cli_main.side_effect = RuntimeError('abc')
+        write_to_cloud_logging.return_value = None
+        cleanup.return_value = None
 
         cloudtasks_conductor._pull_and_execute_tasks(
             task_client=client,
@@ -95,7 +148,8 @@ class ConductorTests(unittest.TestCase):
             u'--api', u'pubsub', u'--lang', u'python', '--user-config',
             '/tmp/artman-config.yaml')
         # Make sure cancel is called when the task execution fails.
-        cleanup_tmp_dir.assert_called_once()
+        cleanup.assert_called_once()
+        write_to_cloud_logging.assert_called_with('task_id', '/tmp/artman.log')
 
     @mock.patch.object(os, 'makedirs')
     @mock.patch.object(uuid, 'uuid4')
@@ -108,7 +162,7 @@ class ConductorTests(unittest.TestCase):
         with mock.patch('io.open', artman_user_config_mock, create=True):
             cloudtasks_conductor._prepare_dir()
             os_mkdir.assert_called_once_with(
-                '/tmp/artman/00000000-0000-0000-0000-000000000000')
+                '/tmp/artman/00000000')
             handler = artman_user_config_mock()
             handler.write.assert_called()
 
