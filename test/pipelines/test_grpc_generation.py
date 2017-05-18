@@ -81,7 +81,7 @@ class MakeGrpcBatchPipelineTasksTest(unittest.TestCase):
             protoc_tasks.ProtoDescGenTask,
             protoc_tasks.GrpcCodeGenTask,
             package_metadata_tasks.JavaGrpcPackageMetadataConfigGenTask,
-            package_metadata_tasks.JavaGrpcPackageMetadataGenTask,
+            package_metadata_tasks.GrpcPackageMetadataGenTask,
         ]
         actual = grpc_generation._make_grpc_batch_pipeline_tasks(language='java')
         for task, class_ in zip(actual, expected):

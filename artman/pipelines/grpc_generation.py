@@ -94,7 +94,7 @@ class _JavaGrpcTaskFactory(GrpcTaskFactoryBase):
             protoc_tasks.ProtoDescGenTask,
             protoc_tasks.GrpcCodeGenTask,
             package_metadata_tasks.JavaGrpcPackageMetadataConfigGenTask,
-            package_metadata_tasks.JavaGrpcPackageMetadataGenTask,
+            package_metadata_tasks.GrpcPackageMetadataGenTask,
         ]
 
 
@@ -118,7 +118,7 @@ class _PythonGrpcTaskFactory(GrpcTaskFactoryBase):
             protoc_tasks.ProtoDescGenTask,
             protoc_tasks.ProtoAndGrpcCodeGenTask,
             package_metadata_tasks.PackageMetadataConfigGenTask,
-            package_metadata_tasks.PythonProtoPackageMetadataGenTask,
+            package_metadata_tasks.GrpcPackageMetadataGenTask,
         ]
 
 

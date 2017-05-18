@@ -59,8 +59,6 @@ class ProtoDescGenTask(task_base.TaskBase):
 
 
 class ProtocCodeGenTaskBase(task_base.TaskBase):
-    default_provides = 'grpc_code_dir'
-
     """Generates protos"""
     def _execute_proto_codegen(
             self, language, src_proto_path, import_proto_path,
@@ -121,6 +119,7 @@ class ProtoCodeGenTask(ProtocCodeGenTaskBase):
 
 
 class GrpcCodeGenTask(ProtocCodeGenTaskBase):
+    default_provides = 'grpc_code_dir'
 
     """Generates the gRPC client library"""
     def execute(self, language, src_proto_path, import_proto_path,
@@ -141,6 +140,7 @@ class GrpcCodeGenTask(ProtocCodeGenTaskBase):
 
 
 class ProtoAndGrpcCodeGenTask(ProtocCodeGenTaskBase):
+    default_provides = 'grpc_code_dir'
 
     """Generates protos and the gRPC client library"""
     def execute(self, language, src_proto_path, import_proto_path,
@@ -275,8 +275,8 @@ class GoExtractImportBaseTask(task_base.TaskBase):
 class JavaProtoCopyTask(task_base.TaskBase):
     """Copies the .proto files into the grpc_code_dir directory
     """
-    def execute(self, src_proto_path, grpc_code_dir):
-        grpc_proto_dir = os.path.join(grpc_code_dir, 'src', 'main', 'proto')
+    def execute(self, src_proto_path, proto_code_dir):
+        grpc_proto_dir = os.path.join(proto_code_dir, 'src', 'main', 'proto')
         for proto_path in src_proto_path:
             index = protoc_utils.find_google_dir_index(proto_path)
             for src_proto_file in protoc_utils.find_proto_files(proto_path):

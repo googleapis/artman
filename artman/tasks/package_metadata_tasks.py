@@ -21,6 +21,7 @@ from ruamel import yaml
 from artman.tasks import task_base
 from artman.utils import task_utils
 
+# Metadata config gen
 
 class PackageMetadataConfigGenTask(task_base.TaskBase):
     """Generates package metadata config"""
@@ -94,50 +95,6 @@ class PackageMetadataConfigGenTask(task_base.TaskBase):
         with open(dest, 'w') as f:
             yaml.safe_dump(config_dict, f, default_flow_style=False)
 
-class ProtoPackageMetadataGenTask(task_base.TaskBase):
-    default_provides = 'proto_pkg_dir'
-
-    def execute(self, api_name, api_version, organization_name, local_paths,
-                descriptor_set, src_proto_path, service_yaml,
-                grpc_code_dir, output_dir, package_metadata_yaml,
-                language):
-        toolkit_path = local_paths['toolkit']
-        api_full_name = task_utils.api_full_name(
-            api_name, api_version, organization_name)
-        proto_prefix = self._get_proto_prefix()
-        pkg_dir = os.path.join(
-            output_dir, language, proto_prefix + api_full_name)
-
-        service_args = ['--service_yaml=' + os.path.abspath(yaml)
-                        for yaml in service_yaml]
-        args = [
-            '--descriptor_set=' + os.path.abspath(descriptor_set),
-            '--input=' + os.path.abspath(grpc_code_dir),
-            '--output=' + os.path.abspath(pkg_dir),
-            '--metadata_config=' + os.path.abspath(package_metadata_yaml),
-            '--language=' + language,
-        ] + service_args
-        self.exec_command(task_utils.gradle_task(
-            toolkit_path, 'runGrpcMetadataGen', args))
-
-        return pkg_dir
-
-    # Separated so that this can be overriden by each language subclass
-    def _get_proto_prefix(self):
-        return 'proto-'
-
-
-class PythonProtoPackageMetadataGenTask(ProtoPackageMetadataGenTask):
-    def _get_proto_prefix(self):
-        return 'grpc-'
-
-
-class JavaGrpcPackageMetadataGenTask(ProtoPackageMetadataGenTask):
-    default_provides = 'grpc_pkg_dir'
-
-    def _get_proto_prefix(self):
-        return 'grpc-'
-
 class JavaGrpcPackageMetadataConfigGenTask(PackageMetadataConfigGenTask):
     def _create_config(self, api_name, api_version, api_full_name, output_dir,
                 package_dependencies_yaml, package_defaults_yaml, proto_deps,
@@ -167,3 +124,62 @@ class JavaProtoPackageMetadataConfigGenTask(PackageMetadataConfigGenTask):
         config['generation_layer'] = 'proto'
 
         return config
+
+# Metadata gen
+
+class ProtoPackageMetadataGenTaskBase(task_base.TaskBase):
+    def _execute(self, api_name, api_version, organization_name, local_paths,
+                descriptor_set, src_proto_path, service_yaml,
+                input_dir, output_dir, package_metadata_yaml,
+                language):
+        toolkit_path = local_paths['toolkit']
+        api_full_name = task_utils.api_full_name(
+            api_name, api_version, organization_name)
+        proto_prefix = self._get_proto_prefix()
+        pkg_dir = os.path.join(
+            output_dir, language, proto_prefix + api_full_name)
+
+        service_args = ['--service_yaml=' + os.path.abspath(yaml)
+                        for yaml in service_yaml]
+        args = [
+            '--descriptor_set=' + os.path.abspath(descriptor_set),
+            '--input=' + os.path.abspath(input_dir),
+            '--output=' + os.path.abspath(pkg_dir),
+            '--metadata_config=' + os.path.abspath(package_metadata_yaml),
+            '--language=' + language,
+        ] + service_args
+        self.exec_command(task_utils.gradle_task(
+            toolkit_path, 'runGrpcMetadataGen', args))
+
+        return pkg_dir
+
+    # Separated so that this can be overriden by each language subclass
+    def _get_proto_prefix(self):
+        return 'proto-'
+
+class ProtoPackageMetadataGenTask(ProtoPackageMetadataGenTaskBase):
+    default_provides = 'proto_pkg_dir'
+
+    def execute(self, api_name, api_version, organization_name, local_paths,
+                descriptor_set, src_proto_path, service_yaml,
+                proto_code_dir, output_dir, package_metadata_yaml,
+                language):
+        return self._execute(api_name, api_version, organization_name,
+                local_paths, descriptor_set, src_proto_path, service_yaml,
+                proto_code_dir, output_dir, package_metadata_yaml,
+                language)
+
+class GrpcPackageMetadataGenTask(ProtoPackageMetadataGenTaskBase):
+    default_provides = 'grpc_pkg_dir'
+
+    def execute(self, api_name, api_version, organization_name, local_paths,
+                descriptor_set, src_proto_path, service_yaml,
+                grpc_code_dir, output_dir, package_metadata_yaml,
+                language):
+        return self._execute(api_name, api_version, organization_name,
+                local_paths, descriptor_set, src_proto_path, service_yaml,
+                grpc_code_dir, output_dir, package_metadata_yaml,
+                language)
+
+    def _get_proto_prefix(self):
+        return 'grpc-'
