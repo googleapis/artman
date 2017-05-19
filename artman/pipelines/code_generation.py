@@ -17,6 +17,7 @@
 
 import time
 import uuid
+import importlib
 
 from artman.utils import pipeline_util, task_utils
 from artman.pipelines import pipeline_base
@@ -100,3 +101,20 @@ class TaskFactoryBase(object):
         a list of required keyword arguments.
         """
         raise NotImplementedError('Subclass must implement abstract method')
+
+    def _get_publish_tasks(self, publish, **kwargs):
+        """Dynamically import publisher tasks based on the selected publisher.
+
+        This will raise ImportError if the publisher does not have a module
+        in `pipeline.tasks.publish`.
+
+        Args:
+            publish (str): A string of a publisher in pipeline.tasks.publish.*.
+
+        Returns:
+            list: A list of Task subclasses defined by the publisher module.
+        """
+        module = importlib.import_module(
+            'artman.tasks.publish.{}'.format(publish),
+        )
+        return module.TASKS

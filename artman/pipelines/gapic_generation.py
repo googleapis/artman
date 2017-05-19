@@ -15,7 +15,6 @@
 """Pipelines that run GAPIC code generation."""
 
 from __future__ import absolute_import
-import importlib
 
 from artman.pipelines import code_generation as code_gen
 from artman.pipelines import grpc_generation as grpc_gen
@@ -26,7 +25,7 @@ from artman.utils import task_utils
 
 # kwargs required by GAPIC code gen
 _GAPIC_REQUIRED = ['service_yaml', 'gapic_language_yaml', 'gapic_api_yaml',
-                   'gapic_code_dir', 'language', 'publish']
+                   'language', 'publish']
 
 
 class GapicConfigPipeline(code_gen.CodeGenerationPipelineBase):
@@ -96,7 +95,11 @@ class GapicTaskFactory(code_gen.TaskFactoryBase):
         # though the GRPC is the dependency. This is because in some languages,
         # the GRPC is "tucked into" the GAPIC, and that process is much easier
         # if the code is generated in this order.
-        answer = self._get_gapic_codegen_tasks(**kwargs)
+        answer = []
+
+        if 'gapic_code_dir' in kwargs:
+            answer = self._get_gapic_codegen_tasks(**kwargs)
+
         for grpc_task in self._get_grpc_codegen_tasks(**kwargs):
             if grpc_task not in answer:
                 answer.append(grpc_task)
@@ -105,7 +108,7 @@ class GapicTaskFactory(code_gen.TaskFactoryBase):
             if proto_task not in answer:
                 answer.append(proto_task)
 
-        answer += self._get_gapic_publish_tasks(**kwargs)
+        answer += self._get_publish_tasks(**kwargs)
         return task_utils.instantiate_tasks(answer, kwargs)
 
     def _get_gapic_codegen_tasks(self, language, **kwargs):
@@ -123,23 +126,6 @@ class GapicTaskFactory(code_gen.TaskFactoryBase):
             tasks.gapic.GapicCodeGenTask,
             tasks.format.get_format_task(language),
         ]
-
-    def _get_gapic_publish_tasks(self, publish, **kwargs):
-        """Dynamically import publisher tasks based on the selected publisher.
-
-        This will raise ImportError if the publisher does not have a module
-        in `pipeline.tasks.publish`.
-
-        Args:
-            publish (str): A string of a publisher in pipeline.tasks.publish.*.
-
-        Returns:
-            list: A list of Task subclasses defined by the publisher module.
-        """
-        module = importlib.import_module(
-            'artman.tasks.publish.{}'.format(publish),
-        )
-        return module.TASKS
 
     def _get_grpc_codegen_tasks(self, language, **kw):
         """Return the code generation tasks for making a GRPC package.

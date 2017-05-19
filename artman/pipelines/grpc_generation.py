@@ -40,6 +40,7 @@ class GrpcTaskFactoryBase(code_gen.TaskFactoryBase):
 
     def get_tasks(self, **kwargs):
         tasks = self.get_grpc_codegen_tasks(**kwargs)
+        tasks += self._get_publish_tasks(**kwargs)
         return task_utils.instantiate_tasks(tasks, kwargs)
 
     def get_grpc_codegen_tasks(self, **kwargs):

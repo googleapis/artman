@@ -54,7 +54,7 @@ class GrpcTaskFactoryBaseTests(unittest.TestCase):
 
     def test_get_tasks(self):
         expected = [protoc_tasks.GrpcPackmanTask]
-        actual = self._gtfb.get_tasks()
+        actual = self._gtfb.get_tasks(publish='noop')
         for task, class_ in zip(actual, expected):
             assert isinstance(task, class_)
 

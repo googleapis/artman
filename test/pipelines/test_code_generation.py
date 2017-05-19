@@ -69,12 +69,25 @@ class CodeGenerationPipelineBaseTests(unittest.TestCase):
         with mock.patch.object(CGPB, 'validate_kwargs') as validate:
             cgpb = CGPB(
                 gapic_generation.GapicTaskFactory(),
-                language='python', publish='noop',
+                language='python', publish='noop'
+            )
+            validate.assert_called_once()
+        flow = cgpb.do_build_flow(language='python', publish='noop',
+                                  gapic_code_dir='output')
+        assert isinstance(flow, linear_flow.Flow)
+        assert len(flow) == 9
+
+    def test_do_build_flow_no_gapic(self):
+        CGPB = code_generation.CodeGenerationPipelineBase
+        with mock.patch.object(CGPB, 'validate_kwargs') as validate:
+            cgpb = CGPB(
+                gapic_generation.GapicTaskFactory(),
+                language='python', publish='noop'
             )
             validate.assert_called_once()
         flow = cgpb.do_build_flow(language='python', publish='noop')
         assert isinstance(flow, linear_flow.Flow)
-        assert len(flow) == 9
+        assert len(flow) == 7
 
     @mock.patch.object(pipeline_util, 'validate_exists')
     @mock.patch.object(pipeline_util, 'validate_does_not_exist')

@@ -24,7 +24,9 @@ from artman.utils.logger import logger
 
 class LocalStagingTests(unittest.TestCase):
     @mock.patch.object(local.LocalStagingTask, 'exec_command')
-    def test_execute(self, exec_command):
+    @mock.patch('os.path.isdir')
+    def test_execute(self, is_dir, exec_command):
+        is_dir.return_value = True
         # Run the task.
         task = local.LocalStagingTask()
         task.execute(
@@ -51,7 +53,9 @@ class LocalStagingTests(unittest.TestCase):
         assert rm_cmd_3[0] == ['rm', '-rf', '/path/to/output']
 
     @mock.patch.object(local.LocalStagingTask, 'exec_command')
-    def test_execute_git_location_without_dot_git(self, exec_command):
+    @mock.patch('os.path.isdir')
+    def test_execute_git_location_without_dot_git(self, is_dir, exec_command):
+        is_dir.return_value = True
         # Run the task.
         # This time, send a location that does not end in ".git" (as an
         # https location would not).
@@ -71,7 +75,9 @@ class LocalStagingTests(unittest.TestCase):
             assert '/path/to/acs/pubsub' in args[0]
 
     @mock.patch.object(local.LocalStagingTask, 'exec_command')
-    def test_execute_output_dir_parent_of_gapic_dest(self, exec_command):
+    @mock.patch('os.path.isdir')
+    def test_execute_output_dir_parent_of_gapic_dest(self, is_dir, exec_command):
+        is_dir.return_value = True
         # Run the task.
         task = local.LocalStagingTask()
         task.execute(
@@ -97,7 +103,9 @@ class LocalStagingTests(unittest.TestCase):
 
     @mock.patch.object(local.LocalStagingTask, 'exec_command')
     @mock.patch.object(logger, 'success')
-    def test_execute_with_grpc(self, success, exec_command):
+    @mock.patch('os.path.isdir')
+    def test_execute_with_grpc(self, is_dir, success, exec_command):
+        is_dir.return_value = True
         # Run the task, this time with a registered grpc location.
         task = local.LocalStagingTask()
         task.execute(
