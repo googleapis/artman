@@ -40,14 +40,14 @@ class BatchTaskFactoryTests(unittest.TestCase):
         self._kwargs = {
             'batch_apis': '*',
             'language': 'python',
-            'api_config_pattern': 'test/cli/data/gapic/api/artman_${API_SHORT_NAME}.yaml',
+            'api_config_patterns': ['test/cli/data/gapic/api/artman_${API_SHORT_NAME}.yaml'],
             'artman_language_yaml': 'test/cli/data/gapic/lang/common.yaml',
             'local_paths': {},
             'publish': 'noop',
         }
 
     def test_validate_kwargs(self):
-        expected = ['batch_apis', 'language', 'api_config_pattern',
+        expected = ['batch_apis', 'language', 'api_config_patterns',
                     'artman_language_yaml', 'publish']
         assert self._btf.get_validate_kwargs() == expected
 
@@ -113,36 +113,36 @@ class BatchTaskFactoryTests(unittest.TestCase):
 
 
 def test_get_artman_config_filenames_wildcard():
-    api_config_pattern = 'test/cli/data/gapic/api/artman_${API_SHORT_NAME}.yaml'
+    api_config_patterns = ['test/cli/data/gapic/api/artman_${API_SHORT_NAME}.yaml']
     expected = [
         'test/cli/data/gapic/api/artman_logging.yaml',
         'test/cli/data/gapic/api/artman_longrunning.yaml',
         'test/cli/data/gapic/api/artman_pubsub.yaml',
     ]
     actual = batch_generation._get_artman_config_filenames(
-            api_config_pattern, '*')
+            api_config_patterns, '*')
     assert expected == actual
 
 
 def test_get_artman_config_filenames_comma_separated():
-    api_config_pattern = 'test/cli/data/gapic/api/artman_${API_SHORT_NAME}.yaml'
+    api_config_patterns = ['test/cli/data/gapic/api/artman_${API_SHORT_NAME}.yaml']
     expected = [
         'test/cli/data/gapic/api/artman_pubsub.yaml',
         'test/cli/data/gapic/api/artman_logging.yaml',
     ]
     actual = batch_generation._get_artman_config_filenames(
-            api_config_pattern, 'pubsub,logging')
+            api_config_patterns, 'pubsub,logging')
     assert expected == actual
 
 
 def test_get_artman_config_filenames_list():
-    api_config_pattern = 'test/cli/data/gapic/api/artman_${API_SHORT_NAME}.yaml'
+    api_config_patterns = ['test/cli/data/gapic/api/artman_${API_SHORT_NAME}.yaml']
     expected = [
         'test/cli/data/gapic/api/artman_logging.yaml',
         'test/cli/data/gapic/api/artman_longrunning.yaml',
     ]
     actual = batch_generation._get_artman_config_filenames(
-            api_config_pattern, ['logging', 'longrunning'])
+            api_config_patterns, ['logging', 'longrunning'])
     assert expected == actual
 
 

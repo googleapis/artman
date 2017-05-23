@@ -44,11 +44,11 @@ class BatchTaskFactory(code_gen.TaskFactoryBase):
         return [batch_flow]
 
     def get_language_api_flows(self, batch_apis, language,
-                               api_config_pattern, artman_language_yaml,
+                               api_config_patterns, artman_language_yaml,
                                local_paths, **kwargs):
 
         artman_config_yamls = _get_artman_config_filenames(
-            api_config_pattern, batch_apis)
+            api_config_patterns, batch_apis)
 
         for api_kwargs in _get_api_kwarg_dicts(
                 artman_config_yamls,
@@ -74,7 +74,7 @@ class BatchTaskFactory(code_gen.TaskFactoryBase):
         return single_flow
 
     def get_validate_kwargs(self, **kwargs):
-        return ['batch_apis', 'language', 'api_config_pattern',
+        return ['batch_apis', 'language', 'api_config_patterns',
                 'artman_language_yaml', 'publish']
 
     def get_invalid_kwargs(self):
@@ -98,17 +98,20 @@ def _get_api_kwarg_dicts(
         yield api_kwargs
 
 
-def _get_artman_config_filenames(api_config_pattern, batch_apis):
-    if batch_apis == '*':
-        glob_pattern = config_util.replace_vars(api_config_pattern,
-                                               {'API_SHORT_NAME': '*'})
-        return sorted(glob.glob(glob_pattern))
-    else:
-        if isinstance(batch_apis, (six.text_type, six.binary_type)):
-            batch_apis = batch_apis.split(',')
-        return [config_util.replace_vars(api_config_pattern,
-                                        {'API_SHORT_NAME': api})
-                for api in batch_apis]
+def _get_artman_config_filenames(api_config_patterns, batch_apis):
+    config_filenames= []
+    for pattern in api_config_patterns:
+        if batch_apis == '*':
+            glob_pattern = config_util.replace_vars(pattern,
+                                                   {'API_SHORT_NAME': '*'})
+            config_filenames += sorted(glob.glob(glob_pattern))
+        else:
+            if isinstance(batch_apis, (six.text_type, six.binary_type)):
+                batch_apis = batch_apis.split(',')
+            config_filenames += [
+                config_util.replace_vars(pattern, {'API_SHORT_NAME': api})
+                    for api in batch_apis]
+    return config_filenames
 
 
 def _load_artman_config(artman_yaml, language, local_paths):
