@@ -240,7 +240,7 @@ class RubyGrpcCopyTask(task_base.TaskBase):
     the gapic_code_dir/lib.
     """
     def execute(self, api_name, api_version, language, organization_name,
-                output_dir, gapic_code_dir, grpc_code_dir):
+                output_dir, pkg_dir, gapic_code_dir, grpc_code_dir):
         final_output_dir = os.path.join(gapic_code_dir, 'lib')
         logger.info('Copying %s/* to %s.' % (grpc_code_dir, final_output_dir))
         if not os.path.exists(final_output_dir):
@@ -259,7 +259,7 @@ class GoExtractImportBaseTask(task_base.TaskBase):
             if not os.path.exists(yaml_file):
                 continue
             with open(yaml_file) as f:
-                gapic_config = yaml.load(f)
+                gapic_config = yaml.load(f, Loader=yaml.Loader)
             if not gapic_config:
                 continue
             language_settings = gapic_config.get('language_settings')
