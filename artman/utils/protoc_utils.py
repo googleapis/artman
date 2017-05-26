@@ -17,6 +17,7 @@
 import os
 import re
 import subprocess
+import sys
 
 import six
 
@@ -188,7 +189,7 @@ class _PythonProtoParams(_SimpleProtoParams):
 
     @property
     def proto_compiler_command(self):
-        return ['python', '-m', 'grpc.tools.protoc']
+        return [sys.executable, '-m', 'grpc.tools.protoc']
 
 
 PROTO_PARAMS_MAP = {

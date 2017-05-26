@@ -112,9 +112,6 @@ RUN cd /toolkit \
   && ./gradlew install \
   && cd /
 
-# Install googleapis protocol compiler plugin which is needed to build gapic resource classes.
-RUN pip3 install -e git+https://github.com/googleapis/proto-compiler-plugin#egg=remote
-
 # Install PHP protobuf plugin.
 RUN gem install ronn --no-ri --no-rdoc \
   && git clone https://github.com/stanley-cheung/Protobuf-PHP.git \
@@ -130,7 +127,7 @@ RUN gem install ronn --no-ri --no-rdoc \
 
 # Setup git config used by github commit pushing.
 RUN git config --global user.email googleapis-publisher@google.com \
-  && git config --global user.name "Googleapis Publisher"
+  && git config --global user.name "Google API Publisher"
 
 # Setup artman user config
 # Note: This is somewhat brittle as it relies on a specific path
@@ -143,7 +140,8 @@ RUN mkdir -p /root/
 ADD artman-user-config-in-docker.yaml /root/.artman/config.yaml
 
 # Install artman and run the smoke test.
-RUN pip3 install googleapis-artman==0.4.3
+ADD . /artman-src/
+# RUN pip3 install googleapis-artman==0.4.3
 
 # TODO (lukesneeringer): Move smoke tests to a different venue.
 # RUN smoketest_artman.py \

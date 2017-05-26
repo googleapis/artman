@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import io
 import mock
 import os
 import unittest
@@ -34,8 +35,7 @@ class PythonPackageChangeTest(unittest.TestCase):
     def test__extract_base_dirs(self):
         mock_proto = mock.mock_open()
         mock_proto.return_value.__iter__ = lambda _: iter(self._PROTO_FILE)
-        with mock.patch.object(python_grpc_tasks, 'open', mock_proto,
-                               create=True):
+        with mock.patch.object(io, 'open', mock_proto):
             base_dirs = self._TASK._extract_base_dirs(
                 os.path.join('a', 'test', 'path', 'to', 'google', 'service',
                              'v1', 'a.proto'))
@@ -72,8 +72,7 @@ class PythonPackageChangeTest(unittest.TestCase):
     def test__copy_proto(self):
         mock_proto = mock.mock_open()
         mock_proto.return_value.__iter__ = lambda _: iter(self._PROTO_FILE)
-        with mock.patch.object(python_grpc_tasks, 'open', mock_proto,
-                               create=True):
+        with mock.patch.object(io, 'open', mock_proto):
             self._TASK._copy_proto('foo', 'bar', ['google.common'])
         expected_writes = [
             mock.call('# Comment line\n'),
