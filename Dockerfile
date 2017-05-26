@@ -45,7 +45,8 @@ RUN mkdir -p /usr/src/protoc/ \
 # Install GRPC and Protobuf.
 RUN pip3 install --upgrade pip \
   && pip3 install \
-    grpcio==1.3.0 \
+    # Ensure that grpcio matches requirements.txt
+    grpcio==1.3.5 \
     protobuf==3.3.0
 
 # Install Oracle JDK 8
@@ -102,27 +103,34 @@ RUN gem install rake --no-ri --no-rdoc \
   && gem install rake --version '= 10.5.0' --no-ri --no-rdoc \
   && gem install grpc-tools --version '=1.0.0' --no-ri --no-rdoc
 
-# Install couple of git repos
-RUN git clone https://github.com/googleapis/googleapis
-RUN git clone https://github.com/googleapis/toolkit
-ENV TOOLKIT_HOME /toolkit
-
-# Install toolkit. Must sudo to download gradle plugins.
-RUN cd /toolkit \
-  && ./gradlew install \
-  && cd /
-
 # Install PHP protobuf plugin.
 RUN gem install ronn --no-ri --no-rdoc \
   && git clone https://github.com/stanley-cheung/Protobuf-PHP.git \
   && cd /Protobuf-PHP \
   && rake pear:package version=1.0 --trace \
   && pear install Protobuf-1.0.tgz \
+  && cd . \
+  && rm -rf /Protobuf-PHP \
 
   # Install PHP formatting tools
   && pear install PHP_CodeSniffer-2.7.0 \
   && curl -L https://github.com/FriendsOfPHP/PHP-CS-Fixer/releases/download/v1.11.8/php-cs-fixer.phar -o /usr/local/bin/php-cs-fixer \
   && chmod a+x /usr/local/bin/php-cs-fixer \
+  && cd /
+
+# Install couple of git repos
+RUN git clone https://github.com/googleapis/googleapis \
+  && rm -rf /googleapis/.git/
+RUN git clone https://github.com/googleapis/toolkit \
+  && cd toolkit/ \
+  && git checkout 9316dc51b83a648f7c85ac1c15d57c945f33f2cd \
+  && cd .. \
+  && rm -rf /toolkit/.git/
+ENV TOOLKIT_HOME /toolkit
+
+# Install toolkit.
+RUN cd /toolkit \
+  && ./gradlew install \
   && cd /
 
 # Setup git config used by github commit pushing.
@@ -140,8 +148,7 @@ RUN mkdir -p /root/
 ADD artman-user-config-in-docker.yaml /root/.artman/config.yaml
 
 # Install artman and run the smoke test.
-ADD . /artman-src/
-# RUN pip3 install googleapis-artman==0.4.3
+RUN pip3 install googleapis-artman==0.4.4
 
 # TODO (lukesneeringer): Move smoke tests to a different venue.
 # RUN smoketest_artman.py \
