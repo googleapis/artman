@@ -240,13 +240,13 @@ class RubyGrpcCopyTask(task_base.TaskBase):
     the gapic_code_dir/lib.
     """
     def execute(self, api_name, api_version, language, organization_name,
-                output_dir, pkg_dir, gapic_code_dir, grpc_code_dir):
+                output_dir, gapic_code_dir, grpc_code_dir):
         final_output_dir = os.path.join(gapic_code_dir, 'lib')
         logger.info('Copying %s/* to %s.' % (grpc_code_dir, final_output_dir))
         if not os.path.exists(final_output_dir):
             self.exec_command(['mkdir', '-p', final_output_dir])
-        for entry in sorted(os.listdir(pkg_dir)):
-            src_path = os.path.join(pkg_dir, entry)
+        for entry in sorted(os.listdir(grpc_code_dir)):
+            src_path = os.path.join(grpc_code_dir, entry)
             self.exec_command([
                 'cp', '-rf', src_path, final_output_dir])
 
