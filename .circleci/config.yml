@@ -62,6 +62,7 @@ jobs:
           command: nox -e "unit_tests(python_version='3.6')"
     working_directory: /usr/src/artman/
 
+
   smoke-csharp:
     docker:
       - image: googleapis/artman:latest

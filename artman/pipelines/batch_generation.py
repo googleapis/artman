@@ -16,6 +16,7 @@
 
 import glob
 import six
+import os
 
 from artman.pipelines import code_generation as code_gen
 from taskflow.patterns import linear_flow
@@ -99,18 +100,33 @@ def _get_api_kwarg_dicts(
 
 
 def _get_artman_config_filenames(api_config_patterns, batch_apis):
+    # We consider two separate cases: when batch_apis='*', and when batch_apis
+    # is a list. In the first case, we find all files which match the patterns
+    # listed in api_config_patterns. In the second case, for each api listed in
+    # batch_apis, we try to find a matching file in EXACTLY ONE of the
+    # api_config_patterns.
     config_filenames= []
-    for pattern in api_config_patterns:
-        if batch_apis == '*':
+    if batch_apis == '*':
+        for pattern in api_config_patterns:
             glob_pattern = config_util.replace_vars(pattern,
                                                    {'API_SHORT_NAME': '*'})
             config_filenames += sorted(glob.glob(glob_pattern))
-        else:
-            if isinstance(batch_apis, (six.text_type, six.binary_type)):
-                batch_apis = batch_apis.split(',')
-            config_filenames += [
-                config_util.replace_vars(pattern, {'API_SHORT_NAME': api})
-                    for api in batch_apis]
+    else:
+        if isinstance(batch_apis, (six.text_type, six.binary_type)):
+            batch_apis = batch_apis.split(',')
+        for api in batch_apis:
+            api_filenames = []
+            for pattern in api_config_patterns:
+                api_filename = config_util.replace_vars(pattern,
+                                                        {'API_SHORT_NAME': api})
+                if os.path.isfile(api_filename):
+                    api_filenames.append(api_filename)
+            if len(api_filenames) > 1:
+                raise ValueError('Multiple candidate artman yamls for api '
+                                 '%s: %s' % api, api_filenames)
+            if len(api_filenames) == 0:
+                raise ValueError('No artman yamls found for api %s' % api)
+            config_filenames += api_filenames
     return config_filenames
 
 

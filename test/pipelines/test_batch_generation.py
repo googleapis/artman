@@ -113,11 +113,13 @@ class BatchTaskFactoryTests(unittest.TestCase):
 
 
 def test_get_artman_config_filenames_wildcard():
-    api_config_patterns = ['test/cli/data/gapic/api/artman_${API_SHORT_NAME}.yaml']
+    api_config_patterns = ['test/cli/data/gapic/api/artman_${API_SHORT_NAME}.yaml',
+                           'test/cli/data/gapic/core/artman_${API_SHORT_NAME}.yaml']
     expected = [
         'test/cli/data/gapic/api/artman_logging.yaml',
         'test/cli/data/gapic/api/artman_longrunning.yaml',
         'test/cli/data/gapic/api/artman_pubsub.yaml',
+        'test/cli/data/gapic/core/artman_core.yaml',
     ]
     actual = batch_generation._get_artman_config_filenames(
             api_config_patterns, '*')
@@ -125,18 +127,21 @@ def test_get_artman_config_filenames_wildcard():
 
 
 def test_get_artman_config_filenames_comma_separated():
-    api_config_patterns = ['test/cli/data/gapic/api/artman_${API_SHORT_NAME}.yaml']
+    api_config_patterns = ['test/cli/data/gapic/api/artman_${API_SHORT_NAME}.yaml',
+                           'test/cli/data/gapic/core/artman_${API_SHORT_NAME}.yaml']
     expected = [
         'test/cli/data/gapic/api/artman_pubsub.yaml',
         'test/cli/data/gapic/api/artman_logging.yaml',
+        'test/cli/data/gapic/core/artman_core.yaml',
     ]
     actual = batch_generation._get_artman_config_filenames(
-            api_config_patterns, 'pubsub,logging')
+            api_config_patterns, 'pubsub,logging,core')
     assert expected == actual
 
 
 def test_get_artman_config_filenames_list():
-    api_config_patterns = ['test/cli/data/gapic/api/artman_${API_SHORT_NAME}.yaml']
+    api_config_patterns = ['test/cli/data/gapic/api/artman_${API_SHORT_NAME}.yaml',
+                           'test/cli/data/gapic/core/artman_${API_SHORT_NAME}.yaml']
     expected = [
         'test/cli/data/gapic/api/artman_logging.yaml',
         'test/cli/data/gapic/api/artman_longrunning.yaml',
