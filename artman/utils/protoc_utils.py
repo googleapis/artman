@@ -321,9 +321,12 @@ def _is_proto_excluded(proto, excluded_proto_path):
             return True
     return False
 
-
+_protobuf_path = None
 def _find_protobuf_path(toolkit_path):
     """Fetch and locate protobuf source"""
-    logger.info('Searching for latest protobuf source')
-    return task_utils.get_gradle_task_output(
-        'showProtobufPath', toolkit_path)
+    global _protobuf_path
+    if not _protobuf_path:
+        logger.info('Searching for latest protobuf source')
+        _protobuf_path = task_utils.get_gradle_task_output(
+            'showProtobufPath', toolkit_path)
+    return _protobuf_path
