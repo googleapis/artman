@@ -30,14 +30,15 @@ class PackageMetadataConfigGenTask(task_base.TaskBase):
     def execute(self, api_name, api_version, organization_name, output_dir,
                 package_dependencies_yaml, package_defaults_yaml, proto_deps,
                 language, local_paths, src_proto_path, package_type,
-                gapic_api_yaml, release_level=None, generated_package_version=None):
+                gapic_api_yaml, release_level=None, generated_package_version=None,
+                proto_test_deps=None):
         api_full_name = task_utils.api_full_name(
             api_name, api_version, organization_name)
 
         config = self._create_config(
             api_name, api_version, api_full_name, output_dir,
             package_dependencies_yaml, package_defaults_yaml, proto_deps,
-            language, local_paths, src_proto_path, package_type,
+            proto_test_deps, language, local_paths, src_proto_path, package_type,
             gapic_api_yaml, release_level=release_level,
             generated_package_version=generated_package_version)
 
@@ -49,7 +50,7 @@ class PackageMetadataConfigGenTask(task_base.TaskBase):
 
     def _create_config(self, api_name, api_version, api_full_name, output_dir,
                        package_dependencies_yaml, package_defaults_yaml, proto_deps,
-                       language, local_paths, src_proto_path, package_type,
+                       proto_test_deps, language, local_paths, src_proto_path, package_type,
                        gapic_api_yaml, release_level=None, generated_package_version=None):
         googleapis_dir = local_paths['googleapis']
         googleapis_path = os.path.commonprefix(
@@ -85,6 +86,9 @@ class PackageMetadataConfigGenTask(task_base.TaskBase):
             'gapic_config_name': gapic_config_name,
         }
 
+        if proto_test_deps:
+            config['proto_test_deps'] = proto_test_deps
+
         config.update(package_dependencies)
         config.update(package_defaults)
 
@@ -98,12 +102,12 @@ class PackageMetadataConfigGenTask(task_base.TaskBase):
 class JavaGrpcPackageMetadataConfigGenTask(PackageMetadataConfigGenTask):
     def _create_config(self, api_name, api_version, api_full_name, output_dir,
                 package_dependencies_yaml, package_defaults_yaml, proto_deps,
-                language, local_paths, src_proto_path, package_type,
+                proto_test_deps, language, local_paths, src_proto_path, package_type,
                 gapic_api_yaml, release_level=None, generated_package_version=None):
         config = super(JavaGrpcPackageMetadataConfigGenTask, self)._create_config(
             api_name, api_version, api_full_name, output_dir,
             package_dependencies_yaml, package_defaults_yaml, proto_deps,
-            language, local_paths, src_proto_path, package_type,
+            proto_test_deps, language, local_paths, src_proto_path, package_type,
             gapic_api_yaml, release_level=release_level,
             generated_package_version=generated_package_version)
         config['generation_layer'] = 'grpc'
@@ -113,12 +117,12 @@ class JavaGrpcPackageMetadataConfigGenTask(PackageMetadataConfigGenTask):
 class JavaProtoPackageMetadataConfigGenTask(PackageMetadataConfigGenTask):
     def _create_config(self, api_name, api_version, api_full_name, output_dir,
                 package_dependencies_yaml, package_defaults_yaml, proto_deps,
-                language, local_paths, src_proto_path, package_type,
+                proto_test_deps, language, local_paths, src_proto_path, package_type,
                 gapic_api_yaml, release_level=None, generated_package_version=None):
         config = super(JavaProtoPackageMetadataConfigGenTask, self)._create_config(
             api_name, api_version, api_full_name, output_dir,
             package_dependencies_yaml, package_defaults_yaml, proto_deps,
-            language, local_paths, src_proto_path, package_type,
+            proto_test_deps, language, local_paths, src_proto_path, package_type,
             gapic_api_yaml, release_level=release_level,
             generated_package_version=generated_package_version)
         config['generation_layer'] = 'proto'
