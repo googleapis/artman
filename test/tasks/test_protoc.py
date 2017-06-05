@@ -73,3 +73,28 @@ def test_find_google_dir_index():
     for path in failing:
         with pytest.raises(ValueError):
             protoc_utils.find_google_dir_index(path)
+
+
+def test_find_protos_no_exclusion():
+    expected = [
+        'test/fake-repos/fake-proto/fake.proto',
+        'test/fake-repos/fake-proto/excluded/excluded.proto'
+    ]
+    src_proto_paths = [
+        'test/fake-repos/fake-proto'
+    ]
+    assert  list(protoc_utils.find_protos(src_proto_paths, [])) == expected
+
+
+def test_find_protos_with_exclusion():
+    expected = [
+        'test/fake-repos/fake-proto/fake.proto'
+    ]
+    src_proto_paths = [
+        'test/fake-repos/fake-proto'
+    ]
+    excluded_proto_paths = [
+        'test/fake-repos/fake-proto/excluded'
+    ]
+    assert list(protoc_utils.find_protos(
+        src_proto_paths, excluded_proto_paths)) == expected
