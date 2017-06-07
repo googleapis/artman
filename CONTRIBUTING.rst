@@ -84,6 +84,17 @@ You’ll have to create a development environment to hack on
 Now your local repo is set up such that you will push changes to your
 GitHub repo, from which you can submit a pull request.
 
+-   Check that the Protobuf package is installed by running:
+    
+  .. code:: bash
+  
+    protoc
+
+-   If not installed, install the Protobuf package
+    (https://github.com/google/protobuf) and add the installation directory to `PATH`.
+
+-   Create use tox to create development virtualenv in which `artman`_ is installed:
+
   .. code:: bash
 
     sudo pip install virtualenv virtualenvwrapper
