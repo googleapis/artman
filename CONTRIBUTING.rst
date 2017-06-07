@@ -128,20 +128,20 @@ Running Tests
 
       docker pull googleapis/artman:latest
       docker run -it \
-      -v ${PWD}:/usr/src/artman \
-      googleapis/artman:latest \
-      /bin/bash -c  "pip uninstall -y googleapis-artman; \
-      pip install -e /usr/src/artman/; \
-      /usr/src/artman/test/smoketest_artman.py --apis=pubsub,vision"
+        -v ${PWD}:/usr/src/artman \
+        googleapis/artman:latest \
+        /bin/bash -c  "pip uninstall -y googleapis-artman; \
+        pip install -e /usr/src/artman/; \
+        /usr/src/artman/test/smoketest_artman.py --apis=pubsub,vision"
 
       # Optionally, you can mount your local toolkit for testing:
       docker run -it \
-      -v ${PWD}:/usr/src/artman \
-      -v {REPLACE_WITH_LOCAL_TOOLKIT_DIR}:/toolkit \
-      googleapis/artman:latest \
-      /bin/bash -c  "pip uninstall -y googleapis-artman; \
-      pip install -e /usr/src/artman/; \
-      /usr/src/artman/test/smoketest_artman.py --apis=pubsub,vision"
+        -v ${PWD}:/usr/src/artman \
+        -v {REPLACE_WITH_LOCAL_TOOLKIT_DIR}:/toolkit \
+        googleapis/artman:latest \
+        /bin/bash -c  "pip uninstall -y googleapis-artman; \
+        pip install -e /usr/src/artman/; \
+        /usr/src/artman/test/smoketest_artman.py --apis=pubsub,vision"
 
 Contributor License Agreements
 ------------------------------
