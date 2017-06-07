@@ -49,6 +49,12 @@ RUN pip3 install --upgrade pip \
     grpcio==1.3.5 \
     protobuf==3.3.0
 
+# Install grpc_csharp_plubin
+RUN curl -L https://www.nuget.org/api/v2/package/Grpc.Tools/1.3.6 -o temp.zip \
+  && unzip -p temp.zip tools/linux_x64/grpc_csharp_plugin > /usr/local/bin/grpc_csharp_plugin \
+  && chmod +x /usr/local/bin/grpc_csharp_plugin \
+  && rm temp.zip
+
 # Install Oracle JDK 8
 RUN add-apt-repository ppa:openjdk-r/ppa \
   && apt-get update \

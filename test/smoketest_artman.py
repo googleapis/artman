@@ -35,7 +35,7 @@ ARTMAN_CONFIG_BLACKLIST = [
     'artman_bigtable_admin.yaml'
 ]
 
-# Not ready to test Go and Csharp yet.
+# TODO(jskeet): enable csharp
 SUPPORTED_LANGS = ['python', 'java', 'ruby', 'nodejs', 'php', 'go']
 
 

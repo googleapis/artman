@@ -22,8 +22,8 @@ import time
 
 from ruamel import yaml
 
+from artman.utils import protoc_utils
 from artman.tasks import task_base
-from artman.utils import task_utils
 
 
 class PythonChangePackageTask(task_base.TaskBase):
@@ -130,7 +130,7 @@ class PythonChangePackageTask(task_base.TaskBase):
             self, src_directories, destination_directory, common_protos,
             paths=None):
         for path in src_directories:
-            protos = list(task_utils.find_protos([path]))
+            protos = list(protoc_utils.find_protos([path], []))
             for proto in protos:
                 src_base_dirs = self._extract_base_dirs(proto)
                 sub_new_src = os.path.join(

@@ -81,6 +81,14 @@ jobs:
       - run:
           name: Build Speech (C#)
           command: artman --api=speech_v1 --language=csharp --publish=noop
+      # TODO(jskeet): Remove C#/gRPC generation tests after Cshape gapic
+      # generation includes gRPC generation.
+      - run:
+          name: Build Pub/Sub (C#/gRPC)
+          command: artman --api=pubsub --language=csharp --pipeline=GrpcClientPipeline --publish=noop
+      - run:
+          name: Build Speech (C#/gRPC)
+          command: artman --api=speech_v1 --language=csharp --pipeline=GrpcClientPipeline --publish=noop
     working_directory: /usr/src/artman/
 
   smoke-go:
