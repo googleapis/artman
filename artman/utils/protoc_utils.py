@@ -180,7 +180,9 @@ class _PythonProtoParams(_SimpleProtoParams):
         return self.params.code_root(output_dir)
 
     def lang_out_param(self, output_dir, with_grpc):
-        return '--python_out={}'.format(self.code_root(output_dir))
+        return '--python_out={root} --pydocstring_out={root}'.format(
+            root=self.code_root(output_dir),
+        )
 
     def grpc_plugin_path(self, dummy_toolkit_path):
         # No plugin for grpc.tools
@@ -238,7 +240,7 @@ def protoc_proto_params(proto_params, pkg_dir, gapic_api_yaml, with_grpc):
     params = []
     lang_param = proto_params.lang_out_param(pkg_dir, with_grpc)
     if lang_param:
-        params.append(lang_param)
+        params += lang_param.split(' ')
     # plugin out must come after lang out
     plugin_param = proto_params.proto_plugin_path()
     plugin_out = proto_params.plugin_out_param(pkg_dir, gapic_api_yaml)

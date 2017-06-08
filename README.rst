@@ -23,22 +23,22 @@ Installation
 
    1. (recommended) `virtualenvwrapper`_ so you don't have to keep
       track of where your virtualenv is on the filesystem:
-      
+
       .. code::
-         
+
          sudo pip install virtualenv virtualenvwrapper
          mkvirtualenv --python=`which python3` artman
 
       To use this virtual environment later:
-      
+
       .. code ::
-      
+
          workon artman
 
    2. `virtualenv`_ in your current directory:
-      
+
       .. code::
-         
+
          sudo pip install virtualenv
          virtualenv env
          source env/bin/activate
@@ -88,7 +88,16 @@ automatically.
 Python Versions
 ---------------
 
-artman is currently tested with Python 2.7 and Python 3.4.
+artman is currently tested with Python 2.7, Python 3.4, Python 3.5,
+and Python 3.6.
+
+.. note::
+
+    The authors of this README are humans, and this is an exceptionally
+    easy spot to end up out of date.
+
+    Our ``nox.py`` and ``.circleci/config.yml`` files are the real source
+    of truth for what versions of Python we test against.
 
 
 Contributing

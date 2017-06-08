@@ -124,6 +124,16 @@ RUN gem install ronn --no-ri --no-rdoc \
   && chmod a+x /usr/local/bin/php-cs-fixer \
   && cd /
 
+# Set up tools for Python codegen; these are:
+#   pandoc: an apt package that can convert text between formats
+#     (example: Markdown to Restructured Text)
+#   protoc-docs-plugin: A protoc plugin to add docstrings to the Python
+#     protoc output.cd
+RUN apt-get update \
+  && apt-get install -y pandoc \
+  && pip3 install protoc-docs-plugin \
+  && rm -rf /var/lib/apt/lists/*
+
 # Install couple of git repos
 RUN git clone https://github.com/googleapis/googleapis \
   && rm -rf /googleapis/.git/
@@ -154,8 +164,4 @@ RUN mkdir -p /root/
 ADD artman-user-config-in-docker.yaml /root/.artman/config.yaml
 
 # Install artman and run the smoke test.
-RUN pip3 install googleapis-artman==0.4.4
-
-# TODO (lukesneeringer): Move smoke tests to a different venue.
-# RUN smoketest_artman.py \
-#   && rm -rf /artman/output
+RUN pip3 install googleapis-artman==0.4.5
