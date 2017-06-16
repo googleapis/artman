@@ -30,8 +30,8 @@ class PackageMetadataConfigGenTask(task_base.TaskBase):
     def execute(self, api_name, api_version, organization_name, output_dir,
                 package_dependencies_yaml, package_defaults_yaml, proto_deps,
                 language, local_paths, src_proto_path, package_type,
-                gapic_api_yaml, release_level=None, generated_package_version=None,
-                proto_test_deps=None):
+                gapic_api_yaml, release_level=None, packaging='single-artifact',
+                generated_package_version=None, proto_test_deps=None):
         api_full_name = task_utils.api_full_name(
             api_name, api_version, organization_name)
 
@@ -39,7 +39,7 @@ class PackageMetadataConfigGenTask(task_base.TaskBase):
             api_name, api_version, api_full_name, output_dir,
             package_dependencies_yaml, package_defaults_yaml, proto_deps,
             proto_test_deps, language, local_paths, src_proto_path, package_type,
-            gapic_api_yaml, release_level=release_level,
+            gapic_api_yaml, release_level=release_level, packaging=packaging,
             generated_package_version=generated_package_version)
 
         package_metadata_config = os.path.join(
@@ -51,7 +51,8 @@ class PackageMetadataConfigGenTask(task_base.TaskBase):
     def _create_config(self, api_name, api_version, api_full_name, output_dir,
                        package_dependencies_yaml, package_defaults_yaml, proto_deps,
                        proto_test_deps, language, local_paths, src_proto_path, package_type,
-                       gapic_api_yaml, release_level=None, generated_package_version=None):
+                       gapic_api_yaml, release_level=None,packaging='single-artifact',
+                       generated_package_version=None):
         googleapis_dir = local_paths['googleapis']
         googleapis_path = os.path.commonprefix(
             [os.path.relpath(p, googleapis_dir) for p in src_proto_path])
@@ -74,6 +75,10 @@ class PackageMetadataConfigGenTask(task_base.TaskBase):
         if len(gapic_api_yaml) > 0:
             gapic_config_name = os.path.basename(gapic_api_yaml[0])
 
+        dependency_type = 'local'
+        if packaging == 'single-artifact':
+            dependency_type = 'release'
+
         config = {
             'short_name': api_name,
             'major_version': api_version,
@@ -83,6 +88,7 @@ class PackageMetadataConfigGenTask(task_base.TaskBase):
             },
             'proto_deps': proto_deps,
             'package_type': package_type,
+            'dependency_type': dependency_type,
             'gapic_config_name': gapic_config_name,
         }
 
@@ -103,12 +109,13 @@ class JavaGrpcPackageMetadataConfigGenTask(PackageMetadataConfigGenTask):
     def _create_config(self, api_name, api_version, api_full_name, output_dir,
                 package_dependencies_yaml, package_defaults_yaml, proto_deps,
                 proto_test_deps, language, local_paths, src_proto_path, package_type,
-                gapic_api_yaml, release_level=None, generated_package_version=None):
+                gapic_api_yaml, release_level=None, packaging='single-artifact',
+                generated_package_version=None):
         config = super(JavaGrpcPackageMetadataConfigGenTask, self)._create_config(
             api_name, api_version, api_full_name, output_dir,
             package_dependencies_yaml, package_defaults_yaml, proto_deps,
             proto_test_deps, language, local_paths, src_proto_path, package_type,
-            gapic_api_yaml, release_level=release_level,
+            gapic_api_yaml, release_level=release_level, packaging=packaging,
             generated_package_version=generated_package_version)
         config['generation_layer'] = 'grpc'
 
@@ -118,12 +125,13 @@ class JavaProtoPackageMetadataConfigGenTask(PackageMetadataConfigGenTask):
     def _create_config(self, api_name, api_version, api_full_name, output_dir,
                 package_dependencies_yaml, package_defaults_yaml, proto_deps,
                 proto_test_deps, language, local_paths, src_proto_path, package_type,
-                gapic_api_yaml, release_level=None, generated_package_version=None):
+                gapic_api_yaml, release_level=None, packaging='single-artifact',
+                generated_package_version=None):
         config = super(JavaProtoPackageMetadataConfigGenTask, self)._create_config(
             api_name, api_version, api_full_name, output_dir,
             package_dependencies_yaml, package_defaults_yaml, proto_deps,
             proto_test_deps, language, local_paths, src_proto_path, package_type,
-            gapic_api_yaml, release_level=release_level,
+            gapic_api_yaml, release_level=release_level, packaging=packaging,
             generated_package_version=generated_package_version)
         config['generation_layer'] = 'proto'
 

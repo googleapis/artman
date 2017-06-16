@@ -77,6 +77,22 @@ class GapicClientBatchPipeline(batch_gen.BatchPipeline):
         task_factory = GapicTaskFactory()
         return task_factory.get_tasks(**kwargs)
 
+class JavaPackagingTaskFactory(code_gen.TaskFactoryBase):
+
+    def get_tasks(self, **kwargs):
+        return [
+            tasks.gapic.JavaGapicPackagingTask
+        ]
+
+    def get_validate_kwargs(self):
+        return ['gapic_code_dir', 'grpc_code_dir', 'proto_code_dir']
+
+    def get_invalid_kwargs(self):
+        return []
+
+PACKAGING_TASK_FACTORY_DICT = {
+    'java': JavaPackagingTaskFactory
+}
 
 class GapicTaskFactory(code_gen.TaskFactoryBase):
     """A task factory describing GAPIC generation tasks.
@@ -107,6 +123,10 @@ class GapicTaskFactory(code_gen.TaskFactoryBase):
         for proto_task in self._get_proto_codegen_tasks(**kwargs):
             if proto_task not in answer:
                 answer.append(proto_task)
+
+        for packaging_task in self._get_packaging_tasks(**kwargs):
+            if packaging_task not in answer:
+                answer.append(packaging_task)
 
         answer += self._get_publish_tasks(**kwargs)
         return task_utils.instantiate_tasks(answer, kwargs)
@@ -165,6 +185,22 @@ class GapicTaskFactory(code_gen.TaskFactoryBase):
         if language in grpc_gen.PROTO_TASK_FACTORY_DICT:
             proto_factory = grpc_gen.PROTO_TASK_FACTORY_DICT[language]()
             return proto_factory.get_grpc_codegen_tasks(language=language, **kw)
+        return []
+
+    def _get_packaging_tasks(self, language, **kw):
+        """Return the code generation tasks for packaging
+
+        Args:
+            language (str): The language code is being generated in.
+            kw (dict): Additional keyword arguments passed through to the
+                proto codegen task factory.
+
+        Returns:
+            list: A list of Task subclasses defined by the packaging task factory.
+        """
+        if language in PACKAGING_TASK_FACTORY_DICT:
+            packaging_factory = PACKAGING_TASK_FACTORY_DICT[language]()
+            return packaging_factory.get_tasks()
         return []
 
     def get_validate_kwargs(self):

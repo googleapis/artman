@@ -119,6 +119,7 @@ class GapicCodeGenTaskTests(unittest.TestCase):
             package_metadata_yaml='pmy.yaml',
             service_yaml='service.yaml',
             toolkit_path='/path/to/toolkit',
+            packaging='single-artifact',
         )
         expected_cmds = (
             'rm -rf api-client-staging/generated/python/*',
