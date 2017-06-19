@@ -163,5 +163,5 @@ RUN git config --global user.email googleapis-publisher@google.com \
 RUN mkdir -p /root/
 ADD artman-user-config-in-docker.yaml /root/.artman/config.yaml
 
-# Install artman and run the smoke test.
-RUN pip3 install googleapis-artman==0.4.6
+# Install artman.
+RUN pip3 install googleapis-artman==0.4.7
