@@ -74,6 +74,8 @@ def setup_logger(name, level, colors=COLORS,
     logger_ = logging.getLogger(name)
     logger_.setLevel(level)
     formatter = ColoredFormatter(format_string, reset=True, log_colors=colors)
+    if logger_.handlers:
+        logger_.handlers.pop()
     handler = logging.StreamHandler()
     handler.setFormatter(formatter)
     logger_.addHandler(handler)

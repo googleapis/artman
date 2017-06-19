@@ -120,7 +120,6 @@ def _delete_task(task_client, task):
 
 def _setup_logger(log_path):
     """Setup logger with one-time logging FileHandler."""
-    logger = logging.getLogger('artman')
     log_file_handler = logging.FileHandler(log_path)
     logger.addHandler(log_file_handler)
     return log_file_handler
@@ -128,6 +127,9 @@ def _setup_logger(log_path):
 
 def _write_to_cloud_logging(log_id, log_file_path):
     """Write log file content to cloud logging"""
+    # TODO(ethanbao): Turn conductor into a python object so that the logging
+    # client can be instance variable not global variable.
+    global CLOUD_LOGGING_CLIENT
     if not CLOUD_LOGGING_CLIENT:
         CLOUD_LOGGING_CLIENT = cloud_logging.Client()
     cloud_logger = CLOUD_LOGGING_CLIENT.logger(log_id)
@@ -191,11 +193,7 @@ def _cleanup(tmp_dir, log_file_handler):
     # Close the one-time logging FileHandler
     if log_file_handler:
         log_file_handler.close()
-
-    # Pop all logging handlers.
-    logger = logging.getLogger('artman')
-    if logger.handlers:
-        logger.handlers.pop()
+        logger.removeHandler(log_file_handler)
 
     # Remove tmp directory.
     subprocess.check_call(['rm', '-rf', tmp_dir])

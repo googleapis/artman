@@ -85,9 +85,9 @@ Now your local repo is set up such that you will push changes to your
 GitHub repo, from which you can submit a pull request.
 
 -   Check that the Protobuf package is installed by running:
-    
+
   .. code:: bash
-  
+
     protoc
 
 -   If not installed, install the Protobuf package
@@ -135,7 +135,7 @@ Running Tests
     installed on your machine, and run the following at the root of your
     artman source directory:
 
-  .. code::bash
+  .. code:: bash
 
       docker pull googleapis/artman:latest
       docker run -it \

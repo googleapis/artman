@@ -21,6 +21,7 @@ RUN apt-get update \
     kdiff3 \
     git \
     vim \
+    less \
   && rm -rf /var/lib/apt/lists/*
 
 # Install runtime packages.
