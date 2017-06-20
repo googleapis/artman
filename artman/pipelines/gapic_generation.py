@@ -57,7 +57,7 @@ class GapicClientPipeline(code_gen.CodeGenerationPipelineBase):
     This is intended to be the only command that needs to run to generate
     a complete GAPIC.
 
-    Exception: In Java and C#, the GrpcClientPipeline must still be
+    Exception: In Java, the GrpcClientPipeline must still be
     run explicitly.
     """
     def __init__(self, language, **kwargs):
@@ -90,8 +90,22 @@ class JavaPackagingTaskFactory(code_gen.TaskFactoryBase):
     def get_invalid_kwargs(self):
         return []
 
+class CSharpPackagingTaskFactory(code_gen.TaskFactoryBase):
+
+    def get_tasks(self, **kwargs):
+        return [
+            tasks.gapic.CSharpGapicPackagingTask
+        ]
+
+    def get_validate_kwargs(self):
+        return ['gapic_code_dir', 'grpc_code_dir', 'proto_code_dir', 'gapic_api_yaml']
+
+    def get_invalid_kwargs(self):
+        return []
+
 PACKAGING_TASK_FACTORY_DICT = {
-    'java': JavaPackagingTaskFactory
+    'java': JavaPackagingTaskFactory,
+    'csharp': CSharpPackagingTaskFactory
 }
 
 class GapicTaskFactory(code_gen.TaskFactoryBase):
@@ -158,10 +172,6 @@ class GapicTaskFactory(code_gen.TaskFactoryBase):
         Returns:
             list: A list of Task subclasses defined by the GRPC task factory.
         """
-        # Sanity check: C# currently has an unusual workflow and
-        # still must generate the grpc and gapic packages separately.
-        if language in ('csharp',):
-            return []
 
         # Instantiate the GRPC task factory.
         grpc_factory = grpc_gen.GRPC_TASK_FACTORY_DICT[language]()
