@@ -14,6 +14,7 @@
 """Tasks related to generation of GAPIC wrappers"""
 
 import os
+from ruamel import yaml
 
 from artman.tasks import packman_tasks
 from artman.tasks import task_base
@@ -126,6 +127,22 @@ class JavaGapicPackagingTask(task_base.TaskBase):
 
             self.exec_command([gapic_code_dir + '/gradlew', '-p', gapic_code_dir, 'jar'])
 
+class CSharpGapicPackagingTask(task_base.TaskBase):
+    def execute(self, gapic_code_dir, grpc_code_dir, proto_code_dir, gapic_api_yaml):
+        with open(gapic_api_yaml[0]) as f:
+            gapic_config = yaml.load(f, Loader=yaml.Loader)
+        package_name = gapic_config.get('language_settings').get('csharp').get('package_name')
+        package_root = '{0}/{1}'.format(gapic_code_dir, package_name)
+        prod_dir = '{0}/{1}'.format(package_root, package_name)
+        snippets_dir = '{0}/{1}.Snippets'.format(package_root, package_name)
+        self.exec_command(['rm', '-rf', package_root])
+        self.exec_command(['mkdir', '-p', prod_dir])
+        self.exec_command(['mkdir', '-p', snippets_dir])
+        self.exec_command(['sh', '-c', 'cp {0}/*.cs {1}'.format(grpc_code_dir, prod_dir)])
+        self.exec_command(['sh', '-c', 'cp {0}/*.cs {1}'.format(proto_code_dir, prod_dir)])
+        self.exec_command(['sh', '-c', 'mv {0}/*.cs {1}'.format(gapic_code_dir, prod_dir)])
+        self.exec_command(['sh', '-c', 'mv {0}/*Snippets.g.cs {1}'.format(prod_dir, snippets_dir)])
+        
 
 class GapicPackmanTask(packman_tasks.PackmanTaskBase):
     default_provides = 'package_dir'

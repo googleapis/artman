@@ -90,8 +90,22 @@ class JavaPackagingTaskFactory(code_gen.TaskFactoryBase):
     def get_invalid_kwargs(self):
         return []
 
+class CSharpPackagingTaskFactory(code_gen.TaskFactoryBase):
+
+    def get_tasks(self, **kwargs):
+        return [
+            tasks.gapic.CSharpGapicPackagingTask
+        ]
+
+    def get_validate_kwargs(self):
+        return ['gapic_code_dir', 'grpc_code_dir', 'proto_code_dir', 'gapic_api_yaml']
+
+    def get_invalid_kwargs(self):
+        return []
+
 PACKAGING_TASK_FACTORY_DICT = {
-    'java': JavaPackagingTaskFactory
+    'java': JavaPackagingTaskFactory,
+    'csharp': CSharpPackagingTaskFactory
 }
 
 class GapicTaskFactory(code_gen.TaskFactoryBase):
