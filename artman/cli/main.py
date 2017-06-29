@@ -271,15 +271,20 @@ def normalize_flags(flags, user_config):
     # If we were given just an API or BATCH, then expand it into the --config
     # syntax.
     if flags.api:
+        shared_config_name = 'common.yaml'
+        if flags.language == 'ruby':
+            shared_config_name = 'doc.yaml'
+
         googleapis = os.path.realpath(os.path.expanduser(
             pipeline_args['local_paths']['googleapis'],
         ))
         flags.config = ','.join([
             '{googleapis}/gapic/api/artman_{api}.yaml',
-            '{googleapis}/gapic/lang/common.yaml',
+            '{googleapis}/gapic/lang/{shared_config_name}',
         ]).format(
             api=flags.api,
             googleapis=googleapis,
+            shared_config_name=shared_config_name,
         )
     elif flags.batch:
         googleapis = os.path.realpath(os.path.expanduser(
