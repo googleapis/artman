@@ -151,6 +151,11 @@ class _CSharpGrpcTaskFactory(GrpcTaskFactoryBase):
             protoc_tasks.GrpcCodeGenTask,
         ]
 
+class _NodeJsGrpcTaskFactory(GrpcTaskFactoryBase):
+
+    def get_grpc_codegen_tasks(self, **kwargs):
+        return []
+
 
 GRPC_TASK_FACTORY_DICT = {
     'java': _JavaGrpcTaskFactory,
@@ -159,7 +164,7 @@ GRPC_TASK_FACTORY_DICT = {
     'ruby': _RubyGrpcTaskFactory,
     'php': GrpcTaskFactoryBase,
     'csharp': _CSharpGrpcTaskFactory,
-    'nodejs': GrpcTaskFactoryBase,
+    'nodejs': _NodeJsGrpcTaskFactory,
 }
 
 
