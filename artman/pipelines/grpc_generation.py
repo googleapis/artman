@@ -124,19 +124,12 @@ class _PythonGrpcTaskFactory(GrpcTaskFactoryBase):
 
 
 class _GoGrpcTaskFactory(GrpcTaskFactoryBase):
-    """Responsible for the protobuf/gRPC flow for Go language.
-
-    The Go compiler needs to specify an import path which is relative to
-    $GOPATH/src, otherwise it can't find the package. Therefore,
-    the import path in proto files needs to be modified in this manner,
-    which is taken care of by GoLangUpdateProtoImportsTask.
-    """
+    """Responsible for the protobuf/gRPC flow for Go language."""
 
     def get_grpc_codegen_tasks(self, **kwargs):
         return [
             protoc_tasks.ProtoAndGrpcCodeGenTask,
-            protoc_tasks.GoExtractImportBaseTask,
-            protoc_tasks.GoLangUpdateImportsTask,
+            protoc_tasks.GoCopyTask,
         ]
 
     def get_validate_kwargs(self):

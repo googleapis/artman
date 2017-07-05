@@ -84,7 +84,7 @@ class LocalStagingTask(task_base.TaskBase):
         if not git_repo.get('paths'):
             raise RuntimeError('This git repository entry in the artman YAML '
                                'does not define module paths.')
-            
+
         # Determine where the code belongs and stage it there.
         for path in git_repo['paths']:
             # Piece together where we are copying code from and to.

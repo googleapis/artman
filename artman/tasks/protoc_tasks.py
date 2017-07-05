@@ -84,11 +84,17 @@ class ProtocCodeGenTaskBase(task_base.TaskBase):
         else:
             protoc_grpc_params = []
 
-        # protoc-gen-go must compile all protos in a package at the same
-        # time, and *only* the protos in that package. This doesn't break
-        # other languages, so we do it that way for all of them.
+        # protoc-gen-go has some peculiarities:
+        #   It can only compile one package per invocation. So, we need to split
+        # proto files by packages.
+        #   The order of the input files affects comments and internal variables.
+        # While this doesn't affect the correctness of the result, we sort proto files
+        # for reproducibility.
+        #
+        # Other languages don't mind us doing this, so we just do it for everyone.
         for (dirname, protos) in protoc_utils.group_by_dirname(
                 protoc_utils.find_protos(src_proto_path, excluded_proto_path)).items():
+            protos.sort()
             self.exec_command(proto_params.proto_compiler_command +
                 protoc_utils.protoc_header_params(
                     import_proto_path + src_proto_path, toolkit_path) +
@@ -165,48 +171,12 @@ class ProtoAndGrpcCodeGenTask(ProtocCodeGenTaskBase):
         return [grpc_requirements.GrpcRequirements]
 
 
-class GoLangUpdateImportsTask(task_base.TaskBase):
-    """Modifies the import in the generated pb.go files and copies them into
-    the gapic_code_dir.
-
-    The Go compiler requires source files to specify the import path as the
-    relative path from $GOPATH/src, however the import paths to other proto
-    packages in the generated pb.go files don't fullfill this requirement. This
-    task finds such import lines and rewrites them in the form of the original
-    code.
-    """
-
-    def execute(self, api_name, api_version, organization_name, language,
-                go_import_base, output_dir, gapic_code_dir):
-        pkg_dir = protoc_utils.prepare_grpc_pkg_dir(output_dir, api_name, api_version,
-                                                    organization_name, language)
-        logger.info(pkg_dir)
-        for pbfile in self.find_pb_files(pkg_dir):
-            out_file = os.path.join(gapic_code_dir, 'proto',
-                                    os.path.relpath(pbfile, pkg_dir))
-            logger.info('outfile {}'.format(out_file))
-            out_dir = os.path.dirname(out_file)
-            if not os.path.exists(out_dir):
-                os.makedirs(out_dir)
-            with open(pbfile) as fin:
-                with open(out_file, 'w') as fout:
-                    for line in fin:
-                        fout.write(self.modify_imports(go_import_base, line))
-
-    def find_pb_files(self, dirname):
-        for root, _, files in os.walk(dirname):
-            for filename in files:
-                # os.path.splitext splits "foo.pb.go" to ("foo.pb", "go").
-                (base, ext) = os.path.splitext(filename)
-                if ext == '.go' and os.path.splitext(base)[1] == '.pb':
-                    yield os.path.join(root, filename)
-
-    def modify_imports(self, go_import_base, line):
-        """Modifies incorrect imports in a pb.go file to point the correct
-        files."""
-        pattern = r'^import ([a-zA-Z0-9_]* )?"google/'
-        replacement = 'import \g<1>"%s/proto/google/' % go_import_base
-        return re.sub(pattern, replacement, line)
+class GoCopyTask(task_base.TaskBase):
+    def execute(self,  gapic_code_dir, grpc_code_dir):
+        for entry in os.listdir(grpc_code_dir):
+            src_path = os.path.join(grpc_code_dir, entry)
+            self.exec_command([
+                'cp', '-rf', src_path, gapic_code_dir])
 
 
 class GrpcPackmanTask(packman_tasks.PackmanTaskBase):
@@ -254,27 +224,6 @@ class RubyGrpcCopyTask(task_base.TaskBase):
             src_path = os.path.join(grpc_code_dir, entry)
             self.exec_command([
                 'cp', '-rf', src_path, final_output_dir])
-
-
-class GoExtractImportBaseTask(task_base.TaskBase):
-    default_provides = 'go_import_base'
-
-    def execute(self, gapic_api_yaml):
-        for yaml_file in gapic_api_yaml:
-            if not os.path.exists(yaml_file):
-                continue
-            with open(yaml_file) as f:
-                gapic_config = yaml.load(f, Loader=yaml.Loader)
-            if not gapic_config:
-                continue
-            language_settings = gapic_config.get('language_settings')
-            if not language_settings:
-                continue
-            go_settings = language_settings.get('go')
-            if not go_settings:
-                continue
-            if 'package_name' in go_settings:
-                return go_settings.get('package_name')
 
 
 class JavaProtoCopyTask(task_base.TaskBase):
