@@ -48,6 +48,7 @@ RUN pip3 install --upgrade pip \
   && pip3 install \
     # Ensure that grpcio matches requirements.txt
     grpcio==1.3.5 \
+    grpcio-tools==1.3.5 \
     protobuf==3.3.0
 
 # Install grpc_csharp_plubin
@@ -165,4 +166,4 @@ RUN mkdir -p /root/
 ADD artman-user-config-in-docker.yaml /root/.artman/config.yaml
 
 # Install artman.
-RUN pip3 install googleapis-artman==0.4.8
+RUN pip3 install googleapis-artman==0.4.9
