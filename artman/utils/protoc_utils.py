@@ -135,16 +135,6 @@ class _PhpProtoParams(_SimpleProtoParams):
     def lang_out_param(self, output_dir, with_grpc):
         return '--php_out={}'.format(self.code_root(output_dir))
 
-    def grpc_plugin_path(self, dummy_toolkit_path):
-        if self.path is None:
-            self.path = subprocess.check_output(
-                ['which', 'protoc-gen-php'], stderr=subprocess.STDOUT)
-            self.path = six.text_type(self.path)[:-1]
-        return self.path
-
-    def grpc_out_param(self, output_dir):
-        return '--grpc_out=' + self.code_root(output_dir)
-
     @property
     def proto_compiler_command(self):
         return ['protoc']

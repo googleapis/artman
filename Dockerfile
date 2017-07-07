@@ -111,17 +111,19 @@ RUN gem install rake --no-ri --no-rdoc \
   && gem install rake --version '= 10.5.0' --no-ri --no-rdoc \
   && gem install grpc-tools --version '=1.0.0' --no-ri --no-rdoc
 
-# Install PHP protobuf plugin.
-RUN gem install ronn --no-ri --no-rdoc \
-  && git clone https://github.com/stanley-cheung/Protobuf-PHP.git \
-  && cd /Protobuf-PHP \
-  && rake pear:package version=1.0 --trace \
-  && pear install Protobuf-1.0.tgz \
-  && cd . \
-  && rm -rf /Protobuf-PHP \
+# Install grpc_php_plugin
+RUN apt-get update \
+  && apt-get install -y autoconf autogen libtool \
+  && git clone -b v1.4.1 https://github.com/grpc/grpc.git /temp/grpc \
+  && cd /temp/grpc \
+  && git submodule update --init --recursive \
+  && make grpc_php_plugin \
+  && mv ./bins/opt/grpc_php_plugin /usr/local/bin/ \
+  && cd / \
+  && rm -r /temp/grpc
 
-  # Install PHP formatting tools
-  && pear install PHP_CodeSniffer-2.7.0 \
+# Install PHP formatting tools
+RUN pear install PHP_CodeSniffer-2.7.0 \
   && curl -L https://github.com/FriendsOfPHP/PHP-CS-Fixer/releases/download/v1.11.8/php-cs-fixer.phar -o /usr/local/bin/php-cs-fixer \
   && chmod a+x /usr/local/bin/php-cs-fixer \
   && cd /
@@ -141,7 +143,7 @@ RUN git clone https://github.com/googleapis/googleapis \
   && rm -rf /googleapis/.git/
 RUN git clone https://github.com/googleapis/toolkit \
   && cd toolkit/ \
-  && git checkout 7a597cdef2d6da40349cf820498226c286ef76c8 \
+  && git checkout b387e49f51debb7f3c1b865da87bbf01f6cb2a35 \
   && cd .. \
   && rm -rf /toolkit/.git/
 ENV TOOLKIT_HOME /toolkit
