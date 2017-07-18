@@ -67,7 +67,8 @@ class TaskBase(Task):
                 self.log(output, logger=output_logger, level=OUTPUT)
             return output
         except subprocess.CalledProcessError as e:
-            self.log(e.output, logger=output_logger, level=logging.ERROR)
+            self.log(e.output.decode('utf8'), logger=output_logger,
+                     level=logging.ERROR)
             raise e
 
 
