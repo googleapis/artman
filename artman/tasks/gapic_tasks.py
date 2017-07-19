@@ -24,7 +24,7 @@ from artman.tasks.requirements import gapic_requirements
 
 class GapicConfigGenTask(task_base.TaskBase):
     """Generates GAPIC config file"""
-    default_provides = 'gapic_config_dir'
+    default_provides = 'gapic_config_path'
 
     def execute(self, toolkit_path, descriptor_set, service_yaml,
                 output_dir, api_name, api_version, organization_name):
@@ -53,10 +53,10 @@ class GapicConfigGenTask(task_base.TaskBase):
 class GapicConfigMoveTask(task_base.TaskBase):
     """Move config file to gapic_api_yaml location"""
 
-    def _move_to(self, gapic_config_dir, gapic_api_yaml):
+    def _move_to(self, gapic_config_path, gapic_api_yaml):
         error_fmt = 'Could not move generated config file ' \
                     'from "{0}" to "{1}": '.format(
-                        os.path.abspath(gapic_config_dir),
+                        os.path.abspath(gapic_config_path),
                         [os.path.abspath(c_out) for c_out in gapic_api_yaml])
 
         if len(gapic_api_yaml) > 1:
@@ -66,14 +66,15 @@ class GapicConfigMoveTask(task_base.TaskBase):
         conf_out = os.path.abspath(gapic_api_yaml[0])
         if os.path.exists(conf_out):
             # TODO (issue #80): no need to test in remote environment
-            raise ValueError(error_fmt + 'File already exists')
-        else:
-            return conf_out
+            olderVersion = conf_out + '.old'
+            print('File already exists, save the old version as ' + olderVersion)
+            self.exec_command(['mv', conf_out, olderVersion])
+        return conf_out
 
-    def execute(self, gapic_config_dir, gapic_api_yaml):
-        conf_out = self._move_to(gapic_config_dir, gapic_api_yaml)
+    def execute(self, gapic_config_path, gapic_api_yaml):
+        conf_out = self._move_to(gapic_config_path, gapic_api_yaml)
         self.exec_command(['mkdir', '-p', os.path.dirname(conf_out)])
-        self.exec_command(['mv', gapic_config_dir, conf_out])
+        self.exec_command(['cp', gapic_config_path, conf_out])
         return
 
     def validate(self):

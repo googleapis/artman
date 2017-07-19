@@ -69,7 +69,7 @@ class GapicConfigMoveTaskTests(unittest.TestCase):
         assert exec_command.call_count == 2
         expected_cmds = (
             'mkdir -p /path',
-            'mv /path/src /path/dest',
+            'cp /path/src /path/dest',
         )
         for call, expected in zip(exec_command.mock_calls, expected_cmds):
             _, args, _ = call
@@ -94,9 +94,16 @@ class GapicConfigMoveTaskTests(unittest.TestCase):
     def test_execute_dest_exists(self, exists, exec_command):
         exists.return_value = True
         task = gapic_tasks.GapicConfigMoveTask()
-        with pytest.raises(ValueError):
-            task.execute('/path/src', ['/path/exists'])
-        assert exec_command.call_count == 0
+        task.execute('/path/src', ['/path/exists'])
+        assert exec_command.call_count == 3
+        expected_cmds = (
+            'mv /path/exists /path/exists.old',
+            'mkdir -p /path',
+            'cp /path/src /path/exists',
+        )
+        for call, expected in zip(exec_command.mock_calls, expected_cmds):
+            _, args, _ = call
+            assert ' '.join(args[0]) == expected
 
     def test_validate(self):
         task = gapic_tasks.GapicConfigMoveTask()
