@@ -169,7 +169,7 @@ RUN git clone https://github.com/googleapis/googleapis \
   && rm -rf /googleapis/.git/
 RUN git clone https://github.com/googleapis/toolkit \
   && cd toolkit/ \
-  && git checkout b387e49f51debb7f3c1b865da87bbf01f6cb2a35 \
+  && git checkout 488fa8a231deeafa5c59935a6455e9dc670d5a7b \
   && cd .. \
   && rm -rf /toolkit/.git/
 ENV TOOLKIT_HOME /toolkit
@@ -194,4 +194,4 @@ RUN mkdir -p /root/
 ADD artman-user-config-in-docker.yaml /root/.artman/config.yaml
 
 # Install artman.
-RUN pip3 install googleapis-artman==0.4.10
+RUN pip3 install googleapis-artman==0.4.11
