@@ -211,6 +211,27 @@ jobs:
           command: artman --api=speech_v1 --language=ruby --publish=noop
     working_directory: /usr/src/artman/
 
+  golden-test:
+    docker:
+      - image: googleapis/artman:latest
+        environment:
+          TERM: dumb
+    steps:
+      - checkout
+      - run:
+          name: Install latest artman
+          command: |
+            pip install pytest
+            pip uninstall -y googleapis-artman
+            pip install /usr/src/artman/
+            git clone https://github.com/googleapis/googleapis /usr/src/artman/test/golden/googleapis
+      - run:
+          name: Run golden test
+          command: py.test test/golden/artman_golden_test.py --googleapis-dir=/usr/src/artman/test/golden/googleapis
+      - store_artifacts:
+            path: /usr/src/artman/test/golden/actual_golden_test_output.txt
+    working_directory: /usr/src/artman/
+
 workflows:
   version: 2
   tests:
@@ -226,3 +247,4 @@ workflows:
       - smoke-php
       - smoke-python
       - smoke-ruby
+      - golden-test
