@@ -84,6 +84,7 @@ def main(*args):
         engine = engines.load(pipeline.flow, engine='serial',
                               store=pipeline.kwargs)
         engine.run()
+        _chown_for_artman_output()
 
 
 def parse_args(*args):
@@ -417,3 +418,23 @@ def _print_log(pipeline_id):
         '    gcloud beta logging read "logName=projects/vkit-pipeline/logs/%s"'
         % pipeline_id,
     )
+
+
+def _chown_for_artman_output():
+  """Change ownership of artman output if necessary.
+
+  When artman runs in Docker instance, all output files are by default owned by
+  `root`, making it non-editable by Docker host user. When user passes host user
+  id and group id through environment variables via `-e` flag, artman will
+  change the owner based on the specified user id and group id.
+  """
+  if os.getenv('HOST_USER_ID') and os.getenv('HOST_GROUP_ID'):
+      for root, dirs, files in os.walk('/artman/output'):
+          for d in dirs:
+              os.chown(os.path.join(root, d),
+                       int(os.getenv('HOST_USER_ID')),
+                       int(os.getenv('HOST_GROUP_ID')))
+          for f in files:
+              os.chown(os.path.join(root, f),
+                       int(os.getenv('HOST_USER_ID')),
+                       int(os.getenv('HOST_GROUP_ID')))
