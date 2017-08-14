@@ -150,6 +150,7 @@ class _PhpGrpcTaskFactory(GrpcTaskFactoryBase):
     def get_grpc_codegen_tasks(self, **kwargs):
         return [
             protoc_tasks.ProtoAndGrpcCodeGenTask,
+            protoc_tasks.PhpGrpcMoveTask,
         ]
 
 

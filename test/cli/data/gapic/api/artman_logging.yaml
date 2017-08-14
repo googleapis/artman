@@ -53,7 +53,7 @@ nodejs:
         - generated/nodejs/google-cloud-node/packages/logging
   skip_packman: True
 php:
-  gapic_code_dir: ${REPOROOT}/artman/output/gcloud-php-cloud-logging
+  gapic_code_dir: ${REPOROOT}/artman/output/google-php-cloud-logging-v2
   git_repos:
     staging:
       paths:

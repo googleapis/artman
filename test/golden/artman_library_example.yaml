@@ -23,7 +23,7 @@ java:
 nodejs:
   gapic_code_dir: ${REPOROOT}/output/js/library_example-v1
 php:
-  gapic_code_dir: ${REPOROOT}/output/gcloud-php-cloud-library_example
+  gapic_code_dir: ${REPOROOT}/output/google-php-cloud-library_example-v1
 python:
   gapic_code_dir: ${REPOROOT}/output/gapic-google-cloud-library_example-v1
 ruby:

@@ -241,3 +241,23 @@ class JavaProtoCopyTask(task_base.TaskBase):
                 self.exec_command(
                     ['mkdir', '-p', os.path.dirname(dst_proto_file)])
                 self.exec_command(['cp', src_proto_file, dst_proto_file])
+
+
+class PhpGrpcMoveTask(task_base.TaskBase):
+    """Moves the generated protos and gRPC client library to
+    the gapic_code_dir/proto directory.
+    """
+    default_provides = 'grpc_code_dir'
+
+    def execute(self, gapic_code_dir, grpc_code_dir):
+        final_output_dir = os.path.join(gapic_code_dir, 'proto')
+        if not os.path.exists(final_output_dir):
+            self.exec_command(['mkdir', '-p', final_output_dir])
+        logger.info('Moving %s/* to %s.' % (grpc_code_dir, final_output_dir))
+        for entry in sorted(os.listdir(grpc_code_dir)):
+            src_path = os.path.join(grpc_code_dir, entry)
+            self.exec_command([
+                'mv', src_path, os.path.join(final_output_dir, entry)])
+        self.exec_command([
+            'rm', '-r', grpc_code_dir])
+        return final_output_dir

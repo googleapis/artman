@@ -44,12 +44,12 @@ class BatchTaskFactory(code_gen.TaskFactoryBase):
             batch_flow.add(single_flow)
         return [batch_flow]
 
-    def get_language_api_flows(self, batch_apis, language,
+    def get_language_api_flows(self, batch_apis, exclude_apis, language,
                                api_config_patterns, artman_language_yaml,
                                local_paths, **kwargs):
 
         artman_config_yamls = _get_artman_config_filenames(
-            api_config_patterns, batch_apis)
+            api_config_patterns, batch_apis, exclude_apis)
 
         for api_kwargs in _get_api_kwarg_dicts(
                 artman_config_yamls,
@@ -92,25 +92,27 @@ def _get_api_kwarg_dicts(
         api_config = _load_artman_config(api_config_yaml,
                                          language,
                                          local_paths)
-        if not api_config.get('enable_batch_generation', True):
-            continue
         api_kwargs = lang_config.copy()
         api_kwargs.update(api_config)
         yield api_kwargs
 
 
-def _get_artman_config_filenames(api_config_patterns, batch_apis):
+def _get_artman_config_filenames(api_config_patterns, batch_apis, exclude_apis):
     # We consider two separate cases: when batch_apis='*', and when batch_apis
     # is a list. In the first case, we find all files which match the patterns
     # listed in api_config_patterns. In the second case, for each api listed in
     # batch_apis, we try to find a matching file in EXACTLY ONE of the
     # api_config_patterns.
-    config_filenames= []
+    # In both cases, entries in exclude_apis override entries in batch_apis,
+    # meaning that if an API appears in both lists, it will not be included.
+    exclude_api_file_set = frozenset(exclude_apis)
+    config_filenames = []
     if batch_apis == '*':
         for pattern in api_config_patterns:
             glob_pattern = config_util.replace_vars(pattern,
-                                                   {'API_SHORT_NAME': '*'})
-            config_filenames += sorted(glob.glob(glob_pattern))
+                                                    {'API_SHORT_NAME': '*'})
+            api_filename_set = set(glob.glob(glob_pattern))
+            config_filenames += sorted(api_filename_set - exclude_api_file_set)
     else:
         if isinstance(batch_apis, (six.text_type, six.binary_type)):
             batch_apis = batch_apis.split(',')
@@ -119,7 +121,8 @@ def _get_artman_config_filenames(api_config_patterns, batch_apis):
             for pattern in api_config_patterns:
                 api_filename = config_util.replace_vars(pattern,
                                                         {'API_SHORT_NAME': api})
-                if os.path.isfile(api_filename):
+                if (os.path.isfile(api_filename) and
+                        api_filename not in exclude_api_file_set):
                     api_filenames.append(api_filename)
             if len(api_filenames) > 1:
                 raise ValueError('Multiple candidate artman yamls for api '

@@ -16,6 +16,7 @@ from __future__ import absolute_import
 import unittest
 
 import mock
+import pytest
 
 from taskflow.patterns import linear_flow
 
@@ -39,6 +40,7 @@ class BatchTaskFactoryTests(unittest.TestCase):
         self._btf = batch_generation.BatchTaskFactory(make_empty_task)
         self._kwargs = {
             'batch_apis': '*',
+            'exclude_apis': ['test/cli/data/gapic/api/artman_longrunning.yaml'],
             'language': 'python',
             'api_config_patterns': ['test/cli/data/gapic/api/artman_${API_SHORT_NAME}.yaml'],
             'artman_language_yaml': 'test/cli/data/gapic/lang/common.yaml',
@@ -80,14 +82,21 @@ class BatchTaskFactoryTests(unittest.TestCase):
 
     def test_get_language_api_flows_list(self):
         self._kwargs['batch_apis'] = ['pubsub', 'longrunning']
+        self._kwargs['exclude_apis'] = []
         with mock.patch.object(self._btf, 'make_single_language_flow') as make:
             apis = []
             for x in self._btf.get_language_api_flows(**self._kwargs):
                 assert x == make.return_value
                 _, kw = make.call_args
                 apis.append(kw['api_name'])
-            assert make.call_count == 1
-            assert apis == ['pubsub']
+            assert make.call_count == 2
+            assert apis == ['pubsub', 'longrunning']
+
+    def test_get_language_api_flows_list_exclude(self):
+        self._kwargs['batch_apis'] = ['longrunning']
+        with pytest.raises(ValueError):
+            with mock.patch.object(self._btf, 'make_single_language_flow'):
+                list(self._btf.get_language_api_flows(**self._kwargs))
 
     def test_get_language_api_flows(self):
         with mock.patch.object(self._btf, 'make_single_language_flow') as make:
@@ -122,7 +131,23 @@ def test_get_artman_config_filenames_wildcard():
         'test/cli/data/gapic/core/artman_core.yaml',
     ]
     actual = batch_generation._get_artman_config_filenames(
-            api_config_patterns, '*')
+            api_config_patterns, '*', [])
+    assert expected == actual
+
+
+def test_get_artman_config_filenames_wildcard_exclude():
+    api_config_patterns = ['test/cli/data/gapic/api/artman_${API_SHORT_NAME}.yaml',
+                           'test/cli/data/gapic/core/artman_${API_SHORT_NAME}.yaml']
+    exclude_apis = [
+        'test/cli/data/gapic/api/artman_longrunning.yaml',
+        'test/cli/data/gapic/core/artman_core.yaml',
+    ]
+    expected = [
+        'test/cli/data/gapic/api/artman_logging.yaml',
+        'test/cli/data/gapic/api/artman_pubsub.yaml',
+    ]
+    actual = batch_generation._get_artman_config_filenames(
+        api_config_patterns, '*', exclude_apis)
     assert expected == actual
 
 
@@ -135,7 +160,7 @@ def test_get_artman_config_filenames_comma_separated():
         'test/cli/data/gapic/core/artman_core.yaml',
     ]
     actual = batch_generation._get_artman_config_filenames(
-            api_config_patterns, 'pubsub,logging,core')
+            api_config_patterns, 'pubsub,logging,core', [])
     assert expected == actual
 
 
@@ -147,8 +172,19 @@ def test_get_artman_config_filenames_list():
         'test/cli/data/gapic/api/artman_longrunning.yaml',
     ]
     actual = batch_generation._get_artman_config_filenames(
-            api_config_patterns, ['logging', 'longrunning'])
+            api_config_patterns, ['logging', 'longrunning'], [])
     assert expected == actual
+
+
+def test_get_artman_config_filenames_list_exception():
+    api_config_patterns = ['test/cli/data/gapic/api/artman_${API_SHORT_NAME}.yaml',
+                           'test/cli/data/gapic/core/artman_${API_SHORT_NAME}.yaml']
+    exclude_apis = [
+        'test/cli/data/gapic/api/artman_longrunning.yaml',
+    ]
+    with pytest.raises(ValueError):
+        batch_generation._get_artman_config_filenames(
+            api_config_patterns, ['longrunning'], exclude_apis)
 
 
 class GapicTaskFactoryTests(unittest.TestCase):
