@@ -430,6 +430,9 @@ def _chown_for_artman_output():
   """
   if os.getenv('HOST_USER_ID') and os.getenv('HOST_GROUP_ID'):
       for root, dirs, files in os.walk('/artman/output'):
+          os.chown(root,
+                   int(os.getenv('HOST_USER_ID')),
+                   int(os.getenv('HOST_GROUP_ID')))
           for d in dirs:
               os.chown(os.path.join(root, d),
                        int(os.getenv('HOST_USER_ID')),

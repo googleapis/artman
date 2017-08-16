@@ -49,6 +49,7 @@
 /google-php-cloud-library_example-v1/proto/src/Google/Example/Library/V1/Shelf.php
 /google-php-cloud-library_example-v1/proto/src/Google/Example/Library/V1/UpdateBookRequest.php
 /google-php-cloud-library_example-v1/src/Example/Library/V1/LibraryServiceClient.php
+/google-php-cloud-library_example-v1/src/Example/Library/V1/LibraryServiceGapicClient.php
 /google-php-cloud-library_example-v1/src/Example/Library/V1/resources/library_service_client_config.json
 /google-php-cloud-library_example-v1/tests/unit/Example/Library/V1/LibraryServiceClientTest.php
 /google-php-cloud-library_example-v1/tests/unit/Example/Library/V1/MockLibraryServiceImpl.php
