@@ -14,9 +14,8 @@
 
 from __future__ import absolute_import, unicode_literals
 import os
+import subprocess
 import sys
-
-from ruamel import yaml
 
 from artman.utils.logger import logger
 
@@ -68,12 +67,12 @@ def parse_github_credentials(config, argv_flags):
     }
 
 
-def parse_local_paths(user_config, flags):
-    """Parse all relevant local flags, given appropriate user config and flags.
+def parse_local_paths(user_config, input_dir):
+    """Parse all relevant local flags, given appropriate user config and user.
 
     Args:
         user_config (dict): The user config, usually ~/.artman/config.yaml
-        flags (argparse.Namespace): The flags sent to sys.argv
+        input_dir (str): Path of artman local input dir.
 
     Returns:
         dict: A dictionary with, at minimum, the following keys:
@@ -92,8 +91,8 @@ def parse_local_paths(user_config, flags):
     # Only googleapis can be set with flags (this allows a temporary pointer
     # to googleapis-private if the developer uses a different directory for
     # that).
-    if flags.googleapis:
-        local_paths['googleapis'] = flags.googleapis
+    if input_dir:
+        local_paths['googleapis'] = input_dir
 
     # Make all paths absolute, resolve reporoot, and expand the ~.
     for key, path in local_paths.items():
@@ -146,3 +145,27 @@ def select_git_repo(git_repos, target_repo):
     return git_repos['staging']
 
 
+def check_docker_requirements(docker_image):
+    """Checks whether all docker-related components have been installed."""
+
+    try:
+        subprocess.check_output(['docker', '--version'])
+    except OSError:
+        logger.error(
+            'Docker not found on path or is not installed. Refert to '
+            'https://docs.docker.com/engine/installation about how to install '
+            'Docker on your local machine.')
+        sys.exit(128)
+
+    try:
+        output = subprocess.check_output(
+            ['docker', 'images', '-q', docker_image])
+        if not output:
+            logger.error(
+                'Cannot find artman Docker image. Run `docker pull %s` to '
+                'pull the image.' % docker_image)
+            sys.exit(128)
+    except OSError:
+        logger.error('Docker image check failed. Please file an issue at '
+                    'https://github.com/googleapis/artman/issues.')
+        sys.exit(128)

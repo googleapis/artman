@@ -245,7 +245,8 @@ def normalize_flags(flags, user_config):
     # Save local paths, if applicable.
     # This allows the user to override the path to api-client-staging or
     # toolkit on his or her machine.
-    pipeline_args['local_paths'] = support.parse_local_paths(user_config, flags)
+    pipeline_args['local_paths'] = support.parse_local_paths(user_config,
+                                                             flags.googleapis)
 
     # In most cases, we get a language.
     if flags.language:

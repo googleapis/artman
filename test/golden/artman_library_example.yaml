@@ -13,18 +13,19 @@ common:
     - ${GOOGLEAPIS}/../library_example.yaml
   gapic_api_yaml:
     - ${GOOGLEAPIS}/../library_example_gapic.yaml
-  output_dir: ${REPOROOT}/output
+  output_dir: ${REPOROOT}/output/legacy
+  release_level: beta
 csharp:
-  gapic_code_dir: ${REPOROOT}/output/csharp/google-cloud-library_example
+  gapic_code_dir: ${REPOROOT}/output/legacy/csharp/google-cloud-library_example
 go:
-  gapic_code_dir: ${REPOROOT}/output/gapi-cloud-library_example-go
+  gapic_code_dir: ${REPOROOT}/output/legacy/gapi-cloud-library_example-go
 java:
-  gapic_code_dir: ${REPOROOT}/output/java/google-cloud-library_example
+  gapic_code_dir: ${REPOROOT}/output/legacy/java/google-cloud-library_example
 nodejs:
-  gapic_code_dir: ${REPOROOT}/output/js/library_example-v1
+  gapic_code_dir: ${REPOROOT}/output/legacy/js/library_example-v1
 php:
-  gapic_code_dir: ${REPOROOT}/output/google-php-cloud-library_example-v1
+  gapic_code_dir: ${REPOROOT}/output/legacy/google-php-cloud-library_example-v1
 python:
-  gapic_code_dir: ${REPOROOT}/output/gapic-google-cloud-library_example-v1
+  gapic_code_dir: ${REPOROOT}/output/legacy/python/library_example-v1
 ruby:
-  gapic_code_dir: ${REPOROOT}/output/google-cloud-ruby/google-cloud-library_example
+  gapic_code_dir: ${REPOROOT}/output/legacy/ruby/google-cloud-ruby/google-cloud-library_example

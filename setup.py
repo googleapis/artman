@@ -39,6 +39,8 @@ setuptools.setup(
     entry_points={
         'console_scripts': [
             'artman = artman.cli.main:main',
+            # Rename once the refactoring is fully complete.
+            'artman2 = artman.cli.main2:main',
             'configure-artman = artman.cli.configure:configure',
             'start-artman-conductor = artman.cli.conductor:start',
         ],

@@ -177,6 +177,7 @@ ENV TOOLKIT_HOME /toolkit
 # Install toolkit.
 RUN cd /toolkit \
   && ./gradlew install \
+  && ./gradlew build \
   && cd /
 
 # Setup git config used by github commit pushing.

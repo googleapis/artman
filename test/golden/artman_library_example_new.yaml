@@ -1,0 +1,33 @@
+common:
+  api_name: library_example
+  api_version: v1
+  organization_name: google-cloud
+  proto_deps:
+    - name: google-common-protos
+  src_proto_paths:
+    - google/example/library/v1
+  service_yaml: ../library_example.yaml
+  gapic_yaml: ../library_example_gapic.yaml
+  release_level: BETA
+artifacts:
+  - name: java
+    type: GAPIC
+    language: JAVA
+  - name: python
+    type: GAPIC
+    language: PYTHON
+  - name: csharp
+    type: GAPIC
+    language: CSHARP
+  - name: ruby
+    type: GAPIC
+    language: RUBY
+  - name: nodejs
+    type: GAPIC
+    language: NODEJS
+  - name: go
+    type: GAPIC
+    language: GO
+  - name: php
+    type: GAPIC
+    language: PHP

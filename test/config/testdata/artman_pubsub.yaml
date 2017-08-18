@@ -1,0 +1,52 @@
+common:
+  api_name: pubsub
+  api_version: v1
+  organization_name: google-cloud
+  src_proto_paths:
+  - google/pubsub/v1
+  proto_deps:
+  - name: google-common-protos
+  - name: google-iam-v1
+  test_proto_deps:
+  - name: google-iam-v1
+  service_yaml: google/pubsub/pubsub.yaml
+  gapic_yaml: google/pubsub/v1/pubsub_gapic.yaml
+artifacts:
+- name: java_gapic_only_library
+  type: GAPIC_ONLY
+  language: JAVA
+  release_level: BETA
+  publish_targets:
+  - name: google-cloud-java
+    location: git@github.com:ethanbao/google-cloud-java.git
+    type: GITHUB
+    directory_mappings:
+    - dest: google-cloud-pubsub
+  - name: staging-github
+    location: git@github.com:ethanbao/api-client-staging.git
+    type: GITHUB
+    directory_mappings:
+    - name: gapic
+      dest: generated/java/gapic-google-cloud-pubsub-v1
+    - src: java/grpc-google-cloud-pubsub-v1
+      dest: generated/java/grpc-google-cloud-pubsub-v1
+    - src: java/proto-google-cloud-pubsub-v1
+      dest: generated/java/proto-google-cloud-pubsub-v1
+- name: python_gapic_only_library
+  type: GAPIC_ONLY
+  language: PYTHON
+  release_level: BETA
+  package_version:
+    grpc_dep_lower_bound: 0.90.3
+    grpc_dep_upper_bound: 0.91dev
+  publish_targets:
+  - name: staging-github
+    type: GITHUB
+    location: git@github.com:ethanbao/api-client-staging.git
+    directory_mappings:
+    - src: gapic-google-cloud-pubsub-v1
+      dest: generated/python/gapic-google-cloud-pubsub-v1
+- name: java_gapic_library
+  type: GAPIC
+  language: JAVA
+  release_level: BETA

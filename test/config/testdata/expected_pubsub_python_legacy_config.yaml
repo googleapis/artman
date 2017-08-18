@@ -1,0 +1,34 @@
+common:
+  api_name: pubsub
+  api_version: v1
+  desc_proto_path:
+  - ${GOOGLEAPIS}/google/iam/v1
+  gapic_api_yaml:
+  - /tmp/input/google/pubsub/v1/pubsub_gapic.yaml
+  import_proto_path:
+  - /tmp/input
+  organization_name: google-cloud
+  output_dir: /tmp/output
+  package_type: grpc_client
+  packaging: google-cloud
+  proto_deps:
+  - google-common-protos
+  - google-iam-v1
+  service_yaml:
+  - /tmp/input/google/pubsub/pubsub.yaml
+  src_proto_path:
+  - /tmp/input/google/pubsub/v1
+  test_proto_deps:
+  - google-iam-v1
+python:
+  gapic_code_dir: /tmp/output/python/pubsub-v1
+  generated_package_version:
+    lower: 0.90.3
+    upper: 0.91dev
+  git_repos:
+    staging-github:
+      location: git@github.com:ethanbao/api-client-staging.git
+      paths:
+      - dest: generated/python/gapic-google-cloud-pubsub-v1
+        src: /tmp/output/gapic-google-cloud-pubsub-v1
+  release_level: beta

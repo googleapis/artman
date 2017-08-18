@@ -16,6 +16,7 @@ from __future__ import absolute_import, unicode_literals
 
 from artman.cli import configure
 from artman.cli import main
+from artman.cli import main2
 from artman.cli import support
 
-__all__ = ('configure', 'main', 'support')
+__all__ = ('configure', 'main', 'main2', 'support')

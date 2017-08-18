@@ -53,8 +53,7 @@ class ParseGitHubCredentialsTests(unittest.TestCase):
 class ParseLocalPathsTests(unittest.TestCase):
     def test_normal(self):
         user_config = {'local_paths': {'reporoot': '~/Code'}}
-        flags = argparse.Namespace(googleapis=None)
-        result = support.parse_local_paths(user_config, flags)
+        result = support.parse_local_paths(user_config, None)
         base = os.path.expanduser('~/Code')
         assert result == {
             'reporoot': base,
@@ -66,8 +65,7 @@ class ParseLocalPathsTests(unittest.TestCase):
 
     def test_googleapis_flag(self):
         user_config = {'local_paths': {'reporoot': '~/Code'}}
-        flags = argparse.Namespace(googleapis='/path/to/googleapis')
-        result = support.parse_local_paths(user_config, flags)
+        result = support.parse_local_paths(user_config, '/path/to/googleapis')
         base = os.path.expanduser('~/Code')
         assert result['googleapis'] == '/path/to/googleapis'
 

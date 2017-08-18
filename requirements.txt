@@ -7,6 +7,7 @@ google-api-python-client >= 1.6.2
 kazoo >= 2.2.1
 oslo.utils >= 3.4.0
 pbr==2.0.0
+protobuf >= 3.3.0
 protoc-java-resource-names-plugin >= 0.0.3
 requests >= 2.10.0, < 3.0.0
 ruamel.yaml >= 0.14.5
