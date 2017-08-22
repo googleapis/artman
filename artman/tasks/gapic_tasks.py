@@ -14,6 +14,7 @@
 """Tasks related to generation of GAPIC wrappers"""
 
 import os
+import glob
 from ruamel import yaml
 
 from artman.tasks import packman_tasks
@@ -89,7 +90,9 @@ class GapicCodeGenTask(task_base.TaskBase):
                 gapic_api_yaml, gapic_language_yaml, package_metadata_yaml,
                 gapic_code_dir, api_name, api_version, organization_name,
                 packaging='single-artifact'):
-        self.exec_command(['rm', '-rf', '%s/*' % gapic_code_dir])
+        existing = glob.glob('%s/*' % gapic_code_dir)
+        if existing:
+            self.exec_command(['rm', '-r'] + existing)
         gapic_yaml = gapic_api_yaml + gapic_language_yaml
         gapic_args = ['--gapic_yaml=' + os.path.abspath(yaml)
                       for yaml in gapic_yaml]

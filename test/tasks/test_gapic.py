@@ -129,7 +129,6 @@ class GapicCodeGenTaskTests(unittest.TestCase):
             packaging='single-artifact',
         )
         expected_cmds = (
-            'rm -rf api-client-staging/generated/python/*',
             '/path/to/toolkit/gradlew -p /path/to/toolkit runCodeGen',
         )
         for call, expected in zip(exec_command.mock_calls, expected_cmds):
