@@ -62,14 +62,19 @@ class PackageMetadataConfigGenTask(task_base.TaskBase):
         with open(package_defaults_yaml) as dep_file:
             package_defaults = yaml.load(dep_file, Loader=yaml.Loader)
 
-        # Apply package version and development status overrides if specified
-        # in the artman config
-        if generated_package_version is not None:
-            package_defaults['generated_package_version'][language] = (
-                generated_package_version)
         if release_level is not None:
             package_defaults['release_level'][language] = (
                 release_level)
+        # Apply package version and development status overrides if specified
+        # in the artman config
+        if generated_package_version is not None:
+            release_version_type = package_defaults['release_level'][language]
+            if release_version_type != 'ga':
+                package_defaults['generated_package_version'][language] = (
+                    generated_package_version)
+            else:
+                package_defaults['generated_ga_package_version'][language] = (
+                    generated_package_version)
 
         gapic_config_name = ''
         if len(gapic_api_yaml) > 0:
