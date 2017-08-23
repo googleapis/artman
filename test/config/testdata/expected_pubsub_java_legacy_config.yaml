@@ -18,7 +18,7 @@ common:
   - /tmp/input/google/pubsub/pubsub.yaml
   src_proto_path:
   - /tmp/input/google/pubsub/v1
-  test_proto_deps:
+  proto_test_deps:
   - google-iam-v1
 java:
   gapic_code_dir: /tmp/output/java/google-cloud-pubsub

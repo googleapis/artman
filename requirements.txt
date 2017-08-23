@@ -12,5 +12,6 @@ protoc-java-resource-names-plugin >= 0.0.3
 requests >= 2.10.0, < 3.0.0
 ruamel.yaml >= 0.14.5
 six >= 1.10.0
+stringcase >= 1.2.0
 taskflow == 1.25.0
 yapf >= 0.6.2

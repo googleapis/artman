@@ -42,6 +42,8 @@ setuptools.setup(
             # Rename once the refactoring is fully complete.
             'artman2 = artman.cli.main2:main',
             'configure-artman = artman.cli.configure:configure',
+            # Remove once all configs finishes the conversion.
+            'converter = artman.cli.converter:main',
             'start-artman-conductor = artman.cli.conductor:start',
         ],
     },

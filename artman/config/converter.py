@@ -43,7 +43,7 @@ def convert_to_legacy_config_dict(artifact_config, intput_dir, output_dir):
         _proto_deps_to_legacy_configs(artifact_config.proto_deps,
                                       artifact_config.test_proto_deps))
     common['proto_deps'] = legacy_proto_deps
-    common['test_proto_deps'] = legacy_test_proto_deps
+    common['proto_test_deps'] = legacy_test_proto_deps
     common['desc_proto_path'] = desc_proto_paths
 
     package_type = 'grpc_client'  # default package_type
@@ -55,6 +55,13 @@ def convert_to_legacy_config_dict(artifact_config, intput_dir, output_dir):
     common['packaging'] = packaging
     common['package_type'] = package_type
 
+    result = {}
+    result['common'] = common
+
+    if artifact_config.type == Artifact.GAPIC_CONFIG:
+        # Early return if the artifact type is GAPIC_CONFIG
+        return result
+
     language = Artifact.Language.Name(
         artifact_config.language).lower()
     language_config_dict = {}
@@ -64,9 +71,10 @@ def convert_to_legacy_config_dict(artifact_config, intput_dir, output_dir):
         output_dir, rel_gapic_code_dir)
     language_config_dict['git_repos'] = _calculate_git_repos_config(
         artifact_config, output_dir)
-    language_config_dict['release_level'] = (
-        Artifact.ReleaseLevel.Name(
-            artifact_config.release_level).lower())
+    if artifact_config.release_level != Artifact.RELEASE_LEVEL_UNSPECIFIED:
+        language_config_dict['release_level'] = (
+            Artifact.ReleaseLevel.Name(
+                artifact_config.release_level).lower())
 
     # Convert package version configuration.
     pv = artifact_config.package_version
@@ -80,8 +88,6 @@ def convert_to_legacy_config_dict(artifact_config, intput_dir, output_dir):
             language_config_dict['generated_package_version'] = (
                 package_version_dict)
 
-    result = {}
-    result['common'] = common
     result[language] = language_config_dict
     return result
 

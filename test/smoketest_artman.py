@@ -38,56 +38,55 @@ ARTMAN_CONFIG_BLACKLIST = [
 SUPPORTED_LANGS = ['python', 'java', 'ruby', 'nodejs', 'php', 'go', 'csharp']
 
 
-def run_smoke_test(apis):
-    artman_config_dir = '../googleapis/gapic/api'
-    failure = []
-    artman_config_list = []
+def run_smoke_test(apis, input_dir):
+    input_dir = os.path.abspath(input_dir)
+    artman_config_dirs = [
+        os.path.join(input_dir, 'artman_configs', 'common'),
+        os.path.join(input_dir, 'artman_configs', 'apis')
+    ]
+
+    artman_config_whitelist = []
     if apis:
         for api in apis.split(','):
-            artman_config_list.append('artman_%s.yaml' % api)
+            artman_config_whitelist.append('artman_%s.yaml' % api)
 
+    for artman_config_dir in artman_config_dirs:
+        _smoke_test(input_dir, artman_config_dir, artman_config_whitelist)
+
+
+def _smoke_test(input_dir, artman_config_dir, artman_config_whitelist):
+    failure = []
     for root, dirs, files in os.walk(artman_config_dir):
         for f in fnmatch.filter(files, 'artman_*.yaml'):
             if f in ARTMAN_CONFIG_BLACKLIST:
                 # Do not run generation tests for those in the blacklist.
                 continue
-            if artman_config_list and f not in artman_config_list:
+            if artman_config_whitelist and f not in artman_config_whitelist:
                 # If apis list is given, only test those in the list
                 continue
             api_name = re.search('artman_(.*)\.yaml', f).group(1)
             filename = os.path.join(root, f)
             content = open(filename).read()
             for lang in SUPPORTED_LANGS:
-                if '%s:' % lang in content:
-                    if generate_grpc_library(filename, lang):
-                        failure.append('Failed to generate grpc %s library '
-                                       'for %s' % (lang, api_name))
-                    if generate_gapic_library(filename, lang):
+                artifact_name = '%s_gapic' % lang
+                if 'name: %s' % lang in content:
+                    if _generate_gapic_library(
+                          filename, artifact_name, input_dir):
                         failure.append('Failed to generate gapic %s library '
                                        'for %s' % (lang, api_name))
     if failure:
         sys.exit('Smoke test failed:\n%s' % '\n'.join(failure))
 
 
-def generate_grpc_library(artman_config, lang):
+def _generate_gapic_library(artman_config, artifact_name, input_dir):
     grpc_pipeline_args = [
-        'artman',
-        '--config', '%s,../googleapis/gapic/lang/common.yaml' % artman_config,
-        '--language', lang,
-        '--pipeline', 'GrpcClientPipeline',
-        '--publish', 'noop',
+        'artman2',
+        '--local',
+        '--config', artman_config,
+        '--input', input_dir,
+        'generate', artifact_name
     ]
     return subprocess.call(grpc_pipeline_args, stdout=subprocess.PIPE)
-
-
-def generate_gapic_library(artman_config, lang):
-    gapic_pipeline_args = [
-        'artman',
-        '--config', '%s,../googleapis/gapic/lang/common.yaml' % artman_config,
-        '--language', lang,
-        '--publish', 'noop',
-    ]
-    return subprocess.call(gapic_pipeline_args, stdout=subprocess.PIPE)
 
 
 def parse_args(*args):
@@ -101,10 +100,15 @@ def parse_args(*args):
              'repo in order for smoketest to run properly. If not specified, '
              'all APIs will be tested. APIs in the blacklist will not be '
              'tested.')
+    parser.add_argument(
+        '--input-dir',
+        default='/googleapis',
+        type=str,
+        help='Specify where googleapis local repo lives.')
     return parser.parse_args(args=args)
 
 
 if __name__ == "__main__":
     flags = parse_args(*sys.argv[1:])
 
-    run_smoke_test(flags.apis)
+    run_smoke_test(flags.apis, flags.input_dir)

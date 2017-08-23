@@ -62,7 +62,7 @@ def main(*args):
         engine = engines.load(
             pipeline.flow, engine='serial', store=pipeline.kwargs)
         engine.run()
-        _chown_for_artman_output(os.path.abspath(flags.output_dir))
+        _change_owner(flags, pipeline_name, pipeline_kwargs)
     else:
         support.check_docker_requirements(flags.image)
         # Note: artman currently won't work if input directory doesn't contain
@@ -271,20 +271,21 @@ def normalize_flags(flags, user_config):
         googleapis=googleapis,
         shared_config_name=shared_config_name, )
 
+    language = Artifact.Language.Name(
+        artifact_config.language).lower()
+
     # Set the pipeline as well as package_type and packaging
     artifact_type = artifact_config.type
     if artifact_type in (Artifact.GAPIC, Artifact.GAPIC_ONLY):
         pipeline_name = 'GapicClientPipeline'
+        pipeline_args['language'] = language
     elif artifact_type in (Artifact.GRPC, Artifact.GRPC_COMMON):
         pipeline_name = 'GrpcClientPipeline'
+        pipeline_args['language'] = language
     elif artifact_type == Artifact.GAPIC_CONFIG:
         pipeline_name = 'GapicConfigPipeline'
     else:
         raise ValueError('Unrecognized artifact.')
-
-    language = Artifact.Language.Name(
-        artifact_config.language).lower()
-    pipeline_args['language'] = language
 
     # Parse out the full configuration.
     # Note: the var replacement is still needed because they are still being
@@ -404,29 +405,35 @@ def _run_artman_in_docker(flags):
                      % ' '.join(debug_cmd))
 
 
-def _chown_for_artman_output(output_dir):
-    """Change ownership of artman output if necessary.
-
-    When artman runs in Docker instance, all output files are by default owned
-    by `root`, making it non-editable by Docker host user. When user passes
-    host user id and group id through environment variables via `-e` flag,
-    artman will change the owner based on the specified user id and group id.
-    """
-    if os.getenv('HOST_USER_ID') and os.getenv('HOST_GROUP_ID'):
-        for root, dirs, files in os.walk(output_dir):
-            os.chown(root,
-                     int(os.getenv('HOST_USER_ID')),
-                     int(os.getenv('HOST_GROUP_ID')))
+def _change_owner(flags, pipeline_name, pipeline_kwargs):
+    """Change file/folder ownership if necessary."""
+    user_host_id = int(os.getenv('HOST_USER_ID', 0))
+    group_host_id = int(os.getenv('HOST_GROUP_ID', 0))
+    # When artman runs in Docker instance, all output files are by default
+    # owned by `root`, making it non-editable by Docker host user. When host
+    # user id and group id get passed through environment variables via
+    # Docker `-e` flag, artman will change the owner based on the specified
+    # user id and group id.
+    if user_host_id and group_host_id:
+        # Change ownership of output directory.
+        for root, dirs, files in os.walk(flags.output_dir):
+            os.chown(root, user_host_id, group_host_id)
             for d in dirs:
                 os.chown(
-                    os.path.join(root, d),
-                    int(os.getenv('HOST_USER_ID')),
-                    int(os.getenv('HOST_GROUP_ID')))
+                    os.path.join(root, d), user_host_id, group_host_id)
             for f in files:
                 os.chown(
-                    os.path.join(root, f),
-                    int(os.getenv('HOST_USER_ID')),
-                    int(os.getenv('HOST_GROUP_ID')))
+                    os.path.join(root, f), user_host_id, group_host_id)
+        if 'GapicConfigPipeline' == pipeline_name:
+            # There is a trick that the gapic config output is generated to
+            # input directory, where it is supposed to be in order to be
+            # used as an input for other artifact generation. With that
+            # the gapic config output is not located in the output folder,
+            # but the input folder. Make the explicit chown in this case.
+            os.chown(
+                pipeline_kwargs['gapic_api_yaml'][0],
+                user_host_id,
+                group_host_id)
 
 
 if __name__ == "__main__":
