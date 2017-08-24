@@ -195,4 +195,4 @@ RUN mkdir -p /root/
 ADD artman-user-config-in-docker.yaml /root/.artman/config.yaml
 
 # Install artman.
-RUN pip3 install googleapis-artman==0.4.12
+RUN pip3 install googleapis-artman==0.4.13
