@@ -135,6 +135,12 @@ class _PhpProtoParams(_SimpleProtoParams):
     def lang_out_param(self, output_dir, with_grpc):
         return '--php_out={}'.format(self.code_root(output_dir))
 
+    def grpc_out_param(self, output_dir):
+        return '--grpc_out={}:{}'.format(
+            'class_suffix=GrpcClient',
+            self.code_root(output_dir)
+        )
+
     @property
     def proto_compiler_command(self):
         return ['protoc']
