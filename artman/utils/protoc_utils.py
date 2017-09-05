@@ -305,12 +305,15 @@ def find_protos(proto_paths, excluded_proto_path):
     if not isinstance(proto_paths, (types.GeneratorType, collections.MutableSequence)):
         raise ValueError("proto_paths must be a list")
     for path in proto_paths:
-        for root, _, files in os.walk(path):
-            for proto in files:
-                is_excluded = _is_proto_excluded(os.path.join(root, proto),
-                                                 excluded_proto_path)
-                if os.path.splitext(proto)[1] == '.proto' and not is_excluded:
-                    yield os.path.join(root, proto)
+        if os.path.isdir(path):
+            for root, _, files in os.walk(path):
+                for proto in files:
+                    is_excluded = _is_proto_excluded(os.path.join(root, proto),
+                                                     excluded_proto_path)
+                    if os.path.splitext(proto)[1] == '.proto' and not is_excluded:
+                        yield os.path.join(root, proto)
+        elif os.path.isfile(path) and os.path.splitext(path)[1] == '.proto':
+            yield path
 
 
 def _is_proto_excluded(proto, excluded_proto_path):
