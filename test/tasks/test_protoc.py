@@ -98,3 +98,12 @@ def test_find_protos_with_exclusion():
     ]
     assert list(protoc_utils.find_protos(
         src_proto_paths, excluded_proto_paths)) == expected
+
+def test_find_protos_listing_filename():
+    expected = [
+        'test/fake-repos/fake-proto/fake.proto',
+    ]
+    src_proto_paths = [
+        'test/fake-repos/fake-proto/fake.proto',
+    ]
+    assert list(protoc_utils.find_protos(src_proto_paths, [])) == expected
