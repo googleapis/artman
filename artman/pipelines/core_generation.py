@@ -49,8 +49,10 @@ class _GoCoreTaskFactory(CoreTaskFactoryBase):
     """Responsible for the protobuf flow for Go language."""
 
     def _get_core_codegen_tasks(self, **kwargs):
-        return [protoc_tasks.ProtoCodeGenTask,
-                    protoc_tasks.GoCopyTask]
+        return [
+            protoc_tasks.ProtoCodeGenTask,
+            protoc_tasks.GoCopyTask,
+        ]
 
     def get_validate_kwargs(self):
         return ['gapic_api_yaml', 'gapic_code_dir'] + code_gen.COMMON_REQUIRED

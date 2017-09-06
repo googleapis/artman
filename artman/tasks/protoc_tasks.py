@@ -85,13 +85,15 @@ class ProtocCodeGenTaskBase(task_base.TaskBase):
             protoc_grpc_params = []
 
         # protoc-gen-go has some peculiarities:
-        #   It can only compile one package per invocation. So, we need to split
+        # It can only compile one package per invocation. So, we need to split
         # proto files by packages.
-        #   The order of the input files affects comments and internal variables.
-        # While this doesn't affect the correctness of the result, we sort proto files
-        # for reproducibility.
         #
-        # Other languages don't mind us doing this, so we just do it for everyone.
+        # The order of the input files affects comments and internal variables.
+        # While this doesn't affect the correctness of the result, we sort
+        # proto files for reproducibility.
+        #
+        # Other languages don't mind us doing this, so we just do it for
+        # everyone.
         for (dirname, protos) in protoc_utils.group_by_dirname(
                 protoc_utils.find_protos(src_proto_path, excluded_proto_path)).items():
             protos.sort()

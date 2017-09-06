@@ -119,7 +119,7 @@ class _PythonGrpcTaskFactory(GrpcTaskFactoryBase):
             protoc_tasks.ProtoDescGenTask,
             protoc_tasks.ProtoAndGrpcCodeGenTask,
             package_metadata_tasks.PackageMetadataConfigGenTask,
-            package_metadata_tasks.GrpcPackageMetadataGenTask,
+            python_grpc_tasks.PythonMoveProtosTask,
         ]
 
 

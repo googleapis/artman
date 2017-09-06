@@ -22,6 +22,7 @@ RUN apt-get update \
     git \
     vim \
     less \
+    openssh-client \
   && rm -rf /var/lib/apt/lists/*
 
 # Install runtime packages.

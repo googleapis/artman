@@ -55,7 +55,10 @@ class PythonChangePackageTask(task_base.TaskBase):
 
     # TODO (geigerj): add regex for documentation link updates?
 
-    def execute(self, src_proto_path, import_proto_path, common_protos_yaml):
+    def execute(self, src_proto_path, import_proto_path, common_protos_yaml,
+                organization_name):
+        self._organization_name = organization_name
+
         with io.open(common_protos_yaml) as file_:
             common_protos_data = yaml.load(file_, Loader=yaml.Loader)
 
@@ -94,35 +97,53 @@ class PythonChangePackageTask(task_base.TaskBase):
             return ''
 
     def _transform(self, pkg, sep, common_protos):
-        """Add 'proto' package after 'google' or 'google.cloud'
+        """Transform to the appropriate proto package layout.
 
         Works with arbitrary separator (e.g., '/' for import statements,
         '.' for proto package statements, os.path.sep for filenames)
         """
-        # Skip common protos
-        pkg_list = pkg.split(sep)
+        if sep != '.' and pkg.endswith('.proto'):
+            dotted = pkg[:-6].replace(sep, '.')
+            suffix = '.proto'
+        else:
+            dotted = pkg.replace(sep, '.')
+            suffix = ''
 
-        dotted = '.'.join(pkg_list)
+        # Sanity check: Do not transform common protos.
         for common_pkg in common_protos:
             if dotted.startswith(common_pkg):
-                return sep.join(pkg_list)
+                return pkg
 
-        if pkg_list[0] == 'google':
-            if pkg_list[1] == 'cloud':
-                return sep.join(['google', 'cloud', 'proto'] + pkg_list[2:])
-            return sep.join(['google', 'cloud', 'proto'] + pkg_list[1:])
-        return sep.join(pkg_list)
+        # Special case: If the organization name is "google-cloud", then we
+        # have to ensure that "cloud" exists in the path. The protos
+        # themselves may not follow this.
+        if 'cloud' not in dotted and self._organization_name == 'google-cloud':
+            dotted = dotted.replace('google.', 'google.cloud.', 1)
+
+        # Transform into the ideal proto path.
+        # What essentially should happen here is that "{api}.{vN}" should
+        # change to "{api}_{vN}".
+        dotted = re.sub(r'\.v([\da-z_]*)([\d]+)\b', r'_v\1\2.proto', dotted)
+
+        # Edge case: Some internal customers use "vNalpha".
+        # Rather than make the regular expression more complicated, catch
+        # this as a one-off.
+        if re.search(r'\.v[\d]+alpha\b', dotted):
+            dotted = re.sub(r'\.v([\d]+)alpha\b', r'_v\1alpha.proto', dotted)
+
+        # Done; return with the appropriate separator.
+        return dotted.replace('.', sep) + suffix
 
     def _copy_proto(self, src, dest, common_protos):
         """Copies a proto while fixing its imports"""
         with io.open(src, 'r', encoding='UTF-8') as src_lines:
             with io.open(dest, 'w+', encoding='UTF-8') as dest_file:
                 for line in src_lines:
-                    imprt = self._IMPORT_REGEX.match(line)
-                    if imprt:
+                    import_ = self._IMPORT_REGEX.match(line)
+                    if import_:
                         dest_file.write('import "{}";\n'.format(
                             self._transform(
-                                imprt.group('package'), '/', common_protos)))
+                                import_.group('package'), '/', common_protos)))
                     else:
                         dest_file.write(line)
 
@@ -145,3 +166,59 @@ class PythonChangePackageTask(task_base.TaskBase):
                     self.exec_command(['mkdir', '-p', sub_new_src])
                 self._copy_proto(
                     proto, os.path.join(sub_new_src, dest), common_protos)
+
+
+class PythonMoveProtosTask(task_base.TaskBase):
+    default_provides = {'grpc_code_dir'}
+
+    def execute(self, grpc_code_dir, gapic_code_dir):
+        """Move the protos into the GAPIC structure.
+
+        This copies the ``x/y/z/proto/`` directory over to be a sibling
+        of ``x/y/z/gapic/`` in the GAPIC code directory. In the event of
+        an inconsistency on the prefix, the GAPIC wins.
+
+        Args:
+            grpc_code_dir (str): The location where the GRPC code was
+                generated.
+            gapic_code_dir (str): The location where the GAPIC code was
+                generated.
+        """
+        # Determine the appropriate source and target directory.
+        # We can get this by drilling in to the GAPIC artifact until we get to
+        # a "gapic" directory.
+        src = self._get_subdir_path(grpc_code_dir, 'proto')
+        target = self._get_subdir_path(
+            os.path.join(gapic_code_dir, 'google'),
+            'gapic',
+        )
+
+        # Move the contents into the GAPIC directory.
+        self.exec_command(['mv', os.path.join(src, 'proto'), target])
+
+        # Remove the grpc directory.
+        self.exec_command(['rm', '-rf', grpc_code_dir])
+
+        # Clear out the grpc_code_dir, so future tasks perceive it as
+        # not being a thing anymore.
+        return {'grpc_code_dir': None}
+
+    def _get_subdir_path(self, haystack, needle):
+        """Return the subpath which contains the ``needle`` directory.
+
+        Args:
+            haystack (str): The top-level directory in which the subdirectory
+                should appear.
+            needle (str): The directory being sought.
+
+        Returns:
+            str: The path, relative to ``haystack``, where the subdirectory
+                was found.
+
+        Raises:
+            RuntimeError: If the subdirectory is not found.
+        """
+        for path, dirs, files in os.walk(haystack):
+            if needle in dirs:
+                return path
+        raise RuntimeError('Path %s not found in %s.' % (needle, haystack))

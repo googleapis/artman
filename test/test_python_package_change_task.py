@@ -23,12 +23,13 @@ from artman.tasks import python_grpc_tasks
 class PythonPackageChangeTest(unittest.TestCase):
 
     _TASK = python_grpc_tasks.PythonChangePackageTask()
+    _TASK._organization_name = 'google'
 
     _PROTO_FILE = [
         '# Comment line\n',
         'package google.service.v1;\n',
-        'import "google/service/a.proto";\n',
-        'import "google/cloud/otherapi/b.proto";\n',
+        'import "google/service/v1/a.proto";\n',
+        'import "google/cloud/otherapi/v3/b.proto";\n',
         'import "google/common/common_proto.proto";\n',
         'Some other text referencing to google.service.v1\n']
 
@@ -49,20 +50,29 @@ class PythonPackageChangeTest(unittest.TestCase):
 
     def test__transfom(self):
         # Simple package transformations with arbitrary separator
-        self.assertEqual(self._TASK._transform('google.service', '.', []),
-                         'google.cloud.proto.service')
-        self.assertEqual(self._TASK._transform('google/other', '/', []),
-                         'google/cloud/proto/other')
+        self.assertEqual(self._TASK._transform('google.service.v1', '.', []),
+                         'google.service_v1.proto')
+        self.assertEqual(
+            self._TASK._transform('google.service.v1alpha', '.', []),
+            'google.service_v1alpha.proto',
+        )
+        self.assertEqual(self._TASK._transform('google/other/v1', '/', []),
+                         'google/other_v1/proto')
         self.assertEqual(self._TASK._transform('google$service', '$', []),
-                         'google$cloud$proto$service')
+                         'google$service')
 
         # Don't transform common protos
         self.assertEqual(
             self._TASK._transform('google/common', '/', ['google.common']),
             'google/common')
         self.assertEqual(
-            self._TASK._transform('google/uncommon', '/', ['google.common']),
-            'google/cloud/proto/uncommon')
+            self._TASK._transform(
+                'google/uncommon/v1',
+                '/',
+                ['google.common'],
+            ),
+            'google/uncommon_v1/proto',
+        )
 
         # Don't transform non-Google protos
         self.assertEqual(
@@ -77,8 +87,8 @@ class PythonPackageChangeTest(unittest.TestCase):
         expected_writes = [
             mock.call('# Comment line\n'),
             mock.call('package google.service.v1;\n'),
-            mock.call('import "google/cloud/proto/service/a.proto";\n'),
-            mock.call('import "google/cloud/proto/otherapi/b.proto";\n'),
+            mock.call('import "google/service_v1/proto/a.proto";\n'),
+            mock.call('import "google/cloud/otherapi_v3/proto/b.proto";\n'),
             mock.call('import "google/common/common_proto.proto";\n'),
             mock.call('Some other text referencing to google.service.v1\n')]
 
