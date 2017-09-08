@@ -274,7 +274,7 @@ def normalize_flags(flags, user_config):
     # syntax.
     if flags.api:
         shared_config_name = 'common.yaml'
-        if flags.language == 'ruby':
+        if flags.language in ('ruby', 'nodejs',):
             shared_config_name = 'doc.yaml'
 
         googleapis = os.path.realpath(os.path.expanduser(

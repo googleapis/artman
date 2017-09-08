@@ -117,7 +117,7 @@ def generate_gapic_library_legacy(golden_dir, googleapis_dir, lang):
         '--config', '%s/artman_library_example.yaml,'
                     '%s/gapic/lang/%s.yaml'
                     % (golden_dir, googleapis_dir,
-                      'doc' if lang == 'ruby' else 'common'),
+                      'doc' if lang in ('ruby', 'nodejs',) else 'common'),
         '--googleapis', googleapis_dir,
         '--language', lang,
         '--publish', 'noop',

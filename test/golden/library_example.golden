@@ -271,6 +271,7 @@
 /js/library_example-v1/README.md
 /js/library_example-v1/package.json
 /js/library_example-v1/src/index.js
+/js/library_example-v1/src/v1/doc/doc_library.js
 /js/library_example-v1/src/v1/index.js
 /js/library_example-v1/src/v1/library_service_client.js
 /js/library_example-v1/src/v1/library_service_client_config.json
