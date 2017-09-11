@@ -263,3 +263,20 @@ class PhpGrpcMoveTask(task_base.TaskBase):
         self.exec_command([
             'rm', '-r', grpc_code_dir])
         return final_output_dir
+
+class NodeJsProtoCopyTask(task_base.TaskBase):
+    """Copies the .proto files into the gapic_code_dir/proto directory.
+    """
+    def execute(self, gapic_code_dir, src_proto_path, excluded_proto_path=[]):
+        final_output_dir = os.path.join(gapic_code_dir, 'proto')
+        for proto_path in src_proto_path:
+            index = protoc_utils.find_google_dir_index(proto_path)
+            for src_proto_file in protoc_utils.find_protos(
+                    [proto_path], excluded_proto_path):
+                relative_proto_file = src_proto_file[index:]
+                dst_proto_file = os.path.join(
+                    final_output_dir, relative_proto_file)
+                dst_proto_dir = os.path.dirname(dst_proto_file)
+                if not os.path.exists(dst_proto_dir):
+                    self.exec_command(['mkdir', '-p', dst_proto_dir])
+                self.exec_command(['cp', src_proto_file, dst_proto_file])

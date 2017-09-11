@@ -31,8 +31,8 @@
 /google-php-cloud-library_example-v1/proto/src/Google/Example/Library/V1/MoveBookRequest.php
 /google-php-cloud-library_example-v1/proto/src/Google/Example/Library/V1/Shelf.php
 /google-php-cloud-library_example-v1/proto/src/Google/Example/Library/V1/UpdateBookRequest.php
-/google-php-cloud-library_example-v1/src/Example/Library/V1/LibraryServiceClient.php
 /google-php-cloud-library_example-v1/src/Example/Library/V1/Gapic/LibraryServiceGapicClient.php
+/google-php-cloud-library_example-v1/src/Example/Library/V1/LibraryServiceClient.php
 /google-php-cloud-library_example-v1/src/Example/Library/V1/resources/library_service_client_config.json
 /google-php-cloud-library_example-v1/tests/unit/Example/Library/V1/LibraryServiceClientTest.php
 /google-php-cloud-library_example-v1/tests/unit/Example/Library/V1/MockLibraryServiceImpl.php
@@ -270,6 +270,7 @@
 /java/proto-google-cloud-library_example-v1/templates/apidocs_index.html.template
 /js/library_example-v1/README.md
 /js/library_example-v1/package.json
+/js/library_example-v1/proto/google/example/library/v1/library.proto
 /js/library_example-v1/src/index.js
 /js/library_example-v1/src/v1/doc/doc_library.js
 /js/library_example-v1/src/v1/index.js
