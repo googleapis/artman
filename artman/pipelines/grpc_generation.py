@@ -157,7 +157,9 @@ class _PhpGrpcTaskFactory(GrpcTaskFactoryBase):
 class _NodeJsGrpcTaskFactory(GrpcTaskFactoryBase):
 
     def get_grpc_codegen_tasks(self, **kwargs):
-        return []
+        return [
+            protoc_tasks.NodeJsProtoCopyTask,
+        ]
 
 
 GRPC_TASK_FACTORY_DICT = {
