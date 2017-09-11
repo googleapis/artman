@@ -294,7 +294,7 @@ def normalize_flags(flags, user_config):
     # If we were given just an API or BATCH, then expand it into the --config
     # syntax.
     shared_config_name = 'common.yaml'
-    if artifact_config.language == Artifact.RUBY:
+    if artifact_config.language in (Artifact.RUBY, Artifact.NODEJS,):
         shared_config_name = 'doc.yaml'
 
     legacy_config_dict = converter.convert_to_legacy_config_dict(
