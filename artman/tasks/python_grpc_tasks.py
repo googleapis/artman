@@ -196,6 +196,12 @@ class PythonMoveProtosTask(task_base.TaskBase):
         # Move the contents into the GAPIC directory.
         self.exec_command(['mv', os.path.join(src, 'proto'), target])
 
+        # Create an __init__.py file in the proto directory.
+        # This is necessary for Python 2.7 compatibility.
+        self.exec_command([
+            'touch', os.path.join(target, 'proto', '__init__.py'),
+        ])
+
         # Remove the grpc directory.
         self.exec_command(['rm', '-rf', grpc_code_dir])
 

@@ -64,12 +64,14 @@ def test_move_protos():
             assert gapic_call[1] == ('gapic_path/google', 'gapic')
 
         # Ensure that the correct commands ran.
-        assert exec_command.call_count == 2
+        assert exec_command.call_count == 3
         mv = exec_command.mock_calls[0]
-        rm = exec_command.mock_calls[1]
+        touch = exec_command.mock_calls[1]
+        rm = exec_command.mock_calls[2]
         assert mv[1] == ([
             'mv',
             'grpc_path/foo/bar/proto',
             'gapic_path/foo/bar',
         ],)
+        assert touch[1] == (['touch', 'gapic_path/foo/bar/proto/__init__.py'],)
         assert rm[1] == (['rm', '-rf', 'grpc_path'],)

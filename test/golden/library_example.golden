@@ -295,6 +295,7 @@
 /python/library_example-v1/google/cloud/gapic/example/library/v1/library_service_client.py
 /python/library_example-v1/google/cloud/gapic/example/library/v1/library_service_client_config.py
 /python/library_example-v1/google/cloud/gapic/example/library_example.py
+/python/library_example-v1/google/cloud/proto/__init__.py
 /python/library_example-v1/google/cloud/proto/library_pb2.py
 /python/library_example-v1/google/cloud/proto/library_pb2_grpc.py
 /python/library_example-v1/nox.py
