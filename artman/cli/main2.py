@@ -138,10 +138,12 @@ def parse_args(*args):
     parser.add_argument(
         '--input-dir',
         type=str,
-        default='.',
+        default='',
         help='[Optional] Directory with all input that is needed by artman, '
-        'which include but not limited to API protos, service config yaml '
-        'and GAPIC config yaml. Default to `.`', )
+             'which include but not limited to API protos, service config '
+             'yaml, and GAPIC config yaml. Default to the settings from user '
+             'configuration.',
+    )
     parser.add_argument(
         '-v',
         '--verbose',
@@ -263,7 +265,8 @@ def normalize_flags(flags, user_config):
             - pipeline name
             - pipeline arguments
     """
-    flags.input_dir = os.path.abspath(flags.input_dir)
+    if flags.input_dir:
+        flags.input_dir = os.path.abspath(flags.input_dir)
     flags.output_dir = os.path.abspath(flags.output_dir)
     flags.config = os.path.abspath(flags.config)
     pipeline_args = {}
@@ -277,6 +280,10 @@ def normalize_flags(flags, user_config):
     # toolkit on his or her machine.
     pipeline_args['local_paths'] = support.parse_local_paths(
         user_config, flags.input_dir)
+
+    # Save the input directory back to flags if it was not explicitly set.
+    if not flags.input_dir:
+        flags.input_dir = pipeline_args['local_paths']['googleapis']
 
     artman_config_path = flags.config
     if not os.path.isfile(artman_config_path):
@@ -314,7 +321,8 @@ def normalize_flags(flags, user_config):
     ]).format(
         artman_config_path=tmp_legacy_config_yaml,
         googleapis=googleapis,
-        shared_config_name=shared_config_name, )
+        shared_config_name=shared_config_name,
+    )
 
     language = Artifact.Language.Name(
         artifact_config.language).lower()
@@ -427,8 +435,9 @@ def _run_artman_in_docker(flags):
         '-v', '%s:%s' % (input_dir, input_dir),
         '-v', '%s:%s' % (output_dir, output_dir),
         '-v', '%s:%s' % (artman_config_dirname, artman_config_dirname),
-        '-v', '%s:/home/.artman' % user_config, '-w',
-        os.getcwd(), docker_image, '/bin/bash', '-c'
+        '-v', '%s:/home/.artman' % user_config,
+        '-w', input_dir,
+        docker_image, '/bin/bash', '-c'
     ]
 
     debug_cmd = list(base_cmd)
