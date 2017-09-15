@@ -96,7 +96,10 @@ class ProtocCodeGenTaskBase(task_base.TaskBase):
         # everyone.
         for (dirname, protos) in protoc_utils.group_by_dirname(
                 protoc_utils.find_protos(src_proto_path, excluded_proto_path)).items():
-            protos.sort()
+            # It is possible to get duplicate protos. De-dupe them.
+            protos = sorted(set(protos))
+
+            # Execute protoc.
             self.exec_command(proto_params.proto_compiler_command +
                 protoc_utils.protoc_header_params(
                     import_proto_path + src_proto_path, toolkit_path) +
