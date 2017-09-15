@@ -177,7 +177,7 @@ class ProtoAndGrpcCodeGenTask(ProtocCodeGenTaskBase):
 
 
 class GoCopyTask(task_base.TaskBase):
-    def execute(self,  gapic_code_dir, grpc_code_dir):
+    def execute(self, gapic_code_dir, grpc_code_dir):
         for entry in os.listdir(grpc_code_dir):
             src_path = os.path.join(grpc_code_dir, entry)
             self.exec_command([
@@ -266,6 +266,23 @@ class PhpGrpcMoveTask(task_base.TaskBase):
         self.exec_command([
             'rm', '-r', grpc_code_dir])
         return final_output_dir
+
+
+# TODO (michaelbausor): Once correct naming is supported in
+# gRPC, we should remove this.
+class PhpGrpcRenameTask(task_base.TaskBase):
+    """Rename references to proto files in the gRPC stub."""
+
+    def execute(self, grpc_code_dir):
+        for filename in protoc_utils.list_files_recursive(grpc_code_dir):
+            if filename.endswith('GrpcClient.php'):
+                logger.info('Performing replacements in: %s' % (filename,))
+                with open(filename) as f:
+                    contents = f.read()
+                contents = protoc_utils.php_proto_rename(contents)
+                with open(filename, 'w') as f:
+                    f.write(contents)
+
 
 class NodeJsProtoCopyTask(task_base.TaskBase):
     """Copies the .proto files into the gapic_code_dir/proto directory.

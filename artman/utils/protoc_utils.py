@@ -316,6 +316,21 @@ def find_protos(proto_paths, excluded_proto_path):
             yield path
 
 
+def list_files_recursive(path):
+    for root, _, files in os.walk(path):
+        for f in files:
+            yield os.path.join(root, f)
+
+
+_php_replacements = [
+    ('\Google\Protobuf\Empty', '\Google\Protobuf\GPBEmpty'),
+]
+def php_proto_rename(contents):
+    for src, target in _php_replacements:
+        contents = contents.replace(src, target)
+    return contents
+
+
 def _is_proto_excluded(proto, excluded_proto_path):
     for excluded_path in excluded_proto_path:
         if excluded_path in proto:

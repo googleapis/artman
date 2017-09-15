@@ -14,6 +14,8 @@
 
 from __future__ import absolute_import
 import unittest
+import os
+import shutil
 
 import mock
 
@@ -48,6 +50,32 @@ class JavaProtoCopyTaskTests(unittest.TestCase):
         with pytest.raises(ValueError):
             task.execute(src_proto_path, grpc_code_dir)
         assert exec_command.call_count == 0
+
+
+class PhpGrpcRenameTaskTests(unittest.TestCase):
+    def test_execute(self):
+        path = 'test/tasks/data/test_protoc/php_rename_task'
+        init_file = os.path.join(path, 'ExampleGrpcClientInitial.php')
+        exp_file = os.path.join(path, 'ExampleGrpcClientExpected.php')
+        moved_file = os.path.join(path, 'MovedExampleGrpcClient.php')
+        files = [init_file, exp_file, moved_file]
+        shutil.copy(init_file, moved_file)
+        try:
+            expected_contents = {}
+            for filename in files:
+                with open(filename) as f:
+                    expected_contents[filename] = f.read()
+            # Only the contents of moved_file should change, from the same as
+            # init_file to the same as exp_file
+            with open(exp_file) as f:
+                expected_contents[moved_file] = f.read()
+            task = protoc_tasks.PhpGrpcRenameTask()
+            task.execute(path)
+            for filename in files:
+                with open(filename) as f:
+                    assert expected_contents[filename] == f.read()
+        finally:
+            os.remove(moved_file)
 
 
 def test_find_google_dir_index():
@@ -107,3 +135,22 @@ def test_find_protos_listing_filename():
         'test/fake-repos/fake-proto/fake.proto',
     ]
     assert list(protoc_utils.find_protos(src_proto_paths, [])) == expected
+
+
+def test_list_files_recursive():
+    expected = [
+        'test/fake-repos/fake-proto/fake.pb.go',
+        'test/fake-repos/fake-proto/fake.proto',
+        'test/fake-repos/fake-proto/excluded/excluded.proto',
+    ]
+    path = 'test/fake-repos/fake-proto'
+    assert list(protoc_utils.list_files_recursive(path)) == expected
+
+
+def test_php_proto_rename():
+    path = 'test/tasks/data/test_protoc/php_rename_task'
+    with open(os.path.join(path, 'ExampleGrpcClientExpected.php')) as exp_file:
+        expected = exp_file.read()
+    with open(os.path.join(path, 'ExampleGrpcClientInitial.php')) as init_file:
+        initial = init_file.read()
+    assert protoc_utils.php_proto_rename(initial) == expected
