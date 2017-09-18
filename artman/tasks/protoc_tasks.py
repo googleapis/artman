@@ -254,7 +254,9 @@ class PhpGrpcMoveTask(task_base.TaskBase):
     """
     default_provides = 'grpc_code_dir'
 
-    def execute(self, gapic_code_dir, grpc_code_dir):
+    def execute(self, grpc_code_dir, gapic_code_dir=None):
+        if not gapic_code_dir:
+            return grpc_code_dir
         final_output_dir = os.path.join(gapic_code_dir, 'proto')
         if not os.path.exists(final_output_dir):
             self.exec_command(['mkdir', '-p', final_output_dir])
