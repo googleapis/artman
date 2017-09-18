@@ -41,8 +41,7 @@ SUPPORTED_LANGS = ['python', 'java', 'ruby', 'nodejs', 'php', 'go', 'csharp']
 def run_smoke_test(apis, input_dir):
     input_dir = os.path.abspath(input_dir)
     artman_config_dirs = [
-        os.path.join(input_dir, 'artman_configs', 'common'),
-        os.path.join(input_dir, 'artman_configs', 'apis')
+        os.path.join(input_dir, 'gapic', 'api'),
     ]
 
     artman_config_whitelist = []
