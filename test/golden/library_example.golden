@@ -22,7 +22,7 @@
 /google-php-cloud-library_example-v1/proto/src/Google/Example/Library/V1/DeleteShelfRequest.php
 /google-php-cloud-library_example-v1/proto/src/Google/Example/Library/V1/GetBookRequest.php
 /google-php-cloud-library_example-v1/proto/src/Google/Example/Library/V1/GetShelfRequest.php
-/google-php-cloud-library_example-v1/proto/src/Google/Example/Library/V1/LibraryServiceClient.php
+/google-php-cloud-library_example-v1/proto/src/Google/Example/Library/V1/LibraryServiceGrpcClient.php
 /google-php-cloud-library_example-v1/proto/src/Google/Example/Library/V1/ListBooksRequest.php
 /google-php-cloud-library_example-v1/proto/src/Google/Example/Library/V1/ListBooksResponse.php
 /google-php-cloud-library_example-v1/proto/src/Google/Example/Library/V1/ListShelvesRequest.php
@@ -63,7 +63,7 @@
 /java/google-cloud-library_example/build/classes/main/com/google/cloud/example/library/spi/v1/SampleApp.class
 /java/google-cloud-library_example/build/classes/main/com/google/cloud/example/library/spi/v1/stub/GrpcLibraryServiceStub.class
 /java/google-cloud-library_example/build/classes/main/com/google/cloud/example/library/spi/v1/stub/LibraryServiceStub.class
-/java/google-cloud-library_example/build/libs/google-cloud-library_example-0.1.18.jar
+/java/google-cloud-library_example/build/libs/google-cloud-library_example-0.1.19.jar
 /java/google-cloud-library_example/build/tmp/jar/MANIFEST.MF
 /java/google-cloud-library_example/gradle/wrapper/gradle-wrapper.jar
 /java/google-cloud-library_example/gradle/wrapper/gradle-wrapper.properties
@@ -80,7 +80,7 @@
 /java/google-cloud-library_example/grpc-google-cloud-library_example-v1/build/classes/main/com/google/example/library/v1/LibraryServiceGrpc$LibraryServiceStub.class
 /java/google-cloud-library_example/grpc-google-cloud-library_example-v1/build/classes/main/com/google/example/library/v1/LibraryServiceGrpc$MethodHandlers.class
 /java/google-cloud-library_example/grpc-google-cloud-library_example-v1/build/classes/main/com/google/example/library/v1/LibraryServiceGrpc.class
-/java/google-cloud-library_example/grpc-google-cloud-library_example-v1/build/libs/grpc-google-cloud-library_example-v1-0.1.18.jar
+/java/google-cloud-library_example/grpc-google-cloud-library_example-v1/build/libs/grpc-google-cloud-library_example-v1-0.1.19.jar
 /java/google-cloud-library_example/grpc-google-cloud-library_example-v1/build/tmp/jar/MANIFEST.MF
 /java/google-cloud-library_example/grpc-google-cloud-library_example-v1/gradle/wrapper/gradle-wrapper.jar
 /java/google-cloud-library_example/grpc-google-cloud-library_example-v1/gradle/wrapper/gradle-wrapper.properties
@@ -161,7 +161,7 @@
 /java/google-cloud-library_example/proto-google-cloud-library_example-v1/build/classes/main/com/google/example/library/v1/UpdateBookRequest$Builder.class
 /java/google-cloud-library_example/proto-google-cloud-library_example-v1/build/classes/main/com/google/example/library/v1/UpdateBookRequest.class
 /java/google-cloud-library_example/proto-google-cloud-library_example-v1/build/classes/main/com/google/example/library/v1/UpdateBookRequestOrBuilder.class
-/java/google-cloud-library_example/proto-google-cloud-library_example-v1/build/libs/proto-google-cloud-library_example-v1-0.1.18.jar
+/java/google-cloud-library_example/proto-google-cloud-library_example-v1/build/libs/proto-google-cloud-library_example-v1-0.1.19.jar
 /java/google-cloud-library_example/proto-google-cloud-library_example-v1/build/tmp/jar/MANIFEST.MF
 /java/google-cloud-library_example/proto-google-cloud-library_example-v1/gradle/wrapper/gradle-wrapper.jar
 /java/google-cloud-library_example/proto-google-cloud-library_example-v1/gradle/wrapper/gradle-wrapper.properties
@@ -279,7 +279,6 @@
 /js/library_example-v1/test/gapic-v1.js
 /python/library_example-v1/LICENSE
 /python/library_example-v1/MANIFEST.in
-/python/library_example-v1/PUBLISHING.rst
 /python/library_example-v1/README.rst
 /python/library_example-v1/setup.cfg
 /python/library_example-v1/docs/conf.py
@@ -295,7 +294,7 @@
 /python/library_example-v1/google/cloud/gapic/example/library/v1/__init__.py
 /python/library_example-v1/google/cloud/gapic/example/library/v1/library_service_client.py
 /python/library_example-v1/google/cloud/gapic/example/library/v1/library_service_client_config.py
-/python/library_example-v1/google/cloud/gapic/example/library_example.py
+/python/library_example-v1/google/cloud/gapic/example/library.py
 /python/library_example-v1/google/cloud/proto/__init__.py
 /python/library_example-v1/google/cloud/proto/library_pb2.py
 /python/library_example-v1/google/cloud/proto/library_pb2_grpc.py
