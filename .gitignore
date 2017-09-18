@@ -73,3 +73,6 @@ output/*
 
 # Ctags
 tags
+
+# In case someone generates files from the artman root
+artman-genfiles/*
