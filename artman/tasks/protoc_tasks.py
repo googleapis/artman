@@ -290,7 +290,7 @@ class NodeJsProtoCopyTask(task_base.TaskBase):
     """Copies the .proto files into the gapic_code_dir/proto directory.
     """
     def execute(self, gapic_code_dir, src_proto_path, excluded_proto_path=[]):
-        final_output_dir = os.path.join(gapic_code_dir, 'proto')
+        final_output_dir = os.path.join(gapic_code_dir, 'protos')
         for proto_path in src_proto_path:
             index = protoc_utils.find_google_dir_index(proto_path)
             for src_proto_file in protoc_utils.find_protos(
