@@ -18,6 +18,8 @@ common:
   - /tmp/input/google/pubsub/pubsub.yaml
   src_proto_path:
   - /tmp/input/google/pubsub/v1
+  excluded_proto_path:
+  - /tmp/input/google/pubsub/v1/excluded
   proto_test_deps:
   - google-iam-v1
 java:

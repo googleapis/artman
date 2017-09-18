@@ -122,8 +122,13 @@ def _normalize_artifact_config(artifact_config, input_dir):
 
     normalized_src_proto_paths = []
     for src_proto_path in artifact_config.src_proto_paths:
-        normalized_src_proto_paths.append(
-            _normalize_path(src_proto_path, input_dir))
+        if src_proto_path.startswith('-'):
+            # Retain the exclusion mark "-" as the prefix of the normalized path
+            normalized_src_proto_paths.append(
+                '-%s' % _normalize_path(src_proto_path[1:], input_dir))
+        else:
+            normalized_src_proto_paths.append(
+                _normalize_path(src_proto_path, input_dir))
     artifact_config.src_proto_paths[:] = normalized_src_proto_paths
 
     return artifact_config

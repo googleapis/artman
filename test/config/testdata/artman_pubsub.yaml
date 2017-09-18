@@ -4,6 +4,7 @@ common:
   organization_name: google-cloud
   src_proto_paths:
   - google/pubsub/v1
+  - -google/pubsub/v1/excluded
   proto_deps:
   - name: google-common-protos
   - name: google-iam-v1
