@@ -4,6 +4,7 @@ google-apitools
 gcloud >= 0.15.0
 github3.py >= 0.9.6
 google-api-python-client >= 1.6.2
+networkx == 1.11.0
 kazoo >= 2.2.1
 oslo.utils >= 3.4.0
 pbr==2.0.0
