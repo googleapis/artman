@@ -5,9 +5,9 @@ common:
   proto_deps:
     - name: google-common-protos
   src_proto_paths:
-    - google/example/library/v1
-  service_yaml: ../library_example.yaml
-  gapic_yaml: ../library_example_gapic.yaml
+    - googleapis/google/example/library/v1
+  service_yaml: library_example.yaml
+  gapic_yaml: library_example_gapic.yaml
   release_level: BETA
 artifacts:
   - name: java

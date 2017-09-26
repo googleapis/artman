@@ -3,15 +3,15 @@ common:
   api_version: v1
   organization_name: google-cloud
   src_proto_paths:
-  - google/pubsub/v1
-  - -google/pubsub/v1/excluded
+  - /tmp/input/google/pubsub/v1
+  - -/tmp/input/google/pubsub/v1/excluded
   proto_deps:
   - name: google-common-protos
   - name: google-iam-v1
   test_proto_deps:
   - name: google-iam-v1
-  service_yaml: google/pubsub/pubsub.yaml
-  gapic_yaml: google/pubsub/v1/pubsub_gapic.yaml
+  service_yaml: /tmp/input/google/pubsub/pubsub.yaml
+  gapic_yaml: /tmp/input/google/pubsub/v1/pubsub_gapic.yaml
 artifacts:
 - name: java_gapic_only_library
   type: GAPIC_ONLY

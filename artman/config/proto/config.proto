@@ -117,7 +117,8 @@ message Artifact {
   // for Python).
   ReleaseLevel release_level = 5;
 
-  // The list of directory paths where your API proto(s) lives.
+  // The list of directory paths where your API proto(s) lives. The path can
+  // be an absolute paths or a path relative to the artman config yaml.
   repeated string src_proto_paths = 6;
 
   // Defines the API-specific protobuf dependency for the generated client
@@ -156,7 +157,8 @@ message Artifact {
   // Similar to `proto_deps`, but are needed for testing only.
   repeated ProtoDependency test_proto_deps = 8;
 
-  // Path to your service config yaml. See
+  // Path to your service config yaml. It can be an absolute path or a path
+  // relative to the artman config yaml. See
   // [pubsub.yaml](https://github.com/googleapis/googleapis/blob/master/google/pubsub/pubsub.yaml)
   // as an example. See
   // [service.proto](https://github.com/googleapis/googleapis/blob/master/google/api/service.proto)
@@ -166,18 +168,17 @@ message Artifact {
   // client library generation.
   string service_yaml = 9;
 
-  // Path to your GAPIC config yaml. See
+  // Path to your GAPIC config yaml. It can be an absolute path or a path
+  // relative to the artman config yaml. See
   // [pubsub_gapic.yaml](https://github.com/googleapis/googleapis/blob/master/google/pubsub/v1/pubsub_gapic.yaml)
   // as an example. See
   // [config.proto](https://github.com/googleapis/toolkit/blob/master/src/main/proto/com/google/api/codegen/config.proto)
   // for a full GAPIC config spec.
   string gapic_yaml = 10;
 
-  // This is an optional field to specify the root proto_path. It will be
-  // passed to protoc via --proto_path flag. The default value is
-  // "${INPUT_DIR}".
-  repeated string import_proto_path = 11;
-
+  reserved 11;
+  reserved import_proto_path;
+  
   enum Type {
     // This artifact type will generate a self-contained library that contains
     // GAPIC layer, GRPC stub and protoc-generated protobuf classes.

@@ -30,7 +30,7 @@ import pytest
 
 
 def test_library_example(googleapis_dir):
-    # TODO(ethanbao): Templatize this test so that we can run more golden tests.
+    # TODO(ethanbao): Templatize this test to run more golden tests.
     golden_dir = os.path.dirname(os.path.realpath(__file__))
     output_dir = '/output/new'
 
@@ -45,8 +45,10 @@ def test_library_example(googleapis_dir):
             if line and not line.startswith('#'):
                 expected.add(line)
 
-    for artifact in ['python', 'java', 'ruby', 'nodejs', 'php', 'go', 'csharp']:
-        generate_gapic_library(golden_dir, googleapis_dir, output_dir, artifact)
+    for artifact in ['python', 'java', 'ruby', 'nodejs', 'php', 'go',
+                     'csharp']:
+        generate_gapic_library(golden_dir, googleapis_dir, output_dir,
+                               artifact)
 
 
     actual = []
@@ -62,6 +64,7 @@ def test_library_example(googleapis_dir):
             output.write('%s\n' % item)
     assert expected == set(actual), \
         "Check the actual output at %s" % actual_output_file
+
 
 def test_library_example_with_legacy_syntax(googleapis_dir):
     # TODO(cbao): Remove after the old artman config and CLI get phased out.`
@@ -99,17 +102,20 @@ def test_library_example_with_legacy_syntax(googleapis_dir):
     assert expected == set(actual), \
         "Check the actual output at %s" % actual_output_file
 
-def generate_gapic_library(golden_dir, googleapis_dir, output_dir, artifact_id):
+
+def generate_gapic_library(golden_dir, googleapis_dir, output_dir,
+                           artifact_id):
     gapic_pipeline_args = [
         'artman2',
         '--config', '%s/artman_library_example_new.yaml' % golden_dir,
         '--local',
-        '--input-dir', googleapis_dir,
+        '--root-dir', googleapis_dir,
         '--output-dir', output_dir,
         'generate',
         artifact_id,
     ]
     subprocess.check_call(gapic_pipeline_args, stdout=subprocess.PIPE)
+
 
 def generate_gapic_library_legacy(golden_dir, googleapis_dir, lang):
     gapic_pipeline_args = [
@@ -117,7 +123,7 @@ def generate_gapic_library_legacy(golden_dir, googleapis_dir, lang):
         '--config', '%s/artman_library_example.yaml,'
                     '%s/gapic/lang/%s.yaml'
                     % (golden_dir, googleapis_dir,
-                      'doc' if lang in ('ruby', 'nodejs',) else 'common'),
+                       'doc' if lang in ('ruby', 'nodejs',) else 'common'),
         '--googleapis', googleapis_dir,
         '--language', lang,
         '--publish', 'noop',

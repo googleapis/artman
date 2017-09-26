@@ -77,10 +77,10 @@ jobs:
             pip install /usr/src/artman/
       - run:
           name: Build Pub/Sub (C#)
-          command: artman2 --local --config=/googleapis/gapic/api/artman_pubsub.yaml generate csharp_gapic
+          command: artman2 --local --config=/googleapis/google/pubsub/artman_pubsub.yaml generate csharp_gapic
       - run:
           name: Build Speech (C#)
-          command: artman2 --local --config=/googleapis/gapic/api/artman_speech_v1.yaml generate csharp_gapic
+          command: artman2 --local --config=/googleapis/google/cloud/speech/artman_speech_v1.yaml generate csharp_gapic
     working_directory: /usr/src/artman/
 
   smoke-go:
@@ -97,10 +97,10 @@ jobs:
             pip install /usr/src/artman/
       - run:
           name: Build Pub/Sub (Go)
-          command: artman2 --local --config=/googleapis/gapic/api/artman_pubsub.yaml generate go_gapic
+          command: artman2 --local --config=/googleapis/google/pubsub/artman_pubsub.yaml generate go_gapic
       - run:
           name: Build Speech (Go)
-          command: artman2 --local --config=/googleapis/gapic/api/artman_speech_v1.yaml generate go_gapic
+          command: artman2 --local --config=/googleapis/google/cloud/speech/artman_speech_v1.yaml generate go_gapic
     working_directory: /usr/src/artman/
 
   smoke-java:
@@ -117,10 +117,10 @@ jobs:
             pip install /usr/src/artman/
       - run:
           name: Build Pub/Sub (Java)
-          command: artman2 --local --config=/googleapis/gapic/api/artman_pubsub.yaml generate java_gapic
+          command: artman2 --local --config=/googleapis/google/pubsub/artman_pubsub.yaml generate java_gapic
       - run:
           name: Build Speech (Java)
-          command: artman2 --local --config=/googleapis/gapic/api/artman_speech_v1.yaml generate java_gapic
+          command: artman2 --local --config=/googleapis/google/cloud/speech/artman_speech_v1.yaml generate java_gapic
     working_directory: /usr/src/artman/
 
   smoke-nodejs:
@@ -137,10 +137,10 @@ jobs:
             pip install /usr/src/artman/
       - run:
           name: Build Pub/Sub (Node.js)
-          command: artman2 --local --config=/googleapis/gapic/api/artman_pubsub.yaml generate nodejs_gapic
+          command: artman2 --local --config=/googleapis/google/pubsub/artman_pubsub.yaml generate nodejs_gapic
       - run:
           name: Build Speech (Node.js)
-          command: artman2 --local --config=/googleapis/gapic/api/artman_speech_v1.yaml generate nodejs_gapic
+          command: artman2 --local --config=/googleapis/google/cloud/speech/artman_speech_v1.yaml generate nodejs_gapic
     working_directory: /usr/src/artman/
 
   smoke-php:
@@ -157,10 +157,10 @@ jobs:
             pip install /usr/src/artman/
       - run:
           name: Build Pub/Sub (PHP)
-          command: artman2 --local --config=/googleapis/gapic/api/artman_pubsub.yaml generate php_gapic
+          command: artman2 --local --config=/googleapis/google/pubsub/artman_pubsub.yaml generate php_gapic
       - run:
           name: Build Speech (PHP)
-          command: artman2 --local --config=/googleapis/gapic/api/artman_speech_v1.yaml generate php_gapic
+          command: artman2 --local --config=/googleapis/google/cloud/speech/artman_speech_v1.yaml generate php_gapic
     working_directory: /usr/src/artman/
 
   smoke-python:
@@ -177,10 +177,10 @@ jobs:
             pip install /usr/src/artman/
       - run:
           name: Build Pub/Sub (Python)
-          command: artman2 --local --config=/googleapis/gapic/api/artman_pubsub.yaml generate python_gapic
+          command: artman2 --local --config=/googleapis/google/pubsub/artman_pubsub.yaml generate python_gapic
       - run:
           name: Build Speech (Python)
-          command: artman2 --local --config=/googleapis/gapic/api/artman_speech_v1.yaml generate python_gapic
+          command: artman2 --local --config=/googleapis/google/cloud/speech/artman_speech_v1.yaml generate python_gapic
     working_directory: /usr/src/artman/
 
   smoke-ruby:
@@ -197,10 +197,10 @@ jobs:
             pip install /usr/src/artman/
       - run:
           name: Build Pub/Sub (Ruby)
-          command: artman2 --local --config=/googleapis/gapic/api/artman_pubsub.yaml generate ruby_gapic
+          command: artman2 --local --config=/googleapis/google/pubsub/artman_pubsub.yaml generate ruby_gapic
       - run:
           name: Build Speech (Ruby)
-          command: artman2 --local --config=/googleapis/gapic/api/artman_speech_v1.yaml generate ruby_gapic
+          command: artman2 --local --config=/googleapis/google/cloud/speech/artman_speech_v1.yaml generate ruby_gapic
     working_directory: /usr/src/artman/
 
   golden-test:

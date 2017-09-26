@@ -67,7 +67,7 @@ def parse_github_credentials(config, argv_flags):
     }
 
 
-def parse_local_paths(user_config, input_dir):
+def parse_local_paths(user_config, root_dir):
     """Parse all relevant local flags, given appropriate user config and user.
 
     Args:
@@ -91,8 +91,8 @@ def parse_local_paths(user_config, input_dir):
     # Only googleapis can be set with flags (this allows a temporary pointer
     # to googleapis-private if the developer uses a different directory for
     # that).
-    if input_dir:
-        local_paths['googleapis'] = input_dir
+    if root_dir:
+        local_paths['googleapis'] = root_dir
 
     # Make all paths absolute, resolve reporoot, and expand the ~.
     for key, path in local_paths.items():
