@@ -29,6 +29,10 @@ class ConverterTest(unittest.TestCase):
         self._test('artman_pubsub.yaml', 'java_gapic_only_library',
                    'expected_pubsub_java_legacy_config.yaml')
 
+    def test_pubsub_java_proto(self):
+        self._test('artman_pubsub.yaml', 'java_proto_library',
+                   'expected_pubsub_java_proto_legacy_config.yaml')
+
     def test_pubsub_python(self):
         self._test('artman_pubsub.yaml', 'python_gapic_only_library',
                    'expected_pubsub_python_legacy_config.yaml')
@@ -42,7 +46,9 @@ class ConverterTest(unittest.TestCase):
                 self.TESTDATA, expected_legacy_config), 'r') as yaml_file:
             expected_legacy_config_dict = yaml.load(yaml_file)
             self.assertDictEqual(
-                expected_legacy_config_dict, actual_legacy_config_dict)
+                expected_legacy_config_dict, actual_legacy_config_dict,
+                'Actual yaml is \n%s' % yaml.dump(
+                    actual_legacy_config_dict, default_flow_style=False))
 
 
 if __name__ == '__main__':

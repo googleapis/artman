@@ -31,8 +31,14 @@ def convert_to_legacy_config_dict(artifact_config, root_dir, output_dir):
     common['api_name'] = artifact_config.api_name
     common['api_version'] = artifact_config.api_version
     common['organization_name'] = artifact_config.organization_name
-    common['service_yaml'] = [artifact_config.service_yaml]
-    common['gapic_api_yaml'] = [artifact_config.gapic_yaml]
+    if artifact_config.service_yaml:
+        common['service_yaml'] = [artifact_config.service_yaml]
+    else:
+        common['service_yaml'] = []
+    if artifact_config.gapic_yaml:
+        common['gapic_api_yaml'] = [artifact_config.gapic_yaml]
+    else:
+        common['gapic_api_yaml'] = []
     common['src_proto_path'], excluded_proto_path = _calculate_proto_paths(
         _repeated_proto3_field_to_list(
             artifact_config.src_proto_paths))
@@ -52,8 +58,12 @@ def convert_to_legacy_config_dict(artifact_config, root_dir, output_dir):
     packaging = 'single-artifact'  # default packaing
     if artifact_config.type == Artifact.GRPC_COMMON:
         package_type = 'grpc_common'
+        # For backward-compatibility.
+        # TODO(ethanbao): Should not restrict to google-cloud packaging.
+        packaging = 'google-cloud'
     elif artifact_config.type == Artifact.GAPIC_ONLY:
         packaging = 'google-cloud'
+
     common['packaging'] = packaging
     common['package_type'] = package_type
 

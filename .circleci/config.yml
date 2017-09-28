@@ -219,7 +219,8 @@ jobs:
             git clone https://github.com/googleapis/googleapis /usr/src/artman/test/golden/googleapis
       - run:
           name: Run golden test
-          command: py.test test/golden/artman_golden_test.py --googleapis-dir=/usr/src/artman/test/golden/googleapis
+          # Set the environment variable so that the cached shared config will be used during the smoketest.
+          command: export RUNNING_IN_ARTMAN_DOCKER=True && py.test test/golden/artman_golden_test.py --googleapis-dir=/usr/src/artman/test/golden/googleapis
       - store_artifacts:
             path: /usr/src/artman/test/golden/actual_library_example.golden
       - store_artifacts:

@@ -51,3 +51,14 @@ artifacts:
   type: GAPIC
   language: JAVA
   release_level: BETA
+- name: java_proto_library
+  type: PROTOBUF
+  language: JAVA
+  release_level: BETA
+  publish_targets:
+  - name: staging-github
+    location: git@github.com:ethanbao/api-client-staging.git
+    type: GITHUB
+    directory_mappings:
+    - src: java/proto-google-cloud-pubsub-v1
+      dest: generated/java/proto-google-cloud-pubsub-v1

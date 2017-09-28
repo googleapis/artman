@@ -177,8 +177,8 @@ message Artifact {
   string gapic_yaml = 10;
 
   reserved 11;
-  reserved import_proto_path;
-  
+  reserved "import_proto_path";
+
   enum Type {
     // This artifact type will generate a self-contained library that contains
     // GAPIC layer, GRPC stub and protoc-generated protobuf classes.
@@ -194,6 +194,10 @@ message Artifact {
     // This artifact type is used for generating a shared GRPC library
     // package that doesn't include any API surface part.
     GRPC_COMMON = 3;
+
+    // This artifact type will generate a protobuf library using protobuf
+    // compiler.
+    PROTOBUF = 4;
 
     // This artifact type will only generate a GAPIC library. Use this type
     // along with GRPC type if you plan to publish GRPC package and GAPIC

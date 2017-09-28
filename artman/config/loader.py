@@ -106,11 +106,13 @@ def _normalize_artifact_config(artifact_config, artman_config_path):
     """
     # Normalize the input file or folder by concanating relative path with
     # the folder of artman config yaml.
-    artifact_config.service_yaml = _normalize_path(
-        artifact_config.service_yaml, artman_config_path, 'service_yaml')
+    if artifact_config.service_yaml:
+        artifact_config.service_yaml = _normalize_path(
+            artifact_config.service_yaml, artman_config_path, 'service_yaml')
 
-    artifact_config.gapic_yaml = _normalize_path(
-        artifact_config.gapic_yaml, artman_config_path, 'gapic_yaml')
+    if artifact_config.gapic_yaml:
+        artifact_config.gapic_yaml = _normalize_path(
+            artifact_config.gapic_yaml, artman_config_path, 'gapic_yaml')
 
     normalized_src_proto_paths = []
     for src_proto_path in artifact_config.src_proto_paths:
