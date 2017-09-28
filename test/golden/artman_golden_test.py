@@ -38,6 +38,9 @@ def test_library_example(googleapis_dir):
         pytest.skip(
             'Skip the golden test as the --googleapis-dir flag is not set.')
 
+    # Resolve relative paths.
+    googleapis_dir = os.path.realpath(os.path.expanduser(googleapis_dir))
+
     with open(os.path.join(golden_dir, 'library_example.golden')) as f:
         expected = set()
         for line in f.read().splitlines():
@@ -72,6 +75,9 @@ def test_library_example_with_legacy_syntax(googleapis_dir):
     if not googleapis_dir:
         pytest.skip(
             'Skip the golden test as the --googleapis-dir flag is not set.')
+
+    # Resolve relative paths.
+    googleapis_dir = os.path.realpath(os.path.expanduser(googleapis_dir))
 
     # It is intended to use the same expected golden output so that we know
     # the new artman config is compatible with the old one from the output
