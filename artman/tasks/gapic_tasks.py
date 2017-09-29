@@ -145,8 +145,9 @@ class CSharpGapicPackagingTask(task_base.TaskBase):
         self.exec_command(['sh', '-c', 'cp {0}/*.cs {1}'.format(grpc_code_dir, prod_dir)])
         self.exec_command(['sh', '-c', 'cp {0}/*.cs {1}'.format(proto_code_dir, prod_dir)])
         self.exec_command(['sh', '-c', 'mv {0}/*.cs {1}'.format(gapic_code_dir, prod_dir)])
+        self.exec_command(['sh', '-c', 'mv {0}/*.csproj {1} || true'.format(gapic_code_dir, prod_dir)])
         self.exec_command(['sh', '-c', 'mv {0}/*Snippets.g.cs {1}'.format(prod_dir, snippets_dir)])
-        
+
 
 class GapicPackmanTask(packman_tasks.PackmanTaskBase):
     default_provides = 'package_dir'
