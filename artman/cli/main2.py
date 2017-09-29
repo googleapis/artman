@@ -40,7 +40,7 @@ from artman.pipelines import pipeline_factory
 from artman.utils import config_util
 from artman.utils.logger import logger, setup_logging
 
-ARTMAN_DOCKER_IMAGE = 'googleapis/artman:0.4.19'
+ARTMAN_DOCKER_IMAGE = 'googleapis/artman:0.4.20'
 RUNNING_IN_ARTMAN_DOCKER_TOKEN = 'RUNNING_IN_ARTMAN_DOCKER'
 
 
