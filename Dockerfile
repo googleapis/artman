@@ -136,7 +136,7 @@ RUN pear install PHP_CodeSniffer-2.7.0 \
 #     protoc output.cd
 RUN apt-get update \
   && apt-get install -y pandoc \
-  && pip3 install protoc-docs-plugin \
+  && pip3 install protoc-docs-plugin==0.2.0 \
   && rm -rf /var/lib/apt/lists/*
 
 # Install .NET Core SDK (about 280MB)
