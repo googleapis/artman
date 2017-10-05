@@ -16,98 +16,127 @@
 
 """Artman smoke tests.
 
-It generates both grpc and gapic client libraries for Google APIs in googleapis
-repo (except those being blacklisted), and fails if any generation fails.
-The test currently assumes that artman and googleapis folders are under the
-same parent folder.
+It generates GAPIC client libraries for Google APIs in googleapis
+repo. The test will fails if any generation fails unless its artman yaml file
+is on the whitelist.
 """
 
 import argparse
-import fnmatch
+import glob
+import json
+import logging
 import os
-import re
 import subprocess
 import sys
+import yaml
 
-ARTMAN_CONFIG_BLACKLIST = [
-    'artman_spanner_admin_instance.yaml',
-    'artman_spanner_admin_database.yaml',
-    'artman_bigtable_admin.yaml'
+from google.protobuf import json_format
+
+from artman.config.proto import config_pb2
+
+# Generation failure of artifact on the whitelist won't be counted as failure
+# but warning.
+WHITELIST = [
+    'google/spanner/admin/instance/artman_spanner_admin_instance.yaml',
+    'google/spanner/admin/database/artman_spanner_admin_database.yaml',
+    'google/bigtable/admin/artman_bigtable_admin.yaml',
+    'google/genomics/artman_genomics.yaml',
+    'google/logging/artman_logging.yaml',
+    'google/iam/artman_iam_admin.yaml',
 ]
 
-SUPPORTED_LANGS = ['python', 'java', 'ruby', 'nodejs', 'php', 'go', 'csharp']
+logger = logging.getLogger('smoketest')
+logger.setLevel(logging.INFO)
 
 
-def run_smoke_test(apis, input_dir):
-    input_dir = os.path.abspath(input_dir)
-    artman_config_dirs = [
-        os.path.join(input_dir, 'gapic', 'api'),
-    ]
-
-    artman_config_whitelist = []
-    if apis:
-        for api in apis.split(','):
-            artman_config_whitelist.append('artman_%s.yaml' % api)
-
-    for artman_config_dir in artman_config_dirs:
-        _smoke_test(input_dir, artman_config_dir, artman_config_whitelist)
-
-
-def _smoke_test(input_dir, artman_config_dir, artman_config_whitelist):
+def run_smoke_test(root_dir, log):
+    log_file = _setup_logger(log)
     failure = []
-    for root, dirs, files in os.walk(artman_config_dir):
-        for f in fnmatch.filter(files, 'artman_*.yaml'):
-            if f in ARTMAN_CONFIG_BLACKLIST:
-                # Do not run generation tests for those in the blacklist.
-                continue
-            if artman_config_whitelist and f not in artman_config_whitelist:
-                # If apis list is given, only test those in the list
-                continue
-            api_name = re.search('artman_(.*)\.yaml', f).group(1)
-            filename = os.path.join(root, f)
-            content = open(filename).read()
-            for lang in SUPPORTED_LANGS:
-                artifact_name = '%s_gapic' % lang
-                if 'name: %s' % lang in content:
-                    if _generate_gapic_library(
-                          filename, artifact_name, input_dir):
-                        failure.append('Failed to generate gapic %s library '
-                                       'for %s' % (lang, api_name))
+    success = []
+    warning = []
+    for artman_yaml_path in glob.glob('%s/google/**/artman_*.yaml' % root_dir,
+                                      recursive=True):
+        artman_config = _parse(artman_yaml_path)
+        for artifact in artman_config.artifacts:
+            logger.info('Start artifact generation for %s of %s'
+                        % (artifact.name, artman_yaml_path))
+            if _generate_gapic_library(artman_yaml_path,
+                                       artifact.name,
+                                       root_dir,
+                                       log_file):
+                msg = 'Failed to generate %s of %s.' % (
+                    artifact.name, artman_yaml_path)
+                if os.path.relpath(artman_yaml_path, root_dir) in WHITELIST:
+                    warning.append(msg)
+                else:
+                    failure.append(msg)
+            else:
+                msg = 'Succeded to generate %s of %s.' % (
+                    artifact.name, artman_yaml_path)
+                success.append(msg)
+            logger.info(msg)
+    logger.info('================ Smoketest summary ================')
+    logger.info('Success:')
+    for msg in success:
+        logger.info(msg)
+    logger.info('Warning:')
+    for msg in warning:
+        logger.info(msg)
+    logger.info('Failure:')
+    for msg in failure:
+        logger.error(msg)
     if failure:
-        sys.exit('Smoke test failed:\n%s' % '\n'.join(failure))
+        sys.exit('Smoke test failed.')
 
 
-def _generate_gapic_library(artman_config, artifact_name, input_dir):
-    grpc_pipeline_args = [
-        'artman2',
-        '--local',
-        '--config', artman_config,
-        '--input', input_dir,
-        'generate', artifact_name
-    ]
-    return subprocess.call(grpc_pipeline_args, stdout=subprocess.PIPE)
+def _parse(artman_yaml_path):
+    """Parse artman yaml config into corresponding protobuf."""
+    with open(artman_yaml_path, 'r') as f:
+        # Convert yaml into json file as protobuf python load support parsing
+        # of protobuf in json or text format, not yaml.
+        artman_config_json_string = json.dumps(yaml.load(f))
+    config_pb = config_pb2.Config()
+    json_format.Parse(artman_config_json_string, config_pb)
+
+    return config_pb
+
+
+def _generate_gapic_library(artman_config, artifact_name, root_dir, log_file):
+    with open(log_file, 'a') as log:
+        grpc_pipeline_args = [
+            'artman2',
+            '--local',
+            '--config', artman_config,
+            '--root-dir', root_dir,
+            'generate', artifact_name
+        ]
+        return subprocess.call(grpc_pipeline_args, stdout=log, stderr=log)
 
 
 def parse_args(*args):
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        '--apis',
-        default=None,
-        type=str,
-        help='Comma-delimited list of apis to test against. The artman config '
-             'of the API must be available in googleapis/googleapis github '
-             'repo in order for smoketest to run properly. If not specified, '
-             'all APIs will be tested. APIs in the blacklist will not be '
-             'tested.')
-    parser.add_argument(
-        '--input-dir',
+        '--root-dir',
         default='/googleapis',
         type=str,
         help='Specify where googleapis local repo lives.')
+    parser.add_argument(
+        '--log',
+        default='/tmp/smoketest.log',
+        type=str,
+        help='Specify where smoketest log should be stored.')
     return parser.parse_args(args=args)
 
 
-if __name__ == "__main__":
+def _setup_logger(log_file):
+    """Setup logger with a logging FileHandler."""
+    log_file_handler = logging.FileHandler(log_file)
+    logger.addHandler(log_file_handler)
+    logger.addHandler(logging.StreamHandler())
+    return log_file
+
+
+if __name__ == '__main__':
     flags = parse_args(*sys.argv[1:])
 
-    run_smoke_test(flags.apis, flags.input_dir)
+    run_smoke_test(os.path.abspath(flags.root_dir), os.path.abspath(flags.log))

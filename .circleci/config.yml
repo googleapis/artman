@@ -227,6 +227,31 @@ jobs:
             path: /usr/src/artman/test/golden/actual_library_example_legacy.golden
     working_directory: /usr/src/artman/
 
+  smoke-all:
+    docker:
+      - image: googleapis/artman:latest
+        environment:
+          TERM: dumb
+    steps:
+      - checkout
+      - run:
+          name: Install latest artman and clone googleapis repo
+          # Always get the latest googleapis repo for smoketest
+          command: |
+            pip uninstall -y googleapis-artman
+            pip install /usr/src/artman/
+            git clone https://github.com/googleapis/googleapis /googleapis_smoketest
+      - run:
+          name: Run smoke tests
+          command: |
+            mkdir /tmp/reports
+            python3 /usr/src/artman/test/smoketest_artman.py --root-dir=/googleapis_smoketest --log=/tmp/reports/smoketest.log
+      - store_test_results:
+          path: /tmp/reports
+      - store_artifacts:
+          path: /tmp/reports
+    working_directory: /usr/src/artman/
+
 workflows:
   version: 2
   tests:
@@ -243,3 +268,6 @@ workflows:
       - smoke-python
       - smoke-ruby
       - golden-test
+  smoketests:
+    jobs:
+      - smoke-all
