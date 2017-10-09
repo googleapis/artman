@@ -43,7 +43,8 @@ WHITELIST = [
     'google/genomics/artman_genomics.yaml',
     'google/iam/artman_iam_admin.yaml',
     'google/privacy/dlp/artman_dlp.yaml',
-    'google/firestore/artman_filestore.yaml',
+    'google/firestore/artman_firestore.yaml',
+    'google/logging/artman_logging.yaml',
 ]
 
 logger = logging.getLogger('smoketest')

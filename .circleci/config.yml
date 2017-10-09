@@ -14,9 +14,6 @@ jobs:
     working_directory: /usr/src/artman
     docker:
       - image: docker:17.05.0-ce-git
-    branches:
-      only:
-        - master
     steps:
       - checkout
       - setup_remote_docker
@@ -61,7 +58,7 @@ jobs:
           name: Run smoketests
           command: |
             mkdir /tmp/reports
-            docker run -it -v /tmp/reports:/tmp/reports artman /bin/bash -c "git clone https://github.com/googleapis/googleapis /tmp/googleapis_smoketest; python3 /artman/test/smoketest_artman.py --root-dir=/tmp/googleapis_smoketest --log=/tmp/reports/smoketest.log"
+            docker run -it -e RUNNING_IN_ARTMAN_DOCKER=True -v /tmp/reports:/tmp/reports artman /bin/bash -c "git clone https://github.com/googleapis/googleapis /tmp/googleapis_smoketest; python3 /artman/test/smoketest_artman.py --root-dir=/tmp/googleapis_smoketest --log=/tmp/reports/smoketest.log"
       - deploy:
           name: Push Artman Docker image
           command: |
@@ -69,6 +66,8 @@ jobs:
               docker login -e $DOCKER_EMAIL -u $DOCKER_USER -p $DOCKER_PASS
               docker tag artman "googleapis/artman:AUTO_BUILD_$CIRCLE_BUILD_NUM"
               docker push "googleapis/artman:AUTO_BUILD_$CIRCLE_BUILD_NUM"
+              docker tag artman "googleapis/artman:latest"
+              docker push "googleapis/artman:latest"
             else
               echo "Environment variables DOCKER_EMAIL, DOCKER_USER, DOCKER_PASS are not properly set in CircleCI project."
               echo "Skip the Artman Docker image publishing step."
@@ -316,4 +315,7 @@ workflows:
       - golden-test
   build_and_push_docker_image:
     jobs:
-      - build_and_push_docker_image
+      - build_and_push_docker_image:
+          filters:
+            branches:
+              only: master
