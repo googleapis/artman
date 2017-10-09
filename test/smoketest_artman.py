@@ -41,8 +41,9 @@ WHITELIST = [
     'google/spanner/admin/database/artman_spanner_admin_database.yaml',
     'google/bigtable/admin/artman_bigtable_admin.yaml',
     'google/genomics/artman_genomics.yaml',
-    'google/logging/artman_logging.yaml',
     'google/iam/artman_iam_admin.yaml',
+    'google/privacy/dlp/artman_dlp.yaml',
+    'google/firestore/artman_filestore.yaml',
 ]
 
 logger = logging.getLogger('smoketest')
@@ -130,7 +131,7 @@ def parse_args(*args):
 
 def _setup_logger(log_file):
     """Setup logger with a logging FileHandler."""
-    log_file_handler = logging.FileHandler(log_file)
+    log_file_handler = logging.FileHandler(log_file, mode='a+')
     logger.addHandler(log_file_handler)
     logger.addHandler(logging.StreamHandler())
     return log_file

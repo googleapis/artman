@@ -10,6 +10,77 @@ jobs:
           command: echo "Hello world!"
     working_directory: /usr/src/artman/
 
+  build_and_push_docker_image:
+    working_directory: /usr/src/artman
+    docker:
+      - image: docker:17.05.0-ce-git
+    branches:
+      only:
+        - master
+    steps:
+      - checkout
+      - setup_remote_docker
+      - run:
+          name: Fingers crossed!
+          command: |
+            echo "Fingers crossed!"
+      - restore_cache:
+          keys:
+            - artman-{{ .Branch }}
+          paths:
+            - /caches/artman.tar
+      - run:
+          name: Load Artman Docker image layer cache
+          command: |
+            set +o pipefail
+            docker load -i /caches/artman.tar | true
+      - run:
+          name: Build application Docker image
+          command: |
+            echo "ADD . /artman" >> Dockerfile
+            echo "RUN pip uninstall -y googleapis-artman" >> Dockerfile
+            echo "RUN pip install -e /artman" >> Dockerfile
+            docker build --cache-from=artman -t artman .
+      - run:
+          name: Save Artman Docker image layer cache
+          command: |
+            mkdir -p /caches
+            docker save -o /caches/artman.tar artman
+      - save_cache:
+          key: artman-{{ .Branch }}
+          paths:
+            - /caches/artman.
+      - run:
+          name: Run golden tests
+          command: |
+            docker run -it -e RUNNING_IN_ARTMAN_DOCKER=True -v /tmp/reports:/tmp/reports artman /bin/bash -c "pip install pytest; git clone https://github.com/googleapis/googleapis /artman/test/golden/googleapis; py.test /artman/test/golden/artman_golden_test.py --googleapis-dir=/artman/test/golden/googleapis"
+      # When build performance is a concern, consider separating this job into
+      # a workflow with multiple jobs and have the smoketest run in parallel
+      # with additional paid containers.
+      - run:
+          name: Run smoketests
+          command: |
+            mkdir /tmp/reports
+            docker run -it -v /tmp/reports:/tmp/reports artman /bin/bash -c "git clone https://github.com/googleapis/googleapis /tmp/googleapis_smoketest; python3 /artman/test/smoketest_artman.py --root-dir=/tmp/googleapis_smoketest --log=/tmp/reports/smoketest.log"
+      - deploy:
+          name: Push Artman Docker image
+          command: |
+            if [ "${DOCKER_EMAIL}" == 'googleapis-publisher@google.com' ]; then
+              docker login -e $DOCKER_EMAIL -u $DOCKER_USER -p $DOCKER_PASS
+              docker tag artman "googleapis/artman:AUTO_BUILD_$CIRCLE_BUILD_NUM"
+              docker push "googleapis/artman:AUTO_BUILD_$CIRCLE_BUILD_NUM"
+            else
+              echo "Environment variables DOCKER_EMAIL, DOCKER_USER, DOCKER_PASS are not properly set in CircleCI project."
+              echo "Skip the Artman Docker image publishing step."
+            fi
+      - run:
+          name: Hooray!
+          command: echo "Hooray!"
+      - store_test_results:
+          path: /tmp/reports
+      - store_artifacts:
+          path: /tmp/reports
+
   unit-python2.7:
     docker:
       - image: python:2.7
@@ -227,31 +298,6 @@ jobs:
             path: /usr/src/artman/test/golden/actual_library_example_legacy.golden
     working_directory: /usr/src/artman/
 
-  smoke-all:
-    docker:
-      - image: googleapis/artman:latest
-        environment:
-          TERM: dumb
-    steps:
-      - checkout
-      - run:
-          name: Install latest artman and clone googleapis repo
-          # Always get the latest googleapis repo for smoketest
-          command: |
-            pip uninstall -y googleapis-artman
-            pip install /usr/src/artman/
-            git clone https://github.com/googleapis/googleapis /googleapis_smoketest
-      - run:
-          name: Run smoke tests
-          command: |
-            mkdir /tmp/reports
-            python3 /usr/src/artman/test/smoketest_artman.py --root-dir=/googleapis_smoketest --log=/tmp/reports/smoketest.log
-      - store_test_results:
-          path: /tmp/reports
-      - store_artifacts:
-          path: /tmp/reports
-    working_directory: /usr/src/artman/
-
 workflows:
   version: 2
   tests:
@@ -268,6 +314,6 @@ workflows:
       - smoke-python
       - smoke-ruby
       - golden-test
-  smoketests:
+  build_and_push_docker_image:
     jobs:
-      - smoke-all
+      - build_and_push_docker_image
