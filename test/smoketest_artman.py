@@ -106,7 +106,7 @@ def _parse(artman_yaml_path):
 def _generate_gapic_library(artman_config, artifact_name, root_dir, log_file):
     with open(log_file, 'a') as log:
         grpc_pipeline_args = [
-            'artman2',
+            'artman',
             '--local',
             '--config', artman_config,
             '--root-dir', root_dir,

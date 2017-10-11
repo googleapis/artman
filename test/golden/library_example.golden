@@ -273,10 +273,10 @@
 /js/library_example-v1/package.json
 /js/library_example-v1/protos/google/example/library/v1/library.proto
 /js/library_example-v1/src/index.js
-/js/library_example-v1/src/v1/doc/doc_library.js
 /js/library_example-v1/src/v1/index.js
 /js/library_example-v1/src/v1/library_service_client.js
 /js/library_example-v1/src/v1/library_service_client_config.json
+/js/library_example-v1/src/v1/doc/google/example/library/v1/doc_library.js
 /js/library_example-v1/test/gapic-v1.js
 /python/library_example-v1/LICENSE
 /python/library_example-v1/MANIFEST.in

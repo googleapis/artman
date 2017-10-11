@@ -1,31 +1,33 @@
 common:
   api_name: library_example
   api_version: v1
-  package_type: grpc_client
   organization_name: google-cloud
   proto_deps:
-    - google-common-protos
-  import_proto_path:
-    - ${GOOGLEAPIS}
-  src_proto_path:
-    - ${GOOGLEAPIS}/google/example/library/v1
-  service_yaml:
-    - ${GOOGLEAPIS}/../library_example.yaml
-  gapic_api_yaml:
-    - ${GOOGLEAPIS}/../library_example_gapic.yaml
-  output_dir: ${REPOROOT}/output/legacy
-  release_level: beta
-csharp:
-  gapic_code_dir: ${REPOROOT}/output/legacy/csharp/google-cloud-library_example
-go:
-  gapic_code_dir: ${REPOROOT}/output/legacy/gapi-cloud-library_example-go
-java:
-  gapic_code_dir: ${REPOROOT}/output/legacy/java/google-cloud-library_example
-nodejs:
-  gapic_code_dir: ${REPOROOT}/output/legacy/js/library_example-v1
-php:
-  gapic_code_dir: ${REPOROOT}/output/legacy/google-php-cloud-library_example-v1
-python:
-  gapic_code_dir: ${REPOROOT}/output/legacy/python/library_example-v1
-ruby:
-  gapic_code_dir: ${REPOROOT}/output/legacy/ruby/google-cloud-ruby/google-cloud-library_example
+    - name: google-common-protos
+  src_proto_paths:
+    - googleapis/google/example/library/v1
+  service_yaml: library_example.yaml
+  gapic_yaml: library_example_gapic.yaml
+  release_level: BETA
+artifacts:
+  - name: java
+    type: GAPIC
+    language: JAVA
+  - name: python
+    type: GAPIC
+    language: PYTHON
+  - name: csharp
+    type: GAPIC
+    language: CSHARP
+  - name: ruby
+    type: GAPIC
+    language: RUBY
+  - name: nodejs
+    type: GAPIC
+    language: NODEJS
+  - name: go
+    type: GAPIC
+    language: GO
+  - name: php
+    type: GAPIC
+    language: PHP

@@ -27,7 +27,7 @@ with io.open('%s/requirements.txt' % cur_dir) as requirements_file:
 
 setuptools.setup(
     name='googleapis-artman',
-    version='0.4.20',
+    version='0.5.0',
     description='Google API artifact manager',
     author='Google Inc',
     author_email='googleapis-packages@google.com',
@@ -39,11 +39,10 @@ setuptools.setup(
     entry_points={
         'console_scripts': [
             'artman = artman.cli.main:main',
-            # Rename once the refactoring is fully complete.
-            'artman2 = artman.cli.main2:main',
+            # artman2 is simply an alias of artman for backward-compatibility
+            # reason. Starting 0.6.0, we will remove artman2.
+            'artman2 = artman.cli.main:main',
             'configure-artman = artman.cli.configure:configure',
-            # Remove once all configs finishes the conversion.
-            'converter = artman.cli.converter:main',
             'start-artman-conductor = artman.cli.conductor:start',
         ],
     },

@@ -15,14 +15,9 @@
 from __future__ import absolute_import
 from argparse import Namespace
 import io
-import json
-import logging
 import os
 import textwrap
-import time
 import unittest
-
-import gcloud
 
 import mock
 
@@ -32,41 +27,33 @@ from artman.cli import main
 from artman.utils.logger import logger
 
 
+CUR_DIR = os.path.dirname(os.path.realpath(__file__))
+
+
 class ParseArgsTests(unittest.TestCase):
-    def test_no_args(self):
-        with pytest.raises(SystemExit):
-            main.parse_args()
 
-    def test_api_or_config_required(self):
+    def test_artifact_name_required(self):
         with pytest.raises(SystemExit):
-            main.parse_args('--language', 'python')
-
-    def test_api_or_config_mutually_exclusive(self):
-        with pytest.raises(SystemExit):
-            main.parse_args('--api', 'pubsub', '--language', 'python',
-                            '--config' '../googleapis/gapic/artman_pubsub.yml')
-
-    def test_api_or_batch_mutually_exclusive(self):
-        with pytest.raises(SystemExit):
-            main.parse_args('--api', 'pubsub', '--language', 'python',
-                            '--batch')
+            main.parse_args('generate')
 
     def test_minimal_args(self):
-        flags = main.parse_args('--language', 'python',
-                                '--api', 'pubsub')
-        assert flags.pipeline_name == ''
-        assert flags.pipeline_kwargs == '{}'
-        assert flags.api == 'pubsub'
+        flags = main.parse_args('generate', 'python_gapic')
+        assert flags.config == 'artman.yaml'
         assert flags.user_config == '~/.artman/config.yaml'
-        assert flags.googleapis is None
-        assert flags.remote is False
-        assert flags.language == 'python'
+        assert flags.output_dir == './artman-genfiles'
+        assert flags.root_dir is ''
+        assert flags.local is False
+        assert flags.artifact_name == 'python_gapic'
+        assert flags.image == main.ARTMAN_DOCKER_IMAGE
+
+        flags = main.parse_args('publish', '--target=staging', 'python_gapic')
+        assert flags.config == 'artman.yaml'
+        assert flags.artifact_name == 'python_gapic'
         assert flags.github_username is None
         assert flags.github_token is None
-        assert flags.publish is None
-        assert flags.target is None
-        assert flags.config is ''
+        assert flags.target == 'staging'
         assert flags.verbosity is None
+        assert flags.dry_run is False
 
 
 class ReadUserConfigTests(unittest.TestCase):
@@ -104,11 +91,13 @@ class NormalizeFlagTests(unittest.TestCase):
 
     def setUp(self):
         self.flags = Namespace(
-            api='pubsub', batch=False, config=None,
-            github_username='lukesneeringer', github_token='1335020400',
-            googleapis='%s/data' % self.CURDIR, language='python',
-            pipeline_name='GapicClientPipeline', pipeline_kwargs='{}',
-            publish='local', remote=False, target='staging', verbosity=60,
+            config=os.path.join(CUR_DIR, 'data', 'artman_test.yaml'),
+            root_dir=os.path.join(CUR_DIR, 'data'),
+            subcommand='generate',
+            github_username='test', github_token='token',
+            artifact_name='python_gapic',
+            output_dir='./artman-genfiles',
+            dry_run=False
         )
         self.user_config = {
             'local_paths': {'reporoot': os.path.realpath('..')},
@@ -116,93 +105,21 @@ class NormalizeFlagTests(unittest.TestCase):
         }
 
     def test_basic_args(self):
-        name, args, env = main.normalize_flags(self.flags, self.user_config)
+        name, args = main.normalize_flags(self.flags, self.user_config)
         assert name == 'GapicClientPipeline'
         assert args['common_protos_yaml'].endswith('common_protos.yaml')
         assert args['desc_proto_path'][0].endswith('google/iam/v1')
-        assert args['gapic_api_yaml'][0].endswith('pubsub_gapic.yaml')
+        assert args['gapic_api_yaml'][0].endswith('test_gapic.yaml')
         assert args['gapic_language_yaml'][0].endswith('python_gapic.yaml')
         assert args['local_paths']
         assert 'github' not in args
         assert args['language'] == 'python'
-        assert args['publish'] == 'local'
-        assert env is None
-
-    def test_no_language(self):
-        self.flags.language = None
-        with pytest.raises(SystemExit):
-            main.normalize_flags(self.flags, self.user_config)
-
-    def test_no_language_config_pipeline(self):
-        self.flags.pipeline_name = 'GapicConfigPipeline'
-        self.flags.language = None
-        name, args, env = main.normalize_flags(self.flags, self.user_config)
-        assert name == 'GapicConfigPipeline'
-        assert 'language' not in args
-
-    def test_github_credentials(self):
-        self.flags.publish = 'github'
-        name, args, env = main.normalize_flags(self.flags, self.user_config)
-        assert args['publish'] == 'github'
-        assert args['github']['username'] == 'lukesneeringer'
-        assert args['github']['token'] == '1335020400'
-
-    def test_pipeline_kwargs(self):
-        self.flags.pipeline_kwargs = json.dumps({
-            'foo': 'bar',
-            'spam': 'eggs',
-        })
-        with mock.patch.object(logger, 'warn') as warn:
-            _, args, _ = main.normalize_flags(self.flags, self.user_config)
-            warn.assert_called_once()
-        assert args['foo'] == 'bar'
-        assert args['spam'] == 'eggs'
-
-    def test_remote(self):
-        self.flags.remote = True
-        _, args, env = main.normalize_flags(self.flags, self.user_config)
-        assert args['local_paths']['reporoot'].startswith('/tmp/artman/')
-        assert env == 'remote'
-
-    def test_explicit_config(self):
-        self.flags.api = None
-        self.flags.config = ','.join([
-            '%s/data/gapic/api/artman_pubsub.yaml' % self.CURDIR,
-            '%s/data/gapic/lang/common.yaml' % self.CURDIR,
-        ])
-        _, args, _ = main.normalize_flags(self.flags, self.user_config)
-        assert args['gapic_api_yaml'][0].endswith('pubsub_gapic.yaml')
-        assert args['gapic_language_yaml'][0].endswith('python_gapic.yaml')
-
-    def test_batch(self):
-        self.flags.api = None
-        self.flags.batch = True
-        self.flags.pipeline_name = None
-        self.flags.target = None
-        self.flags.publish = None
-        name, args, _ = main.normalize_flags(self.flags, self.user_config)
-        assert name == 'GapicClientBatchPipeline'
-        assert args['batch_apis'] == '*'
         assert args['publish'] == 'noop'
 
-    def test_batch_with_target(self):
-        self.flags.api = None
-        self.flags.batch = True
-        with pytest.raises(SystemExit):
-            main.normalize_flags(self.flags, self.user_config)
-
-
-class PrintLogTests(unittest.TestCase):
-    @mock.patch.object(gcloud.logging, 'Client')
-    @mock.patch.object(logger, 'error')
-    @mock.patch.object(time, 'sleep')
-    def test_print_log(self, sleep, error, client):
-        client().logger().list_entries.return_value = [
-            (Namespace(payload='foo'), Namespace(payload='bar')),
-            'token',
-        ]
-        main._print_log('00000000')
-        assert error.call_count == 2
-        assert error.mock_calls[0][1][0] == 'foo'
-        assert error.mock_calls[1][1][0] == 'bar'
-        sleep.assert_called_once_with(30)
+    def test_github_credentials(self):
+        self.flags.target = 'github'
+        self.flags.subcommand = 'publish'
+        name, args = main.normalize_flags(self.flags, self.user_config)
+        assert args['publish'] == 'github'
+        assert args['github']['username'] == 'test'
+        assert args['github']['token'] == 'token'

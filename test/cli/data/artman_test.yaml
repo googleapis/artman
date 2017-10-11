@@ -1,0 +1,32 @@
+common:
+  api_name: test
+  api_version: v1
+  organization_name: test-org
+  service_yaml: test.yaml
+  gapic_yaml: v1/test_gapic.yaml
+  src_proto_paths:
+  - v1
+  proto_deps:
+  - name: google-common-protos
+  - name: google-iam-v1
+artifacts:
+- name: java_gapic
+  language: JAVA
+- name: python_gapic
+  language: PYTHON
+  publish_targets:
+  - name: github
+    type: GITHUB
+    location: git@github.com:test/example.git
+- name: php_gapic
+  language: PHP
+- name: ruby_gapic
+  language: RUBY
+- name: go_gapic
+  language: GO
+- name: csharp_gapic
+  language: CSHARP
+- name: nodejs_gapic
+  language: NODEJS
+- name: gapic_config
+  type: GAPIC_CONFIG

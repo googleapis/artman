@@ -168,12 +168,12 @@ RUN curl -SL $DOTNET_SDK_DOWNLOAD_URL --output dotnet.tar.gz \
 # Install couple of git repos
 RUN git clone https://github.com/googleapis/googleapis \
   && cd googleapis \
-  && git checkout 4f3fbf77d6880dab94ed86d8f4304f0d446bbe1f \
+  && git checkout e812b177194fd0468a03d3bfefa4d7283f2a922f \
   && cd .. \
   && rm -rf /googleapis/.git/
 RUN git clone https://github.com/googleapis/toolkit \
   && cd toolkit/ \
-  && git checkout baeaa9ea01dba58364168a9102aa1d6bf228d065 \
+  && git checkout a681cf25cc2ad8c6ed7679e3c56489d8debeb6c4 \
   && cd .. \
   && rm -rf /toolkit/.git/
 ENV TOOLKIT_HOME /toolkit
@@ -199,4 +199,6 @@ RUN mkdir -p /root/
 ADD artman-user-config-in-docker.yaml /root/.artman/config.yaml
 
 # Install artman.
-RUN pip3 install googleapis-artman==0.4.20
+ADD . /artman
+ARG install_artman_from_source=false
+RUN if [ "$install_artman_from_source" = true ]; then pip3 install -e /artman; else pip3 install googleapis-artman==0.5.0; rm -r /artman; fi

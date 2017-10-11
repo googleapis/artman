@@ -11,34 +11,41 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+"""The new artman CLI with the following syntax.
 
-"""CLI to execute pipeline either locally or remotely."""
+    artman [Options] generate|publish <artifact_name>
+
+.. note::
+    Only local execution is supported at this moment. The CLI syntax is
+    beta, and might have changes in the future.
+"""
 
 from __future__ import absolute_import
-from logging import DEBUG, INFO
+from logging import INFO
 import argparse
-import ast
-import base64
+from distutils.dir_util import copy_tree
 import io
 import os
+import pprint
+import subprocess
 import sys
-import tempfile
-import time
-import uuid
-
-from gcloud import logging
 
 from ruamel import yaml
-
 from taskflow import engines
 
+from artman.config import converter, loader
+from artman.config.proto.config_pb2 import Artifact, Config
 from artman.cli import support
 from artman.pipelines import pipeline_factory
-from artman.utils import job_util, pipeline_util, config_util
+from artman.utils import config_util
 from artman.utils.logger import logger, setup_logging
+
+ARTMAN_DOCKER_IMAGE = 'googleapis/artman:0.5.0'
+RUNNING_IN_ARTMAN_DOCKER_TOKEN = 'RUNNING_IN_ARTMAN_DOCKER'
 
 
 def main(*args):
+    """Main method of artman."""
     # If no arguments are sent, we are using the entry point; derive
     # them from sys.argv.
     if not args:
@@ -47,152 +54,174 @@ def main(*args):
     # Get to a normalized set of arguments.
     flags = parse_args(*args)
     user_config = read_user_config(flags)
-    pipeline_name, pipeline_kwargs, env = normalize_flags(flags, user_config)
+    _adjust_root_dir(flags.root_dir)
+    pipeline_name, pipeline_kwargs = normalize_flags(flags, user_config)
 
-    # Flesh out the pipline arguments with information gleamed from
-    # loading the appropriate config in the googleapis local repo.
-    pipeline_kwargs = _load_local_repo(
-        pipeline_kwargs['local_paths']['googleapis'],
-        **pipeline_kwargs
-    )
-
-    if flags.remote:
-        # Execute pipeline task remotely based on the specified env param.
-        pipeline = pipeline_factory.make_pipeline(
-            pipeline_name, True, **pipeline_kwargs)
-        jb = job_util.post_remote_pipeline_job_and_wait(pipeline, env)
-        task_details, flow_detail = job_util.fetch_job_status(jb, env)
-
-        for task_detail in task_details:
-            if (task_detail.name.startswith('BlobUploadTask') and
-                        task_detail.results):
-                bucket_name, path, _ = task_detail.results
-                pipeline_util.download_from_gcs(
-                    bucket_name,
-                    path,
-                    os.path.join(tempfile.gettempdir(), 'artman-remote'))
-
-        if flow_detail.state != 'SUCCESS':
-            # Print the remote log if the pipeline execution completes but not
-            # with SUCCESS status.
-            _print_log(pipeline_kwargs['pipeline_id'])
-
-    else:
-        pipeline = pipeline_factory.make_pipeline(
-            pipeline_name, False, **pipeline_kwargs)
+    if flags.local:
+        pipeline = pipeline_factory.make_pipeline(pipeline_name, False,
+                                                  **pipeline_kwargs)
         # Hardcoded to run pipeline in serial engine, though not necessarily.
-        engine = engines.load(pipeline.flow, engine='serial',
-                              store=pipeline.kwargs)
+        engine = engines.load(
+            pipeline.flow, engine='serial', store=pipeline.kwargs)
         engine.run()
-        _chown_for_artman_output()
+        _change_owner(flags, pipeline_name, pipeline_kwargs)
+    else:
+        support.check_docker_requirements(flags.image)
+        # Note: artman currently won't work if input directory doesn't contain
+        # shared configuration files (e.g. gapic/packaging/dependencies.yaml).
+        # This will make artman less useful for non-Google APIs.
+        # TODO(ethanbao): Fix that by checking the input directory and
+        # pulling the shared configuration files if necessary.
+        logger.info('Running artman command in a Docker instance.')
+        _run_artman_in_docker(flags)
+
+
+def _adjust_root_dir(root_dir):
+    """"Adjust input directory to use versioned common config and/or protos.
+
+    Currently che codegen has coupling with some shared configuration yaml
+    under under {googleapis repo}/gapic/[lang,packaging], causing library
+    generation to fail when a breaking change is made to such shared
+    configuration file. This delivers a poor user experience to artman
+    users, as their library generation could fail without any change at API
+    proto side.
+
+    Similarily, some common protos will be needed during protoc
+    compilation, but is not provided by users in some cases. When such shared
+    proto directories are not provided, copy and use the versioned ones.
+
+    TODO(ethanbao): Remove the config copy once
+    https://github.com/googleapis/toolkit/issues/1450 is fixed.
+    """
+    if os.getenv(RUNNING_IN_ARTMAN_DOCKER_TOKEN):
+        # Only doing this when running inside Docker container
+        common_config_dirs = [
+            'gapic/lang',
+            'gapic/packaging',
+        ]
+        common_proto_dirs = [
+            'google/api',
+            'google/iam/v1',
+            'google/longrunning',
+            'google/rpc',
+            'google/type',
+        ]
+        for src_dir in common_config_dirs:
+            # /googleapis is the root of the versioned googleapis repo
+            # inside Artman Docker image.
+            copy_tree(os.path.join('/googleapis', src_dir),
+                      os.path.join(root_dir, src_dir))
+
+        for src_dir in common_proto_dirs:
+            if not os.path.exists(os.path.join(root_dir, src_dir)):
+                copy_tree(os.path.join('/googleapis', src_dir),
+                          os.path.join(root_dir, src_dir))
 
 
 def parse_args(*args):
     parser = argparse.ArgumentParser()
-    parser.add_argument('--language',
-        default=None,
-        help='Specify the language in which to generate output.',
-    )
-    api = parser.add_mutually_exclusive_group(required=True)
-    api.add_argument('--api',
-        default=None,
-        help='The name of the API to generate. It must match a file in '
-             '{googleapis}/gapic/api/artman_{api}.yml',
-    )
-    api.add_argument('--config',
+    parser.add_argument(
+        '--config',
+        type=str,
+        default='artman.yaml',
+        help='[Optional] Specify path to artman config yaml, which can be '
+        'either an absolute path, or a path relative to the input '
+        'directory (specified by `--root-dir` flag). Default to '
+        '`artman.yaml`', )
+    parser.add_argument(
+        '--output-dir',
+        type=str,
+        default='./artman-genfiles',
+        help='[Optional] Directory to store output generated by artman. '
+        'Default to `./artman-genfiles`', )
+    parser.add_argument(
+        '--root-dir',
+        type=str,
         default='',
-        type=str,
-        help='Comma-delimited list of yaml config files. Each file may '
-             'be followed by a colon (:) and then a |-delimited list of '
-             'sections to be loaded from the config file. When this list '
-             'of config sections is not provided, it will default to '
-             '":common|<language>". An example with two config section is: '
-             '/path/to/config.yaml:config_section_A|config_section_B. '
-             'This is an advanced feature; for most cases, use `--api`.',
+        help='[Optional] Directory with all input that is needed by artman, '
+        'which includes but is not limited to API protos, service config yaml '
+        'and GAPIC config yaml. It will be passed to protobuf compiler via '
+        '`-I` flag in order to generate descriptor. If not specified, it '
+        'will first look up in artman user config. If not found, an error '
+        'will be raised with instructions.',
     )
-    api.add_argument('--batch',
-        action='store_true',
-        help='Enables batch mode, which will generate all APIs for the '
-             'specified language (that have not disabled batch mode). This '
-             'will load the yaml config file '
-             '{googleapis}/gapic/batch/common.yaml and change the default '
-             'pipeline to GapicClientBatchPipeline. When --batch is '
-             'specified, the --publish argument will be defaulted to noop '
-             'unless another option is chosen on the command line (the '
-             'publish option specified in a user config file will be '
-             'ignored). Each API will be published to the default repository '
-             'specified in its artman yaml file (or staging if no default is '
-             'provided. This argument is incompatible with the --target '
-             'argument.',
-    )
-    parser.add_argument('--publish',
-        choices=('github', 'local', 'maven', 'noop'),
-        default=None,
-        help='Set where to publish the code. Options are "github", "local", '
-             '"maven", and "noop". The default is "local" (unless --batch is '
-             'specified). This can also be set in the user config file.',
-    )
-    parser.add_argument('--target',
-        default=None,
-        dest='target',
-        help='If the "github" or "local" publisher is used, define which '
-             'repository to publish to. The artman config YAML may specify '
-             'a default for this, in which case this argument may be omitted. '
-             'This argument in incompatible with the --batch argument.',
-    )
-    parser.add_argument('--pipeline',
-        default='',
-        dest='pipeline_name',
-        type=str,
-        help='The name of the pipeline to run',
-    )
-    parser.add_argument('--pipeline-kwargs',
-        type=str,
-        default='{}',
-        help='pipeline_kwargs string, e.g. '
-             "{'sleep_secs':3, 'type':'sample'}",
-    )
-    parser.add_argument('--googleapis',
-        type=str,
-        default=None,
-        help='Local path to the googleapis repository. Can also be set in '
-             'the user config file under local_paths.googleapis. If not set, '
-             'defaults to ${reporoot}/googleapis',
-    )
-    parser.add_argument('--remote',
-        action='store_true',
-        help='Triggers remote execution. Pipeline will be executed locally if '
-             'this flag is not provided.',
-    )
-    parser.add_argument('--github-username',
-        default=None,
-        help='The GitHub username. Must be set if publishing, but can come '
-             'from the user config file.',
-    )
-    parser.add_argument('--github-token',
-        default=None,
-        help='The GitHub token (or password, but do not do that). Must be set '
-             'if publishing, but can come from the user config file.',
-    )
-    verbosity = parser.add_mutually_exclusive_group(required=False)
-    verbosity.add_argument('-v', '--verbose',
+    parser.add_argument(
+        '-v',
+        '--verbose',
         action='store_const',
         const=10,
         default=None,
         dest='verbosity',
-        help='Show verbose / debug output.',
-    )
-    verbosity.add_argument('-q', '--quiet',
-        action='store_const',
-        const=25,
-        default=None,
-        dest='verbosity',
-        help='Suppress most output.',
-    )
-    parser.add_argument('--user-config',
+        help='Show verbose / debug output.', )
+    parser.add_argument(
+        '--user-config',
         default='~/.artman/config.yaml',
-        help='User configuration file for artman. Stores GitHub credentials.',
-    )
+        help='[Optional] User configuration file to stores credentials like '
+        'GitHub credentials. Default to `~/.artman/config.yaml`', )
+    parser.add_argument(
+        '--local',
+        dest='local',
+        action='store_true',
+        help='[Optional] If specified, running the artman on the local host '
+        'machine instead of artman docker instance that have all binaries '
+        'installed. Note: one will have to make sure all binaries get '
+        'installed on the local machine with this flag, a full list can '
+        'be found at '
+        'https://github.com/googleapis/artman/blob/master/Dockerfile', )
+    parser.set_defaults(local=False)
+    parser.add_argument(
+        '--image',
+        default=ARTMAN_DOCKER_IMAGE,
+        help=('[Optional] Specify docker image used by artman when running in '
+              'a Docker instance. Default to `%s`' % ARTMAN_DOCKER_IMAGE)),
+
+    # Add sub-commands.
+    subparsers = parser.add_subparsers(
+        dest='subcommand', help='Support [generate|publish] sub-commands')
+
+    # `generate` sub-command.
+    parser_generate = subparsers.add_parser(
+        'generate', help='Generate artifact')
+    parser_generate.add_argument(
+        'artifact_name',
+        type=str,
+        help='[Required] Name of the artifact for artman to generate. Must '
+        'match an artifact in the artman config yaml.')
+
+    # `publish` sub-command.
+    parser_publish = subparsers.add_parser('publish', help='Publish artifact')
+    parser_publish.add_argument(
+        'artifact_name',
+        type=str,
+        help='[Required] Name of the artifact for artman to generate. Must '
+        'match an artifact in the artman config yaml.')
+    parser_publish.add_argument(
+        '--target',
+        type=str,
+        default=None,
+        required=True,
+        help='[Required] Specify where the generated artifact should be '
+        'published to. It is defined as publishing targets in artman '
+        'config at artifact level.', )
+    parser_publish.add_argument(
+        '--github-username',
+        default=None,
+        help='[Optional] The GitHub username. Must be set if publishing the '
+        'artifact to github, but can come from the user config file.', )
+    parser_publish.add_argument(
+        '--github-token',
+        default=None,
+        help='[Optional] The GitHub personal access token. Must be set if '
+        'publishing the artifact to github, but can come from the user '
+        'config file.', )
+    parser_publish.add_argument(
+        '--dry-run',
+        dest='dry_run',
+        action='store_true',
+        help='[Optional] When specified, artman will skip the remote '
+        'publishing step.', )
+    parser_publish.set_defaults(dry_run=False)
+
     return parser.parse_args(args=args)
 
 
@@ -223,19 +252,24 @@ def read_user_config(flags):
     # Done; return the user config.
     return user_config
 
+
 def normalize_flags(flags, user_config):
     """Combine the argparse flags and user configuration together.
 
     Args:
         flags (argparse.Namespace): The flags parsed from sys.argv
-        user_config (dict): The user configuration taken from ~/.artman/config.yaml.
+        user_config (dict): The user configuration taken from
+                            ~/.artman/config.yaml.
 
     Returns:
-        tuple (str, dict, str): 3-tuple containing:
+        tuple (str, dict): 2-tuple containing:
             - pipeline name
             - pipeline arguments
-            - 'remote' or None
     """
+    if flags.root_dir:
+        flags.root_dir = os.path.abspath(flags.root_dir)
+    flags.output_dir = os.path.abspath(flags.output_dir)
+    flags.config = os.path.abspath(flags.config)
     pipeline_args = {}
 
     # Determine logging verbosity and then set up logging.
@@ -245,126 +279,119 @@ def normalize_flags(flags, user_config):
     # Save local paths, if applicable.
     # This allows the user to override the path to api-client-staging or
     # toolkit on his or her machine.
-    pipeline_args['local_paths'] = support.parse_local_paths(user_config,
-                                                             flags.googleapis)
+    pipeline_args['local_paths'] = support.parse_local_paths(
+        user_config, flags.root_dir)
 
-    # In most cases, we get a language.
-    if flags.language:
-        pipeline_args['language'] = flags.language
-    elif flags.pipeline_name != 'GapicConfigPipeline':
-        logger.critical('--language is required for every pipeline except '
-                        'GapicConfigPipeline.')
-        sys.exit(64)
+    if flags.root_dir:
+        root_dir = flags.root_dir
+    elif pipeline_args['local_paths']['googleapis']:
+        root_dir = pipeline_args['local_paths']['googleapis']
+        flags.root_dir = root_dir
+    else:
+        logger.error('`--root-dir` flag must be passed, or you will have to '
+                     'specify the `googleapis` field in artman user config.')
+        sys.exit(96)
 
-    # If this is remote execution, configure that.
-    if flags.remote:
-        pipeline_id = str(uuid.uuid4())
-        # Use a unique random temp directory for remote execution.
-        # TODO(ethanbao): Let remote artman decide the temp directory.
-        pipeline_args['local_paths']['reporoot'] = '/tmp/artman/{id}'.format(
-            id=pipeline_id,
-        )
-        pipeline_args['pipeline_id'] = pipeline_id
+    artman_config_path = flags.config
+    if not os.path.isfile(artman_config_path):
+        logger.error(
+            'Artman config file `%s` doesn\'t exist.' % artman_config_path)
+        sys.exit(96)
 
-    # Specify the default pipeline settings - this may change if
-    # BATCH is set
-    default_pipeline = 'GapicClientPipeline'
+    try:
+        artifact_config = loader.load_artifact_config(
+            artman_config_path, flags.artifact_name)
+    except ValueError as ve:
+        logger.error('Artifact config loading failed with `%s`' % ve)
+        sys.exit(96)
 
     # If we were given just an API or BATCH, then expand it into the --config
     # syntax.
-    if flags.api:
-        shared_config_name = 'common.yaml'
-        if flags.language in ('ruby', 'nodejs',):
-            shared_config_name = 'doc.yaml'
+    shared_config_name = 'common.yaml'
+    if artifact_config.language in (Artifact.RUBY, Artifact.NODEJS,):
+        shared_config_name = 'doc.yaml'
 
-        googleapis = os.path.realpath(os.path.expanduser(
-            pipeline_args['local_paths']['googleapis'],
-        ))
-        flags.config = ','.join([
-            '{googleapis}/gapic/api/artman_{api}.yaml',
-            '{googleapis}/gapic/lang/{shared_config_name}',
-        ]).format(
-            api=flags.api,
-            googleapis=googleapis,
-            shared_config_name=shared_config_name,
-        )
-    elif flags.batch:
-        googleapis = os.path.realpath(os.path.expanduser(
-            pipeline_args['local_paths']['googleapis'],
-        ))
-        flags.config = '{googleapis}/gapic/batch/common.yaml'.format(
-            googleapis=googleapis,
-        )
-        default_pipeline = 'GapicClientBatchPipeline'
-        if not flags.publish:
-            # If publish flag was not set by the user, set it here.
-            # This prevents the user config yaml from causing a
-            # publish event when batch mode is used.
-            flags.publish = 'noop'
-        if flags.target:
-            logger.critical('--target and --batch cannot both be specified; '
-                            'when using --batch, the repo must be the default '
-                            'specified in the artman config yaml file (or '
-                            'staging if no default is provided).')
-            sys.exit(64)
+    legacy_config_dict = converter.convert_to_legacy_config_dict(
+        artifact_config, root_dir, flags.output_dir)
+    logger.debug('Below is the legacy config after conversion:\n%s' %
+                 pprint.pformat(legacy_config_dict))
+    tmp_legacy_config_yaml = '%s.tmp' % artman_config_path
+    with io.open(tmp_legacy_config_yaml, 'w') as outfile:
+        yaml.dump(legacy_config_dict, outfile, default_flow_style=False)
 
-    # Set the pipeline if none was specified
-    if not flags.pipeline_name:
-        flags.pipeline_name = default_pipeline
-
-    # Determine where to publish.
-    pipeline_args['publish'] = support.resolve('publish', user_config, flags,
-        default='local',
+    googleapis = os.path.realpath(
+        os.path.expanduser(
+            pipeline_args['local_paths']['googleapis'], ))
+    config = ','.join([
+        '{artman_config_path}',
+        '{googleapis}/gapic/lang/{shared_config_name}',
+    ]).format(
+        artman_config_path=tmp_legacy_config_yaml,
+        googleapis=googleapis,
+        shared_config_name=shared_config_name,
     )
 
-    # Parse out the GitHub credentials iff we are publishing to GitHub.
-    if pipeline_args['publish'] == 'github':
-        pipeline_args['github'] = support.parse_github_credentials(
-            argv_flags=flags,
-            config=user_config.get('github', {}),
-        )
+    language = Artifact.Language.Name(
+        artifact_config.language).lower()
+
+    # Set the pipeline as well as package_type and packaging
+    artifact_type = artifact_config.type
+    if artifact_type in (Artifact.GAPIC, Artifact.GAPIC_ONLY):
+        pipeline_name = 'GapicClientPipeline'
+        pipeline_args['language'] = language
+    elif artifact_type in (Artifact.GRPC, Artifact.GRPC_COMMON):
+        pipeline_name = 'GrpcClientPipeline'
+        pipeline_args['language'] = language
+    elif artifact_type == Artifact.GAPIC_CONFIG:
+        pipeline_name = 'GapicConfigPipeline'
+    elif artifact_type == Artifact.PROTOBUF:
+        pipeline_name = 'ProtoClientPipeline'
+        pipeline_args['language'] = language
+    else:
+        raise ValueError('Unrecognized artifact.')
 
     # Parse out the full configuration.
+    # Note: the var replacement is still needed because they are still being
+    # used in some shared/common config yamls.
     config_sections = ['common']
-    for config_spec in flags.config.split(','):
+    for config_spec in config.split(','):
         config_args = config_util.load_config_spec(
             config_spec=config_spec,
             config_sections=config_sections,
-            repl_vars={k.upper(): v for k, v in
-                       pipeline_args['local_paths'].items()},
-            language=flags.language,
-        )
+            repl_vars={
+                k.upper(): v
+                for k, v in pipeline_args['local_paths'].items()
+            },
+            language=language, )
         pipeline_args.update(config_args)
 
-    # Add any arbitrary keyword arguments.
-    if flags.pipeline_kwargs != '{}':
-        logger.warn('The use of --pipeline-kwargs is discouraged.')
-        cmd_args = ast.literal_eval(flags.pipeline_kwargs)
-        pipeline_args.update(cmd_args)
-
-    # Coerce `git_repos` and `target_repo` into a single git_repo.
-    if pipeline_args['publish'] in ('github', 'local') and not flags.batch:
-        # Temporarily give our users a nice error if they have an older
-        # googleapis checkout.
-        # DEPRECATED: 2017-04-20
-        # REMOVE: 2017-05-20
-        if 'git_repo' in pipeline_args:
-            logger.error('Your git repos are configured in your artman YAML '
-                         'using a older format. Please git pull.')
+    # Setup publishing related config if needed.
+    if flags.subcommand == 'generate':
+        pipeline_args['publish'] = 'noop'
+    elif flags.subcommand == 'publish':
+        publishing_config = _get_publishing_config(artifact_config,
+                                                   flags.target)
+        if publishing_config.type == Artifact.PublishTarget.GITHUB:
+            pipeline_args['publish'] = 'local' if flags.dry_run else 'github'
+            pipeline_args['github'] = support.parse_github_credentials(
+                argv_flags=flags,
+                config=user_config.get('github', {}), )
+            repos = pipeline_args.pop('git_repos')
+            pipeline_args['git_repo'] = support.select_git_repo(
+                repos, publishing_config.name)
+        else:
+            logger.error(
+                'Publishing type `%s` is not supported yet.' %
+                Artifact.PublishTarget.Type.Name(publishing_config.type))
             sys.exit(96)
-
-        # Pop the git repos off of the pipeline args and select the
-        # correct one.
-        repos = pipeline_args.pop('git_repos')
-        pipeline_args['git_repo'] = support.select_git_repo(repos, flags.target)
 
     # Print out the final arguments to stdout, to help the user with
     # possible debugging.
-    pipeline_args_repr = yaml.dump(pipeline_args,
+    pipeline_args_repr = yaml.dump(
+        pipeline_args,
         block_seq_indent=2,
         default_flow_style=False,
-        indent=2,
-    )
+        indent=2, )
     logger.info('Final args:')
     for line in pipeline_args_repr.split('\n'):
         if 'token' in line:
@@ -372,73 +399,107 @@ def normalize_flags(flags, user_config):
             line = line[:index + 2] + '<< REDACTED >>'
         logger.info('  {0}'.format(line))
 
+    # Clean up the tmp legacy artman config.
+    os.remove(tmp_legacy_config_yaml)
+
     # Return the final arguments.
-    # This includes a pipeline to run, arguments, and whether to run remotely.
-    return (
-        flags.pipeline_name,
-        pipeline_args,
-        'remote' if flags.remote else None,
-    )
+    return pipeline_name, pipeline_args
 
 
-def _load_local_repo(private_repo_root, **pipeline_kwargs):
-    files_dict = {}
-    for root, dirs, files in os.walk(private_repo_root):
-        for fname in files:
-            path = os.path.join(root, fname)
-            rel_path = os.path.relpath(path, private_repo_root)
-
-            # Always use forward slashes, even on Windows, since remote
-            # Artman will be running in GKE.
-            normalized_path = '/'.join(os.path.split(rel_path))
-
-            # Save the contents of every applicable file into a dictionary.
-            with io.open(path, 'rb') as f:
-                files_dict[normalized_path] = base64.b64encode(f.read())
-
-    pipeline_kwargs['files_dict'] = files_dict
-    return pipeline_kwargs
+def _get_publishing_config(artifact_config_pb, publish_target):
+    valid_options = []
+    for target in artifact_config_pb.publish_targets:
+        valid_options.append(target.name)
+        if target.name == publish_target:
+            return target
+    logger.error('No publish target with `%s` configured in artifact `%s`. '
+                 'Valid options are %s' %
+                 (publish_target, artifact_config_pb.name, valid_options))
+    sys.exit(96)
 
 
-def _print_log(pipeline_id):
-    # Fetch the cloud logging entry if the exection fails. Wait for 30 secs,
-    # because it takes a while for the logging to become available.
-    logger.critical(
-        'The remote pipeline execution failed. It will wait for 30 '
-        'seconds before fetching the log for remote pipeline execution.',
-    )
-    time.sleep(30)
-    client = logging.Client()
-    pipeline_logger = client.logger(pipeline_id)
-    entries, token = pipeline_logger.list_entries()
-    for entry in entries:
-        logger.error(entry.payload)
+def _run_artman_in_docker(flags):
+    """Executes artman command.
 
-    logger.info(
-        'You can always run the following command to fetch the log entry:\n'
-        '    gcloud beta logging read "logName=projects/vkit-pipeline/logs/%s"'
-        % pipeline_id,
-    )
+    Args:
+        root_dir: The input directory that will be mounted to artman docker
+            container as local googleapis directory.
+    Returns:
+        The output directory with artman-generated files.
+    """
+    ARTMAN_CONTAINER_NAME = 'artman-docker'
+    root_dir = flags.root_dir
+    output_dir = flags.output_dir
+    artman_config_dirname = os.path.dirname(flags.config)
+    user_config = os.path.join(os.path.expanduser('~'), '.artman')
+    docker_image = flags.image
+
+    inner_artman_cmd_str = ' '.join(sys.argv[1:])
+
+    # TODO(ethanbao): Such folder to folder mounting won't work on windows.
+    base_cmd = [
+        'docker', 'run', '--name', ARTMAN_CONTAINER_NAME, '--rm', '-i', '-t',
+        '-e', 'HOST_USER_ID=%s' % os.getuid(),
+        '-e', 'HOST_GROUP_ID=%s' % os.getgid(),
+        '-e', '%s=True' % RUNNING_IN_ARTMAN_DOCKER_TOKEN,
+        '-v', '%s:%s' % (root_dir, root_dir),
+        '-v', '%s:%s' % (output_dir, output_dir),
+        '-v', '%s:%s' % (artman_config_dirname, artman_config_dirname),
+        '-v', '%s:/home/.artman' % user_config,
+        '-w', root_dir,
+        docker_image, '/bin/bash', '-c'
+    ]
+
+    debug_cmd = list(base_cmd)
+    debug_cmd.append('"artman %s; bash"' % inner_artman_cmd_str)
+
+    cmd = base_cmd
+    cmd.append('artman --local %s' % (inner_artman_cmd_str))
+    try:
+        output = subprocess.check_output(cmd)
+        logger.info(output.decode('utf8'))
+        return output_dir
+    except subprocess.CalledProcessError as e:
+        logger.error(e.output.decode('utf8'))
+        logger.error(
+            'Artman execution failed. For additional logging, re-run the '
+            'command with the "--verbose" flag')
+        raise
+    finally:
+        logger.debug('For further inspection inside docker container, run `%s`'
+                     % ' '.join(debug_cmd))
 
 
-def _chown_for_artman_output():
-  """Change ownership of artman output if necessary.
+def _change_owner(flags, pipeline_name, pipeline_kwargs):
+    """Change file/folder ownership if necessary."""
+    user_host_id = int(os.getenv('HOST_USER_ID', 0))
+    group_host_id = int(os.getenv('HOST_GROUP_ID', 0))
+    # When artman runs in Docker instance, all output files are by default
+    # owned by `root`, making it non-editable by Docker host user. When host
+    # user id and group id get passed through environment variables via
+    # Docker `-e` flag, artman will change the owner based on the specified
+    # user id and group id.
+    if user_host_id and group_host_id:
+        # Change ownership of output directory.
+        for root, dirs, files in os.walk(flags.output_dir):
+            os.chown(root, user_host_id, group_host_id)
+            for d in dirs:
+                os.chown(
+                    os.path.join(root, d), user_host_id, group_host_id)
+            for f in files:
+                os.chown(
+                    os.path.join(root, f), user_host_id, group_host_id)
+        if 'GapicConfigPipeline' == pipeline_name:
+            # There is a trick that the gapic config output is generated to
+            # input directory, where it is supposed to be in order to be
+            # used as an input for other artifact generation. With that
+            # the gapic config output is not located in the output folder,
+            # but the input folder. Make the explicit chown in this case.
+            os.chown(
+                pipeline_kwargs['gapic_api_yaml'][0],
+                user_host_id,
+                group_host_id)
 
-  When artman runs in Docker instance, all output files are by default owned by
-  `root`, making it non-editable by Docker host user. When user passes host user
-  id and group id through environment variables via `-e` flag, artman will
-  change the owner based on the specified user id and group id.
-  """
-  if os.getenv('HOST_USER_ID') and os.getenv('HOST_GROUP_ID'):
-      for root, dirs, files in os.walk('/artman/output'):
-          os.chown(root,
-                   int(os.getenv('HOST_USER_ID')),
-                   int(os.getenv('HOST_GROUP_ID')))
-          for d in dirs:
-              os.chown(os.path.join(root, d),
-                       int(os.getenv('HOST_USER_ID')),
-                       int(os.getenv('HOST_GROUP_ID')))
-          for f in files:
-              os.chown(os.path.join(root, f),
-                       int(os.getenv('HOST_USER_ID')),
-                       int(os.getenv('HOST_GROUP_ID')))
+
+if __name__ == "__main__":
+    main()
