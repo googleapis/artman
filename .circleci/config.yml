@@ -41,9 +41,9 @@ jobs:
             mkdir -p /caches
             docker save -o /caches/artman.tar artman
       - save_cache:
-          key: artman-{{ .Branch }}
+          key: artman-{{ .Branch }}-{{ epoch }}
           paths:
-            - /caches/artman.
+            - /caches/artman.tar
       - run:
           name: Run golden tests
           command: |

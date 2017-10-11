@@ -37,12 +37,8 @@ from artman.config.proto import config_pb2
 # Generation failure of artifact on the whitelist won't be counted as failure
 # but warning.
 WHITELIST = [
-    'google/spanner/admin/instance/artman_spanner_admin_instance.yaml',
-    'google/spanner/admin/database/artman_spanner_admin_database.yaml',
-    'google/bigtable/admin/artman_bigtable_admin.yaml',
     'google/genomics/artman_genomics.yaml',
     'google/iam/artman_iam_admin.yaml',
-    'google/privacy/dlp/artman_dlp.yaml',
     'google/firestore/artman_firestore.yaml',
     'google/logging/artman_logging.yaml',
 ]
