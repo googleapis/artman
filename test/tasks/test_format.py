@@ -91,7 +91,6 @@ class PhpFormatTaskTests(unittest.TestCase):
         task.execute('/path/to/gapic')
         expected_cmds = (
             'php-cs-fixer fix /path/to/gapic',
-            'php-cs-fixer fix /path/to/gapic --fixers=phpdoc_var_to_type',
             'phpcbf --standard=PSR2 --no-patch /path/to/gapic',
         )
         assert call.call_count == len(expected_cmds)

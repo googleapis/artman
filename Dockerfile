@@ -124,8 +124,8 @@ RUN apt-get update \
   && rm -r /temp/grpc
 
 # Install PHP formatting tools
-RUN pear install PHP_CodeSniffer-2.7.0 \
-  && curl -L https://github.com/FriendsOfPHP/PHP-CS-Fixer/releases/download/v1.11.8/php-cs-fixer.phar -o /usr/local/bin/php-cs-fixer \
+RUN pear install PHP_CodeSniffer-2.9.1 \
+  && curl -L https://github.com/FriendsOfPHP/PHP-CS-Fixer/releases/download/v2.7.1/php-cs-fixer.phar -o /usr/local/bin/php-cs-fixer \
   && chmod a+x /usr/local/bin/php-cs-fixer \
   && cd /
 
