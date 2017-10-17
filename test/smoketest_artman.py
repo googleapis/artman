@@ -37,9 +37,6 @@ from artman.config.proto import config_pb2
 # Generation failure of artifact on the whitelist won't be counted as failure
 # but warning.
 WHITELIST = [
-    'google/genomics/artman_genomics.yaml',
-    'google/iam/artman_iam_admin.yaml',
-    'google/firestore/artman_firestore.yaml',
 ]
 
 logger = logging.getLogger('smoketest')
