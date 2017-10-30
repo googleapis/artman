@@ -40,7 +40,7 @@ class JavaFormatTask(task_base.TaskBase):
                     targetFile = os.path.abspath(os.path.join(root, filename))
                     targetFiles.append(targetFile)
         self.exec_command(
-            ['java', '-jar', path, '--replace'] + targetFiles)
+                ['java', '-jar', path, '--replace'] + targetFiles)
 
     def validate(self):
         return []
@@ -81,7 +81,16 @@ class PhpFormatTask(task_base.TaskBase):
     def execute(self, gapic_code_dir):
         abs_code_dir = os.path.abspath(gapic_code_dir)
         logger.info('Formatting file using php-cs-fixer in %s.' % abs_code_dir)
-        subprocess.call(['php-cs-fixer', 'fix', gapic_code_dir])
+        subprocess.call(
+                ['php-cs-fixer', 'fix', '--rules=@Symfony', gapic_code_dir])
+        # We require a second call to php-cs-fixer because instances of @type
+        # have been converted to @var. We cannot disable this conversion in
+        # the first call without affecting other aspects of the formatting.
+        subprocess.call(['php-cs-fixer',
+                         'fix',
+                         '--rules={"phpdoc_no_alias_tag" : {"replacements" : '
+                         '{"var" : "type"}}}',
+                         gapic_code_dir])
         logger.info('Formatting file using phpcbf in %s.' % abs_code_dir)
         subprocess.call(['phpcbf', '--standard=PSR2', '--no-patch',
                          gapic_code_dir])

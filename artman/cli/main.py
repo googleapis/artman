@@ -372,10 +372,13 @@ def normalize_flags(flags, user_config):
         publishing_config = _get_publishing_config(artifact_config,
                                                    flags.target)
         if publishing_config.type == Artifact.PublishTarget.GITHUB:
-            pipeline_args['publish'] = 'local' if flags.dry_run else 'github'
-            pipeline_args['github'] = support.parse_github_credentials(
-                argv_flags=flags,
-                config=user_config.get('github', {}), )
+            if flags.dry_run:
+                pipeline_args['publish'] = 'local'
+            else:
+                pipeline_args['publish'] = 'github'
+                pipeline_args['github'] = support.parse_github_credentials(
+                    argv_flags=flags,
+                    config=user_config.get('github', {}), )
             repos = pipeline_args.pop('git_repos')
             pipeline_args['git_repo'] = support.select_git_repo(
                 repos, publishing_config.name)

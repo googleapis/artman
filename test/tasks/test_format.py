@@ -90,7 +90,9 @@ class PhpFormatTaskTests(unittest.TestCase):
         task = format_tasks.PhpFormatTask()
         task.execute('/path/to/gapic')
         expected_cmds = (
-            'php-cs-fixer fix /path/to/gapic',
+            'php-cs-fixer fix --rules=@Symfony /path/to/gapic',
+            'php-cs-fixer fix --rules={"phpdoc_no_alias_tag" : {'
+            '"replacements" : {"var" : "type"}}} /path/to/gapic',
             'phpcbf --standard=PSR2 --no-patch /path/to/gapic',
         )
         assert call.call_count == len(expected_cmds)
