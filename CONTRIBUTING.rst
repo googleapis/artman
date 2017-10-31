@@ -98,6 +98,8 @@ GitHub repo, from which you can submit a pull request.
   .. code:: bash
 
     sudo pip install virtualenv virtualenvwrapper
+    # Edit shell startup file to enable virtualenvwrapper, see:
+    # http://virtualenvwrapper.readthedocs.io/en/latest/install.html#shell-startup-file
     mkvirtualenv --python=`which python3` artman
     pip install -e .
 
