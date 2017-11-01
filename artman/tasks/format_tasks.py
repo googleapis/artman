@@ -81,8 +81,9 @@ class PhpFormatTask(task_base.TaskBase):
     def execute(self, gapic_code_dir):
         abs_code_dir = os.path.abspath(gapic_code_dir)
         logger.info('Formatting file using php-cs-fixer in %s.' % abs_code_dir)
-        subprocess.call(
-                ['php-cs-fixer', 'fix', '--rules=@Symfony', gapic_code_dir])
+        subprocess.call(['php-cs-fixer', 'fix',
+                         '--rules=@Symfony,-phpdoc_annotation_without_dot',
+                         gapic_code_dir])
         # We require a second call to php-cs-fixer because instances of @type
         # have been converted to @var. We cannot disable this conversion in
         # the first call without affecting other aspects of the formatting.
