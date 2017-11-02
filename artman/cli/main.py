@@ -29,6 +29,7 @@ import os
 import pprint
 import subprocess
 import sys
+import traceback
 
 from ruamel import yaml
 from taskflow import engines
@@ -58,13 +59,17 @@ def main(*args):
     pipeline_name, pipeline_kwargs = normalize_flags(flags, user_config)
 
     if flags.local:
-        pipeline = pipeline_factory.make_pipeline(pipeline_name, False,
-                                                  **pipeline_kwargs)
-        # Hardcoded to run pipeline in serial engine, though not necessarily.
-        engine = engines.load(
-            pipeline.flow, engine='serial', store=pipeline.kwargs)
-        engine.run()
-        _change_owner(flags, pipeline_name, pipeline_kwargs)
+        try:
+            pipeline = pipeline_factory.make_pipeline(pipeline_name, False,
+                                                      **pipeline_kwargs)
+            # Hardcoded to run pipeline in serial engine, though not necessarily.
+            engine = engines.load(
+                pipeline.flow, engine='serial', store=pipeline.kwargs)
+            engine.run()
+        except:
+            logger.error(traceback.format_exc())
+        finally:
+            _change_owner(flags, pipeline_name, pipeline_kwargs)
     else:
         support.check_docker_requirements(flags.image)
         # Note: artman currently won't work if input directory doesn't contain
@@ -482,8 +487,10 @@ def _change_owner(flags, pipeline_name, pipeline_kwargs):
     # user id and group id get passed through environment variables via
     # Docker `-e` flag, artman will change the owner based on the specified
     # user id and group id.
-    if user_host_id and group_host_id:
-        # Change ownership of output directory.
+    if not user_host_id or not group_host_id:
+        return
+    # Change ownership of output directory.
+    if os.path.exists(flags.output_dir):
         for root, dirs, files in os.walk(flags.output_dir):
             os.chown(root, user_host_id, group_host_id)
             for d in dirs:
@@ -492,16 +499,16 @@ def _change_owner(flags, pipeline_name, pipeline_kwargs):
             for f in files:
                 os.chown(
                     os.path.join(root, f), user_host_id, group_host_id)
+
+    gapic_config_path = pipeline_kwargs['gapic_api_yaml'][0]
+    if os.path.exists(gapic_config_path):
         if 'GapicConfigPipeline' == pipeline_name:
             # There is a trick that the gapic config output is generated to
             # input directory, where it is supposed to be in order to be
             # used as an input for other artifact generation. With that
             # the gapic config output is not located in the output folder,
             # but the input folder. Make the explicit chown in this case.
-            os.chown(
-                pipeline_kwargs['gapic_api_yaml'][0],
-                user_host_id,
-                group_host_id)
+            os.chown(gapic_config_path, user_host_id, group_host_id)
 
 
 if __name__ == "__main__":
