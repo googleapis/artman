@@ -23,12 +23,12 @@ import yaml
 
 from google.protobuf import json_format
 
-from artman.config.proto import config_pb2
+from artman.config.proto.config_pb2 import Artifact, Config
 
 
 def load_artifact_config(artman_config_path, artifact_name):
     artman_config = _read_artman_config(artman_config_path)
-    artifact_config = config_pb2.Artifact()
+    artifact_config = Artifact()
     artifact_config.CopyFrom(artman_config.common)
     valid_values = []
     for artifact in artman_config.artifacts:
@@ -60,7 +60,7 @@ def _parse(artman_yaml_path):
         # Convert yaml into json file as protobuf python load support paring of
         # protobuf in json or text format, not yaml.
         artman_config_json_string = json.dumps(yaml.load(f))
-    config_pb = config_pb2.Config()
+    config_pb = Config()
     json_format.Parse(artman_config_json_string, config_pb)
 
     return config_pb
@@ -93,7 +93,9 @@ def _validate_artman_config(config_pb):
 def _validate_artifact_config(artifact_config):
     # TODO(ethanbao) Validate input files, in which we disallow ${GOOGLEAPIS}
     # syntax and the file or folder must exist.
-    pass
+    if (artifact_config.language == Artifact.NODEJS and
+            artifact_config.type == Artifact.GRPC):
+        raise ValueError('GRPC artifact type is invalid for NodeJS.')
 
 
 def _normalize_artifact_config(artifact_config, artman_config_path):
