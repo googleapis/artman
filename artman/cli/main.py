@@ -464,8 +464,13 @@ def _run_artman_in_docker(flags):
         docker_image, '/bin/bash', '-c'
     ]
 
+    inner_artman_debug_cmd_str = inner_artman_cmd_str
+    # Because debug_cmd is run inside the Docker image, we want to
+    # make sure --local is set
+    if '--local' not in inner_artman_debug_cmd_str:
+        inner_artman_debug_cmd_str = '--local %s' % inner_artman_debug_cmd_str
     debug_cmd = list(base_cmd)
-    debug_cmd.append('"artman %s; bash"' % inner_artman_cmd_str)
+    debug_cmd.append('"artman %s; bash"' % inner_artman_debug_cmd_str)
 
     cmd = base_cmd
     cmd.append('artman --local %s' % (inner_artman_cmd_str))

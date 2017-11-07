@@ -152,7 +152,7 @@ def check_docker_requirements(docker_image):
         subprocess.check_output(['docker', '--version'])
     except OSError:
         logger.error(
-            'Docker not found on path or is not installed. Refert to '
+            'Docker not found on path or is not installed. Refer to '
             'https://docs.docker.com/engine/installation about how to install '
             'Docker on your local machine.')
         sys.exit(128)
