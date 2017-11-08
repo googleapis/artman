@@ -511,9 +511,10 @@ def _change_owner(flags, pipeline_name, pipeline_kwargs):
                 os.chown(
                     os.path.join(root, f), user_host_id, group_host_id)
 
-    gapic_config_path = pipeline_kwargs['gapic_api_yaml'][0]
-    if os.path.exists(gapic_config_path):
-        if 'GapicConfigPipeline' == pipeline_name:
+    if pipeline_kwargs['gapic_api_yaml']:
+        gapic_config_path = pipeline_kwargs['gapic_api_yaml'][0]
+        if (os.path.exists(gapic_config_path) and
+                'GapicConfigPipeline' == pipeline_name):
             # There is a trick that the gapic config output is generated to
             # input directory, where it is supposed to be in order to be
             # used as an input for other artifact generation. With that
