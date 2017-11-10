@@ -39,9 +39,9 @@ RUN apt-get update \
 # Currently, the stable version is still 2.6.x, which can only handle proto2
 # syntax, so we have to download our own.
 RUN mkdir -p /usr/src/protoc/ \
-  && curl --location https://github.com/google/protobuf/releases/download/v3.3.0/protoc-3.3.0-linux-x86_64.zip > /usr/src/protoc/protoc-3.3.0.zip \
+  && curl --location https://github.com/google/protobuf/releases/download/v3.4.0/protoc-3.4.0-linux-x86_64.zip > /usr/src/protoc/protoc-3.4.0.zip \
   && cd /usr/src/protoc/ \
-  && unzip protoc-3.3.0.zip \
+  && unzip protoc-3.4.0.zip \
   && ln -s /usr/src/protoc/bin/protoc /usr/local/bin/protoc
 
 # Install GRPC and Protobuf.
