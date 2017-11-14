@@ -188,10 +188,7 @@ class PythonMoveProtosTask(task_base.TaskBase):
         # We can get this by drilling in to the GAPIC artifact until we get to
         # a "gapic" directory.
         src = self._get_subdir_path(grpc_code_dir, 'proto')
-        target = self._get_subdir_path(
-            os.path.join(gapic_code_dir, 'google'),
-            'gapic',
-        )
+        target = self._get_subdir_path(gapic_code_dir, 'gapic')
 
         # Move the contents into the GAPIC directory.
         self.exec_command(['mv', os.path.join(src, 'proto'), target])
