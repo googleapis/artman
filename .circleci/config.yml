@@ -141,7 +141,7 @@ jobs:
           name: Install latest artman
           command: |
             pip uninstall -y googleapis-artman
-            pip install /usr/src/artman/
+            pip install --upgrade /usr/src/artman/
       - run:
           name: Build Pub/Sub (C#)
           command: artman --local --config=/googleapis/google/pubsub/artman_pubsub.yaml generate csharp_gapic
@@ -161,7 +161,7 @@ jobs:
           name: Install latest artman
           command: |
             pip uninstall -y googleapis-artman
-            pip install /usr/src/artman/
+            pip install --upgrade /usr/src/artman/
       - run:
           name: Build Pub/Sub (Go)
           command: artman --local --config=/googleapis/google/pubsub/artman_pubsub.yaml generate go_gapic
@@ -181,7 +181,7 @@ jobs:
           name: Install latest artman
           command: |
             pip uninstall -y googleapis-artman
-            pip install /usr/src/artman/
+            pip install --upgrade /usr/src/artman/
       - run:
           name: Build Pub/Sub (Java)
           command: artman --local --config=/googleapis/google/pubsub/artman_pubsub.yaml generate java_gapic
@@ -201,7 +201,7 @@ jobs:
           name: Install latest artman
           command: |
             pip uninstall -y googleapis-artman
-            pip install /usr/src/artman/
+            pip install --upgrade /usr/src/artman/
       - run:
           name: Build Pub/Sub (Node.js)
           command: artman --local --config=/googleapis/google/pubsub/artman_pubsub.yaml generate nodejs_gapic
@@ -221,7 +221,7 @@ jobs:
           name: Install latest artman
           command: |
             pip uninstall -y googleapis-artman
-            pip install /usr/src/artman/
+            pip install --upgrade /usr/src/artman/
       - run:
           name: Build Pub/Sub (PHP)
           command: artman --local --config=/googleapis/google/pubsub/artman_pubsub.yaml generate php_gapic
@@ -241,7 +241,7 @@ jobs:
           name: Install latest artman
           command: |
             pip uninstall -y googleapis-artman
-            pip install /usr/src/artman/
+            pip install --upgrade /usr/src/artman/
       - run:
           name: Build Pub/Sub (Python)
           command: artman --local --config=/googleapis/google/pubsub/artman_pubsub.yaml generate python_gapic
@@ -261,7 +261,7 @@ jobs:
           name: Install latest artman
           command: |
             pip uninstall -y googleapis-artman
-            pip install /usr/src/artman/
+            pip install --upgrade /usr/src/artman/
       - run:
           name: Build Pub/Sub (Ruby)
           command: artman --local --config=/googleapis/google/pubsub/artman_pubsub.yaml generate ruby_gapic
@@ -282,7 +282,7 @@ jobs:
           command: |
             pip install pytest
             pip uninstall -y googleapis-artman
-            pip install /usr/src/artman/
+            pip install --upgrade /usr/src/artman/
             git clone https://github.com/googleapis/googleapis /usr/src/artman/test/golden/googleapis
       - run:
           name: Run golden test
