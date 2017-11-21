@@ -83,8 +83,6 @@ def parse_local_paths(user_config, root_dir):
     # Set all defaults.
     local_paths.setdefault('reporoot', '..')
     local_paths.setdefault('artman', '{reporoot}/artman')
-    local_paths.setdefault('api_client_staging',
-                           '{reporoot}/api-client-staging')
     local_paths.setdefault('googleapis', '{reporoot}/googleapis')
     local_paths.setdefault('toolkit', '{reporoot}/toolkit')
 

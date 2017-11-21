@@ -24,6 +24,7 @@ from __future__ import absolute_import
 import os
 
 from artman.config.proto.config_pb2 import Artifact
+from artman.utils.logger import logger
 
 
 def convert_to_legacy_config_dict(artifact_config, root_dir, output_dir):
@@ -172,7 +173,12 @@ def _calculate_git_repos_config(artifact_config, output_dir):
                 path['dest'] = map_entry.dest
             if map_entry.name:
                 path['artifact'] = map_entry.name
-            paths.append(path)
+            if (map_entry.name not in ['grpc', 'proto']
+                or artifact_config.language != Artifact.JAVA):
+              paths.append(path)
+            else:
+              logger.warning('"%" publishing artifact type is only used in '
+                             'Java. Ignore that config.')
         item['paths'] = paths
         result[target.name] = item
     return result

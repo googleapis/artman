@@ -141,7 +141,7 @@ jobs:
           name: Install latest artman
           command: |
             pip uninstall -y googleapis-artman
-            pip install --upgrade /usr/src/artman/
+            pip install /usr/src/artman/
       - run:
           name: Build Pub/Sub (C#)
           command: artman --local --config=/googleapis/google/pubsub/artman_pubsub.yaml generate csharp_gapic
@@ -161,13 +161,13 @@ jobs:
           name: Install latest artman
           command: |
             pip uninstall -y googleapis-artman
-            pip install --upgrade /usr/src/artman/
+            pip install /usr/src/artman/
       - run:
           name: Build Pub/Sub (Go)
-          command: artman --local --config=/googleapis/google/pubsub/artman_pubsub.yaml generate go_gapic
+          command: artman --local --config=/googleapis/google/pubsub/artman_pubsub.yaml publish --dry-run --github-username foo --github-token bar --target staging go_gapic
       - run:
           name: Build Speech (Go)
-          command: artman --local --config=/googleapis/google/cloud/speech/artman_speech_v1.yaml generate go_gapic
+          command: artman --local --config=/googleapis/google/cloud/speech/artman_speech_v1.yaml publish --dry-run --github-username foo --github-token bar --target staging go_gapic
     working_directory: /usr/src/artman/
 
   smoke-java:
@@ -181,13 +181,13 @@ jobs:
           name: Install latest artman
           command: |
             pip uninstall -y googleapis-artman
-            pip install --upgrade /usr/src/artman/
+            pip install /usr/src/artman/
       - run:
           name: Build Pub/Sub (Java)
-          command: artman --local --config=/googleapis/google/pubsub/artman_pubsub.yaml generate java_gapic
+          command: artman --local --config=/googleapis/google/pubsub/artman_pubsub.yaml publish --dry-run --github-username foo --github-token bar --target staging java_gapic
       - run:
           name: Build Speech (Java)
-          command: artman --local --config=/googleapis/google/cloud/speech/artman_speech_v1.yaml generate java_gapic
+          command: artman --local --config=/googleapis/google/cloud/speech/artman_speech_v1.yaml publish --dry-run --github-username foo --github-token bar --target staging java_gapic
     working_directory: /usr/src/artman/
 
   smoke-nodejs:
@@ -201,13 +201,13 @@ jobs:
           name: Install latest artman
           command: |
             pip uninstall -y googleapis-artman
-            pip install --upgrade /usr/src/artman/
+            pip install /usr/src/artman/
       - run:
           name: Build Pub/Sub (Node.js)
-          command: artman --local --config=/googleapis/google/pubsub/artman_pubsub.yaml generate nodejs_gapic
+          command: artman --local --config=/googleapis/google/pubsub/artman_pubsub.yaml publish --dry-run --github-username foo --github-token bar --target staging nodejs_gapic
       - run:
           name: Build Speech (Node.js)
-          command: artman --local --config=/googleapis/google/cloud/speech/artman_speech_v1.yaml generate nodejs_gapic
+          command: artman --local --config=/googleapis/google/cloud/speech/artman_speech_v1.yaml publish --dry-run --github-username foo --github-token bar --target staging nodejs_gapic
     working_directory: /usr/src/artman/
 
   smoke-php:
@@ -221,13 +221,13 @@ jobs:
           name: Install latest artman
           command: |
             pip uninstall -y googleapis-artman
-            pip install --upgrade /usr/src/artman/
+            pip install /usr/src/artman/
       - run:
           name: Build Pub/Sub (PHP)
-          command: artman --local --config=/googleapis/google/pubsub/artman_pubsub.yaml generate php_gapic
+          command: artman --local --config=/googleapis/google/pubsub/artman_pubsub.yaml publish --dry-run --github-username foo --github-token bar --target staging php_gapic
       - run:
           name: Build Speech (PHP)
-          command: artman --local --config=/googleapis/google/cloud/speech/artman_speech_v1.yaml generate php_gapic
+          command: artman --local --config=/googleapis/google/cloud/speech/artman_speech_v1.yaml publish --dry-run --github-username foo --github-token bar --target staging php_gapic
     working_directory: /usr/src/artman/
 
   smoke-python:
@@ -241,13 +241,13 @@ jobs:
           name: Install latest artman
           command: |
             pip uninstall -y googleapis-artman
-            pip install --upgrade /usr/src/artman/
+            pip install /usr/src/artman/
       - run:
           name: Build Pub/Sub (Python)
-          command: artman --local --config=/googleapis/google/pubsub/artman_pubsub.yaml generate python_gapic
+          command: artman --local --config=/googleapis/google/pubsub/artman_pubsub.yaml publish --dry-run --github-username foo --github-token bar --target staging python_gapic
       - run:
           name: Build Speech (Python)
-          command: artman --local --config=/googleapis/google/cloud/speech/artman_speech_v1.yaml generate python_gapic
+          command: artman --local --config=/googleapis/google/cloud/speech/artman_speech_v1.yaml publish --dry-run --github-username foo --github-token bar --target staging python_gapic
     working_directory: /usr/src/artman/
 
   smoke-ruby:
@@ -261,13 +261,13 @@ jobs:
           name: Install latest artman
           command: |
             pip uninstall -y googleapis-artman
-            pip install --upgrade /usr/src/artman/
+            pip install /usr/src/artman/
       - run:
           name: Build Pub/Sub (Ruby)
-          command: artman --local --config=/googleapis/google/pubsub/artman_pubsub.yaml generate ruby_gapic
+          command: artman --local --config=/googleapis/google/pubsub/artman_pubsub.yaml publish --dry-run --github-username foo --github-token bar --target staging ruby_gapic
       - run:
           name: Build Speech (Ruby)
-          command: artman --local --config=/googleapis/google/cloud/speech/artman_speech_v1.yaml generate ruby_gapic
+          command: artman --local --config=/googleapis/google/cloud/speech/artman_speech_v1.yaml publish --dry-run --github-username foo --github-token bar --target staging ruby_gapic
     working_directory: /usr/src/artman/
 
   golden-test:
@@ -282,7 +282,7 @@ jobs:
           command: |
             pip install pytest
             pip uninstall -y googleapis-artman
-            pip install --upgrade /usr/src/artman/
+            pip install /usr/src/artman/
             git clone https://github.com/googleapis/googleapis /usr/src/artman/test/golden/googleapis
       - run:
           name: Run golden test

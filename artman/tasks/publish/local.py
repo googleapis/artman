@@ -53,12 +53,22 @@ class LocalStagingTask(task_base.TaskBase):
 
         # Where is the target git repo located?
         # Start by checking for an explicit path in `local_paths`, and then
-        # if none is found, derive it from reporoot.
+        # if none is found, clone the repo to output_dir.
         repo_name_underscore = repo_name.replace('-', '_')
-        api_repo = local_paths.get(repo_name_underscore,
-            os.path.join(local_paths.get('reporoot', '..'), repo_name),
-        )
-        api_repo = os.path.realpath(os.path.expanduser(api_repo))
+        api_repo = local_paths.get(repo_name_underscore)
+        if not api_repo:
+            api_repo = os.path.join(output_dir, repo_name)
+            if os.path.exists(api_repo):
+                logger.fatal(
+                    'Local repo folder `%s` exists. Please manually remove the '
+                    'folder, or point to another folder through artman user '
+                    'config or `artman --output-dir` flag.' % api_repo)
+            repo = git_repo['location']
+            # This only works for public repo for now.
+            if repo.startswith('git@github.com:'):
+                repo = 'https://github.com/%s' % repo[15:]
+            logger.info('Checking out fresh clone of %s.' % repo)
+            self.exec_command(['git', 'clone', repo, api_repo])
 
         # Track our code directories, and use absolute paths, since we will
         # be moving around.
@@ -112,8 +122,9 @@ class LocalStagingTask(task_base.TaskBase):
             self.exec_command(['rm', '-rf', gapic_code_dir])
         if grpc_code_dir and os.path.isdir(grpc_code_dir):
             self.exec_command(['rm', '-rf', grpc_code_dir])
-        if all([output_dir not in d for d in dests]) and os.path.isdir(output_dir):
-            self.exec_command(['rm', '-rf', output_dir])
+        if not os.getenv('RUNNING_IN_ARTMAN_DOCKER'):
+            if all([output_dir not in d for d in dests]) and os.path.isdir(output_dir):
+                self.exec_command(['rm', '-rf', output_dir])
 
         # Log a useful success message.
         userhome = os.path.expanduser('~')

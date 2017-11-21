@@ -58,7 +58,6 @@ class ParseLocalPathsTests(unittest.TestCase):
         assert result == {
             'reporoot': base,
             'artman': '{}/artman'.format(base),
-            'api_client_staging': '{}/api-client-staging'.format(base),
             'googleapis': '{}/googleapis'.format(base),
             'toolkit': '{}/toolkit'.format(base),
         }

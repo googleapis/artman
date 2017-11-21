@@ -116,9 +116,12 @@ class LocalStagingTests(unittest.TestCase):
                     'gapic/pubsub',
                     {'artifact': 'grpc', 'dest': 'grpc/pubsub'},
                 ],
-                'location': 'api-client-staging.git',
+                'location': 'git@github.com:googleapis/api-client-staging.git',
             },
-            local_paths={'reporoot': '/rr'},
+            local_paths={
+                'reporoot': '/rr',
+                'api_client_staging': '/rr/api-client-staging'
+            },
             output_dir='/tmp/out',
         )
 
@@ -141,6 +144,48 @@ class LocalStagingTests(unittest.TestCase):
         expected_messages = (
             'Code generated: /rr/api-client-staging/gapic/pubsub',
             'Code generated: /rr/api-client-staging/grpc/pubsub',
+        )
+        assert len(success.mock_calls) == len(expected_messages)
+        for msg, call in zip(expected_messages, success.mock_calls):
+            _, args, _ = call
+            assert args[0] == msg
+
+    @mock.patch.object(local.LocalStagingTask, 'exec_command')
+    @mock.patch.object(logger, 'success')
+    @mock.patch('os.path.isdir')
+    def test_execute_without_api_client_staging_user_config(
+        self, is_dir, success, exec_command):
+        is_dir.return_value = True
+        # Run the task, this time with a registered grpc location.
+        task = local.LocalStagingTask()
+        task.execute(
+            gapic_code_dir='/path/to/gapic',
+            git_repo={
+                'paths': [
+                    'gapic/pubsub'
+                ],
+                'location': 'git@github.com:googleapis/api-client-staging.git',
+            },
+            local_paths={'reporoot': '/rr'},
+            output_dir='/tmp/out',
+        )
+
+        # Establish the commands we expect to have been called.
+        expected_commands = (
+            'git clone https://github.com/googleapis/api-client-staging.git '
+            '/tmp/out/api-client-staging',
+            'rm -rf /tmp/out/api-client-staging/gapic/pubsub',
+            'cp -rf /path/to/gapic /tmp/out/api-client-staging/gapic/pubsub',
+            'rm -rf /path/to/gapic',
+        )
+        assert len(exec_command.mock_calls) == len(expected_commands)
+        for cmd, call in zip(expected_commands, exec_command.mock_calls):
+            _, args, _ = call
+            assert ' '.join(args[0]) == cmd
+
+        # Establish the expected log entires.
+        expected_messages = (
+            'Code generated: /tmp/out/api-client-staging/gapic/pubsub',
         )
         assert len(success.mock_calls) == len(expected_messages)
         for msg, call in zip(expected_messages, success.mock_calls):

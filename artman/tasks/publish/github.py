@@ -56,7 +56,7 @@ class CreateGitHubBranch(task_base.TaskBase):
 
         # Ensure we know where we are, so we can make this task not
         # ultimately mutate the working directory.
-        original_directory = os.curdir
+        original_directory = os.path.abspath(os.curdir)
 
         # Track our code directories, and use absolute paths, since we will
         # be moving around.
@@ -66,11 +66,12 @@ class CreateGitHubBranch(task_base.TaskBase):
 
         # Check out the code from GitHub.
         repo = git_repo['location']
-        logger.info('Checking out fresh clone of %s.' % repo)
         try:
             if repo.startswith('git@github.com:'):
                 repo = 'https://%s:%s@github.com/%s' % (
                     github['username'], github['token'], repo[15:])
+            logger.info('Checking out fresh clone of %s to %s.'
+                        % (repo, repo_temp_dir))
             self.exec_command(['git', 'clone', repo, repo_temp_dir])
 
             # Create a new branch for this API.
@@ -112,9 +113,14 @@ class CreateGitHubBranch(task_base.TaskBase):
                 # the code's original output location.
                 src = os.path.abspath(os.path.join(code_dirs[artifact], src))
 
+                if not src.endswith('.'):
+                    src = os.path.join(src, '.')
+
                 # Actually copy the code.
                 self.exec_command(['git', 'rm', '-r', '--force',
                                    '--ignore-unmatch', dest])
+                if not os.path.exists(dest):
+                    os.makedirs(dest)
                 self.exec_command(['cp', '-rf', src, dest])
                 self.exec_command(['git', 'add', dest])
 
@@ -132,7 +138,8 @@ class CreateGitHubBranch(task_base.TaskBase):
             logger.info('Code pushed to GitHub as `%s` branch.' % branch_name)
 
             # Remove the original output directory.
-            self.exec_command(['rm', '-rf', output_dir])
+            if not os.getenv('RUNNING_IN_ARTMAN_DOCKER'):
+              self.exec_command(['rm', '-rf', output_dir])
 
             # Return the branch name. This is needed in order to create a
             # pull request from that branch.
