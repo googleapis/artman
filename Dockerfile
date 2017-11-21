@@ -115,7 +115,7 @@ RUN gem install rake --no-ri --no-rdoc \
 # Install grpc_php_plugin
 RUN apt-get update \
   && apt-get install -y autoconf autogen libtool \
-  && git clone -b v1.6.0 https://github.com/grpc/grpc.git /temp/grpc \
+  && git clone -b v1.7.2 https://github.com/grpc/grpc.git /temp/grpc \
   && cd /temp/grpc \
   && git submodule update --init --recursive \
   && make grpc_php_plugin \
