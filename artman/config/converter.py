@@ -152,6 +152,7 @@ def _calculate_rel_gapic_output_dir(language, api_name, api_version):
     elif language == 'python':
         return 'python/%s-%s' % (api_name, api_version)
     elif language == 'ruby':
+        api_name = api_name.replace('-', '_')
         return 'ruby/google-cloud-ruby/google-cloud-%s' % api_name
 
     raise ValueError('Language `%s` is not currently supported.' % language)
