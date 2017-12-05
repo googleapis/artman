@@ -47,7 +47,7 @@ jobs:
       - run:
           name: Run golden tests
           command: |
-            docker run -it -e RUNNING_IN_ARTMAN_DOCKER=True -v /tmp/reports:/tmp/reports artman /bin/bash -c "pip install pytest; git clone https://github.com/googleapis/googleapis /artman/test/golden/googleapis; py.test /artman/test/golden/artman_golden_test.py --googleapis-dir=/artman/test/golden/googleapis"
+            docker run -it -e RUNNING_IN_ARTMAN_DOCKER=True -v /tmp/reports:/tmp/reports artman /bin/bash -c "pip install pytest; git clone https://github.com/googleapis/googleapis /artman/test/golden/googleapis; py.test -vv /artman/test/golden/artman_golden_test.py --googleapis-dir=/artman/test/golden/googleapis"
       # When build performance is a concern, consider separating this job into
       # a workflow with multiple jobs and have the smoketest run in parallel
       # with additional paid containers.
@@ -76,6 +76,8 @@ jobs:
           path: /tmp/reports
       - store_artifacts:
           path: /tmp/reports
+      - store_artifacts:
+          path: /artman/test/golden/actual_library_example.golden
 
   unit-python2.7:
     docker:
