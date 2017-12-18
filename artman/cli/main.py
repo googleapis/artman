@@ -31,6 +31,7 @@ import subprocess
 import sys
 import traceback
 
+import pkg_resources
 from ruamel import yaml
 from taskflow import engines
 
@@ -41,7 +42,8 @@ from artman.pipelines import pipeline_factory
 from artman.utils import config_util
 from artman.utils.logger import logger, setup_logging
 
-ARTMAN_DOCKER_IMAGE = 'googleapis/artman:0.5.4'
+VERSION = pkg_resources.get_distribution('googleapis-artman').version
+ARTMAN_DOCKER_IMAGE = 'googleapis/artman:%s' % VERSION
 RUNNING_IN_ARTMAN_DOCKER_TOKEN = 'RUNNING_IN_ARTMAN_DOCKER'
 
 
