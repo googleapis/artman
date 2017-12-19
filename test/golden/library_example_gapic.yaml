@@ -2,9 +2,9 @@ type: com.google.api.codegen.ConfigProto
 config_schema_version: 1.0.0
 language_settings:
   java:
-    package_name: com.google.cloud.example.library.spi.v1
+    package_name: com.google.cloud.example.library.v1
   python:
-    package_name: google.cloud.gapic.example.library.v1
+    package_name: google.cloud.example.library_v1.gapic
   go:
     package_name: cloud.google.com/go/example/library/apiv1
   csharp:
@@ -15,6 +15,7 @@ language_settings:
     package_name: Google\Cloud\Example\Library\V1
   nodejs:
     package_name: library.v1
+    domain_layer_location: google-cloud
 license_header:
   copyright_file: copyright-google.txt
   license_file: license-header-apache-2.0.txt
