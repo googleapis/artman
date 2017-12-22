@@ -59,7 +59,7 @@ def test_library_example(googleapis_dir):
         for f in files:
             # TODO(ethanbao): Remove this once such gradle-generated class files
             # get cleaned up in Java codegen task.
-            if item.endswith('.class'):
+            if f.endswith('.class'):
                 continue
             actual.append(os.path.join(root, f)[len(output_dir):])
 

@@ -44,6 +44,8 @@
 /java/google-cloud-library_example/.gradle/2.12/taskArtifacts/outputFileStates.bin
 /java/google-cloud-library_example/.gradle/2.12/taskArtifacts/taskArtifacts.bin
 /java/google-cloud-library_example/build.gradle
+/java/google-cloud-library_example/build/libs/google-cloud-library_example-0.1.26.jar
+/java/google-cloud-library_example/build/tmp/jar/MANIFEST.MF
 /java/google-cloud-library_example/gradle/wrapper/gradle-wrapper.jar
 /java/google-cloud-library_example/gradle/wrapper/gradle-wrapper.properties
 /java/google-cloud-library_example/gradlew
