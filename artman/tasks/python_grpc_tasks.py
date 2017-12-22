@@ -125,11 +125,13 @@ class PythonChangePackageTask(task_base.TaskBase):
         # change to "{api}_{vN}".
         dotted = re.sub(r'\.v([\da-z_]*)([\d]+)\b', r'_v\1\2.proto', dotted)
 
-        # Edge case: Some internal customers use "vNalpha".
+        # Edge case: Some internal customers use "vNalpha" and "vNbeta".
         # Rather than make the regular expression more complicated, catch
         # this as a one-off.
         if re.search(r'\.v[\d]+alpha\b', dotted):
             dotted = re.sub(r'\.v([\d]+)alpha\b', r'_v\1alpha.proto', dotted)
+        if re.search(r'\.v[\d]+beta\b', dotted):
+            dotted = re.sub(r'\.v([\d]+)beta\b', r'_v\1beta.proto', dotted)
 
         # Done; return with the appropriate separator.
         return dotted.replace('.', sep) + suffix
