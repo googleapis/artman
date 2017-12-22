@@ -57,6 +57,10 @@ def test_library_example(googleapis_dir):
     actual = []
     for root, subdirs, files in os.walk(output_dir):
         for f in files:
+            # TODO(ethanbao): Remove this once such gradle-generated class files
+            # get cleaned up in Java codegen task.
+            if item.endswith('.class'):
+                continue
             actual.append(os.path.join(root, f)[len(output_dir):])
 
     # Store the actual output relative to the working directory.
