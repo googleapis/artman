@@ -15,6 +15,7 @@
 from __future__ import absolute_import
 
 import nox
+import os
 
 
 @nox.session
@@ -52,3 +53,20 @@ def coverage(session):
         session.run('coverage', 'html')
     finally:
         session.run('coverage', 'erase')
+
+
+@nox.session
+def docs(session):
+    """Build the docs."""
+
+    # Set the virtualenv dirname.
+    session.virtualenv_dirname = 'docs'
+
+    # Install Sphinx and also all of the google-cloud-* packages.
+    session.chdir(os.path.realpath(os.path.dirname(__file__)))
+    session.install('setuptools >= 36.4.0', 'sphinx >= 1.6.3', '.')
+
+    # Build the docs!
+    session.run('rm', '-rf', 'docs/_build/')
+    session.run('sphinx-build', '-W', '-b', 'html', '-d',
+                'docs/_build/doctrees', 'docs/', 'docs/_build/html/')

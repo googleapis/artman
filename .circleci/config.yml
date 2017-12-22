@@ -1,15 +1,6 @@
 ---
 version: 2.0
 jobs:
-  build:
-    docker:
-      - image: python:3.6
-    steps:
-      - run:
-          name: Hello world!
-          command: echo "Hello world!"
-    working_directory: /usr/src/artman/
-
   build_and_push_docker_image:
     working_directory: /usr/src/artman
     docker:
@@ -78,6 +69,18 @@ jobs:
           path: /tmp/reports
       - store_artifacts:
           path: /artman/test/golden/actual_library_example.golden
+
+  docs:
+    docker:
+      - image: python:3.6
+    steps:
+      - checkout
+      - run:
+          name: Install nox.
+          command: pip install --upgrade nox-automation
+      - run:
+          name: Build the docs.
+          command: nox -e docs
 
   unit-python2.7:
     docker:
@@ -304,6 +307,7 @@ workflows:
       - unit-python3.4
       - unit-python3.5
       - unit-python3.6
+      - docs
       - smoke-csharp
       - smoke-go
       - smoke-java

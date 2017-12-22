@@ -2,7 +2,7 @@ Google API Artifact Manager
 ===========================
 
 Google API Artifact Manager (``artman``) is a program used to automate the
-generaton and publishing of API client libraries.
+generation and publishing of API client libraries.
 
 In order to be consumed by artman, APIs require:
 
@@ -28,21 +28,7 @@ metadata files.
 .. _`toolkit`: https://github.com/googleapis/toolkit
 
 
-Installing
-==========
-
-If your goal is just to use ``artman`` (rather than contribute to it), a
-standard pip install is probably not the right thing; we recommend
-the use of `pipsi`_ instead.
-
-View our `installation guide`_ to get going.
-
-.. _`pipsi`: https://github.com/mitsuhiko/pipsi
-.. _`installation guide`: https://googleapis-artman.readthedocs.io/latest/installing.html
-
-Documentation
-=============
-
-Documentation is available on `Read the Docs`_.
-
-.. _`Read the Docs`: https://googleapis-artman.readthedocs.io/
+.. toctree::
+    installing
+    getting-started
+    support
