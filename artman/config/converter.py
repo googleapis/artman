@@ -178,7 +178,7 @@ def _calculate_git_repos_config(artifact_config, output_dir):
                 or artifact_config.language == Artifact.JAVA):
               paths.append(path)
             else:
-              logger.warning('"%" publishing artifact type is only used in '
+              logger.warning('"%s" publishing artifact type is only used in '
                              'Java. Ignore that config.' % map_entry.name)
         item['paths'] = paths
         result[target.name] = item
