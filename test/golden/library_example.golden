@@ -44,7 +44,7 @@
 /java/google-cloud-library_example/.gradle/2.12/taskArtifacts/outputFileStates.bin
 /java/google-cloud-library_example/.gradle/2.12/taskArtifacts/taskArtifacts.bin
 /java/google-cloud-library_example/build.gradle
-/java/google-cloud-library_example/build/libs/google-cloud-library_example-0.1.26.jar
+/java/google-cloud-library_example/build/libs/google-cloud-library_example-0.1.27.jar
 /java/google-cloud-library_example/build/tmp/jar/MANIFEST.MF
 /java/google-cloud-library_example/gradle/wrapper/gradle-wrapper.jar
 /java/google-cloud-library_example/gradle/wrapper/gradle-wrapper.properties
@@ -53,7 +53,7 @@
 /java/google-cloud-library_example/grpc-google-cloud-library_example-v1/LICENSE
 /java/google-cloud-library_example/grpc-google-cloud-library_example-v1/PUBLISHING.md
 /java/google-cloud-library_example/grpc-google-cloud-library_example-v1/build.gradle
-/java/google-cloud-library_example/grpc-google-cloud-library_example-v1/build/libs/grpc-google-cloud-library_example-v1-0.1.26.jar
+/java/google-cloud-library_example/grpc-google-cloud-library_example-v1/build/libs/grpc-google-cloud-library_example-v1-0.1.27.jar
 /java/google-cloud-library_example/grpc-google-cloud-library_example-v1/build/tmp/jar/MANIFEST.MF
 /java/google-cloud-library_example/grpc-google-cloud-library_example-v1/gradle/wrapper/gradle-wrapper.jar
 /java/google-cloud-library_example/grpc-google-cloud-library_example-v1/gradle/wrapper/gradle-wrapper.properties
@@ -64,7 +64,7 @@
 /java/google-cloud-library_example/proto-google-cloud-library_example-v1/LICENSE
 /java/google-cloud-library_example/proto-google-cloud-library_example-v1/PUBLISHING.md
 /java/google-cloud-library_example/proto-google-cloud-library_example-v1/build.gradle
-/java/google-cloud-library_example/proto-google-cloud-library_example-v1/build/libs/proto-google-cloud-library_example-v1-0.1.26.jar
+/java/google-cloud-library_example/proto-google-cloud-library_example-v1/build/libs/proto-google-cloud-library_example-v1-0.1.27.jar
 /java/google-cloud-library_example/proto-google-cloud-library_example-v1/build/tmp/jar/MANIFEST.MF
 /java/google-cloud-library_example/proto-google-cloud-library_example-v1/gradle/wrapper/gradle-wrapper.jar
 /java/google-cloud-library_example/proto-google-cloud-library_example-v1/gradle/wrapper/gradle-wrapper.properties
