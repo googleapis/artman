@@ -31,7 +31,8 @@ class LocalStagingTask(task_base.TaskBase):
     This task requires WRITE access to the applicable repository.
     """
     def execute(self, git_repo, local_paths, output_dir,
-        gapic_code_dir=None, grpc_code_dir=None, proto_code_dir=None):
+        gapic_code_dir=None, grpc_code_dir=None, proto_code_dir=None,
+        local_repo_dir=None):
         """Copy the code to the correct local staging location.
 
         Args:
@@ -51,12 +52,18 @@ class LocalStagingTask(task_base.TaskBase):
         if repo_name.endswith('.git'):
             repo_name = repo_name[:-4]
 
-        # Where is the target git repo located?
-        # Start by checking for an explicit path in `local_paths`, and then
-        # if none is found, clone the repo to output_dir.
+        # Artman will find the local repo dir via the following steps:
+        # 1. Check whether an explicit `--local_repo_dir` flag is passed. Is so,
+        #    use that value.
+        # 2. Check whether a matched local repo dir is specified in user config.
+        #    If so, use that value.
+        # 3. Clones the repo to output_dir, and use the cloned repo dir.
         repo_name_underscore = repo_name.replace('-', '_')
-        api_repo = local_paths.get(repo_name_underscore)
-        if not api_repo:
+        if local_repo_dir:
+            api_repo = local_repo_dir
+        elif local_paths.get(repo_name_underscore):
+            api_repo = local_paths.get(repo_name_underscore)
+        else:
             api_repo = os.path.join(output_dir, repo_name)
             if os.path.exists(api_repo):
                 logger.fatal(

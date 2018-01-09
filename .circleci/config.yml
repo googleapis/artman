@@ -189,7 +189,9 @@ jobs:
             pip install --upgrade -e /usr/src/artman/
       - run:
           name: Build Pub/Sub (Java)
-          command: artman --local --config=/googleapis/google/pubsub/artman_pubsub.yaml publish --dry-run --github-username foo --github-token bar --target staging java_gapic
+          command: |
+            git clone https://github.com/googleapis/api-client-staging /tmp/api-client-staging
+            artman --local --config=/googleapis/google/pubsub/artman_pubsub.yaml publish --dry-run --local-repo-dir=/tmp/api-client-staging --github-username foo --github-token bar --target staging java_gapic
       - run:
           name: Build Speech (Java)
           command: artman --local --config=/googleapis/google/cloud/speech/artman_speech_v1.yaml publish --dry-run --github-username foo --github-token bar --target staging java_gapic

@@ -97,7 +97,8 @@ class NormalizeFlagTests(unittest.TestCase):
             github_username='test', github_token='token',
             artifact_name='python_gapic',
             output_dir='./artman-genfiles',
-            dry_run=False
+            dry_run=False,
+            local_repo_dir=None,
         )
         self.user_config = {
             'local_paths': {'reporoot': os.path.realpath('..')},
