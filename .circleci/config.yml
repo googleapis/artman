@@ -277,30 +277,6 @@ jobs:
           command: artman --local --config=/googleapis/google/cloud/speech/artman_speech_v1.yaml publish --dry-run --github-username foo --github-token bar --target staging ruby_gapic
     working_directory: /usr/src/artman/
 
-  golden-test:
-    docker:
-      - image: googleapis/artman:latest
-        environment:
-          TERM: dumb
-    steps:
-      - checkout
-      - run:
-          name: Install latest artman
-          command: |
-            pip install pytest
-            pip uninstall -y googleapis-artman
-            pip install --upgrade -e /usr/src/artman/
-            git clone https://github.com/googleapis/googleapis /usr/src/artman/test/golden/googleapis
-      - run:
-          name: Run golden test
-          # Set the environment variable so that the cached shared config will be used during the smoketest.
-          command: export RUNNING_IN_ARTMAN_DOCKER=True && py.test test/golden/artman_golden_test.py --googleapis-dir=/usr/src/artman/test/golden/googleapis
-      - store_artifacts:
-            path: /usr/src/artman/test/golden/actual_library_example.golden
-      - store_artifacts:
-            path: /usr/src/artman/test/golden/actual_library_example_legacy.golden
-    working_directory: /usr/src/artman/
-
 workflows:
   version: 2
   tests:
@@ -317,7 +293,6 @@ workflows:
       - smoke-php
       - smoke-python
       - smoke-ruby
-      - golden-test
   build_and_push_docker_image:
     jobs:
       - build_and_push_docker_image:
