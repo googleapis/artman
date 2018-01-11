@@ -481,7 +481,7 @@ def _run_artman_in_docker(flags):
         '-v', '%s:%s' % (artman_config_dirname, artman_config_dirname),
         '-w', root_dir
     ]
-    if flags.local_repo_dir:
+    if flags.subcommand == 'publish' and flags.local_repo_dir:
         base_cmd.extend(['-v', '%s:%s' % (flags.local_repo_dir, flags.local_repo_dir)])
     base_cmd.extend([docker_image, '/bin/bash', '-c'])
 
