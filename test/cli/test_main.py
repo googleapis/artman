@@ -87,8 +87,6 @@ class ReadUserConfigTests(unittest.TestCase):
 
 
 class NormalizeFlagTests(unittest.TestCase):
-    CURDIR = os.path.realpath(os.path.dirname(__file__))
-
     def setUp(self):
         self.flags = Namespace(
             config=os.path.join(CUR_DIR, 'data', 'artman_test.yaml'),
