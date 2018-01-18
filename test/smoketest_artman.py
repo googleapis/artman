@@ -100,6 +100,7 @@ def _generate_gapic_library(artman_config, artifact_name, root_dir, log_file):
         grpc_pipeline_args = [
             'artman',
             '--local',
+            '--verbose',
             '--config', artman_config,
             '--root-dir', root_dir,
             'generate', artifact_name
