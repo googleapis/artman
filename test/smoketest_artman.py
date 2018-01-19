@@ -26,6 +26,7 @@ import glob
 import json
 import logging
 import os
+import re
 import subprocess
 import sys
 import yaml
@@ -35,8 +36,13 @@ from google.protobuf import json_format
 from artman.config.proto import config_pb2
 
 # Generation failure of artifact on the whitelist won't be counted as failure
-# but warning.
+# but warning. It is defined at artifact level, and one can use regex to
+# whitelist the whole API or whole folder.
 WHITELIST = [
+    'gapic_config@google/bigtable/admin/artman_bigtableadmin.yaml',
+    'java_gapic@google/cloud/dialogflow/artman_dialogflow_v2beta1_java.yaml',
+    'nodejs_gapic@google/cloud/videointelligence/artman_videointelligence_v1.yaml',
+    '.+@google/devtools/remoteworkers/v1test2/artman_remoteworkers.yaml',
 ]
 
 logger = logging.getLogger('smoketest')
@@ -51,16 +57,24 @@ def run_smoke_test(root_dir, log):
     for artman_yaml_path in glob.glob('%s/google/**/artman_*.yaml' % root_dir,
                                       recursive=True):
         artman_config = _parse(artman_yaml_path)
-        for artifact in artman_config.artifacts:
+        # Reorder the artifacts by moving the gapic_config artifact to the end.
+        # Otherwise, the following GAPIC library generation is going to use the
+        # newly-generated GAPIC config instead of the one in github, leading to
+        # false negative and false positive in the test result.
+        artifacts = sorted(
+            artman_config.artifacts,
+            key=lambda a: config_pb2.Artifact.GAPIC_CONFIG == a.type)
+
+        for artifact in artifacts:
             logger.info('Start artifact generation for %s of %s'
                         % (artifact.name, artman_yaml_path))
-            if _generate_gapic_library(artman_yaml_path,
-                                       artifact.name,
-                                       root_dir,
-                                       log_file):
+            if _generate_artifact(artman_yaml_path,
+                                  artifact.name,
+                                  root_dir,
+                                  log_file):
                 msg = 'Failed to generate %s of %s.' % (
                     artifact.name, artman_yaml_path)
-                if os.path.relpath(artman_yaml_path, root_dir) in WHITELIST:
+                if _is_whitelisted(artman_yaml_path, root_dir, artifact.name):
                     warning.append(msg)
                 else:
                     failure.append(msg)
@@ -95,7 +109,7 @@ def _parse(artman_yaml_path):
     return config_pb
 
 
-def _generate_gapic_library(artman_config, artifact_name, root_dir, log_file):
+def _generate_artifact(artman_config, artifact_name, root_dir, log_file):
     with open(log_file, 'a') as log:
         grpc_pipeline_args = [
             'artman',
@@ -106,6 +120,15 @@ def _generate_gapic_library(artman_config, artifact_name, root_dir, log_file):
             'generate', artifact_name
         ]
         return subprocess.call(grpc_pipeline_args, stdout=log, stderr=log)
+
+
+def _is_whitelisted(artman_yaml_path, root_dir, artifact_name):
+    artifact = '%s@%s' % (artifact_name,
+                          os.path.relpath(artman_yaml_path, root_dir))
+    for whitelist in WHITELIST:
+        if re.match(whitelist, artifact):
+            return True
+    return False
 
 
 def parse_args(*args):
