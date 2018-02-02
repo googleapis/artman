@@ -140,7 +140,7 @@ def _calculate_rel_gapic_output_dir(language, api_name, api_version):
     ouput dir becomes configurable. This logic doesn't work for non-cloud.
     """
     if language == 'java':
-        return 'java/google-cloud-%s' % api_name
+        return 'java/gapic-google-cloud-%s-%s' % (api_name, api_version)
     elif language == 'csharp':
         return 'csharp/google-cloud-%s' % api_name
     elif language == 'go':
