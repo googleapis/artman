@@ -1,37 +1,30 @@
 ---
 version: 2.0
 jobs:
-  build_and_push_docker_image:
+  golden_test_and_optional_smoketest_all:
     working_directory: /usr/src/artman
     docker:
       - image: docker:17.05.0-ce-git
     steps:
       - checkout
       - setup_remote_docker
-      - run:
-          name: Fingers crossed!
-          command: |
-            echo "Fingers crossed!"
-      - restore_cache:
+      - &restore_artman_cache
+        restore_cache:
           keys:
             - artman-{{ .Branch }}
           paths:
             - /caches/artman.tar
-      - run:
+      - &load_build_and_save_artman_image
+        run:
           name: Load Artman Docker image layer cache
           command: |
             set +o pipefail
             docker load -i /caches/artman.tar | true
-      - run:
-          name: Build application Docker image
-          command: |
             docker build --cache-from=artman -t artman --build-arg install_artman_from_source=true .
-      - run:
-          name: Save Artman Docker image layer cache
-          command: |
             mkdir -p /caches
             docker save -o /caches/artman.tar artman
-      - save_cache:
+      - &save_artman_cache
+        save_cache:
           key: artman-{{ .Branch }}-{{ epoch }}
           paths:
             - /caches/artman.tar
@@ -45,11 +38,31 @@ jobs:
       - run:
           name: Run smoketests
           command: |
-            docker run -it -e RUNNING_IN_ARTMAN_DOCKER=True --name smoketest artman /bin/bash -c "git clone https://github.com/googleapis/googleapis /tmp/googleapis_smoketest; python3 /artman/test/smoketest_artman.py --root-dir=/tmp/googleapis_smoketest --log=/tmp/smoketest.log" || OUT=$?
-            docker cp smoketest:/tmp/smoketest.log /tmp/smoketest.log
-            if [ $OUT -ne 0 ];then
-              exit $OUT
+            if [ "${RUN_SMOKETEST}" ]; then
+              docker run -it -e RUNNING_IN_ARTMAN_DOCKER=True --name smoketest artman /bin/bash -c "git clone https://github.com/googleapis/googleapis /tmp/googleapis_smoketest; python3 /artman/test/smoketest_artman.py --root-dir=/tmp/googleapis_smoketest --log=/tmp/smoketest.log" || OUT=$?
+              docker cp smoketest:/tmp/smoketest.log /tmp/smoketest.log
+              if [ $OUT -ne 0 ];then
+                exit $OUT
+              fi
+            else
+              echo "Environment variables RUN_SMOKETEST is not properly set in CircleCI project."
+              echo "Skip smoketest step."
             fi
+      - store_artifacts:
+          path: /artman/test/golden/actual_library_example.golden
+      - store_artifacts:
+          path: /tmp/smoketest.log
+
+  build_and_release_docker_image:
+    working_directory: /usr/src/artman
+    docker:
+      - image: docker:17.05.0-ce-git
+    steps:
+      - checkout
+      - setup_remote_docker
+      - *restore_artman_cache
+      - *load_build_and_save_artman_image
+      - *save_artman_cache
       - deploy:
           name: Push Artman Docker image
           command: |
@@ -63,13 +76,6 @@ jobs:
               echo "Environment variables DOCKER_EMAIL, DOCKER_USER, DOCKER_PASS are not properly set in CircleCI project."
               echo "Skip the Artman Docker image publishing step."
             fi
-      - run:
-          name: Hooray!
-          command: echo "Hooray!"
-      - store_artifacts:
-          path: /artman/test/golden/actual_library_example.golden
-      - store_artifacts:
-          path: /tmp/smoketest.log
 
   docs:
     docker:
@@ -316,9 +322,24 @@ workflows:
       - smoke-php
       - smoke-python
       - smoke-ruby
-  build_and_push_docker_image:
+      - golden_test_and_optional_smoketest_all
+  build_and_release_docker_image:
     jobs:
-      - build_and_push_docker_image:
+      - build_and_release_docker_image:
+          requires:
+            - unit-python2.7
+            - unit-python3.4
+            - unit-python3.5
+            - unit-python3.6
+            - docs
+            - smoke-csharp
+            - smoke-go
+            - smoke-java
+            - smoke-nodejs
+            - smoke-php
+            - smoke-python
+            - smoke-ruby
+            - golden_test_and_optional_smoketest_all
           filters:
             branches:
               only: master
