@@ -44,10 +44,7 @@ class PackageMetadataConfigTest(unittest.TestCase):
             api_version='v1',
             gapic_api_yaml=[],
             language='python',
-            local_paths={
-                'googleapis': '%s/googleapis' % repo_root,
-                'reporoot': repo_root,
-            },
+            root_dir='%s/googleapis' % repo_root,
             organization_name='google-cloud',
             output_dir=str(self.output_dir),
             package_dependencies_yaml=package_dependencies_yaml,

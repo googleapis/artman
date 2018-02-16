@@ -17,6 +17,7 @@ config.
 """
 
 from __future__ import absolute_import
+import io
 import json
 import os
 
@@ -24,6 +25,7 @@ from google.protobuf import json_format
 import yaml
 
 from artman.config.proto.config_pb2 import Artifact, Config
+from artman.config.proto.user_config_pb2 import UserConfig
 from artman.utils.logger import logger
 
 # Error messages
@@ -32,6 +34,7 @@ CONFIG_NOT_FOUND_ERROR_MESSAGE_FORMAT = (
 # TODO(ethanbao): Add a reference link once Artman schema spec is publicly
 # available.
 INVALID_CONFIG_ERROR_MESSAGE_FORMAT = 'Artman YAML %s is invalid.'
+INVALID_USER_CONFIG_ERROR_MESSAGE_FORMAT = 'Artman user YAML %s is invalid.'
 
 
 def load_artifact_config(artman_config_path, artifact_name):
@@ -51,6 +54,28 @@ def load_artifact_config(artman_config_path, artifact_name):
         'No artifact with `%s` configured in artman yaml. Valid values are %s'
         % (artifact_name, valid_values))
 
+
+def read_user_config(artman_user_config_path):
+    """Parse and return artman config"""
+    config_pb = UserConfig()
+    artman_user_config_path = os.path.expanduser(artman_user_config_path)
+    if not os.path.isfile(artman_user_config_path):
+      logger.warn(
+          'No artman user config defined. Use the default one for this '
+          'execution. Run `configure-artman` to set up user config.')
+      return config_pb
+
+    try:
+        with io.open(artman_user_config_path, 'r') as f:
+            # Convert yaml into json file as protobuf python load support
+            # parsing of protobuf in json or text format, not yaml.
+            json_string = json.dumps(yaml.load(f))
+        json_format.Parse(json_string, config_pb)
+    except (json_format.ParseError, yaml.parser.ParserError):
+        logger.error(INVALID_USER_CONFIG_ERROR_MESSAGE_FORMAT % artman_user_config_path)
+        raise
+
+    return config_pb
 
 def _read_artman_config(artman_yaml_path):
     """Parse and return artman config after validation and normalization."""

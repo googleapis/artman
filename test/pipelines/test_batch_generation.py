@@ -44,7 +44,8 @@ class BatchTaskFactoryTests(unittest.TestCase):
             'language': 'python',
             'api_config_patterns': ['test/cli/data/gapic/api/artman_${API_SHORT_NAME}.yaml'],
             'artman_language_yaml': 'test/cli/data/gapic/lang/common.yaml',
-            'local_paths': {},
+            'toolkit': '/toolkit',
+            'root_dir': '/googleapis',
             'publish': 'noop',
         }
 

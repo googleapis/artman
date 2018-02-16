@@ -29,7 +29,7 @@ class PackageMetadataConfigGenTask(task_base.TaskBase):
 
     def execute(self, api_name, api_version, organization_name, output_dir,
                 package_dependencies_yaml, package_defaults_yaml, proto_deps,
-                language, local_paths, src_proto_path, package_type,
+                language, root_dir, src_proto_path, package_type,
                 gapic_api_yaml, release_level=None, packaging='single-artifact',
                 generated_package_version=None, proto_test_deps=None):
         api_full_name = task_utils.api_full_name(
@@ -38,7 +38,7 @@ class PackageMetadataConfigGenTask(task_base.TaskBase):
         config = self._create_config(
             api_name, api_version, api_full_name, output_dir,
             package_dependencies_yaml, package_defaults_yaml, proto_deps,
-            proto_test_deps, language, local_paths, src_proto_path, package_type,
+            proto_test_deps, language, root_dir, src_proto_path, package_type,
             gapic_api_yaml, release_level=release_level, packaging=packaging,
             generated_package_version=generated_package_version)
 
@@ -50,10 +50,10 @@ class PackageMetadataConfigGenTask(task_base.TaskBase):
 
     def _create_config(self, api_name, api_version, api_full_name, output_dir,
                        package_dependencies_yaml, package_defaults_yaml, proto_deps,
-                       proto_test_deps, language, local_paths, src_proto_path, package_type,
+                       proto_test_deps, language, root_dir, src_proto_path, package_type,
                        gapic_api_yaml, release_level=None,packaging='single-artifact',
                        generated_package_version=None):
-        googleapis_dir = local_paths['googleapis']
+        googleapis_dir = root_dir
         googleapis_path = os.path.commonprefix(
             [os.path.relpath(p, googleapis_dir) for p in src_proto_path])
 
@@ -113,13 +113,13 @@ class PackageMetadataConfigGenTask(task_base.TaskBase):
 class JavaGrpcPackageMetadataConfigGenTask(PackageMetadataConfigGenTask):
     def _create_config(self, api_name, api_version, api_full_name, output_dir,
                 package_dependencies_yaml, package_defaults_yaml, proto_deps,
-                proto_test_deps, language, local_paths, src_proto_path, package_type,
+                proto_test_deps, language, root_dir, src_proto_path, package_type,
                 gapic_api_yaml, release_level=None, packaging='single-artifact',
                 generated_package_version=None):
         config = super(JavaGrpcPackageMetadataConfigGenTask, self)._create_config(
             api_name, api_version, api_full_name, output_dir,
             package_dependencies_yaml, package_defaults_yaml, proto_deps,
-            proto_test_deps, language, local_paths, src_proto_path, package_type,
+            proto_test_deps, language, root_dir, src_proto_path, package_type,
             gapic_api_yaml, release_level=release_level, packaging=packaging,
             generated_package_version=generated_package_version)
         config['generation_layer'] = 'grpc'
@@ -129,13 +129,13 @@ class JavaGrpcPackageMetadataConfigGenTask(PackageMetadataConfigGenTask):
 class JavaProtoPackageMetadataConfigGenTask(PackageMetadataConfigGenTask):
     def _create_config(self, api_name, api_version, api_full_name, output_dir,
                 package_dependencies_yaml, package_defaults_yaml, proto_deps,
-                proto_test_deps, language, local_paths, src_proto_path, package_type,
+                proto_test_deps, language, root_dir, src_proto_path, package_type,
                 gapic_api_yaml, release_level=None, packaging='single-artifact',
                 generated_package_version=None):
         config = super(JavaProtoPackageMetadataConfigGenTask, self)._create_config(
             api_name, api_version, api_full_name, output_dir,
             package_dependencies_yaml, package_defaults_yaml, proto_deps,
-            proto_test_deps, language, local_paths, src_proto_path, package_type,
+            proto_test_deps, language, root_dir, src_proto_path, package_type,
             gapic_api_yaml, release_level=release_level, packaging=packaging,
             generated_package_version=generated_package_version)
         config['generation_layer'] = 'proto'
@@ -145,11 +145,11 @@ class JavaProtoPackageMetadataConfigGenTask(PackageMetadataConfigGenTask):
 # Metadata gen
 
 class ProtoPackageMetadataGenTaskBase(task_base.TaskBase):
-    def _execute(self, api_name, api_version, organization_name, local_paths,
+    def _execute(self, api_name, api_version, organization_name, toolkit,
                 descriptor_set, src_proto_path, service_yaml,
                 input_dir, output_dir, package_metadata_yaml,
                 language):
-        toolkit_path = local_paths['toolkit']
+        toolkit_path = toolkit
         api_full_name = task_utils.api_full_name(
             api_name, api_version, organization_name)
         proto_prefix = self._get_proto_prefix()
@@ -177,24 +177,24 @@ class ProtoPackageMetadataGenTaskBase(task_base.TaskBase):
 class ProtoPackageMetadataGenTask(ProtoPackageMetadataGenTaskBase):
     default_provides = 'proto_pkg_dir'
 
-    def execute(self, api_name, api_version, organization_name, local_paths,
+    def execute(self, api_name, api_version, organization_name, toolkit,
                 descriptor_set, src_proto_path, service_yaml,
                 proto_code_dir, output_dir, package_metadata_yaml,
                 language):
         return self._execute(api_name, api_version, organization_name,
-                local_paths, descriptor_set, src_proto_path, service_yaml,
+                toolkit, descriptor_set, src_proto_path, service_yaml,
                 proto_code_dir, output_dir, package_metadata_yaml,
                 language)
 
 class GrpcPackageMetadataGenTask(ProtoPackageMetadataGenTaskBase):
     default_provides = 'grpc_pkg_dir'
 
-    def execute(self, api_name, api_version, organization_name, local_paths,
+    def execute(self, api_name, api_version, organization_name, toolkit,
                 descriptor_set, src_proto_path, service_yaml,
                 grpc_code_dir, output_dir, package_metadata_yaml,
                 language):
         return self._execute(api_name, api_version, organization_name,
-                local_paths, descriptor_set, src_proto_path, service_yaml,
+                toolkit, descriptor_set, src_proto_path, service_yaml,
                 grpc_code_dir, output_dir, package_metadata_yaml,
                 language)
 

@@ -176,8 +176,7 @@ def _prepare_dir(source_repo="https://github.com/googleapis/googleapis.git"):
     artman_user_config = os.path.join(repo_root, 'artman-config.yaml')
     with io.open(artman_user_config, 'w+') as file_:
         file_.write(u'---\n')
-        file_.write(u'local_paths:\n')
-        file_.write(u'  reporoot: %s\n' % repo_root)
+        file_.write(u'local:\n')
         if os.environ.get('TOOLKIT_HOME'):
             toolkit_home = os.environ.get('TOOLKIT_HOME')
             file_.write(u'  toolkit: %s \n' % toolkit_home)

@@ -35,17 +35,17 @@ class LocalStagingTests(unittest.TestCase):
                 'paths': ['pubsub'],
                 'location': 'api-client-staging.git',
             },
-            local_paths={'api_client_staging': '/path/to/acs'},
+            local_repo_dir='/path/to/local/repo',
             output_dir='/path/to/output',
         )
 
         # Ensure we executed the commands we expect.
         assert exec_command.call_count == 4
         _, rm_cmd, _ = exec_command.mock_calls[0]
-        assert rm_cmd[0] == ['rm', '-rf', '/path/to/acs/pubsub']
+        assert rm_cmd[0] == ['rm', '-rf', '/path/to/local/repo/pubsub']
         _, cp_cmd, _ = exec_command.mock_calls[1]
         assert cp_cmd[0] == ['cp', '-rf', os.path.expanduser('~/foo/bar'),
-            '/path/to/acs/pubsub',
+            '/path/to/local/repo/pubsub',
         ]
         _, rm_cmd_2, _ = exec_command.mock_calls[2]
         assert rm_cmd_2[0] == ['rm', '-rf', os.path.expanduser('~/foo/bar')]
@@ -66,13 +66,13 @@ class LocalStagingTests(unittest.TestCase):
                 'paths': ['pubsub'],
                 'location': 'api-client-staging',
             },
-            local_paths={'api_client_staging': '/path/to/acs'},
+            local_repo_dir='/path/to/local/repo',
             output_dir='/path/to/output',
         )
 
         # Ensure that the correct path is still determined.
         for _, args, _ in exec_command.mock_calls[0:1]:
-            assert '/path/to/acs/pubsub' in args[0]
+            assert '/path/to/local/repo/pubsub' in args[0]
 
     @mock.patch.object(local.LocalStagingTask, 'exec_command')
     @mock.patch('os.path.isdir')
@@ -86,17 +86,17 @@ class LocalStagingTests(unittest.TestCase):
                 'paths': ['pubsub'],
                 'location': 'api-client-staging.git',
             },
-            local_paths={'api_client_staging': '/path/to/acs'},
+            local_repo_dir='/path/to/local/repo',
             output_dir='/path/to',
         )
 
         # Ensure we executed the commands we expect.
         assert exec_command.call_count == 3
         _, rm_cmd, _ = exec_command.mock_calls[0]
-        assert rm_cmd[0] == ['rm', '-rf', '/path/to/acs/pubsub']
+        assert rm_cmd[0] == ['rm', '-rf', '/path/to/local/repo/pubsub']
         _, cp_cmd, _ = exec_command.mock_calls[1]
         assert cp_cmd[0] == ['cp', '-rf', os.path.expanduser('~/foo/bar'),
-            '/path/to/acs/pubsub',
+            '/path/to/local/repo/pubsub',
         ]
         _, rm_cmd_2, _ = exec_command.mock_calls[2]
         assert rm_cmd_2[0] == ['rm', '-rf', os.path.expanduser('~/foo/bar')]
@@ -118,19 +118,16 @@ class LocalStagingTests(unittest.TestCase):
                 ],
                 'location': 'git@github.com:googleapis/api-client-staging.git',
             },
-            local_paths={
-                'reporoot': '/rr',
-                'api_client_staging': '/rr/api-client-staging'
-            },
+            local_repo_dir='/path/to/local/repo',
             output_dir='/tmp/out',
         )
 
         # Establish the commands we expect to have been called.
         expected_commands = (
-            'rm -rf /rr/api-client-staging/gapic/pubsub',
-            'cp -rf /path/to/gapic /rr/api-client-staging/gapic/pubsub',
-            'rm -rf /rr/api-client-staging/grpc/pubsub',
-            'cp -rf /path/to/grpc /rr/api-client-staging/grpc/pubsub',
+            'rm -rf /path/to/local/repo/gapic/pubsub',
+            'cp -rf /path/to/gapic /path/to/local/repo/gapic/pubsub',
+            'rm -rf /path/to/local/repo/grpc/pubsub',
+            'cp -rf /path/to/grpc /path/to/local/repo/grpc/pubsub',
             'rm -rf /path/to/gapic',
             'rm -rf /path/to/grpc',
             'rm -rf /tmp/out',
@@ -142,8 +139,8 @@ class LocalStagingTests(unittest.TestCase):
 
         # Establish the expected log entires.
         expected_messages = (
-            'Code generated: /rr/api-client-staging/gapic/pubsub',
-            'Code generated: /rr/api-client-staging/grpc/pubsub',
+            'Code generated: /path/to/local/repo/gapic/pubsub',
+            'Code generated: /path/to/local/repo/grpc/pubsub',
         )
         assert len(success.mock_calls) == len(expected_messages)
         for msg, call in zip(expected_messages, success.mock_calls):
@@ -166,7 +163,6 @@ class LocalStagingTests(unittest.TestCase):
                 ],
                 'location': 'git@github.com:googleapis/api-client-staging.git',
             },
-            local_paths={'reporoot': '/rr'},
             output_dir='/tmp/out',
         )
 

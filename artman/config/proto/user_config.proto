@@ -1,0 +1,62 @@
+// Copyright 2018 Google Inc.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+syntax = "proto3";
+
+package googleapis.artman;
+
+// The Artman user config is used to store user settings. All configuration is
+// optional unless it is explicitly marked as required. Configuration can
+// simplify the CLI invocation (e.g. github config), or change the behavior.
+// For example, when `local.toolkit` is configured to a local toolkit path, it
+// is the local toolkit that will be used (instead of the one shipped with
+// artman Docker image) when artman generates client libraries.
+//
+// The artman user config is defined in the YAML format and by default stored
+// as ~/.artman/config.yaml file. Below is an example:
+//
+//    local:
+//      toolkit: /local/toolkit/location
+//    github:
+//      username: foo
+//      token: DUMMY_TOKEN
+message UserConfig {
+  // Configuration for local settings (e.g. location of local toolkit).
+  LocalConfig local = 1;
+
+  // Configuration for GitHub-related settings.
+  GitHubConfig github = 2;
+}
+
+message LocalConfig {
+  // Specify the location of local `toolkit` source code dir or binary jar.
+  // Otherwise, the toolkit shipped as part of the artman Docker image will be
+  // used. This is useful for toolkit debugging. This configuration currently
+  // only work when running in artman local mode.
+  //
+  // Note: Absolute path should be used.
+  string toolkit = 1;
+}
+
+message GitHubConfig {
+  // The GitHub username, which is used to submit Gitcommit and create GitHub
+  // PR. The user can pass a different value when invoking `artman` CLI via
+  // `--github-username` flag.
+  string username = 1;
+
+  // The GitHub personal access token that matches the specified GitHub
+  // username. The user can pass a different value when invoking `artman` CLI
+  // via `--github-token` flag.
+  string token = 2;
+}

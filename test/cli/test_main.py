@@ -24,6 +24,7 @@ import mock
 import pytest
 
 from artman.cli import main
+from artman.config.proto.user_config_pb2 import UserConfig, LocalConfig, GitHubConfig
 from artman.utils.logger import logger
 
 
@@ -56,52 +57,23 @@ class ParseArgsTests(unittest.TestCase):
         assert flags.dry_run is False
 
 
-class ReadUserConfigTests(unittest.TestCase):
-    @mock.patch.object(logger, 'critical')
-    def test_no_config(self, critical):
-        flags = Namespace(user_config='/bogus/file.yaml', command='not_init')
-        with pytest.raises(SystemExit):
-            main.read_user_config(flags)
-        critical.assert_called_once_with('No user configuration found.')
-
-    @mock.patch.object(io, 'open')
-    @mock.patch.object(os.path, 'isfile')
-    def test_with_config(self, is_file, open_):
-        # Create our stand-in config file.
-        config_file = textwrap.dedent(u"""\
-        ---
-        local_paths:
-          reporoot: ~/Code
-        publish: local
-        """)
-        is_file.return_value = True
-        open_.return_value = io.StringIO(config_file)
-
-        # Get the config and test the result.
-        flags = Namespace(user_config='/bogus/file.yaml', command='not_init')
-        user_config = main.read_user_config(flags)
-        assert user_config == {
-            'local_paths': {'reporoot': '~/Code'},
-            'publish': 'local',
-        }
-
-
 class NormalizeFlagTests(unittest.TestCase):
     def setUp(self):
         self.flags = Namespace(
             config=os.path.join(CUR_DIR, 'data', 'artman_test.yaml'),
             root_dir=os.path.join(CUR_DIR, 'data'),
             subcommand='generate',
-            github_username='test', github_token='token',
+            github_username='test', github_token='testtoken',
             artifact_name='python_gapic',
             output_dir='./artman-genfiles',
             dry_run=False,
             local_repo_dir=None,
         )
-        self.user_config = {
-            'local_paths': {'reporoot': os.path.realpath('..')},
-            'publish': 'local',
-        }
+        local_config = LocalConfig()
+        local_config.toolkit = '/toolkit'
+        user_config = UserConfig()
+        user_config.local.CopyFrom(local_config)
+        self.user_config = user_config
 
     def test_basic_args(self):
         name, args = main.normalize_flags(self.flags, self.user_config)
@@ -110,7 +82,7 @@ class NormalizeFlagTests(unittest.TestCase):
         assert args['desc_proto_path'][0].endswith('google/iam/v1')
         assert args['gapic_api_yaml'][0].endswith('test_gapic.yaml')
         assert args['gapic_language_yaml'][0].endswith('python_gapic.yaml')
-        assert args['local_paths']
+        assert args['toolkit']
         assert 'github' not in args
         assert args['language'] == 'python'
         assert args['publish'] == 'noop'
@@ -121,4 +93,4 @@ class NormalizeFlagTests(unittest.TestCase):
         name, args = main.normalize_flags(self.flags, self.user_config)
         assert args['publish'] == 'github'
         assert args['github']['username'] == 'test'
-        assert args['github']['token'] == 'token'
+        assert args['github']['token'] == 'testtoken'

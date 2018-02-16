@@ -6,7 +6,9 @@ jobs:
     docker:
       - image: docker:17.05.0-ce-git
     steps:
-      - checkout
+      - &checkout_artman
+        checkout:
+          path: /usr/src/artman/
       - setup_remote_docker
       - &restore_artman_cache
         restore_cache:
@@ -58,7 +60,7 @@ jobs:
     docker:
       - image: docker:17.05.0-ce-git
     steps:
-      - checkout
+      - *checkout_artman
       - setup_remote_docker
       - *restore_artman_cache
       - *load_build_and_save_artman_image
@@ -81,13 +83,14 @@ jobs:
     docker:
       - image: python:3.6
     steps:
-      - checkout
+      - *checkout_artman
       - run:
           name: Install nox.
           command: pip install --upgrade nox-automation
       - run:
           name: Build the docs.
           command: nox -e docs
+    working_directory: /usr/src/artman/
 
   unit-python2.7:
     docker:
@@ -106,7 +109,7 @@ jobs:
     docker:
       - image: python:3.4
     steps:
-      - checkout
+      - *checkout_artman
       - run:
           name: Install nox and codecov.
           command: pip install --upgrade nox-automation codecov
@@ -119,7 +122,7 @@ jobs:
     docker:
       - image: python:3.5
     steps:
-      - checkout
+      - *checkout_artman
       - run:
           name: Install nox and codecov.
           command: pip install --upgrade nox-automation codecov
@@ -141,14 +144,13 @@ jobs:
           command: nox -e "unit_tests(python_version='3.6')"
     working_directory: /usr/src/artman/
 
-
   smoke-csharp:
     docker:
       - image: googleapis/artman:latest
         environment:
           TERM: dumb
     steps:
-      - checkout
+      - *checkout_artman
       - run:
           name: Install latest artman
           command: |
@@ -160,7 +162,7 @@ jobs:
       - run:
           name: Build Speech (C#)
           command: artman --local --config=google/cloud/speech/artman_speech_v1.yaml --root-dir=/googleapis generate csharp_gapic
-    working_directory: /usr/src/artman/
+    working_directory: /usr/src/artman/  # Intended, in order to test --root-dir flag.
 
   smoke-go:
     docker:
@@ -168,7 +170,7 @@ jobs:
         environment:
           TERM: dumb
     steps:
-      - checkout
+      - *checkout_artman
       - run:
           name: Install latest artman
           command: |
@@ -178,13 +180,13 @@ jobs:
           name: Build Pub/Sub (Go)
           command: |
             mkdir /tmp/pubsub-go
-            artman --local --output-dir /tmp/pubsub-go --config=/googleapis/google/pubsub/artman_pubsub.yaml publish --dry-run --github-username foo --github-token bar --target staging go_gapic
+            artman --local --output-dir /tmp/pubsub-go --config=google/pubsub/artman_pubsub.yaml publish --dry-run --github-username foo --github-token bar --target staging go_gapic
       - run:
           name: Build Speech (Go)
           command: |
             mkdir /tmp/speech-go
-            artman --local --output-dir /tmp/speech-go --config=/googleapis/google/cloud/speech/artman_speech_v1.yaml publish --dry-run --github-username foo --github-token bar --target staging go_gapic
-    working_directory: /usr/src/artman/
+            artman --local --output-dir /tmp/speech-go --config=google/cloud/speech/artman_speech_v1.yaml publish --dry-run --github-username foo --github-token bar --target staging go_gapic
+    working_directory: /googleapis
 
   smoke-java:
     docker:
@@ -192,7 +194,7 @@ jobs:
         environment:
           TERM: dumb
     steps:
-      - checkout
+      - *checkout_artman
       - run:
           name: Install latest artman
           command: |
@@ -202,13 +204,13 @@ jobs:
           name: Build Pub/Sub (Java)
           command: |
             git clone https://github.com/googleapis/api-client-staging /tmp/api-client-staging
-            artman --local --config=/googleapis/google/pubsub/artman_pubsub.yaml publish --dry-run --local-repo-dir=/tmp/api-client-staging --github-username foo --github-token bar --target staging java_gapic
+            artman --local --config=google/pubsub/artman_pubsub.yaml publish --dry-run --local-repo-dir=/tmp/api-client-staging --github-username foo --github-token bar --target staging java_gapic
       - run:
           name: Build Speech (Java)
           command: |
             mkdir /tmp/speech-java
-            artman --local --output-dir /tmp/speech-java --config=/googleapis/google/cloud/speech/artman_speech_v1.yaml publish --dry-run --github-username foo --github-token bar --target staging java_gapic
-    working_directory: /usr/src/artman/
+            artman --local --output-dir /tmp/speech-java --config=google/cloud/speech/artman_speech_v1.yaml publish --dry-run --github-username foo --github-token bar --target staging java_gapic
+    working_directory: /googleapis
 
   smoke-nodejs:
     docker:
@@ -216,7 +218,7 @@ jobs:
         environment:
           TERM: dumb
     steps:
-      - checkout
+      - *checkout_artman
       - run:
           name: Install latest artman
           command: |
@@ -226,13 +228,13 @@ jobs:
           name: Build Pub/Sub (Node.js)
           command: |
             mkdir /tmp/pubsub-node
-            artman --local --output-dir /tmp/pubsub-node --config=/googleapis/google/pubsub/artman_pubsub.yaml publish --dry-run --github-username foo --github-token bar --target staging nodejs_gapic
+            artman --local --output-dir /tmp/pubsub-node --config=google/pubsub/artman_pubsub.yaml publish --dry-run --github-username foo --github-token bar --target staging nodejs_gapic
       - run:
           name: Build Speech (Node.js)
           command: |
             mkdir /tmp/speech-node
-            artman --local --output-dir speech-node --config=/googleapis/google/cloud/speech/artman_speech_v1.yaml publish --dry-run --github-username foo --github-token bar --target staging nodejs_gapic
-    working_directory: /usr/src/artman/
+            artman --local --output-dir speech-node --config=google/cloud/speech/artman_speech_v1.yaml publish --dry-run --github-username foo --github-token bar --target staging nodejs_gapic
+    working_directory: /googleapis
 
   smoke-php:
     docker:
@@ -240,7 +242,7 @@ jobs:
         environment:
           TERM: dumb
     steps:
-      - checkout
+      - *checkout_artman
       - run:
           name: Install latest artman
           command: |
@@ -250,13 +252,13 @@ jobs:
           name: Build Pub/Sub (PHP)
           command: |
             mkdir /tmp/pubsub-php
-            artman --local --output-dir /tmp/pubsub-php --config=/googleapis/google/pubsub/artman_pubsub.yaml publish --dry-run --github-username foo --github-token bar --target staging php_gapic
+            artman --local --output-dir /tmp/pubsub-php --config=google/pubsub/artman_pubsub.yaml publish --dry-run --github-username foo --github-token bar --target staging php_gapic
       - run:
           name: Build Speech (PHP)
           command: |
             mkdir /tmp/speech-php
-            artman --local --output-dir /tmp/speech-php --config=/googleapis/google/cloud/speech/artman_speech_v1.yaml publish --dry-run --github-username foo --github-token bar --target staging php_gapic
-    working_directory: /usr/src/artman/
+            artman --local --output-dir /tmp/speech-php --config=google/cloud/speech/artman_speech_v1.yaml publish --dry-run --github-username foo --github-token bar --target staging php_gapic
+    working_directory: /googleapis
 
   smoke-python:
     docker:
@@ -264,7 +266,7 @@ jobs:
         environment:
           TERM: dumb
     steps:
-      - checkout
+      - *checkout_artman
       - run:
           name: Install latest artman
           command: |
@@ -274,13 +276,13 @@ jobs:
           name: Build Pub/Sub (Python)
           command: |
             mkdir /tmp/pubsub-python
-            artman --local --output-dir /tmp/pubsub-python --config=/googleapis/google/pubsub/artman_pubsub.yaml publish --dry-run --github-username foo --github-token bar --target staging python_gapic
+            artman --local --output-dir /tmp/pubsub-python --config=google/pubsub/artman_pubsub.yaml publish --dry-run --github-username foo --github-token bar --target staging python_gapic
       - run:
           name: Build Speech (Python)
           command: |
             mkdir /tmp/speech-python
-            artman --local --output-dir /tmp/speech-python --config=/googleapis/google/cloud/speech/artman_speech_v1.yaml publish --dry-run --github-username foo --github-token bar --target staging python_gapic
-    working_directory: /usr/src/artman/
+            artman --local --output-dir /tmp/speech-python --config=google/cloud/speech/artman_speech_v1.yaml publish --dry-run --github-username foo --github-token bar --target staging python_gapic
+    working_directory: /googleapis
 
   smoke-ruby:
     docker:
@@ -288,7 +290,7 @@ jobs:
         environment:
           TERM: dumb
     steps:
-      - checkout
+      - *checkout_artman
       - run:
           name: Install latest artman
           command: |
@@ -298,13 +300,13 @@ jobs:
           name: Build Pub/Sub (Ruby)
           command: |
             mkdir /tmp/pubsub-ruby
-            artman --local --output-dir /tmp/pubsub-ruby --config=/googleapis/google/pubsub/artman_pubsub.yaml publish --dry-run --github-username foo --github-token bar --target staging ruby_gapic
+            artman --local --output-dir /tmp/pubsub-ruby --config=google/pubsub/artman_pubsub.yaml publish --dry-run --github-username foo --github-token bar --target staging ruby_gapic
       - run:
           name: Build Speech (Ruby)
           command: |
             mkdir /tmp/speech-ruby
-            artman --local --output-dir /tmp/speech-ruby --config=/googleapis/google/cloud/speech/artman_speech_v1.yaml publish --dry-run --github-username foo --github-token bar --target staging ruby_gapic
-    working_directory: /usr/src/artman/
+            artman --local --output-dir /tmp/speech-ruby --config=google/cloud/speech/artman_speech_v1.yaml publish --dry-run --github-username foo --github-token bar --target staging ruby_gapic
+    working_directory: /googleapis
 
 workflows:
   version: 2

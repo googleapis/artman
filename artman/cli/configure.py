@@ -13,19 +13,24 @@
 # limitations under the License.
 
 from __future__ import absolute_import
-from copy import copy
+from collections import OrderedDict
 import getpass
 import importlib
 import io
+import json
 import logging
 import os
 
 import six
 
 from ruamel import yaml
+import stringcase
+import yaml
 
+from artman.config.proto.user_config_pb2 import UserConfig, LocalConfig, GitHubConfig
 from artman.utils.logger import logger
 from artman.utils.logger import setup_logging
+from google.protobuf.json_format import MessageToJson
 
 __all__ = ('configure',)
 
@@ -36,7 +41,7 @@ def configure(log_level=logging.INFO):
     Returns:
         int: An exit status.
     """
-    user_config = {}
+    user_config = UserConfig()
 
     # Walk the user through basic configuration.
     setup_logging(log_level)
@@ -46,107 +51,99 @@ def configure(log_level=logging.INFO):
 
     # Go through each step.
     # These are split out to make testing them easier.
-    user_config['local_paths'] = _configure_local_paths(
-        user_config.get('local_paths', {}),
-    )
-    user_config['publish'] = _configure_publish()
-    if user_config['publish'] == 'github':
-        user_config['github'] = _configure_github(
-            user_config.get('github', {}),
-        )
+    user_config.local.CopyFrom(_configure_local_config())
+    user_config.github.CopyFrom(_configure_github_config())
 
-    # Write the final configuration.
-    config_yaml = yaml.dump(user_config,
-        block_seq_indent=2,
-        default_flow_style=False,
-        indent=2,
-    )
-    if isinstance(config_yaml, six.binary_type):
-        config_yaml = config_yaml.decode('utf8')
     try:
-        os.makedirs(os.path.expanduser('~/.artman/'))
+        config_dir = os.path.expanduser('~/.artman/')
+        os.makedirs(config_dir)
     except OSError:
         pass
-    with io.open(os.path.expanduser('~/.artman/config.yaml'), 'w+') as file_:
-        file_.write(u'---\n')
-        file_.write(config_yaml)
+    _write_pb_to_yaml(user_config, os.path.join(config_dir, 'config.yaml'))
     logger.success('Configuration written successfully to '
                    '~/.artman/config.yaml.')
 
 
-def _configure_local_paths(local_paths):
-    """Return a copy of user_config with local_paths set.
-
-    Args:
-        local_paths (dict): The starting local_paths portion ofuser config.
+def _configure_local_config():
+    """Determine and return artman user local config.
 
     Returns:
-        dict: The new local_paths dictionary.
+        LocalConfig: The new artman local config settings.
     """
-    answer = copy(local_paths)
+    answer = LocalConfig()
 
-    # Ask the user for a repository root.
-    while not answer.get('reporoot'):
-        logger.info('First, we need to know where you store most code on your '
-                    'local machine.')
-        logger.info('Other paths (example: toolkit) will derive from this, '
-                    'but most are individually configurable.')
-        logger.info('The use of ${REPOROOT} in GAPIC YAMLs will point here.')
-        logger.info('Note: Use of ~ is fine here.')
-        answer['reporoot'] = six.moves.input('Local code path: ')
-        answer['reporoot'] = answer['reporoot'].rstrip('/').strip()
-
-    # Set up dependent directories.
-    reporoot = answer['reporoot']
-    for dep in ('api-client-staging', 'googleapis', 'toolkit'):
+    # Ask the user for a local toolkit location.
+    while not answer.toolkit:
         location = six.moves.input(
-            'Path for {0} (default: {1}/{0}): '.format(dep, reporoot)
-        ).rstrip('/').strip()
+            'Where is your local toolkit repository? (If you do not have a '
+            'toolkit repository, clone https://github.com/googleapis/toolkit/) '
+            'Please provide an absolute path: ')
         if location:
-            answer[dep.replace('-', '_')] = location
+            answer.toolkit = location
 
     # Done; return the answer.
     return answer
 
 
-def _configure_publish(publish=None):
-    """Determine and return the default publisher.
-
-    Args:
-        publish (str): The current default publisher (may be None).
-
-    Returns:
-        str: The new default publisher.
-    """
-    # Set up publishing defaults.
-    logger.info('Where do you want to publish code by default?')
-    logger.info('The common valid options are "github" and "local".')
-    publish = six.moves.input('Default publisher: ').lower()
-    try:
-        importlib.import_module('artman.tasks.publish.%s' % publish)
-        return publish
-    except ImportError:
-        logger.error('Invalid publisher.')
-        return _configure_publish()
-
-
-def _configure_github(github):
-    """Determine and return the GitHub configuration.
-
-    Args:
-        github (dict): The current GitHub configuration.
+def _configure_github_config():
+    """Determine and return artman user GitHub config.
 
     Returns:
         dict: The new GitHub configuration.
     """
-    answer = copy(github)
+    answer = GitHubConfig()
     logger.info('Since you intend to publish to GitHub, you need to '
                 'supply credentials.')
     logger.info('Create an access token at: '
                 'https://github.com/settings/tokens')
     logger.info('It needs the "repo" scope and nothing else.')
-    while not answer.get('username'):
-        answer['username'] = six.moves.input('GitHub username: ')
-    while not answer.get('token'):
-        answer['token'] = getpass.getpass('GitHub token (input is hidden): ')
+    while not answer.username:
+        answer.username = six.moves.input('GitHub username: ')
+    while not answer.token:
+        answer.token = getpass.getpass('GitHub token (input is hidden): ')
+
     return answer
+
+
+def _write_pb_to_yaml(pb, output):
+    # Add yaml representer so that yaml dump can dump OrderedDict. The code
+    # is coming from https://stackoverflow.com/questions/16782112.
+    yaml.add_representer(OrderedDict, _represent_ordereddict)
+
+    json_obj = _order_dict(json.loads(MessageToJson(pb)))
+    with open(output, 'w') as outfile:
+        yaml.dump(json_obj, outfile, default_flow_style=False)
+
+
+def _represent_ordereddict(dumper, data):
+    value = []
+    for item_key, item_value in data.items():
+        node_key = dumper.represent_data(item_key)
+        node_value = dumper.represent_data(item_value)
+
+        value.append((node_key, node_value))
+
+    return yaml.nodes.MappingNode(u'tag:yaml.org,2002:map', value)
+
+
+def _order_dict(od):
+    # The whole key order is based on the simple name of the config field
+    # instead of its full name (`username` vs `github.username`).
+    keyorder = [
+        'local', 'toolkit', 'github', 'username', 'token'
+    ]
+    res = OrderedDict()
+    for k, v in sorted(od.items(), key=lambda i: keyorder.index(i[0])):
+        if isinstance(v, dict):
+            res[k] = _order_dict(v)
+        elif isinstance(v, list):
+            if isinstance(v[0], dict):
+                result = []
+                for d2 in v:
+                    result.append(_order_dict(d2))
+                res[k] = result
+            else:
+                res[k] = v
+        else:
+            res[k] = v
+    return res

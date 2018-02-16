@@ -37,6 +37,7 @@ from taskflow import engines
 
 from artman.config import converter, loader
 from artman.config.proto.config_pb2 import Artifact, Config
+from artman.config.proto.user_config_pb2 import UserConfig
 from artman.cli import support
 from artman.pipelines import pipeline_factory
 from artman.utils import config_util
@@ -56,7 +57,7 @@ def main(*args):
 
     # Get to a normalized set of arguments.
     flags = parse_args(*args)
-    user_config = read_user_config(flags)
+    user_config = loader.read_user_config(flags.user_config)
     _adjust_root_dir(flags.root_dir)
     pipeline_name, pipeline_kwargs = normalize_flags(flags, user_config)
 
@@ -150,8 +151,7 @@ def parse_args(*args):
         'which includes but is not limited to API protos, service config yaml '
         'and GAPIC config yaml. It will be passed to protobuf compiler via '
         '`-I` flag in order to generate descriptor. If not specified, it '
-        'will first look up in artman user config. If not found, an error '
-        'will be raised with instructions.',
+        'will use the current working directory.',
     )
     parser.add_argument(
         '-v',
@@ -241,34 +241,6 @@ def parse_args(*args):
     return parser.parse_args(args=args)
 
 
-def read_user_config(flags):
-    """Read the user config from disk and return it.
-
-    Args:
-        flags (argparse.Namespace): The flags from sys.argv.
-
-    Returns:
-        dict: The user config.
-    """
-    # Load the user configuration if it exists and save a dictionary.
-    user_config = {}
-    user_config_file = os.path.realpath(os.path.expanduser(flags.user_config))
-    if os.path.isfile(user_config_file):
-        with io.open(user_config_file) as ucf:
-            user_config = yaml.load(ucf.read(), Loader=yaml.Loader) or {}
-
-    # Sanity check: Is there a configuration? If not, abort.
-    if not user_config:
-        setup_logging(INFO)
-        logger.critical('No user configuration found.')
-        logger.warn('This is probably your first time running Artman.')
-        logger.warn('Run `configure-artman` to get yourself set up.')
-        sys.exit(64)
-
-    # Done; return the user config.
-    return user_config
-
-
 def normalize_flags(flags, user_config):
     """Combine the argparse flags and user configuration together.
 
@@ -286,19 +258,23 @@ def normalize_flags(flags, user_config):
         flags.root_dir = os.path.abspath(flags.root_dir)
         flags.config = os.path.join(flags.root_dir, flags.config)
     else:
+        flags.root_dir = os.getcwd()
         flags.config = os.path.abspath(flags.config)
+    root_dir = flags.root_dir
     flags.output_dir = os.path.abspath(flags.output_dir)
     pipeline_args = {}
 
     # Determine logging verbosity and then set up logging.
-    verbosity = support.resolve('verbosity', user_config, flags, default=INFO)
+    verbosity = INFO
+    if getattr(flags, 'verbosity', None):
+        verbosity = getattr(flags, 'verbosity')
     setup_logging(verbosity)
 
     # Save local paths, if applicable.
     # This allows the user to override the path to api-client-staging or
     # toolkit on his or her machine.
-    pipeline_args['local_paths'] = support.parse_local_paths(
-        user_config, flags.root_dir)
+    pipeline_args['root_dir'] = root_dir
+    pipeline_args['toolkit'] = user_config.local.toolkit
 
     if flags.subcommand == 'publish' and flags.local_repo_dir:
         if not flags.dry_run:
@@ -307,16 +283,6 @@ def normalize_flags(flags, user_config):
             sys.exit(96)
         flags.local_repo_dir = os.path.abspath(flags.local_repo_dir)
         pipeline_args['local_repo_dir'] = flags.local_repo_dir
-
-    if flags.root_dir:
-        root_dir = flags.root_dir
-    elif pipeline_args['local_paths']['googleapis']:
-        root_dir = pipeline_args['local_paths']['googleapis']
-        flags.root_dir = root_dir
-    else:
-        logger.error('`--root-dir` flag must be passed, or you will have to '
-                     'specify the `googleapis` field in artman user config.')
-        sys.exit(96)
 
     artman_config_path = flags.config
     if not os.path.isfile(artman_config_path):
@@ -345,15 +311,12 @@ def normalize_flags(flags, user_config):
     with io.open(tmp_legacy_config_yaml, 'w') as outfile:
         yaml.dump(legacy_config_dict, outfile, default_flow_style=False)
 
-    googleapis = os.path.realpath(
-        os.path.expanduser(
-            pipeline_args['local_paths']['googleapis'], ))
     config = ','.join([
         '{artman_config_path}',
         '{googleapis}/gapic/lang/{shared_config_name}',
     ]).format(
         artman_config_path=tmp_legacy_config_yaml,
-        googleapis=googleapis,
+        googleapis=root_dir,
         shared_config_name=shared_config_name,
     )
 
@@ -385,8 +348,8 @@ def normalize_flags(flags, user_config):
             config_spec=config_spec,
             config_sections=config_sections,
             repl_vars={
-                k.upper(): v
-                for k, v in pipeline_args['local_paths'].items()
+                'GOOGLEAPIS': root_dir,
+                'TOOLKIT': user_config.local.toolkit
             },
             language=language, )
         pipeline_args.update(config_args)
@@ -404,7 +367,7 @@ def normalize_flags(flags, user_config):
                 pipeline_args['publish'] = 'github'
                 pipeline_args['github'] = support.parse_github_credentials(
                     argv_flags=flags,
-                    config=user_config.get('github', {}), )
+                    github_config=user_config.github)
             repos = pipeline_args.pop('git_repos')
             pipeline_args['git_repo'] = support.select_git_repo(
                 repos, publishing_config.name)

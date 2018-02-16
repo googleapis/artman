@@ -30,7 +30,7 @@ class LocalStagingTask(task_base.TaskBase):
 
     This task requires WRITE access to the applicable repository.
     """
-    def execute(self, git_repo, local_paths, output_dir,
+    def execute(self, git_repo, output_dir,
         gapic_code_dir=None, grpc_code_dir=None, proto_code_dir=None,
         local_repo_dir=None):
         """Copy the code to the correct local staging location.
@@ -38,16 +38,13 @@ class LocalStagingTask(task_base.TaskBase):
         Args:
             gapic_code_dir (str): The location of the GAPIC code.
             git_repo (dict): Information about the git repository.
-            local_paths (dict): Configured local paths; here we use it for
-                knowing where api_client_staging is.
             output_dir (str): The original base output dir. This directory
                 is removed after proper local code staging unless removing
                 it would remove the final destination directories.
             grpc_code_dir (str): The location of the GRPC code, if any.
         """
         # Determine the actual repository name.
-        # We can use this to derive the probable OS system path, as well
-        # as the key we expect in `local_paths` for an override.
+        # We can use this to derive the probable OS system path.
         repo_name = git_repo['location'].rstrip('/').split('/')[-1]
         if repo_name.endswith('.git'):
             repo_name = repo_name[:-4]
@@ -55,14 +52,10 @@ class LocalStagingTask(task_base.TaskBase):
         # Artman will find the local repo dir via the following steps:
         # 1. Check whether an explicit `--local_repo_dir` flag is passed. Is so,
         #    use that value.
-        # 2. Check whether a matched local repo dir is specified in user config.
-        #    If so, use that value.
-        # 3. Clones the repo to output_dir, and use the cloned repo dir.
+        # 2. Clones the repo to output_dir, and use the cloned repo dir.
         repo_name_underscore = repo_name.replace('-', '_')
         if local_repo_dir:
             api_repo = local_repo_dir
-        elif local_paths.get(repo_name_underscore):
-            api_repo = local_paths.get(repo_name_underscore)
         else:
             api_repo = os.path.join(output_dir, repo_name)
             if os.path.exists(api_repo):

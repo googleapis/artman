@@ -46,7 +46,7 @@ class BatchTaskFactory(code_gen.TaskFactoryBase):
 
     def get_language_api_flows(self, batch_apis, exclude_apis, language,
                                api_config_patterns, artman_language_yaml,
-                               local_paths, **kwargs):
+                               toolkit, root_dir, **kwargs):
 
         artman_config_yamls = _get_artman_config_filenames(
             api_config_patterns, batch_apis, exclude_apis)
@@ -55,7 +55,8 @@ class BatchTaskFactory(code_gen.TaskFactoryBase):
                 artman_config_yamls,
                 language,
                 artman_language_yaml,
-                local_paths):
+                toolkit,
+                root_dir):
 
             api_kwargs.update(kwargs)
 
@@ -83,15 +84,17 @@ class BatchTaskFactory(code_gen.TaskFactoryBase):
 
 
 def _get_api_kwarg_dicts(
-        artman_config_yamls, language, artman_language_yaml, local_paths):
+        artman_config_yamls, language, artman_language_yaml, toolkit, root_dir):
     lang_config = _load_artman_config(artman_language_yaml,
                                       language,
-                                      local_paths)
+                                      toolkit,
+                                      root_dir)
     lang_config['language'] = language
     for api_config_yaml in artman_config_yamls:
         api_config = _load_artman_config(api_config_yaml,
                                          language,
-                                         local_paths)
+                                         toolkit,
+                                         root_dir)
         api_kwargs = lang_config.copy()
         api_kwargs.update(api_config)
         yield api_kwargs
@@ -133,9 +136,10 @@ def _get_artman_config_filenames(api_config_patterns, batch_apis, exclude_apis):
     return config_filenames
 
 
-def _load_artman_config(artman_yaml, language, local_paths):
+def _load_artman_config(artman_yaml, language, toolkit, root_dir):
     return config_util.load_config_spec(
         config_spec=artman_yaml,
         config_sections=['common'],
-        repl_vars={k.upper(): v for k, v in local_paths.items()},
+        repl_vars={'TOOLKIT': toolkit,
+                   'GOOGLEAPIS': root_dir},
         language=language)

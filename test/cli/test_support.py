@@ -20,85 +20,39 @@ import unittest
 import pytest
 
 from artman.cli import support
+from artman.config.proto.user_config_pb2 import GitHubConfig
 
 
 class ParseGitHubCredentialsTests(unittest.TestCase):
     def test_read_from_config_file(self):
-        user_config = {'username': 'foo', 'token': 'bar'}
+        github_config = GitHubConfig()
+        github_config.username = 'foo'
+        github_config.token = 'bar'
         flags = argparse.Namespace(github_username=None, github_token=None)
-        result = support.parse_github_credentials(user_config, flags)
-        assert result == user_config
+        result = support.parse_github_credentials(github_config, flags)
+        assert {'username': 'foo', 'token': 'bar'} == result
 
     def test_read_from_argv(self):
-        user_config = {}
+        github_config = GitHubConfig()
         flags = argparse.Namespace(github_username='spam', github_token='eggs')
-        result = support.parse_github_credentials(user_config, flags)
-        assert result == {'username': 'spam', 'token': 'eggs'}
+        result = support.parse_github_credentials(github_config, flags)
+        assert {'username': 'spam', 'token': 'eggs'} == result
 
     def test_read_from_config_file_and_argv(self):
         # If we get values both in the config file and in sys.argv, the latter
         # should win.
-        user_config = {'username': 'foo', 'token': 'bar'}
+        github_config = GitHubConfig()
+        github_config.username = 'foo'
+        github_config.token = 'bar'
         flags = argparse.Namespace(github_username='spam', github_token='eggs')
-        result = support.parse_github_credentials(user_config, flags)
-        assert result == {'username': 'spam', 'token': 'eggs'}
+        result = support.parse_github_credentials(github_config, flags)
+        assert {'username': 'spam', 'token': 'eggs'} == result
 
     def test_no_credentials_error(self):
-        user_config = {}
+        github_config = GitHubConfig()
         flags = argparse.Namespace(github_username=None, github_token=None)
         with pytest.raises(SystemExit):
-            support.parse_github_credentials(user_config, flags)
-
-
-class ParseLocalPathsTests(unittest.TestCase):
-    def test_normal(self):
-        user_config = {'local_paths': {'reporoot': '~/Code'}}
-        result = support.parse_local_paths(user_config, None)
-        base = os.path.expanduser('~/Code')
-        assert result == {
-            'reporoot': base,
-            'artman': '{}/artman'.format(base),
-            'googleapis': '{}/googleapis'.format(base),
-            'toolkit': '{}/toolkit'.format(base),
-        }
-
-    def test_googleapis_flag(self):
-        user_config = {'local_paths': {'reporoot': '~/Code'}}
-        result = support.parse_local_paths(user_config, '/path/to/googleapis')
-        base = os.path.expanduser('~/Code')
-        assert result['googleapis'] == '/path/to/googleapis'
-
-
-class ResolveTests(unittest.TestCase):
-    def test_neither_set(self):
-        user_config = {}
-        flags = argparse.Namespace()
-        result = support.resolve('foo', user_config, flags, default=42)
-        assert result == 42
-
-    def test_neither_set_no_default(self):
-        user_config = {}
-        flags = argparse.Namespace()
-        result = support.resolve('foo', user_config, flags)
-        assert result is None
-
-    def test_user_config_only_set(self):
-        user_config = {'bar': 3}
-        flags = argparse.Namespace(bar=None)
-        result = support.resolve('bar', user_config, flags, default=42)
-        assert result == 3
-
-    def test_flag_only_set(self):
-        user_config = {}
-        flags = argparse.Namespace(baz=9)
-        result = support.resolve('baz', user_config, flags, default=42)
-        assert result == 9
-
-    def test_both_set(self):
-        user_config = {'bacon': 'gross'}
-        flags = argparse.Namespace(bacon='yummy!')
-        result = support.resolve('bacon', user_config, flags, default='meh')
-        assert result == 'yummy!'
+            support.parse_github_credentials(github_config, flags)
 
 
 class SelectGitRepoTests(unittest.TestCase):

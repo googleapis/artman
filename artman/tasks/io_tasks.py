@@ -109,8 +109,8 @@ class PrepareGoogleapisDirTask(task_base.TaskBase):
 
     default_provides = ('remote_repo_dir')
 
-    def execute(self, local_paths, files_dict={}):
-        repo_root = local_paths['reporoot']
+    def execute(self, root_dir, files_dict={}):
+        repo_root = os.path.abspath(os.path.join(root_dir, os.pardir))
         if os.path.exists(os.path.realpath(os.path.expanduser(repo_root))):
             # Do nothing if the repo_root exists. The repo_root exists if
             # artman is running locally.
