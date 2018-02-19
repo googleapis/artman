@@ -38,7 +38,7 @@ the use of `pipsi`_ instead.
 View our `installation guide`_ to get going.
 
 .. _`pipsi`: https://github.com/mitsuhiko/pipsi
-.. _`installation guide`: https://googleapis-artman.readthedocs.io/latest/installing.html
+.. _`installation guide`: https://googleapis-artman.readthedocs.io/en/latest/installing.html
 
 Documentation
 =============
