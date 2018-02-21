@@ -40,8 +40,9 @@ from artman.config.proto import config_pb2
 # whitelist the whole API or whole folder.
 WHITELIST = [
     'gapic_config@google/bigtable/admin/artman_bigtableadmin.yaml',
-    'java_gapic@google/cloud/dialogflow/artman_dialogflow_v2beta1_java.yaml',
     'nodejs_gapic@google/cloud/videointelligence/artman_videointelligence_v1.yaml',
+    # TODO(michaelbausor): Remove once the php_gapic generation works.
+    'php_gapic@google/cloud/dialogflow/artman_dialogflow_v2beta1.yaml',
     '.+@google/devtools/remoteworkers/v1test2/artman_remoteworkers.yaml',
 ]
 
