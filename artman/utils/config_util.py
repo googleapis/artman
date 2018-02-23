@@ -16,6 +16,7 @@
 
 from __future__ import absolute_import
 import collections
+import io
 
 from ruamel import yaml
 
@@ -27,7 +28,7 @@ def load_config_spec(config_spec, config_sections, repl_vars, language):
     config_path = config_split[0]
     if len(config_split) > 1:
         config_sections = config_split[1].split('|')
-    with open(config_path) as config_file:
+    with io.open(config_path, encoding='UTF-8') as config_file:
         all_config_data = yaml.load(config_file, Loader=yaml.Loader)
 
     # Make a list of the appropriate configuration sections (just the ones

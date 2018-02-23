@@ -14,6 +14,7 @@
 
 """Tasks related to protoc"""
 
+import io
 import os
 import re
 from ruamel import yaml
@@ -279,10 +280,10 @@ class PhpGrpcRenameTask(task_base.TaskBase):
         for filename in protoc_utils.list_files_recursive(grpc_code_dir):
             if filename.endswith('GrpcClient.php'):
                 logger.info('Performing replacements in: %s' % (filename,))
-                with open(filename) as f:
+                with io.open(filename, encoding='UTF-8') as f:
                     contents = f.read()
                 contents = protoc_utils.php_proto_rename(contents)
-                with open(filename, 'w') as f:
+                with io.open(filename, 'w', encoding='UTF-8') as f:
                     f.write(contents)
 
 

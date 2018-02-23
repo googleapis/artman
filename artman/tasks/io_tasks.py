@@ -15,6 +15,7 @@
 """Tasks related to I/O."""
 
 import base64
+import io
 import os
 import shutil
 import zipfile
@@ -47,7 +48,7 @@ class BlobUploadTask(task_base.TaskBase):
         client = storage.Client()
         bucket = client.get_bucket(bucket_name)
         blob = bucket.blob(dest_path)
-        with open(src_path, 'r') as f:
+        with io.open(src_path, 'r', encoding='UTF-8') as f:
             blob.upload_from_file(f)
         logger.info('Uploaded to %s' % blob.public_url)
 
@@ -72,7 +73,7 @@ class BlobDownloadTask(task_base.TaskBase):
                 os.makedirs(os.path.dirname(filename))
             except:
                 raise
-        with open(filename, "w") as f:
+        with io.open(filename, "w", encoding='UTF-8') as f:
             blob.download_to_file(f)
             logger.info('File downloaded to %s.' % f.name)
 
@@ -138,6 +139,6 @@ class PrepareGoogleapisDirTask(task_base.TaskBase):
             filename = os.path.join(remote_repo_dir, f)
             if not os.path.exists(os.path.dirname(filename)):
                 os.makedirs(os.path.dirname(filename))
-            with open(filename, "w+") as text_file:
+            with io.open(filename, "w+", encoding='UTF-8') as text_file:
                 text_file.write(base64.b64decode(content))
         return remote_repo_dir

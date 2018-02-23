@@ -14,6 +14,7 @@
 
 """Tasks related to package metadata"""
 
+import io
 import os
 
 from ruamel import yaml
@@ -57,9 +58,9 @@ class PackageMetadataConfigGenTask(task_base.TaskBase):
         googleapis_path = os.path.commonprefix(
             [os.path.relpath(p, googleapis_dir) for p in src_proto_path])
 
-        with open(package_dependencies_yaml) as dep_file:
+        with io.open(package_dependencies_yaml, encoding='UTF-8') as dep_file:
             package_dependencies = yaml.load(dep_file, Loader=yaml.Loader)
-        with open(package_defaults_yaml) as dep_file:
+        with io.open(package_defaults_yaml, encoding='UTF-8') as dep_file:
             package_defaults = yaml.load(dep_file, Loader=yaml.Loader)
 
         if release_level is not None:
@@ -107,7 +108,7 @@ class PackageMetadataConfigGenTask(task_base.TaskBase):
 
     # Separated so that this can be mocked for testing
     def _write_yaml(self, config_dict, dest):
-        with open(dest, 'w') as f:
+        with io.open(dest, 'w', encoding='UTF-8') as f:
             yaml.safe_dump(config_dict, f, default_flow_style=False)
 
 class JavaGrpcPackageMetadataConfigGenTask(PackageMetadataConfigGenTask):

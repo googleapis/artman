@@ -66,7 +66,7 @@ def read_user_config(artman_user_config_path):
       return config_pb
 
     try:
-        with io.open(artman_user_config_path, 'r') as f:
+        with io.open(artman_user_config_path, 'r', encoding='UTF-8') as f:
             # Convert yaml into json file as protobuf python load support
             # parsing of protobuf in json or text format, not yaml.
             json_string = json.dumps(yaml.load(f))
@@ -93,7 +93,7 @@ def _parse(artman_yaml_path):
       raise ValueError(CONFIG_NOT_FOUND_ERROR_MESSAGE_FORMAT % artman_yaml_path)
 
     try:
-        with open(artman_yaml_path, 'r') as f:
+        with io.open(artman_yaml_path, 'r', encoding='UTF-8') as f:
             # Convert yaml into json file as protobuf python load support paring of
             # protobuf in json or text format, not yaml.
             artman_config_json_string = json.dumps(yaml.load(f))

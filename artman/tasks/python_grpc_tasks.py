@@ -59,7 +59,7 @@ class PythonChangePackageTask(task_base.TaskBase):
                 organization_name):
         self._organization_name = organization_name
 
-        with io.open(common_protos_yaml) as file_:
+        with io.open(common_protos_yaml, encoding='UTF-8') as file_:
             common_protos_data = yaml.load(file_, Loader=yaml.Loader)
 
         # Treat google.protobuf, google.iam as a common proto package, even
