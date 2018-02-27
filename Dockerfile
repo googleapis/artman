@@ -35,7 +35,7 @@ RUN apt-get update \
     python3-pip \
   && rm -rf /var/lib/apt/lists/*
 
-# Install protoc 3.3.0.
+# Install protoc 3.4.0.
 # Currently, the stable version is still 2.6.x, which can only handle proto2
 # syntax, so we have to download our own.
 RUN mkdir -p /usr/src/protoc/ \
