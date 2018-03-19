@@ -45,6 +45,7 @@ WHITELIST = [
     'java_gapic@google/cloud/dialogflow/artman_dialogflow_v2beta1_java.yaml',
     # TODO(michaelbausor): Remove once the php_gapic generation works.
     'php_gapic@google/cloud/dialogflow/artman_dialogflow_v2beta1.yaml',
+    '.+@google/api/servicemanagement/artman_servicemanagement_v1.yaml',
     '.+@google/devtools/remoteworkers/v1test2/artman_remoteworkers.yaml',
 ]
 

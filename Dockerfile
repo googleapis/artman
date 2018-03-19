@@ -13,9 +13,7 @@ RUN apt-get update \
     build-essential \
     man-db \
     pkg-config \
-    # Needed by gcloud-python
     libffi-dev \
-    # Needed by gcloud-python
     libssl-dev \
     curl \
     kdiff3 \
@@ -35,22 +33,22 @@ RUN apt-get update \
     python3-pip \
   && rm -rf /var/lib/apt/lists/*
 
-# Install protoc 3.4.0.
+# Install protoc 3.5.1.
 # Currently, the stable version is still 2.6.x, which can only handle proto2
 # syntax, so we have to download our own.
 RUN mkdir -p /usr/src/protoc/ \
-  && curl --location https://github.com/google/protobuf/releases/download/v3.4.0/protoc-3.4.0-linux-x86_64.zip > /usr/src/protoc/protoc-3.4.0.zip \
+  && curl --location https://github.com/google/protobuf/releases/download/v3.5.1/protoc-3.5.1-linux-x86_64.zip > /usr/src/protoc/protoc-3.5.1.zip \
   && cd /usr/src/protoc/ \
-  && unzip protoc-3.4.0.zip \
+  && unzip protoc-3.5.1.zip \
   && ln -s /usr/src/protoc/bin/protoc /usr/local/bin/protoc
 
 # Install GRPC and Protobuf.
 RUN pip3 install --upgrade pip \
   && pip3 install \
     # Ensure that grpcio matches requirements.txt
-    grpcio==1.3.5 \
-    grpcio-tools==1.3.5 \
-    protobuf==3.3.0
+    grpcio==1.10.0 \
+    grpcio-tools==1.10.0 \
+    protobuf==3.5.1
 
 # Install grpc_csharp_plubin
 RUN curl -L https://www.nuget.org/api/v2/package/Grpc.Tools/1.3.6 -o temp.zip \
@@ -110,7 +108,7 @@ RUN gem install rake --no-ri --no-rdoc \
   && gem install rubocop --version '= 0.39.0' --no-ri --no-rdoc \
   && gem install bundler --version '= 1.12.1' --no-ri --no-rdoc \
   && gem install rake --version '= 10.5.0' --no-ri --no-rdoc \
-  && gem install grpc-tools --version '=1.0.0' --no-ri --no-rdoc
+  && gem install grpc-tools --version '=1.10.0' --no-ri --no-rdoc
 
 # Install grpc_php_plugin
 RUN apt-get update \
@@ -129,11 +127,11 @@ RUN pear install PHP_CodeSniffer-2.9.1 \
   && chmod a+x /usr/local/bin/php-cs-fixer \
   && cd /
 
-# Set up tools for Python codegen; these are:
+# Set up tools for Python code generation; these are:
 #   pandoc: an apt package that can convert text between formats
 #     (example: Markdown to Restructured Text)
 #   protoc-docs-plugin: A protoc plugin to add docstrings to the Python
-#     protoc output.cd
+#     protoc output.
 RUN apt-get update \
   && apt-get install -y pandoc \
   && pip3 install protoc-docs-plugin==0.2.0 \
@@ -168,12 +166,12 @@ RUN curl -SL $DOTNET_SDK_DOWNLOAD_URL --output dotnet.tar.gz \
 # Install couple of git repos
 RUN git clone https://github.com/googleapis/googleapis \
   && cd googleapis \
-  && git checkout 924d32fc26f52de13998fd576c0cbb76d884bef5 \
+  && git checkout 0fa1df7241b5dad99cd860c757232f94dbbb3e03 \
   && cd .. \
   && rm -rf /googleapis/.git/
 RUN git clone https://github.com/googleapis/toolkit \
   && cd toolkit/ \
-  && git checkout 033aebf80016832bcb5fded934af140be4d171e8 \
+  && git checkout 1cf322cd065ee784658339f641016c93b62ce812 \
   && cd .. \
   && rm -rf /toolkit/.git/
 ENV TOOLKIT_HOME /toolkit

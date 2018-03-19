@@ -1,4 +1,6 @@
 /csharp/google-cloud-library_example/Google.Example.Library.V1/Google.Example.Library.V1.Snippets/LibraryServiceClientSnippets.g.cs
+/csharp/google-cloud-library_example/Google.Example.Library.V1/Google.Example.Library.V1.Tests/Google.Example.Library.V1.Tests.csproj
+/csharp/google-cloud-library_example/Google.Example.Library.V1/Google.Example.Library.V1.Tests/LibraryServiceClientTest.g.cs
 /csharp/google-cloud-library_example/Google.Example.Library.V1/Google.Example.Library.V1/Google.Example.Library.V1.csproj
 /csharp/google-cloud-library_example/Google.Example.Library.V1/Google.Example.Library.V1/Library.cs
 /csharp/google-cloud-library_example/Google.Example.Library.V1/Google.Example.Library.V1/LibraryGrpc.cs
@@ -45,7 +47,7 @@
 /java/gapic-google-cloud-library_example-v1/.gradle/2.12/taskArtifacts/outputFileStates.bin
 /java/gapic-google-cloud-library_example-v1/.gradle/2.12/taskArtifacts/taskArtifacts.bin
 /java/gapic-google-cloud-library_example-v1/build.gradle
-/java/gapic-google-cloud-library_example-v1/build/libs/gapic-google-cloud-library_example-v1-0.2.0.jar
+/java/gapic-google-cloud-library_example-v1/build/libs/gapic-google-cloud-library_example-v1-0.5.0.jar
 /java/gapic-google-cloud-library_example-v1/build/tmp/jar/MANIFEST.MF
 /java/gapic-google-cloud-library_example-v1/gradle/wrapper/gradle-wrapper.jar
 /java/gapic-google-cloud-library_example-v1/gradle/wrapper/gradle-wrapper.properties
@@ -54,7 +56,7 @@
 /java/gapic-google-cloud-library_example-v1/grpc-google-cloud-library_example-v1/LICENSE
 /java/gapic-google-cloud-library_example-v1/grpc-google-cloud-library_example-v1/PUBLISHING.md
 /java/gapic-google-cloud-library_example-v1/grpc-google-cloud-library_example-v1/build.gradle
-/java/gapic-google-cloud-library_example-v1/grpc-google-cloud-library_example-v1/build/libs/grpc-google-cloud-library_example-v1-0.2.0.jar
+/java/gapic-google-cloud-library_example-v1/grpc-google-cloud-library_example-v1/build/libs/grpc-google-cloud-library_example-v1-0.5.0.jar
 /java/gapic-google-cloud-library_example-v1/grpc-google-cloud-library_example-v1/build/tmp/jar/MANIFEST.MF
 /java/gapic-google-cloud-library_example-v1/grpc-google-cloud-library_example-v1/gradle/wrapper/gradle-wrapper.jar
 /java/gapic-google-cloud-library_example-v1/grpc-google-cloud-library_example-v1/gradle/wrapper/gradle-wrapper.properties
@@ -65,7 +67,7 @@
 /java/gapic-google-cloud-library_example-v1/proto-google-cloud-library_example-v1/LICENSE
 /java/gapic-google-cloud-library_example-v1/proto-google-cloud-library_example-v1/PUBLISHING.md
 /java/gapic-google-cloud-library_example-v1/proto-google-cloud-library_example-v1/build.gradle
-/java/gapic-google-cloud-library_example-v1/proto-google-cloud-library_example-v1/build/libs/proto-google-cloud-library_example-v1-0.2.0.jar
+/java/gapic-google-cloud-library_example-v1/proto-google-cloud-library_example-v1/build/libs/proto-google-cloud-library_example-v1-0.5.0.jar
 /java/gapic-google-cloud-library_example-v1/proto-google-cloud-library_example-v1/build/resources/main/google/example/library/v1/library.proto
 /java/gapic-google-cloud-library_example-v1/proto-google-cloud-library_example-v1/build/tmp/jar/MANIFEST.MF
 /java/gapic-google-cloud-library_example-v1/proto-google-cloud-library_example-v1/gradle/wrapper/gradle-wrapper.jar
