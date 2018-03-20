@@ -323,9 +323,19 @@ def normalize_flags(flags, user_config):
     language = Artifact.Language.Name(
         artifact_config.language).lower()
 
-    # Set the pipeline as well as package_type and packaging
+    # Set the pipeline
     artifact_type = artifact_config.type
-    if artifact_type in (Artifact.GAPIC, Artifact.GAPIC_ONLY):
+    pipeline_args['artifact_type'] = Artifact.Type.Name(artifact_type)
+    if artifact_type == Artifact.GAPIC_ONLY:
+        # TODO: convert all languages from GAPIC_ONLY to GAPIC and then remove
+        # this "if" statement (make pipeline_name = 'GapicOnlyClientPipeline'
+        # for all languages)
+        if artifact_config.language == Artifact.JAVA:
+            pipeline_name = 'GapicOnlyClientPipeline'
+        else:
+            pipeline_name = 'GapicClientPipeline'
+        pipeline_args['language'] = language
+    elif artifact_type == Artifact.GAPIC:
         pipeline_name = 'GapicClientPipeline'
         pipeline_args['language'] = language
     elif artifact_type in (Artifact.GRPC, Artifact.GRPC_COMMON):

@@ -11,8 +11,7 @@ common:
   - /tmp/input
   organization_name: google-cloud
   output_dir: /tmp/output
-  package_type: grpc_client
-  packaging: single-artifact
+  artifact_type: PROTOBUF
   proto_deps:
   - google-common-protos
   - google-iam-v1

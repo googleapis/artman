@@ -51,6 +51,18 @@ class GapicConfigTaskFactory(code_gen.TaskFactoryBase):
         return ['language']
 
 
+class GapicOnlyClientPipeline(code_gen.CodeGenerationPipelineBase):
+    """The pipeline for generating a GAPIC_ONLY layer, other layers
+    (like PROTOBUF or GRPC) will not be generated.
+    """
+    def __init__(self, language, **kwargs):
+        super(GapicOnlyClientPipeline, self).__init__(
+            GapicOnlyTaskFactory(),
+            language=language,
+            **kwargs
+        )
+
+
 class GapicClientPipeline(code_gen.CodeGenerationPipelineBase):
     """The pipeline for generating a complete GAPIC.
 
@@ -77,18 +89,6 @@ class GapicClientBatchPipeline(batch_gen.BatchPipeline):
         task_factory = GapicTaskFactory()
         return task_factory.get_tasks(**kwargs)
 
-class JavaPackagingTaskFactory(code_gen.TaskFactoryBase):
-
-    def get_tasks(self, **kwargs):
-        return [
-            tasks.gapic.JavaGapicPackagingTask
-        ]
-
-    def get_validate_kwargs(self):
-        return ['gapic_code_dir', 'grpc_code_dir', 'proto_code_dir']
-
-    def get_invalid_kwargs(self):
-        return []
 
 class CSharpPackagingTaskFactory(code_gen.TaskFactoryBase):
 
@@ -103,8 +103,8 @@ class CSharpPackagingTaskFactory(code_gen.TaskFactoryBase):
     def get_invalid_kwargs(self):
         return []
 
+
 PACKAGING_TASK_FACTORY_DICT = {
-    'java': JavaPackagingTaskFactory,
     'csharp': CSharpPackagingTaskFactory
 }
 
@@ -133,10 +133,6 @@ class GapicTaskFactory(code_gen.TaskFactoryBase):
         for grpc_task in self._get_grpc_codegen_tasks(**kwargs):
             if grpc_task not in answer:
                 answer.append(grpc_task)
-
-        for proto_task in self._get_proto_codegen_tasks(**kwargs):
-            if proto_task not in answer:
-                answer.append(proto_task)
 
         for packaging_task in self._get_packaging_tasks(**kwargs):
             if packaging_task not in answer:
@@ -177,26 +173,6 @@ class GapicTaskFactory(code_gen.TaskFactoryBase):
         grpc_factory = grpc_gen.GRPC_TASK_FACTORY_DICT[language]()
         return grpc_factory.get_grpc_codegen_tasks(language=language, **kw)
 
-    def _get_proto_codegen_tasks(self, language, **kw):
-        """Return the code generation tasks for making a Proto package.
-           This is currently only required by Java since Java has separated
-           GRPC and Proto packages.
-
-        Args:
-            language (str): The language code is being generated in.
-            kw (dict): Additional keyword arguments passed through to the
-                proto codegen task factory.
-
-        Returns:
-            list: A list of Task subclasses defined by the Proto task factory.
-        """
-
-        # Instantiate the Proto task factory.
-        if language in grpc_gen.PROTO_TASK_FACTORY_DICT:
-            proto_factory = grpc_gen.PROTO_TASK_FACTORY_DICT[language]()
-            return proto_factory.get_grpc_codegen_tasks(language=language, **kw)
-        return []
-
     def _get_packaging_tasks(self, language, **kw):
         """Return the code generation tasks for packaging
 
@@ -217,4 +193,13 @@ class GapicTaskFactory(code_gen.TaskFactoryBase):
         return _GAPIC_REQUIRED + code_gen.COMMON_REQUIRED
 
     def get_invalid_kwargs(self):
+        return []
+
+
+class GapicOnlyTaskFactory(GapicTaskFactory):
+    """A task factory describing GAPIC_ONLY generation tasks."""
+    def _get_grpc_codegen_tasks(self, language, **kw):
+        return[]
+
+    def _get_packaging_tasks(self, language, **kw):
         return []

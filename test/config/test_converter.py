@@ -26,7 +26,7 @@ class ConverterTest(unittest.TestCase):
         os.path.realpath(os.path.dirname(__file__)), 'testdata')
 
     def test_pubsub_java(self):
-        self._test('artman_pubsub.yaml', 'java_gapic_only_library',
+        self._test('artman_pubsub.yaml', 'java_gapic_library',
                    'expected_pubsub_java_legacy_config.yaml')
 
     def test_pubsub_java_proto(self):
@@ -34,7 +34,7 @@ class ConverterTest(unittest.TestCase):
                    'expected_pubsub_java_proto_legacy_config.yaml')
 
     def test_pubsub_python(self):
-        self._test('artman_pubsub.yaml', 'python_gapic_only_library',
+        self._test('artman_pubsub.yaml', 'python_gapic_library',
                    'expected_pubsub_python_legacy_config.yaml')
 
     def _test(self, artman_yaml, artifact_name, expected_legacy_config):

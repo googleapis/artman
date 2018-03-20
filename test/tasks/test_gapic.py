@@ -125,8 +125,7 @@ class GapicCodeGenTaskTests(unittest.TestCase):
             organization_name='google-cloud',
             package_metadata_yaml='pmy.yaml',
             service_yaml='service.yaml',
-            toolkit_path='/path/to/toolkit',
-            packaging='single-artifact',
+            toolkit_path='/path/to/toolkit'
         )
         expected_cmds = (
             '/path/to/toolkit/gradlew -p /path/to/toolkit runCodeGen',

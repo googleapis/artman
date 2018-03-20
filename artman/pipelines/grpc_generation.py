@@ -93,11 +93,13 @@ class _JavaGrpcTaskFactory(GrpcTaskFactoryBase):
     def get_grpc_codegen_tasks(self, **kwargs):
         return [
             protoc_tasks.ProtoDescGenTask,
+            protoc_tasks.ProtoCodeGenTask,
             protoc_tasks.GrpcCodeGenTask,
-            package_metadata_tasks.JavaGrpcPackageMetadataConfigGenTask,
+            package_metadata_tasks.PackageMetadataConfigGenTask,
+            package_metadata_tasks.ProtoPackageMetadataGenTask,
             package_metadata_tasks.GrpcPackageMetadataGenTask,
+            protoc_tasks.JavaProtoCopyTask,
         ]
-
 
 class _JavaProtoTaskFactory(GrpcTaskFactoryBase):
 
@@ -105,7 +107,7 @@ class _JavaProtoTaskFactory(GrpcTaskFactoryBase):
         return [
             protoc_tasks.ProtoDescGenTask,
             protoc_tasks.ProtoCodeGenTask,
-            package_metadata_tasks.JavaProtoPackageMetadataConfigGenTask,
+            package_metadata_tasks.PackageMetadataConfigGenTask,
             package_metadata_tasks.ProtoPackageMetadataGenTask,
             protoc_tasks.JavaProtoCopyTask,
         ]

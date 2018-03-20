@@ -54,19 +54,7 @@ def convert_to_legacy_config_dict(artifact_config, root_dir, output_dir):
     common['proto_deps'] = legacy_proto_deps
     common['proto_test_deps'] = legacy_test_proto_deps
     common['desc_proto_path'] = desc_proto_paths
-
-    package_type = 'grpc_client'  # default package_type
-    packaging = 'single-artifact'  # default packaing
-    if artifact_config.type == Artifact.GRPC_COMMON:
-        package_type = 'grpc_common'
-        # For backward-compatibility.
-        # TODO(ethanbao): Should not restrict to google-cloud packaging.
-        packaging = 'google-cloud'
-    elif artifact_config.type == Artifact.GAPIC_ONLY:
-        packaging = 'google-cloud'
-
-    common['packaging'] = packaging
-    common['package_type'] = package_type
+    common['artifact_type'] = Artifact.Type.Name(artifact_config.type)
 
     result = {}
     result['common'] = common
