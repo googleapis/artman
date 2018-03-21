@@ -44,6 +44,7 @@
 /java/gapic-google-cloud-library_example-v1/src/main/java/com/google/cloud/example/library/v1/LibraryServiceClient.java
 /java/gapic-google-cloud-library_example-v1/src/main/java/com/google/cloud/example/library/v1/LibraryServiceSettings.java
 /java/gapic-google-cloud-library_example-v1/src/main/java/com/google/cloud/example/library/v1/package-info.java
+/java/gapic-google-cloud-library_example-v1/src/main/java/com/google/cloud/example/library/v1/stub/GrpcLibraryServiceCallableFactory.java
 /java/gapic-google-cloud-library_example-v1/src/main/java/com/google/cloud/example/library/v1/stub/GrpcLibraryServiceStub.java
 /java/gapic-google-cloud-library_example-v1/src/main/java/com/google/cloud/example/library/v1/stub/LibraryServiceStub.java
 /java/gapic-google-cloud-library_example-v1/src/main/java/com/google/cloud/example/library/v1/stub/LibraryServiceStubSettings.java
