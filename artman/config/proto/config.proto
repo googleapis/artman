@@ -205,13 +205,9 @@ message Artifact {
     // This artifact type will only generate a GRPC library without GAPIC layer.
     GRPC = 2;
 
-    // This artifact type is used for generating a shared GRPC library
-    // package that doesn't include any API surface part.
-    GRPC_COMMON = 3;
-
     // This artifact type will generate a protobuf library using protobuf
     // compiler.
-    PROTOBUF = 4;
+    PROTOBUF = 3;
 
     // This artifact type will only generate a GAPIC library. Use this type
     // along with GRPC type if you plan to publish GRPC package and GAPIC
