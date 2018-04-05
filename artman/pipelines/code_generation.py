@@ -30,6 +30,9 @@ COMMON_REQUIRED = ['src_proto_path', 'import_proto_path', 'toolkit', 'root_dir',
                    'output_dir', 'api_name', 'api_version',
                    'organization_name']
 
+COMMON_DISCO_REQUIRED = ['discovery_doc', 'toolkit', 'root_dir', 'output_dir', 'api_name',
+                         'api_version', 'organization_name']
+
 
 def _load_remote_parameters(kwargs):
     tmp_id = str(uuid.uuid4())

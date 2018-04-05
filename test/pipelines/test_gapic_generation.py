@@ -81,6 +81,27 @@ class GapicConfigTaskFactoryTests(unittest.TestCase):
             assert isinstance(task, class_)
 
 
+class DiscoGapicConfigTaskFactoryTests(unittest.TestCase):
+    def setUp(self):
+        self._gctf = gapic_generation.DiscoGapicConfigTaskFactory()
+
+    def test_get_validate_kwargs(self):
+        COMMON_DISCO_REQUIRED = code_generation.COMMON_DISCO_REQUIRED
+        assert self._gctf.get_validate_kwargs() == COMMON_DISCO_REQUIRED
+
+    def test_get_invalid_kwargs(self):
+        assert self._gctf.get_invalid_kwargs() == ['language']
+
+    def test_get_tasks(self):
+        expected = (
+            tasks.gapic.DiscoGapicConfigGenTask,
+            tasks.gapic.GapicConfigMoveTask,
+        )
+        instantiated_tasks = self._gctf.get_tasks()
+        for task, class_ in zip(instantiated_tasks, expected):
+            assert isinstance(task, class_)
+
+
 class GapicTaskFactoryTests(unittest.TestCase):
     def test_grpc_codegen_java(self):
         gtf = gapic_generation.GapicTaskFactory()

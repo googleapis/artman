@@ -77,6 +77,19 @@ class CodeGenerationPipelineBaseTests(unittest.TestCase):
         assert isinstance(flow, linear_flow.Flow)
         assert len(flow) == 9
 
+    def test_do_build_flow_disco(self):
+        CGPB = code_generation.CodeGenerationPipelineBase
+        with mock.patch.object(CGPB, 'validate_kwargs') as validate:
+            cgpb = CGPB(
+                gapic_generation.DiscoGapicTaskFactory(),
+                language='java', publish='noop'
+            )
+            validate.assert_called_once()
+        flow = cgpb.do_build_flow(language='java', publish='noop',
+                                  gapic_code_dir='output')
+        assert isinstance(flow, linear_flow.Flow)
+        assert len(flow) == 5
+
     def test_do_build_flow_no_gapic(self):
         CGPB = code_generation.CodeGenerationPipelineBase
         with mock.patch.object(CGPB, 'validate_kwargs') as validate:

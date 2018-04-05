@@ -61,6 +61,43 @@ class GapicConfigGenTaskTests(unittest.TestCase):
         assert task.validate() == [gapic_requirements.ConfigGenRequirements]
 
 
+class DiscoGapicConfigGenTaskTests(unittest.TestCase):
+    @mock.patch.object(gapic_tasks.DiscoGapicConfigGenTask, 'exec_command')
+    def test_execute(self, exec_command):
+        task = gapic_tasks.DiscoGapicConfigGenTask()
+        result = task.execute(
+            api_name='compute',
+            api_version='v1',
+            organization_name='google-cloud',
+            output_dir='/path/to/output',
+            discovery_doc='/path/to/discovery_doc.json',
+            toolkit_path='/path/to/toolkit',
+        )
+        assert result == '/'.join((
+            '/path/to/output/google-cloud-compute-v1-config-gen',
+            'google-cloud-compute-v1_gapic.yaml',
+        ))
+        expected_cmds = (
+            'mkdir -p %s' % os.path.dirname(result),
+            ''.join((
+                '/path/to/toolkit/gradlew -p /path/to/toolkit runDiscoConfigGen '
+                '-Pclargs=',
+                '--discovery_doc=',
+                '/path/to/discovery_doc.json,'
+                '--output=/path/to/output/google-cloud-compute-v1-config-gen/',
+                'google-cloud-compute-v1_gapic.yaml',
+            )),
+        )
+        for call, expected in zip(exec_command.mock_calls, expected_cmds):
+            _, args, _ = call
+            cmd = ' '.join(args[0])
+            assert cmd == expected
+
+    def test_validate(self):
+        task = gapic_tasks.DiscoGapicConfigGenTask()
+        assert task.validate() == [gapic_requirements.ConfigGenRequirements]
+
+
 class GapicConfigMoveTaskTests(unittest.TestCase):
     @mock.patch.object(gapic_tasks.GapicConfigMoveTask, 'exec_command')
     def test_execute(self, exec_command):
@@ -136,6 +173,34 @@ class GapicCodeGenTaskTests(unittest.TestCase):
 
     def test_validate(self):
         task = gapic_tasks.GapicCodeGenTask()
+        assert task.validate() == [gapic_requirements.GapicRequirements]
+
+
+class DiscoGapicCodeGenTaskTests(unittest.TestCase):
+    @mock.patch.object(gapic_tasks.DiscoGapicCodeGenTask, 'exec_command')
+    def test_execute(self, exec_command):
+        task = gapic_tasks.DiscoGapicCodeGenTask()
+        task.execute(
+            api_name='compute',
+            api_version='v1',
+            gapic_api_yaml='compute.yaml',
+            gapic_code_dir='api-client-staging/generated/java',
+            discogapic_language_yaml='java.yaml',
+            language='java',
+            organization_name='google-cloud',
+            package_metadata_yaml='pmy.yaml',
+            discovery_doc="compute.v1.json",
+            toolkit_path='/path/to/toolkit'
+        )
+        expected_cmds = (
+            '/path/to/toolkit/gradlew -p /path/to/toolkit runDiscoCodeGen',
+        )
+        for call, expected in zip(exec_command.mock_calls, expected_cmds):
+            _, args, _ = call
+            assert expected in ' '.join(args[0])
+
+    def test_validate(self):
+        task = gapic_tasks.DiscoGapicCodeGenTask()
         assert task.validate() == [gapic_requirements.GapicRequirements]
 
 

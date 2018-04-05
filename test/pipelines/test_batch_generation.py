@@ -34,6 +34,10 @@ def make_tasks(**kwargs):
     tf = gapic_generation.GapicTaskFactory()
     return tf.get_tasks(**kwargs)
 
+def make_disco_tasks(**kwargs):
+    tf = gapic_generation.DiscoGapicTaskFactory()
+    return tf.get_tasks(**kwargs)
+
 
 class BatchTaskFactoryTests(unittest.TestCase):
     def setUp(self):
@@ -81,6 +85,23 @@ class BatchTaskFactoryTests(unittest.TestCase):
         for task, class_ in zip(instantiated_tasks, expected):
             assert isinstance(task, class_)
 
+    def test_disco_get_language_api_flows_tasks(self):
+        self._kwargs['batch_apis'] = ['compute']
+        self._kwargs['language'] = 'java'
+        expected = [
+            tasks.package_metadata.PackageMetadataConfigGenTask,
+            tasks.gapic.DiscoGapicCodeGenTask,
+            tasks.format.JavaFormatTask,
+        ]
+        self._btf.make_pipeline_tasks_func = make_disco_tasks
+        flows = self._btf.get_language_api_flows(**self._kwargs)
+        instantiated_tasks = []
+        for flow in flows:
+            for task, _ in flow.iter_nodes():
+                instantiated_tasks.append(task)
+        for task, class_ in zip(instantiated_tasks, expected):
+            assert isinstance(task, class_)
+
     def test_get_language_api_flows_list(self):
         self._kwargs['batch_apis'] = ['pubsub', 'longrunning']
         self._kwargs['exclude_apis'] = []
@@ -107,8 +128,8 @@ class BatchTaskFactoryTests(unittest.TestCase):
                 _, kw = make.call_args
                 print('kw:', kw)
                 apis.append(kw['api_name'])
-            assert make.call_count == 2
-            assert apis == ['logging', 'pubsub']
+            assert make.call_count == 3
+            assert apis == ['compute', 'logging', 'pubsub']
 
     def test_get_language_api_flows_publish(self):
         staging_repo = {'location': 'staging_repo.git'}
@@ -126,6 +147,7 @@ def test_get_artman_config_filenames_wildcard():
     api_config_patterns = ['test/cli/data/gapic/api/artman_${API_SHORT_NAME}.yaml',
                            'test/cli/data/gapic/core/artman_${API_SHORT_NAME}.yaml']
     expected = [
+        'test/cli/data/gapic/api/artman_compute.yaml',
         'test/cli/data/gapic/api/artman_logging.yaml',
         'test/cli/data/gapic/api/artman_longrunning.yaml',
         'test/cli/data/gapic/api/artman_pubsub.yaml',
@@ -144,6 +166,7 @@ def test_get_artman_config_filenames_wildcard_exclude():
         'test/cli/data/gapic/core/artman_core.yaml',
     ]
     expected = [
+        'test/cli/data/gapic/api/artman_compute.yaml',
         'test/cli/data/gapic/api/artman_logging.yaml',
         'test/cli/data/gapic/api/artman_pubsub.yaml',
     ]

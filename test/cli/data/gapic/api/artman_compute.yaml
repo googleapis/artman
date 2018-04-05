@@ -1,0 +1,22 @@
+common:
+  api_name: compute
+  api_version: v1
+  organization_name: google-cloud
+  gapic_yaml: v1/compute_gapic.yaml
+  discovery_doc: v1/compute.v1.json
+  gapic_api_yaml:
+    - ${GOOGLEAPIS}/google/compute/v1/compute_gapic.yaml
+  output_dir: ${REPOROOT}/artman/output
+  git_repos:
+    staging:
+      location: git@github.com:googleapis/api-client-staging.git
+java:
+  gapic_code_dir: ${REPOROOT}/artman/output/java/google-cloud-compute
+  git_repos:
+    java:
+      location: git@github.com:GoogleCloudPlatform/google-cloud-java.git
+      paths:
+        - google-cloud-compute
+    staging:
+      paths:
+        - generated/java/google-cloud-compute-v1

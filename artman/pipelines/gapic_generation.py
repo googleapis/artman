@@ -27,6 +27,9 @@ from artman.utils import task_utils
 _GAPIC_REQUIRED = ['service_yaml', 'gapic_language_yaml', 'gapic_api_yaml',
                    'language', 'publish']
 
+_DISCOGAPIC_REQUIRED = ['discogapic_language_yaml', 'gapic_api_yaml',
+                        'language', 'publish']
+
 
 class GapicConfigPipeline(code_gen.CodeGenerationPipelineBase):
 
@@ -34,6 +37,11 @@ class GapicConfigPipeline(code_gen.CodeGenerationPipelineBase):
         super(GapicConfigPipeline, self).__init__(
             GapicConfigTaskFactory(), **kwargs)
 
+class DiscoGapicConfigPipeline(code_gen.CodeGenerationPipelineBase):
+
+    def __init__(self, **kwargs):
+        super(DiscoGapicConfigPipeline, self).__init__(
+            DiscoGapicConfigTaskFactory(), **kwargs)
 
 class GapicConfigTaskFactory(code_gen.TaskFactoryBase):
 
@@ -46,6 +54,21 @@ class GapicConfigTaskFactory(code_gen.TaskFactoryBase):
 
     def get_validate_kwargs(self):
         return code_gen.COMMON_REQUIRED
+
+    def get_invalid_kwargs(self):
+        return ['language']
+
+
+class DiscoGapicConfigTaskFactory(code_gen.TaskFactoryBase):
+
+    def get_tasks(self, **kwargs):
+        return task_utils.instantiate_tasks([
+            tasks.gapic.DiscoGapicConfigGenTask,
+            tasks.gapic.GapicConfigMoveTask
+        ], kwargs)
+
+    def get_validate_kwargs(self):
+        return code_gen.COMMON_DISCO_REQUIRED
 
     def get_invalid_kwargs(self):
         return ['language']
@@ -79,6 +102,18 @@ class GapicClientPipeline(code_gen.CodeGenerationPipelineBase):
             **kwargs
         )
 
+class DiscoGapicClientPipeline(code_gen.CodeGenerationPipelineBase):
+    """The pipeline for generating a complete GAPIC from a Discovery document.
+
+    This is intended to be the only command that needs to run to generate
+    a complete GAPIC.
+    """
+    def __init__(self, language, **kwargs):
+        super(DiscoGapicClientPipeline, self).__init__(
+            DiscoGapicTaskFactory(),
+            language=language,
+            **kwargs
+        )
 
 class GapicClientBatchPipeline(batch_gen.BatchPipeline):
     def __init__(self, **kwargs):
@@ -191,6 +226,70 @@ class GapicTaskFactory(code_gen.TaskFactoryBase):
 
     def get_validate_kwargs(self):
         return _GAPIC_REQUIRED + code_gen.COMMON_REQUIRED
+
+    def get_invalid_kwargs(self):
+        return []
+
+
+class DiscoGapicTaskFactory(code_gen.TaskFactoryBase):
+    """A task factory describing GAPIC generation tasks on Discovery docs.
+
+    Language specific tasks may be defined in language-specific methods
+    on this class.
+    """
+    def get_tasks(self, **kwargs):
+        """Return the full list of instantiated tasks to generate a GAPIC.
+
+        Args:
+            kwargs (dict): Keyword arguments, which are passed through.
+        """
+        answer = []
+
+        if 'gapic_code_dir' in kwargs:
+            answer = self._get_gapic_codegen_tasks(**kwargs)
+
+
+        for packaging_task in self._get_packaging_tasks(**kwargs):
+            if packaging_task not in answer:
+                answer.append(packaging_task)
+
+        answer += self._get_publish_tasks(**kwargs)
+        return task_utils.instantiate_tasks(answer, kwargs)
+
+    def _get_gapic_codegen_tasks(self, language, **kwargs):
+        """Return the code generation tasks necessary for creating a GAPIC
+        from a Discovery document.
+
+        Args:
+            language (str): The language.
+
+        Returns:
+            list: A list of Task subclasses.
+        """
+        return [
+            tasks.package_metadata.PackageMetadataConfigGenTask,
+            tasks.gapic.DiscoGapicCodeGenTask,
+            tasks.format.get_format_task(language),
+        ]
+
+    def _get_packaging_tasks(self, language, **kw):
+        """Return the code generation tasks for packaging
+
+        Args:
+            language (str): The language code is being generated in.
+            kw (dict): Additional keyword arguments passed through to the
+                proto codegen task factory.
+
+        Returns:
+            list: A list of Task subclasses defined by the packaging task factory.
+        """
+        if language in PACKAGING_TASK_FACTORY_DICT:
+            packaging_factory = PACKAGING_TASK_FACTORY_DICT[language]()
+            return packaging_factory.get_tasks()
+        return []
+
+    def get_validate_kwargs(self):
+        return _DISCOGAPIC_REQUIRED + code_gen.COMMON_DISCO_REQUIRED
 
     def get_invalid_kwargs(self):
         return []

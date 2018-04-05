@@ -19,7 +19,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   name='config.proto',
   package='googleapis.artman',
   syntax='proto3',
-  serialized_pb=_b('\n\x0c\x63onfig.proto\x12\x11googleapis.artman\"e\n\x06\x43onfig\x12+\n\x06\x63ommon\x18\x01 \x01(\x0b\x32\x1b.googleapis.artman.Artifact\x12.\n\tartifacts\x18\x02 \x03(\x0b\x32\x1b.googleapis.artman.Artifact\"\xb1\n\n\x08\x41rtifact\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x10\n\x08\x61pi_name\x18\x02 \x01(\t\x12\x13\n\x0b\x61pi_version\x18\x03 \x01(\t\x12\x19\n\x11organization_name\x18\x04 \x01(\t\x12?\n\rrelease_level\x18\x05 \x01(\x0e\x32(.googleapis.artman.Artifact.ReleaseLevel\x12\x17\n\x0fsrc_proto_paths\x18\x06 \x03(\t\x12?\n\nproto_deps\x18\x07 \x03(\x0b\x32+.googleapis.artman.Artifact.ProtoDependency\x12\x44\n\x0ftest_proto_deps\x18\x08 \x03(\x0b\x32+.googleapis.artman.Artifact.ProtoDependency\x12\x14\n\x0cservice_yaml\x18\t \x01(\t\x12\x12\n\ngapic_yaml\x18\n \x01(\t\x12.\n\x04type\x18\x0c \x01(\x0e\x32 .googleapis.artman.Artifact.Type\x12\x36\n\x08language\x18\r \x01(\x0e\x32$.googleapis.artman.Artifact.Language\x12\x43\n\x0fpackage_version\x18\x0e \x01(\x0b\x32*.googleapis.artman.Artifact.PackageVersion\x12\x42\n\x0fpublish_targets\x18\x0f \x03(\x0b\x32).googleapis.artman.Artifact.PublishTarget\x1a\x1f\n\x0fProtoDependency\x12\x0c\n\x04name\x18\x01 \x01(\t\x1a]\n\x0ePackageVersion\x12\x0f\n\x07version\x18\x01 \x01(\t\x12\x1c\n\x14grpc_dep_lower_bound\x18\x02 \x01(\t\x12\x1c\n\x14grpc_dep_upper_bound\x18\x03 \x01(\t\x1a\xb7\x02\n\rPublishTarget\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x10\n\x08location\x18\x02 \x01(\t\x12<\n\x04type\x18\x03 \x01(\x0e\x32..googleapis.artman.Artifact.PublishTarget.Type\x12V\n\x12\x64irectory_mappings\x18\x04 \x03(\x0b\x32:.googleapis.artman.Artifact.PublishTarget.DirectoryMapping\x1a;\n\x10\x44irectoryMapping\x12\x0b\n\x03src\x18\x01 \x01(\t\x12\x0c\n\x04\x64\x65st\x18\x02 \x01(\t\x12\x0c\n\x04name\x18\x03 \x01(\t\"3\n\x04Type\x12\x1f\n\x1bPUBLISHING_TYPE_UNSPECIFIED\x10\x00\x12\n\n\x06GITHUB\x10\x01\"J\n\x0cReleaseLevel\x12\x1d\n\x19RELEASE_LEVEL_UNSPECIFIED\x10\x00\x12\x06\n\x02GA\x10\x01\x12\x08\n\x04\x42\x45TA\x10\x02\x12\t\n\x05\x41LPHA\x10\x03\"K\n\x04Type\x12\t\n\x05GAPIC\x10\x00\x12\x10\n\x0cGAPIC_CONFIG\x10\x01\x12\x08\n\x04GRPC\x10\x02\x12\x0c\n\x08PROTOBUF\x10\x03\x12\x0e\n\nGAPIC_ONLY\x10\x63\"m\n\x08Language\x12\x18\n\x14LANGUAGE_UNSPECIFIED\x10\x00\x12\x08\n\x04JAVA\x10\x01\x12\n\n\x06PYTHON\x10\x02\x12\n\n\x06NODEJS\x10\x03\x12\x06\n\x02GO\x10\x04\x12\x07\n\x03PHP\x10\x05\x12\n\n\x06\x43SHARP\x10\x06\x12\x08\n\x04RUBY\x10\x07J\x04\x08\x0b\x10\x0cR\x11import_proto_pathb\x06proto3')
+  serialized_pb=_b('\n\x0c\x63onfig.proto\x12\x11googleapis.artman\"e\n\x06\x43onfig\x12+\n\x06\x63ommon\x18\x01 \x01(\x0b\x32\x1b.googleapis.artman.Artifact\x12.\n\tartifacts\x18\x02 \x03(\x0b\x32\x1b.googleapis.artman.Artifact\"\xef\n\n\x08\x41rtifact\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x10\n\x08\x61pi_name\x18\x02 \x01(\t\x12\x13\n\x0b\x61pi_version\x18\x03 \x01(\t\x12\x19\n\x11organization_name\x18\x04 \x01(\t\x12?\n\rrelease_level\x18\x05 \x01(\x0e\x32(.googleapis.artman.Artifact.ReleaseLevel\x12\x17\n\x0fsrc_proto_paths\x18\x06 \x03(\t\x12?\n\nproto_deps\x18\x07 \x03(\x0b\x32+.googleapis.artman.Artifact.ProtoDependency\x12\x44\n\x0ftest_proto_deps\x18\x08 \x03(\x0b\x32+.googleapis.artman.Artifact.ProtoDependency\x12\x14\n\x0cservice_yaml\x18\t \x01(\t\x12\x12\n\ngapic_yaml\x18\n \x01(\t\x12.\n\x04type\x18\x0c \x01(\x0e\x32 .googleapis.artman.Artifact.Type\x12\x36\n\x08language\x18\r \x01(\x0e\x32$.googleapis.artman.Artifact.Language\x12\x43\n\x0fpackage_version\x18\x0e \x01(\x0b\x32*.googleapis.artman.Artifact.PackageVersion\x12\x42\n\x0fpublish_targets\x18\x0f \x03(\x0b\x32).googleapis.artman.Artifact.PublishTarget\x12\x15\n\rdiscovery_doc\x18\x10 \x01(\t\x1a\x1f\n\x0fProtoDependency\x12\x0c\n\x04name\x18\x01 \x01(\t\x1a]\n\x0ePackageVersion\x12\x0f\n\x07version\x18\x01 \x01(\t\x12\x1c\n\x14grpc_dep_lower_bound\x18\x02 \x01(\t\x12\x1c\n\x14grpc_dep_upper_bound\x18\x03 \x01(\t\x1a\xb7\x02\n\rPublishTarget\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x10\n\x08location\x18\x02 \x01(\t\x12<\n\x04type\x18\x03 \x01(\x0e\x32..googleapis.artman.Artifact.PublishTarget.Type\x12V\n\x12\x64irectory_mappings\x18\x04 \x03(\x0b\x32:.googleapis.artman.Artifact.PublishTarget.DirectoryMapping\x1a;\n\x10\x44irectoryMapping\x12\x0b\n\x03src\x18\x01 \x01(\t\x12\x0c\n\x04\x64\x65st\x18\x02 \x01(\t\x12\x0c\n\x04name\x18\x03 \x01(\t\"3\n\x04Type\x12\x1f\n\x1bPUBLISHING_TYPE_UNSPECIFIED\x10\x00\x12\n\n\x06GITHUB\x10\x01\"J\n\x0cReleaseLevel\x12\x1d\n\x19RELEASE_LEVEL_UNSPECIFIED\x10\x00\x12\x06\n\x02GA\x10\x01\x12\x08\n\x04\x42\x45TA\x10\x02\x12\t\n\x05\x41LPHA\x10\x03\"r\n\x04Type\x12\t\n\x05GAPIC\x10\x00\x12\x10\n\x0cGAPIC_CONFIG\x10\x01\x12\x08\n\x04GRPC\x10\x02\x12\x0c\n\x08PROTOBUF\x10\x03\x12\x0e\n\nDISCOGAPIC\x10\x04\x12\x15\n\x11\x44ISCOGAPIC_CONFIG\x10\x05\x12\x0e\n\nGAPIC_ONLY\x10\x63\"m\n\x08Language\x12\x18\n\x14LANGUAGE_UNSPECIFIED\x10\x00\x12\x08\n\x04JAVA\x10\x01\x12\n\n\x06PYTHON\x10\x02\x12\n\n\x06NODEJS\x10\x03\x12\x06\n\x02GO\x10\x04\x12\x07\n\x03PHP\x10\x05\x12\n\n\x06\x43SHARP\x10\x06\x12\x08\n\x04RUBY\x10\x07J\x04\x08\x0b\x10\x0cR\x11import_proto_pathb\x06proto3')
 )
 
 
@@ -41,8 +41,8 @@ _ARTIFACT_PUBLISHTARGET_TYPE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=1128,
-  serialized_end=1179,
+  serialized_start=1151,
+  serialized_end=1202,
 )
 _sym_db.RegisterEnumDescriptor(_ARTIFACT_PUBLISHTARGET_TYPE)
 
@@ -71,8 +71,8 @@ _ARTIFACT_RELEASELEVEL = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=1181,
-  serialized_end=1255,
+  serialized_start=1204,
+  serialized_end=1278,
 )
 _sym_db.RegisterEnumDescriptor(_ARTIFACT_RELEASELEVEL)
 
@@ -99,14 +99,22 @@ _ARTIFACT_TYPE = _descriptor.EnumDescriptor(
       options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='GAPIC_ONLY', index=4, number=99,
+      name='DISCOGAPIC', index=4, number=4,
+      options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='DISCOGAPIC_CONFIG', index=5, number=5,
+      options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='GAPIC_ONLY', index=6, number=99,
       options=None,
       type=None),
   ],
   containing_type=None,
   options=None,
-  serialized_start=1257,
-  serialized_end=1332,
+  serialized_start=1280,
+  serialized_end=1394,
 )
 _sym_db.RegisterEnumDescriptor(_ARTIFACT_TYPE)
 
@@ -151,8 +159,8 @@ _ARTIFACT_LANGUAGE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=1334,
-  serialized_end=1443,
+  serialized_start=1396,
+  serialized_end=1505,
 )
 _sym_db.RegisterEnumDescriptor(_ARTIFACT_LANGUAGE)
 
@@ -221,8 +229,8 @@ _ARTIFACT_PROTODEPENDENCY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=739,
-  serialized_end=770,
+  serialized_start=762,
+  serialized_end=793,
 )
 
 _ARTIFACT_PACKAGEVERSION = _descriptor.Descriptor(
@@ -265,8 +273,8 @@ _ARTIFACT_PACKAGEVERSION = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=772,
-  serialized_end=865,
+  serialized_start=795,
+  serialized_end=888,
 )
 
 _ARTIFACT_PUBLISHTARGET_DIRECTORYMAPPING = _descriptor.Descriptor(
@@ -309,8 +317,8 @@ _ARTIFACT_PUBLISHTARGET_DIRECTORYMAPPING = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1067,
-  serialized_end=1126,
+  serialized_start=1090,
+  serialized_end=1149,
 )
 
 _ARTIFACT_PUBLISHTARGET = _descriptor.Descriptor(
@@ -361,8 +369,8 @@ _ARTIFACT_PUBLISHTARGET = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=868,
-  serialized_end=1179,
+  serialized_start=891,
+  serialized_end=1202,
 )
 
 _ARTIFACT = _descriptor.Descriptor(
@@ -470,6 +478,13 @@ _ARTIFACT = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
+    _descriptor.FieldDescriptor(
+      name='discovery_doc', full_name='googleapis.artman.Artifact.discovery_doc', index=14,
+      number=16, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
   ],
   extensions=[
   ],
@@ -486,7 +501,7 @@ _ARTIFACT = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=139,
-  serialized_end=1468,
+  serialized_end=1530,
 )
 
 _CONFIG.fields_by_name['common'].message_type = _ARTIFACT

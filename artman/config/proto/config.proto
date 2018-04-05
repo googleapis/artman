@@ -209,6 +209,15 @@ message Artifact {
     // compiler.
     PROTOBUF = 3;
 
+    // This artifact type will generate a self-contained library that contains
+    // GAPIC layer from a Discovery document.
+    DISCOGAPIC = 4;
+
+    // This artifact type will, from a Discovery document, generate a
+    // base GAPIC config yaml that an API producer can start with.
+    DISCOGAPIC_CONFIG = 5;
+
+
     // This artifact type will only generate a GAPIC library. Use this type
     // along with GRPC type if you plan to publish GRPC package and GAPIC
     // package separately to package managers. This type might
@@ -309,4 +318,10 @@ message Artifact {
   // Note: when `--dry-run` is specified, the publishing command will do
   // everything except the real publishing step.
   repeated PublishTarget publish_targets = 15;
+
+  // The path where your Discovery Document API lives. This is only used for
+  // tasks that generate client libraries or GAPIC config yamls from
+  // Discovery Document. The path can be an absolute path or a path relative
+  // to the artman config yaml.
+  string discovery_doc = 16;
 }
