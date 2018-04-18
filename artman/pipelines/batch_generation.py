@@ -141,5 +141,6 @@ def _load_artman_config(artman_yaml, language, toolkit, root_dir):
         config_spec=artman_yaml,
         config_sections=['common'],
         repl_vars={'TOOLKIT': toolkit,
-                   'GOOGLEAPIS': root_dir},
+                   'GOOGLEAPIS': root_dir,
+                   'DISCOVERY_ARTIFACT_MANAGER': root_dir},
         language=language)

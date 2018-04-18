@@ -142,3 +142,8 @@ class PrepareGoogleapisDirTask(task_base.TaskBase):
             with io.open(filename, "w+", encoding='UTF-8') as text_file:
                 text_file.write(base64.b64decode(content))
         return remote_repo_dir
+
+
+class PrepareOutputDirectoryTask(task_base.TaskBase):
+    def execute(self, output_dir):
+        self.exec_command(['mkdir', '-p', output_dir])

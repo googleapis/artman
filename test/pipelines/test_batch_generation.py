@@ -89,6 +89,7 @@ class BatchTaskFactoryTests(unittest.TestCase):
         self._kwargs['batch_apis'] = ['compute']
         self._kwargs['language'] = 'java'
         expected = [
+            tasks.io.PrepareOutputDirectoryTask,
             tasks.package_metadata.PackageMetadataConfigGenTask,
             tasks.gapic.DiscoGapicCodeGenTask,
             tasks.format.JavaFormatTask,

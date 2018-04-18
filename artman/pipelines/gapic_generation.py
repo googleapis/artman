@@ -248,7 +248,6 @@ class DiscoGapicTaskFactory(code_gen.TaskFactoryBase):
         if 'gapic_code_dir' in kwargs:
             answer = self._get_gapic_codegen_tasks(**kwargs)
 
-
         for packaging_task in self._get_packaging_tasks(**kwargs):
             if packaging_task not in answer:
                 answer.append(packaging_task)
@@ -267,6 +266,7 @@ class DiscoGapicTaskFactory(code_gen.TaskFactoryBase):
             list: A list of Task subclasses.
         """
         return [
+            tasks.io.PrepareOutputDirectoryTask,
             tasks.package_metadata.PackageMetadataConfigGenTask,
             tasks.gapic.DiscoGapicCodeGenTask,
             tasks.format.get_format_task(language),

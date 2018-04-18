@@ -88,7 +88,7 @@ class CodeGenerationPipelineBaseTests(unittest.TestCase):
         flow = cgpb.do_build_flow(language='java', publish='noop',
                                   gapic_code_dir='output')
         assert isinstance(flow, linear_flow.Flow)
-        assert len(flow) == 5
+        assert len(flow) == 6
 
     def test_do_build_flow_no_gapic(self):
         CGPB = code_generation.CodeGenerationPipelineBase

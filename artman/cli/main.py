@@ -360,6 +360,7 @@ def normalize_flags(flags, user_config):
             config_sections=config_sections,
             repl_vars={
                 'GOOGLEAPIS': root_dir,
+                'DISCOVERY_ARTIFACT_MANAGER': root_dir,
                 'TOOLKIT': user_config.local.toolkit
             },
             language=language, )
