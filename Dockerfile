@@ -43,7 +43,7 @@ RUN mkdir -p /usr/src/protoc/ \
   && ln -s /usr/src/protoc/bin/protoc /usr/local/bin/protoc
 
 # Install GRPC and Protobuf.
-RUN pip3 install --upgrade pip \
+RUN pip3 install --upgrade pip==9.0.3 \
   && pip3 install \
     # Ensure that grpcio matches requirements.txt
     grpcio==1.10.0 \
@@ -166,12 +166,12 @@ RUN curl -SL $DOTNET_SDK_DOWNLOAD_URL --output dotnet.tar.gz \
 # Install couple of git repos
 RUN git clone https://github.com/googleapis/googleapis \
   && cd googleapis \
-  && git checkout d5f28ca4b0b9f09580989471f1bf06281681c684 \
+  && git checkout 4d308b21b2553e4d7f5eaffa72e109c85d147be7 \
   && cd .. \
   && rm -rf /googleapis/.git/
 RUN git clone https://github.com/googleapis/toolkit \
   && cd toolkit/ \
-  && git checkout f0679136e6178b75588b7e19e90f005590ee8766 \
+  && git checkout d4e4503ce2546105bef6ecd84493705aa83c4040 \
   && cd .. \
   && rm -rf /toolkit/.git/
 ENV TOOLKIT_HOME /toolkit
