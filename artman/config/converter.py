@@ -137,7 +137,7 @@ def _calculate_rel_gapic_output_dir(language, api_name, api_version):
     elif language == 'nodejs':
         return 'js/%s-%s' % (api_name, api_version)
     elif language == 'php':
-        return 'google-php-cloud-%s-%s' % (api_name, api_version)
+        return 'php/google-cloud-%s-%s' % (api_name, api_version)
     elif language == 'python':
         return 'python/%s-%s' % (api_name, api_version)
     elif language == 'ruby':
