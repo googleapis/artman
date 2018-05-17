@@ -134,7 +134,7 @@ RUN pear install PHP_CodeSniffer-2.9.1 \
 #     protoc output.
 RUN apt-get update \
   && apt-get install -y pandoc \
-  && pip3 install protoc-docs-plugin==0.2.0 \
+  && pip3 install protoc-docs-plugin==0.3.0 \
   && rm -rf /var/lib/apt/lists/*
 
 # Install .NET Core SDK (about 280MB)
@@ -171,7 +171,7 @@ RUN git clone https://github.com/googleapis/googleapis \
   && rm -rf /googleapis/.git/
 RUN git clone https://github.com/googleapis/toolkit \
   && cd toolkit/ \
-  && git checkout 4d01a224796349d51f6ec15933d7b432f442fc3f \
+  && git checkout 64a1f33515be195c56ac897f16f00feca87670b6 \
   && cd .. \
   && rm -rf /toolkit/.git/
 ENV TOOLKIT_HOME /toolkit
@@ -199,4 +199,4 @@ ADD artman-user-config-in-docker.yaml /root/.artman/config.yaml
 # Install artman.
 ADD . /artman
 ARG install_artman_from_source=false
-RUN if [ "$install_artman_from_source" = true ]; then pip3 install -e /artman; else pip3 install googleapis-artman==0.9.0; rm -r /artman; fi
+RUN if [ "$install_artman_from_source" = true ]; then pip3 install -e /artman; else pip3 install googleapis-artman==0.9.1; rm -r /artman; fi
