@@ -47,7 +47,7 @@ class PackageMetadataConfigTest(unittest.TestCase):
         )
         actual_file = os.path.join(str(self.output_dir),
                                    'python_google-cloud-fake-v1_package2.yaml')
-        expected_file = 'test/testdata/google-cloud-fake-v1_package.yaml'
+        expected_file = 'test/testdata/python_google-cloud-fake-v1_package2.yaml'
         with open(actual_file) as f:
             actual = yaml.safe_load(f)
         with open(expected_file) as f:

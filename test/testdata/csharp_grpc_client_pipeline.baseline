@@ -1,5 +1,0 @@
-mkdir -p {OUTPUT}/google-cloud-library-v1-gen-csharp
-protoc --proto_path=test/fake-repos/gapi-core-proto/src/main/proto/ --proto_path=test/fake-repos/fake-proto --proto_path=MOCK_GRADLE_TASK_OUTPUT --csharp_out={OUTPUT}/google-cloud-library-v1-gen-csharp test/fake-repos/fake-proto/fake.proto
-mkdir -p {OUTPUT}/google-cloud-library-v1-gen-csharp
-which grpc_csharp_plugin
-protoc --proto_path=test/fake-repos/gapi-core-proto/src/main/proto/ --proto_path=test/fake-repos/fake-proto --proto_path=MOCK_GRADLE_TASK_OUTPUT --grpc_out={OUTPUT}/google-cloud-library-v1-gen-csharp test/fake-repos/fake-proto/fake.proto

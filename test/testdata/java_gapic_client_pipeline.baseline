@@ -1,7 +1,0 @@
-mkdir -p {OUTPUT}
-protoc --proto_path=test/fake-repos/gapi-core-proto/src/main/proto/ --proto_path=test/fake-repos/fake-mixin-proto --proto_path=test/fake-repos/fake-proto --proto_path=MOCK_GRADLE_TASK_OUTPUT --include_imports --include_source_info -o {OUTPUT}/google-cloud-library-v1.desc test/fake-repos/fake-proto/fake.proto test/fake-repos/fake-mixin-proto/fake_mixin.proto
-rm -rf {OUTPUT}/google-cloud-library-v1-gapic-gen-java
-test/fake-repos/toolkit/gradlew -p test/fake-repos/toolkit runCodeGen -Pclargs=--descriptor_set={OUTPUT}/google-cloud-library-v1.desc,--package_yaml={OUTPUT}/google-cloud-library-v1_package.yaml,--output={OUTPUT}/google-cloud-library-v1-gapic-gen-java,--service_yaml={CWD}/test/testdata/gapi-example-library-proto/src/main/proto/google/example/library/library.yaml,--gapic_yaml={CWD}/test/testdata/gapi-example-library-proto/src/main/proto/google/example/library/library_gapic.yaml,--gapic_yaml={CWD}/test/testdata/gapi-example-library-proto/src/main/proto/google/example/library/java_gapic.yaml
-java -jar MOCK_GRADLE_TASK_OUTPUT --replace {OUTPUT}/google-cloud-library-v1-gapic-gen-java/MyApi.java
-mkdir -p {OUTPUT}/final
-cp -rf {OUTPUT}/google-cloud-library-v1-gapic-gen-java/MyApi.java {OUTPUT}/final

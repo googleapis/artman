@@ -1,4 +1,0 @@
-php-cs-fixer fix {OUTPUT}/google-cloud-library-v1-gapic-gen-php
-php-cs-fixer fix {OUTPUT}/google-cloud-library-v1-gapic-gen-php --fixers=phpdoc_var_to_type
-phpcbf --standard=PSR2 --no-patch {OUTPUT}/google-cloud-library-v1-gapic-gen-php
-yapf -i {OUTPUT}/google-cloud-library-v1-gapic-gen-python/my_api.py

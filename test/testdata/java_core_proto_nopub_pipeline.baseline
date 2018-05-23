@@ -1,1 +1,0 @@
-gen-api-package --api_name=google/cloud/library/v1 -l java -o {OUTPUT}/google-cloud-library-v1-gen-java --package_prefix grpc- -i {CWD}/test/fake-repos/gapi-core-proto/src/main/proto -r test/fake-repos/fake-proto --experimental_alt_java --build_common_protos

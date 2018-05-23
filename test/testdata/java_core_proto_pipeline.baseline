@@ -1,9 +1,0 @@
-mkdir -p {CWD}/test/testdata/test_output
-protoc --proto_path=test/fake-repos/gapi-core-proto/src/main/proto/ --proto_path=test/fake-repos/fake-mixin-proto --proto_path=test/fake-repos/fake-proto --proto_path=MOCK_GRADLE_TASK_OUTPUT --include_imports --include_source_info -o {CWD}/test/testdata/test_output/google-cloud-library-v1.desc test/fake-repos/fake-proto/fake.proto test/fake-repos/fake-mixin-proto/fake_mixin.proto
-mkdir -p {CWD}/test/testdata/test_output/google-cloud-library-v1-gen-java/src/main/java
-protoc --proto_path=test/fake-repos/gapi-core-proto/src/main/proto/ --proto_path=test/fake-repos/fake-proto --proto_path=MOCK_GRADLE_TASK_OUTPUT --java_out={CWD}/test/testdata/test_output/google-cloud-library-v1-gen-java/src/main/java test/fake-repos/fake-proto/fake.proto
-test/fake-repos/toolkit/gradlew -p test/fake-repos/toolkit runGrpcMetadataGen -Pclargs=--descriptor_set={CWD}/test/testdata/test_output/google-cloud-library-v1.desc,--input={CWD}/test/testdata/test_output/google-cloud-library-v1-gen-java,--output={CWD}/test/testdata/test_output/java/grpc-google-cloud-library-v1,--metadata_config={CWD}/test/testdata/test_output/google-cloud-library-v1_package.yaml,--language=java,--service_yaml={CWD}/test/testdata/gapi-example-library-proto/src/main/proto/google/example/library/library.yaml
-mkdir -p {CWD}/test/testdata/test_output/java/grpc-google-cloud-library-v1/src/main/proto
-cp -rf test/fake-repos/fake-proto {CWD}/test/testdata/test_output/java/grpc-google-cloud-library-v1/src/main/proto
-cp {CWD}/test/testdata/gapi-example-library-proto/src/main/proto/google/example/library/library_gapic.yaml {CWD}/test/testdata/test_output/java/grpc-google-cloud-library-v1
-rm -r {CWD}/test/testdata/test_output/google-cloud-library-v1-gen-java

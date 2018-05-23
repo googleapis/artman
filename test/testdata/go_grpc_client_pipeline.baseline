@@ -1,3 +1,0 @@
-mkdir -p {OUTPUT}/google-cloud-library-v1-gen-go
-protoc --proto_path=test/fake-repos/gapi-core-proto/src/main/proto/ --proto_path=test/fake-repos/fake-proto --proto_path=MOCK_GRADLE_TASK_OUTPUT --go_out=plugins=grpc:{OUTPUT}/google-cloud-library-v1-gen-go test/fake-repos/fake-proto/fake.proto
-mkdir -p {OUTPUT}/google-cloud-library-v1-gen-go
