@@ -9,14 +9,15 @@
 /csharp/google-cloud-library_example/Google.Example.Library.V1/Google.Example.Library.V1/ResourceNames.cs
 /csharp/grpc-google-cloud-library_example-v1/LibraryGrpc.cs
 /csharp/proto-google-cloud-library_example-v1/Library.cs
+/csharp_google-cloud-library_example-v1_package2.yaml
 /gapi-cloud-library_example-go/cloud.google.com/go/example/library/apiv1/doc.go
 /gapi-cloud-library_example-go/cloud.google.com/go/example/library/apiv1/library_client.go
 /gapi-cloud-library_example-go/cloud.google.com/go/example/library/apiv1/library_client_example_test.go
 /gapi-cloud-library_example-go/cloud.google.com/go/example/library/apiv1/mock_test.go
 /gapi-cloud-library_example-go/google.golang.org/genproto/googleapis/example/library/v1/library.pb.go
 /go/grpc-google-cloud-library_example-v1/google.golang.org/genproto/googleapis/example/library/v1/library.pb.go
+/go_google-cloud-library_example-v1_package2.yaml
 /google-cloud-library_example-v1.desc
-/google-cloud-library_example-v1_package.yaml
 /java/build.gradle
 /java/gapic-google-cloud-library_example-v1/build.gradle
 /java/gapic-google-cloud-library_example-v1/src/main/java/com/google/cloud/example/library/v1/LibraryServiceClient.java
@@ -75,6 +76,7 @@
 /java/proto-google-cloud-library_example-v1/src/main/java/com/google/example/library/v1/UpdateBookRequestOrBuilder.java
 /java/proto-google-cloud-library_example-v1/src/main/proto/google/example/library/v1/library.proto
 /java/settings.gradle
+/java_google-cloud-library_example-v1_package2.yaml
 /js/library_example-v1/README.md
 /js/library_example-v1/package.json
 /js/library_example-v1/protos/google/example/library/v1/library.proto
@@ -85,6 +87,7 @@
 /js/library_example-v1/src/v1/library_service_client.js
 /js/library_example-v1/src/v1/library_service_client_config.json
 /js/library_example-v1/test/gapic-v1.js
+/nodejs_google-cloud-library_example-v1_package2.yaml
 /php/google-cloud-library_example-v1/composer.json
 /php/google-cloud-library_example-v1/proto/src/GPBMetadata/Google/Example/Library/V1/Library.php
 /php/google-cloud-library_example-v1/proto/src/Google/Example/Library/V1/Book.php
@@ -109,6 +112,7 @@
 /php/google-cloud-library_example-v1/src/V1/resources/library_service_descriptor_config.php
 /php/google-cloud-library_example-v1/src/V1/resources/library_service_rest_client_config.php
 /php/google-cloud-library_example-v1/tests/Unit/V1/LibraryServiceClientTest.php
+/php_google-cloud-library_example-v1_package2.yaml
 /python/library_example-v1/LICENSE
 /python/library_example-v1/MANIFEST.in
 /python/library_example-v1/README.rst
@@ -132,6 +136,7 @@
 /python/library_example-v1/setup.cfg
 /python/library_example-v1/setup.py
 /python/library_example-v1/tests/unit/gapic/v1/test_library_service_client_v1.py
+/python_google-cloud-library_example-v1_package2.yaml
 /ruby/google-cloud-ruby/google-cloud-library_example/.gitignore
 /ruby/google-cloud-ruby/google-cloud-library_example/.rubocop.yml
 /ruby/google-cloud-ruby/google-cloud-library_example/.yardopts
@@ -153,3 +158,4 @@
 /ruby/google-cloud-ruby/google-cloud-library_example/test/google/cloud/example/library/v1/library_service_client_test.rb
 /ruby/grpc-google-cloud-library_example-v1/google/example/library/v1/library_pb.rb
 /ruby/grpc-google-cloud-library_example-v1/google/example/library/v1/library_services_pb.rb
+/ruby_google-cloud-library_example-v1_package2.yaml

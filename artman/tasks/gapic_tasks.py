@@ -126,7 +126,7 @@ class GapicCodeGenTask(task_base.TaskBase):
                         for yaml in service_yaml]
         args = [
             '--descriptor_set=' + os.path.abspath(descriptor_set),
-            '--package_yaml=' + os.path.abspath(package_metadata_yaml),
+            '--package_yaml2=' + os.path.abspath(package_metadata_yaml),
             '--output=' + os.path.abspath(gapic_code_dir),
         ] + service_args + gapic_args
 
@@ -155,7 +155,7 @@ class DiscoGapicCodeGenTask(task_base.TaskBase):
         args = [
             # TODO(andrealin): Get right absolute path for discovery_doc
                    '--discovery_doc=' + os.path.abspath(discovery_doc),
-                   '--package_yaml=' + os.path.abspath(package_metadata_yaml),
+                   '--package_yaml2=' + os.path.abspath(package_metadata_yaml),
                    '--output=' + os.path.abspath(gapic_code_dir),
                    ] + gapic_args
 

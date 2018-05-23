@@ -78,18 +78,6 @@ def convert_to_legacy_config_dict(artifact_config, root_dir, output_dir):
             Artifact.ReleaseLevel.Name(
                 artifact_config.release_level).lower())
 
-    # Convert package version configuration.
-    pv = artifact_config.package_version
-    if pv:
-        package_version_dict = {}
-        if pv.grpc_dep_lower_bound:
-            package_version_dict['lower'] = pv.grpc_dep_lower_bound
-        if pv.grpc_dep_upper_bound:
-            package_version_dict['upper'] = pv.grpc_dep_upper_bound
-        if package_version_dict.keys():
-            language_config_dict['generated_package_version'] = (
-                package_version_dict)
-
     result[language] = language_config_dict
     return result
 

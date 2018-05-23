@@ -32,13 +32,6 @@ class PackageMetadataConfigTest(unittest.TestCase):
         task = package_metadata_tasks.PackageMetadataConfigGenTask()
         repo_root = os.path.abspath('.')
 
-        package_dependencies_yaml = os.path.join(
-            repo_root,
-            'test/testdata/googleapis_test/gapic/packaging/dependencies.yaml')
-        package_defaults_yaml = os.path.join(
-            repo_root,
-            'test/testdata/googleapis_test/gapic/packaging/api_defaults.yaml')
-
         task.execute(
             api_name='fake',
             api_version='v1',
@@ -47,18 +40,21 @@ class PackageMetadataConfigTest(unittest.TestCase):
             root_dir='%s/googleapis' % repo_root,
             organization_name='google-cloud',
             output_dir=str(self.output_dir),
-            package_dependencies_yaml=package_dependencies_yaml,
-            package_defaults_yaml=package_defaults_yaml,
             proto_deps=['googleapis-common-protos'],
             artifact_type='GAPIC',
             src_proto_path=['path/to/protos'],
-            generated_package_version={'lower': '0.17.29', 'upper': '0.18dev'},
             release_level='beta'
         )
-        with open(os.path.join(str(self.output_dir),
-                               'google-cloud-fake-v1_package.yaml')) as f:
+        actual_file = os.path.join(str(self.output_dir),
+                                   'python_google-cloud-fake-v1_package2.yaml')
+        expected_file = 'test/testdata/google-cloud-fake-v1_package.yaml'
+        with open(actual_file) as f:
             actual = yaml.safe_load(f)
-        with open('test/testdata/google-cloud-fake-v1_package.yaml') as f:
+        with open(expected_file) as f:
             expected = yaml.safe_load(f)
         # Don't compare files directly because yaml doesn't preserve ordering
-        self.assertDictEqual(actual, expected)
+        try:
+            self.assertDictEqual(actual, expected)
+        except:
+            print("comparison failure: actual = " + actual_file + ", expected = " + expected_file)
+            raise
