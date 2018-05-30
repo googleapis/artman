@@ -146,8 +146,8 @@
 /ruby/google-cloud-ruby/google-cloud-library_example/Rakefile
 /ruby/google-cloud-ruby/google-cloud-library_example/google-cloud-example-library.gemspec
 /ruby/google-cloud-ruby/google-cloud-library_example/lib/google/cloud/example/library.rb
-/ruby/google-cloud-ruby/google-cloud-library_example/lib/google/cloud/example/library/credentials.rb
 /ruby/google-cloud-ruby/google-cloud-library_example/lib/google/cloud/example/library/v1.rb
+/ruby/google-cloud-ruby/google-cloud-library_example/lib/google/cloud/example/library/v1/credentials.rb
 /ruby/google-cloud-ruby/google-cloud-library_example/lib/google/cloud/example/library/v1/doc/google/example/library/v1/library.rb
 /ruby/google-cloud-ruby/google-cloud-library_example/lib/google/cloud/example/library/v1/doc/google/protobuf/empty.rb
 /ruby/google-cloud-ruby/google-cloud-library_example/lib/google/cloud/example/library/v1/doc/overview.rb
