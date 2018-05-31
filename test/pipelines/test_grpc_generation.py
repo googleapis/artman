@@ -21,7 +21,6 @@ import pytest
 
 from artman.tasks import protoc_tasks, package_metadata_tasks
 from artman.pipelines import code_generation
-from artman.pipelines import batch_generation
 from artman.pipelines import grpc_generation
 
 
@@ -57,64 +56,3 @@ class GrpcTaskFactoryBaseTests(unittest.TestCase):
         actual = self._gtfb.get_tasks(publish='noop')
         for task, class_ in zip(actual, expected):
             assert isinstance(task, class_)
-
-
-class GrpcClientBatchPipelineTests(unittest.TestCase):
-    @mock.patch.object(grpc_generation, '_make_grpc_batch_pipeline_tasks')
-    @mock.patch.object(batch_generation.BatchPipeline, '__init__')
-    def test_constructor(self, bp, mgbpt):
-        grpc_generation.GrpcClientBatchPipeline(foo='bar')
-        bp.assert_called_once_with(mgbpt, foo='bar')
-
-
-class ProtoClientBatchPipelineTests(unittest.TestCase):
-    @mock.patch.object(grpc_generation, '_make_proto_batch_pipeline_tasks')
-    @mock.patch.object(batch_generation.BatchPipeline, '__init__')
-    def test_constructor(self, bp, mpbpt):
-        grpc_generation.ProtoClientBatchPipeline(foo='bar')
-        bp.assert_called_once_with(mpbpt, foo='bar')
-
-
-class MakeGrpcBatchPipelineTasksTest(unittest.TestCase):
-    def test_make_java(self):
-        expected = [
-            protoc_tasks.ProtoDescGenTask,
-            protoc_tasks.ProtoCodeGenTask,
-            protoc_tasks.GrpcCodeGenTask,
-            package_metadata_tasks.PackageMetadataConfigGenTask,
-            package_metadata_tasks.ProtoPackageMetadataGenTask,
-            package_metadata_tasks.GrpcPackageMetadataGenTask
-        ]
-        actual = grpc_generation._make_grpc_batch_pipeline_tasks(language='java')
-        for task, class_ in zip(actual, expected):
-            assert isinstance(task, class_)
-
-    def test_no_language(self):
-        with pytest.raises(ValueError):
-            grpc_generation._make_grpc_batch_pipeline_tasks()
-
-    def test_bad_language(self):
-        with pytest.raises(ValueError):
-            grpc_generation._make_grpc_batch_pipeline_tasks(language='cpp')
-
-
-class MakeProtoBatchPipelineTasksTest(unittest.TestCase):
-    def test_make_java(self):
-        expected = [
-            protoc_tasks.ProtoDescGenTask,
-            protoc_tasks.ProtoCodeGenTask,
-            package_metadata_tasks.PackageMetadataConfigGenTask,
-            package_metadata_tasks.ProtoPackageMetadataGenTask,
-            protoc_tasks.JavaProtoCopyTask,
-        ]
-        actual = grpc_generation._make_proto_batch_pipeline_tasks(language='java')
-        for task, class_ in zip(actual, expected):
-            assert isinstance(task, class_)
-
-    def test_no_language(self):
-        with pytest.raises(ValueError):
-            grpc_generation._make_proto_batch_pipeline_tasks()
-
-    def test_bad_language(self):
-        with pytest.raises(ValueError):
-            grpc_generation._make_proto_batch_pipeline_tasks(language='python')

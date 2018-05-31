@@ -146,7 +146,7 @@ def _normalize_artifact_config(artifact_config, artman_config_path):
     Once the individual GAPIC output folder becomes configurable, that folder
     name calculation logic should be moved from converter into this method.
     """
-    # Normalize the input file or folder by concanating relative path with
+    # Normalize the input file or folder by concatenating relative path with
     # the folder of artman config yaml.
     if artifact_config.service_yaml:
         artifact_config.service_yaml = _normalize_path(

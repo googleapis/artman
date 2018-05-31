@@ -14,7 +14,6 @@
 
 """Pipelines that run gRPC codegen"""
 
-from artman.pipelines import batch_generation as batch_gen
 from artman.pipelines import code_generation as code_gen
 from artman.tasks import package_metadata_tasks
 from artman.tasks import protoc_tasks
@@ -51,32 +50,6 @@ class GrpcTaskFactoryBase(code_gen.TaskFactoryBase):
 
     def get_invalid_kwargs(self):
         return []
-
-
-class GrpcClientBatchPipeline(batch_gen.BatchPipeline):
-
-    def __init__(self, **kwargs):
-        super(GrpcClientBatchPipeline, self).__init__(
-            _make_grpc_batch_pipeline_tasks, **kwargs)
-
-
-def _make_grpc_batch_pipeline_tasks(**kwargs):
-    task_factory = get_grpc_task_factory(kwargs)
-    tasks = task_factory.get_grpc_codegen_tasks(**kwargs)
-    return task_utils.instantiate_tasks(tasks, kwargs)
-
-
-class ProtoClientBatchPipeline(batch_gen.BatchPipeline):
-
-    def __init__(self, **kwargs):
-        super(ProtoClientBatchPipeline, self).__init__(
-            _make_proto_batch_pipeline_tasks, **kwargs)
-
-
-def _make_proto_batch_pipeline_tasks(**kwargs):
-    task_factory = get_proto_task_factory(kwargs)
-    tasks = task_factory.get_grpc_codegen_tasks(**kwargs)
-    return task_utils.instantiate_tasks(tasks, kwargs)
 
 
 class _RubyGrpcTaskFactory(GrpcTaskFactoryBase):

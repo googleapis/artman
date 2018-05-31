@@ -21,7 +21,6 @@ import pytest
 
 from artman import tasks
 from artman.pipelines import code_generation
-from artman.pipelines import batch_generation
 from artman.pipelines import gapic_generation
 from artman.pipelines import grpc_generation
 
@@ -40,23 +39,6 @@ class GapicClientPipelineTests(unittest.TestCase):
     def test_constructor(self, cgpb, gctf):
         gcp = gapic_generation.GapicClientPipeline('csharp', foo='bar')
         cgpb.assert_called_once_with(gctf(), language='csharp', foo='bar')
-
-
-class GapicClientBatchPipelineTests(unittest.TestCase):
-    @mock.patch.object(batch_generation.BatchPipeline, '__init__')
-    def test_constructor(self, bp):
-        gcbp = gapic_generation.GapicClientBatchPipeline(foo='bar')
-        bp.assert_called_once_with(gcbp._make_batch_pipeline_tasks, foo='bar')
-
-    @mock.patch.object(gapic_generation.GapicClientBatchPipeline, '__init__')
-    @mock.patch.object(gapic_generation.GapicTaskFactory, 'get_tasks')
-    def test_make_batch_pipeline_tasks(self, get_tasks, init):
-        init.return_value = None
-        get_tasks.return_value = []
-        gcbp = gapic_generation.GapicClientBatchPipeline()
-        tasks_ = gcbp._make_batch_pipeline_tasks(language='php')
-        get_tasks.assert_called_once_with(language='php')
-        assert tasks_ == []
 
 
 class GapicConfigTaskFactoryTests(unittest.TestCase):

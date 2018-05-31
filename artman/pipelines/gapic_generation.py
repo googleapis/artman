@@ -18,7 +18,6 @@ from __future__ import absolute_import
 
 from artman.pipelines import code_generation as code_gen
 from artman.pipelines import grpc_generation as grpc_gen
-from artman.pipelines import batch_generation as batch_gen
 from artman import tasks
 from artman.utils import task_utils
 
@@ -114,16 +113,6 @@ class DiscoGapicClientPipeline(code_gen.CodeGenerationPipelineBase):
             language=language,
             **kwargs
         )
-
-class GapicClientBatchPipeline(batch_gen.BatchPipeline):
-    def __init__(self, **kwargs):
-        super(GapicClientBatchPipeline, self).__init__(
-            self._make_batch_pipeline_tasks, **kwargs)
-
-    def _make_batch_pipeline_tasks(self, **kwargs):
-        task_factory = GapicTaskFactory()
-        return task_factory.get_tasks(**kwargs)
-
 
 class CSharpPackagingTaskFactory(code_gen.TaskFactoryBase):
 

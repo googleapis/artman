@@ -88,7 +88,7 @@ def main(*args):
 def _adjust_root_dir(root_dir):
     """"Adjust input directory to use versioned common config and/or protos.
 
-    Currently che codegen has coupling with some shared configuration yaml
+    Currently the codegen has coupling with some shared configuration yaml
     under under {googleapis repo}/gapic/[lang,packaging], causing library
     generation to fail when a breaking change is made to such shared
     configuration file. This delivers a poor user experience to artman
@@ -297,8 +297,6 @@ def normalize_flags(flags, user_config):
         logger.error('Artifact config loading failed with `%s`' % ve)
         sys.exit(96)
 
-    # If we were given just an API or BATCH, then expand it into the --config
-    # syntax.
     shared_config_name = 'common.yaml'
     if artifact_config.language in (Artifact.RUBY, Artifact.NODEJS,):
         shared_config_name = 'doc.yaml'

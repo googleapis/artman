@@ -21,11 +21,10 @@ from artman.pipelines import sample_pipeline
 from artman.pipelines import gapic_generation
 from artman.pipelines import grpc_generation
 from artman.pipelines import core_generation
-from artman.pipelines import batch_generation
 from artman.utils.logger import logger
 
 __all__ = (
-    'batch_generation', 'core_generation', 'gapic_generation',
+    'core_generation', 'gapic_generation',
     'grpc_generation', 'make_pipeline', 'make_pipeline_flow',
     'pipeline_base', 'sample_pipeline',
 )
