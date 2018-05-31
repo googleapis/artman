@@ -17,10 +17,8 @@ import os
 import glob
 from ruamel import yaml
 
-from artman.tasks import packman_tasks
 from artman.tasks import task_base
 from artman.utils import task_utils
-from artman.tasks.requirements import gapic_requirements
 
 
 class GapicConfigGenTask(task_base.TaskBase):
@@ -47,9 +45,6 @@ class GapicConfigGenTask(task_base.TaskBase):
 
         return config_gen_path
 
-    def validate(self):
-        return [gapic_requirements.ConfigGenRequirements]
-
 
 class DiscoGapicConfigGenTask(task_base.TaskBase):
     """Generates GAPIC config file from a Discovery document"""
@@ -73,9 +68,6 @@ class DiscoGapicConfigGenTask(task_base.TaskBase):
             task_utils.gradle_task(toolkit_path, 'runDiscoConfigGen', args))
 
         return config_gen_path
-
-    def validate(self):
-        return [gapic_requirements.ConfigGenRequirements]
 
 
 class GapicConfigMoveTask(task_base.TaskBase):
@@ -135,9 +127,6 @@ class GapicCodeGenTask(task_base.TaskBase):
 
         return gapic_code_dir
 
-    def validate(self):
-        return [gapic_requirements.GapicRequirements]
-
 
 class DiscoGapicCodeGenTask(task_base.TaskBase):
     """Generates GAPIC wrappers from a Discovery document"""
@@ -164,9 +153,6 @@ class DiscoGapicCodeGenTask(task_base.TaskBase):
 
         return gapic_code_dir
 
-    def validate(self):
-        return [gapic_requirements.GapicRequirements]
-
 
 class CSharpGapicPackagingTask(task_base.TaskBase):
     def execute(self, gapic_code_dir, grpc_code_dir, proto_code_dir, gapic_api_yaml):
@@ -178,19 +164,3 @@ class CSharpGapicPackagingTask(task_base.TaskBase):
         # Copy proto/grpc .cs files into prod directory
         self.exec_command(['sh', '-c', 'cp {0}/*.cs {1}'.format(proto_code_dir, prod_dir)])
         self.exec_command(['sh', '-c', 'cp {0}/*.cs {1}'.format(grpc_code_dir, prod_dir)])
-
-
-class GapicPackmanTask(packman_tasks.PackmanTaskBase):
-    default_provides = 'package_dir'
-
-    def execute(self, language, api_name, api_version, organization_name,
-                gapic_code_dir, skip_packman=False):
-        if not skip_packman:
-            api_full_name = task_utils.api_full_name(
-                api_name, api_version, organization_name)
-            # TODO: Use TaskBase.exec_command()
-            self.run_packman(language,
-                             task_utils.packman_api_name(api_full_name),
-                             '--gax_dir=' + gapic_code_dir,
-                             '--template_root=templates/gax')
-        return gapic_code_dir

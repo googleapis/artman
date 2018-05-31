@@ -52,7 +52,7 @@ class GrpcTaskFactoryBaseTests(unittest.TestCase):
         assert self._gtfb.get_invalid_kwargs() == []
 
     def test_get_tasks(self):
-        expected = [protoc_tasks.GrpcPackmanTask]
+        expected = []
         actual = self._gtfb.get_tasks(publish='noop')
         for task, class_ in zip(actual, expected):
             assert isinstance(task, class_)

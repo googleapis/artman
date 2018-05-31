@@ -17,7 +17,6 @@
 import time
 
 from artman.tasks import task_base
-from artman.tasks.requirements import sample_requirement
 from artman.utils.logger import logger
 
 
@@ -27,6 +26,3 @@ class SampleTask(task_base.TaskBase):
     def execute(self, sleep_secs):
         logger.info('Sleep %d sec.' % sleep_secs)
         time.sleep(sleep_secs)
-
-    def validate(self):
-        return [sample_requirement.SampleRequirement]

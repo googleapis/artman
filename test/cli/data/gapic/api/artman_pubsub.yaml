@@ -52,7 +52,6 @@ nodejs:
     staging:
       paths:
         - generated/nodejs/google-cloud-node/packages/pubsub
-  skip_packman: True
 php:
   gapic_code_dir: ${REPOROOT}/artman/output/google-php-pubsub-v1
   git_repos:
@@ -78,4 +77,3 @@ ruby:
     staging:
       paths:
         - generated/ruby/google-cloud-ruby/google-cloud-pubsub
-  skip_packman: True

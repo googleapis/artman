@@ -51,11 +51,6 @@ def api_full_name(api_name, api_version, organization_name):
         return '-'.join([organization_name, api_name])
 
 
-def packman_api_name(api_name):
-    """Changes an pipeline kwarg API name to format expected by Packman"""
-    return api_name.replace('-', '/')
-
-
 def is_output_gcloud(language, gapic_code_dir):
     """Check if the gapic_code_dir is a part of gcloud project.
     """

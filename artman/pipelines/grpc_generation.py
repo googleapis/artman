@@ -43,7 +43,7 @@ class GrpcTaskFactoryBase(code_gen.TaskFactoryBase):
         return task_utils.instantiate_tasks(tasks, kwargs)
 
     def get_grpc_codegen_tasks(self, **kwargs):
-        return [protoc_tasks.GrpcPackmanTask]
+        return []
 
     def get_validate_kwargs(self):
         return code_gen.COMMON_REQUIRED

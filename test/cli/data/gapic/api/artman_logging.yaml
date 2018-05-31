@@ -50,7 +50,6 @@ nodejs:
     staging:
       paths:
         - generated/nodejs/google-cloud-node/packages/logging
-  skip_packman: True
 php:
   gapic_code_dir: ${REPOROOT}/artman/output/google-php-cloud-logging-v2
   git_repos:
@@ -80,4 +79,3 @@ ruby:
     staging:
       paths:
         - generated/ruby/google-cloud-ruby/google-cloud-logging
-  skip_packman: True

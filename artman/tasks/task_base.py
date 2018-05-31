@@ -36,14 +36,6 @@ class TaskBase(Task):
     def __init__(self, *args, **kwargs):
         super(TaskBase, self).__init__(*args, **kwargs)
 
-    def validate(self):
-        """Abstract method, which returns a list of task requirements.
-
-        Subclass must implement this method and return a list of task
-        requirements classes.
-        """
-        raise NotImplementedError("Subclass must implement abstract method")
-
     def log(self, msg, logger=artman_logger, level=logging.INFO):
         """Do local logging, and optionally cloud logging.
 

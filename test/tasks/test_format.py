@@ -22,8 +22,6 @@ import mock
 import pytest
 
 from artman.tasks import format_tasks
-from artman.tasks.requirements import go_requirements
-from artman.tasks.requirements import php_requirements
 from artman.utils import task_utils
 
 
@@ -78,10 +76,6 @@ class GoFormatTaskTests(unittest.TestCase):
         task.execute('/path/to/gapic')
         exec_command.assert_called_once_with(['gofmt', '-w', '/path/to/gapic'])
 
-    def test_validate(self):
-        task = format_tasks.GoFormatTask()
-        assert task.validate() == [go_requirements.GoFormatRequirements]
-
 
 class PhpFormatTaskTests(unittest.TestCase):
     @mock.patch.object(subprocess, 'call')
@@ -100,7 +94,3 @@ class PhpFormatTaskTests(unittest.TestCase):
         for c, expected in zip(call.mock_calls, expected_cmds):
             _, args, _ = c
             assert ' '.join(args[0]) == expected
-
-    def test_validate(self):
-        task = format_tasks.PhpFormatTask()
-        assert task.validate() == [php_requirements.PhpFormatRequirements]

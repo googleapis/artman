@@ -98,11 +98,6 @@ RUN mkdir -p "$GOPATH/src" "$GOPATH/bin" \
   && chmod -R 777 "$GOPATH" \
   && go get -u github.com/golang/protobuf/proto github.com/golang/protobuf/protoc-gen-go
 
-# Install packman
-# TODO: consider installing released packages once artman is versioned (so that
-#   each release of artman is pegged to a release of packman)
-RUN npm install -g https://github.com/googleapis/packman.git
-
 # Setup tools for codegen of Ruby
 RUN gem install rake --no-ri --no-rdoc \
   && gem install rubocop --version '= 0.39.0' --no-ri --no-rdoc \

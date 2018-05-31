@@ -21,9 +21,7 @@ from ruamel import yaml
 
 import six
 
-from artman.tasks import packman_tasks
 from artman.tasks import task_base
-from artman.tasks.requirements import grpc_requirements
 from artman.utils import task_utils
 from artman.utils.logger import logger
 from artman.utils import protoc_utils
@@ -55,9 +53,6 @@ class ProtoDescGenTask(task_base.TaskBase):
             protoc_utils.protoc_desc_params(output_dir, desc_out_file) +
             desc_protos)
         return os.path.join(output_dir, desc_out_file)
-
-    def validate(self):
-        return [grpc_requirements.GrpcRequirements]
 
 
 class ProtocCodeGenTaskBase(task_base.TaskBase):
@@ -129,9 +124,6 @@ class ProtoCodeGenTask(ProtocCodeGenTaskBase):
             final_import_proto_path=final_import_proto_path,
             excluded_proto_path=excluded_proto_path)
 
-    def validate(self):
-        return [grpc_requirements.GrpcRequirements]
-
 
 class GrpcCodeGenTask(ProtocCodeGenTaskBase):
     default_provides = 'grpc_code_dir'
@@ -150,9 +142,6 @@ class GrpcCodeGenTask(ProtocCodeGenTaskBase):
             final_src_proto_path=final_src_proto_path,
             final_import_proto_path=final_import_proto_path,
             excluded_proto_path=excluded_proto_path)
-
-    def validate(self):
-        return [grpc_requirements.GrpcRequirements]
 
 
 class ProtoAndGrpcCodeGenTask(ProtocCodeGenTaskBase):
@@ -173,9 +162,6 @@ class ProtoAndGrpcCodeGenTask(ProtocCodeGenTaskBase):
             final_import_proto_path=final_import_proto_path,
             excluded_proto_path=excluded_proto_path)
 
-    def validate(self):
-        return [grpc_requirements.GrpcRequirements]
-
 
 class GoCopyTask(task_base.TaskBase):
     def execute(self, gapic_code_dir, grpc_code_dir):
@@ -183,37 +169,6 @@ class GoCopyTask(task_base.TaskBase):
             src_path = os.path.join(grpc_code_dir, entry)
             self.exec_command([
                 'cp', '-rf', src_path, gapic_code_dir])
-
-
-class GrpcPackmanTask(packman_tasks.PackmanTaskBase):
-    default_provides = 'package_dir'
-
-    def execute(self, language, api_name, api_version, organization_name,
-                output_dir, src_proto_path, import_proto_path,
-                packman_flags=None, remote_repo_dir=None,
-                final_src_proto_path=None, final_import_proto_path=None):
-        src_proto_path = final_src_proto_path or src_proto_path
-        import_proto_path = final_import_proto_path or import_proto_path
-
-        packman_flags = packman_flags or []
-        api_name_arg = task_utils.packman_api_name(
-            task_utils.api_full_name(api_name, api_version, organization_name))
-        pkg_dir = protoc_utils.pkg_root_dir(
-            output_dir, api_name, api_version, organization_name, language)
-        arg_list = [language, api_name_arg, '-o', pkg_dir,
-                    '--package_prefix', 'grpc-']
-
-        # Import path must be absolute. See
-        #   https://github.com/googleapis/packman/issues/1
-        import_proto_path = [os.path.abspath(imp) for imp in import_proto_path]
-
-        arg_list += [arg for imp in import_proto_path for arg in ('-i', imp)]
-        arg_list += [arg for src in src_proto_path for arg in ('-r', src)]
-        arg_list += packman_flags
-        if remote_repo_dir:
-            arg_list += ['-r', remote_repo_dir]
-        self.run_packman(*arg_list)
-        return os.path.join(pkg_dir, language)
 
 
 class RubyGrpcCopyTask(task_base.TaskBase):

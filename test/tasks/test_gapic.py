@@ -21,7 +21,6 @@ import mock
 import pytest
 
 from artman.tasks import gapic_tasks
-from artman.tasks.requirements import gapic_requirements
 
 
 class GapicConfigGenTaskTests(unittest.TestCase):
@@ -56,10 +55,6 @@ class GapicConfigGenTaskTests(unittest.TestCase):
             cmd = ' '.join(args[0])
             assert cmd == expected
 
-    def test_validate(self):
-        task = gapic_tasks.GapicConfigGenTask()
-        assert task.validate() == [gapic_requirements.ConfigGenRequirements]
-
 
 class DiscoGapicConfigGenTaskTests(unittest.TestCase):
     @mock.patch.object(gapic_tasks.DiscoGapicConfigGenTask, 'exec_command')
@@ -92,10 +87,6 @@ class DiscoGapicConfigGenTaskTests(unittest.TestCase):
             _, args, _ = call
             cmd = ' '.join(args[0])
             assert cmd == expected
-
-    def test_validate(self):
-        task = gapic_tasks.DiscoGapicConfigGenTask()
-        assert task.validate() == [gapic_requirements.ConfigGenRequirements]
 
 
 class GapicConfigMoveTaskTests(unittest.TestCase):
@@ -171,10 +162,6 @@ class GapicCodeGenTaskTests(unittest.TestCase):
             _, args, _ = call
             assert expected in ' '.join(args[0])
 
-    def test_validate(self):
-        task = gapic_tasks.GapicCodeGenTask()
-        assert task.validate() == [gapic_requirements.GapicRequirements]
-
 
 class DiscoGapicCodeGenTaskTests(unittest.TestCase):
     @mock.patch.object(gapic_tasks.DiscoGapicCodeGenTask, 'exec_command')
@@ -198,28 +185,3 @@ class DiscoGapicCodeGenTaskTests(unittest.TestCase):
         for call, expected in zip(exec_command.mock_calls, expected_cmds):
             _, args, _ = call
             assert expected in ' '.join(args[0])
-
-    def test_validate(self):
-        task = gapic_tasks.DiscoGapicCodeGenTask()
-        assert task.validate() == [gapic_requirements.GapicRequirements]
-
-
-class GapicPackmanTaskTests(unittest.TestCase):
-    @mock.patch.object(gapic_tasks.GapicPackmanTask, 'run_packman')
-    def test_execute(self, run_packman):
-        task = gapic_tasks.GapicPackmanTask()
-        result = task.execute('python', 'pubsub', 'v1', 'gcloud', '/gapic/cd')
-        assert result == '/gapic/cd'
-        run_packman.assert_called_once_with('python', 'gcloud/pubsub/v1',
-            '--gax_dir=/gapic/cd',
-            '--template_root=templates/gax',
-        )
-
-    @mock.patch.object(gapic_tasks.GapicPackmanTask, 'run_packman')
-    def test_execute_skip_packman(self, run_packman):
-        task = gapic_tasks.GapicPackmanTask()
-        result = task.execute('python', 'pubsub', 'v1', 'gcloud', '/gapic/cd',
-            skip_packman=True,
-        )
-        assert result == '/gapic/cd'
-        assert run_packman.call_count == 0
