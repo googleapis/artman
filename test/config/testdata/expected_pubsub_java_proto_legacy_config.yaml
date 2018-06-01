@@ -2,7 +2,7 @@ common:
   api_name: pubsub
   api_version: v1
   desc_proto_path:
-  - ${GOOGLEAPIS}/google/iam/v1
+  - /tmp/input/google/iam/v1
   excluded_proto_path:
   - /tmp/input/google/pubsub/v1/excluded
   gapic_api_yaml:

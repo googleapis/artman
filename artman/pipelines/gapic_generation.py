@@ -23,11 +23,9 @@ from artman.utils import task_utils
 
 
 # kwargs required by GAPIC code gen
-_GAPIC_REQUIRED = ['service_yaml', 'gapic_language_yaml', 'gapic_api_yaml',
-                   'language', 'publish']
+_GAPIC_REQUIRED = ['service_yaml', 'gapic_api_yaml', 'language', 'publish']
 
-_DISCOGAPIC_REQUIRED = ['discogapic_language_yaml', 'gapic_api_yaml',
-                        'language', 'publish']
+_DISCOGAPIC_REQUIRED = ['gapic_api_yaml', 'language', 'publish']
 
 
 class GapicConfigPipeline(code_gen.CodeGenerationPipelineBase):

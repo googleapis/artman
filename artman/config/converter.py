@@ -50,7 +50,8 @@ def convert_to_legacy_config_dict(artifact_config, root_dir, output_dir):
 
     legacy_proto_deps, legacy_test_proto_deps, desc_proto_paths = (
         _proto_deps_to_legacy_configs(artifact_config.proto_deps,
-                                      artifact_config.test_proto_deps))
+                                      artifact_config.test_proto_deps,
+                                      root_dir))
     common['proto_deps'] = legacy_proto_deps
     common['proto_test_deps'] = legacy_test_proto_deps
     common['desc_proto_path'] = desc_proto_paths
@@ -95,16 +96,14 @@ def _repeated_proto3_field_to_list(field):
     return result
 
 
-def _proto_deps_to_legacy_configs(proto_deps, test_proto_deps):
+def _proto_deps_to_legacy_configs(proto_deps, test_proto_deps, root_dir):
     legacy_proto_deps, legacy_test_proto_deps, desc_proto_paths = [], [], []
     for dep in proto_deps:
         legacy_proto_deps.append(dep.name)
-        # TODO(ethanbao): This is way too magical, and need to figure out a
-        # better way one option is to formalize the ProtoDependency with more
-        # fields and make current gapic/packaging/dependencies.yaml into that
-        # ProtoDependency type, which will include the real file path.
+        # TODO This is way too magical, and we need to figure out a better
+        # way.
         if dep.name == 'google-iam-v1':
-            desc_proto_paths.append('${GOOGLEAPIS}/google/iam/v1')
+            desc_proto_paths.append(os.path.join(root_dir, 'google/iam/v1'))
     for test_dep in test_proto_deps:
         legacy_test_proto_deps.append(test_dep.name)
     return legacy_proto_deps, legacy_test_proto_deps, desc_proto_paths

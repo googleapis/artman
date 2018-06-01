@@ -15,7 +15,6 @@
 """Utils related to config files"""
 
 from __future__ import absolute_import
-import collections
 import io
 
 from ruamel import yaml
@@ -23,25 +22,11 @@ from ruamel import yaml
 import six
 
 
-def load_config_spec(config_spec, config_sections, repl_vars, language):
-    config_split = config_spec.strip().split(':')
-    config_path = config_split[0]
-    if len(config_split) > 1:
-        config_sections = config_split[1].split('|')
-    with io.open(config_path, encoding='UTF-8') as config_file:
-        all_config_data = yaml.load(config_file, Loader=yaml.Loader)
-
-    # Make a list of the appropriate configuration sections (just the ones
-    # we are actually using) from the YAML file.
-    segments = [all_config_data[i] for i in config_sections]
+def load_config_spec(all_config_data, language):
+    segments = [all_config_data['common']]
     segments.append(all_config_data.get(language, {}))
-
-    # Merge all of the segments of data into a single config dictionary.
     config = merge(*segments)
-
-    # Perform final replacements.
-    return replace_vars(config, repl_vars)
-
+    return config
 
 def merge(*dictionaries):
     """Recursively merge one or more dictionaries together.
@@ -95,24 +80,3 @@ def merge(*dictionaries):
             # value wins.
             answer[k] = v
     return answer
-
-
-def replace_vars(data, repl_vars):
-    """Return the given data structure with appropriate variables replaced.
-
-    Args:
-        data (Any): Data of an arbitrary type.
-
-    Returns:
-        Any: Data of the same time, possibly with replaced values.
-    """
-    if isinstance(data, (six.text_type, six.binary_type)):
-        for k, v in repl_vars.items():
-            data = data.replace('${' + k + '}', v)
-        return data
-    if isinstance(data, collections.Sequence):
-        return type(data)([replace_vars(d, repl_vars) for d in data])
-    if isinstance(data, collections.Mapping):
-        return type(data)([(k, replace_vars(v, repl_vars))
-                           for k, v in data.items()])
-    return data

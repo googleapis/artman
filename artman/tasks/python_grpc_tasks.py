@@ -55,21 +55,24 @@ class PythonChangePackageTask(task_base.TaskBase):
 
     # TODO (geigerj): add regex for documentation link updates?
 
-    def execute(self, src_proto_path, import_proto_path, common_protos_yaml,
+    def execute(self, src_proto_path, import_proto_path,
                 organization_name):
         self._organization_name = organization_name
-
-        with io.open(common_protos_yaml, encoding='UTF-8') as file_:
-            common_protos_data = yaml.load(file_, Loader=yaml.Loader)
 
         # Treat google.protobuf, google.iam as a common proto package, even
         # though they are not included in the common-protos we generate.
         #
         # TODO (geigerj): remove 'google.iam' when it is included in the common
         # protos package.
-        common_protos = ['google.protobuf', 'google.iam']
-        for package in common_protos_data['packages']:
-            common_protos.append('google.' + package['name'].replace('/', '.'))
+        common_protos = [
+            'google.protobuf',
+            'google.iam',
+            'google.api',
+            'google.longrunning',
+            'google.rpc',
+            'google.type',
+            'google.logging.type',
+        ]
 
         tmpdir = os.path.join(
             tempfile.gettempdir(), 'artman-python', str(int(time.time())))

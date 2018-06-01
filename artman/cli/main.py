@@ -77,37 +77,20 @@ def main(*args):
     else:
         support.check_docker_requirements(flags.image)
         # Note: artman currently won't work if input directory doesn't contain
-        # shared configuration files (e.g. gapic/packaging/dependencies.yaml).
-        # This will make artman less useful for non-Google APIs.
-        # TODO(ethanbao): Fix that by checking the input directory and
-        # pulling the shared configuration files if necessary.
+        # common-protos.
         logger.info('Running artman command in a Docker instance.')
         _run_artman_in_docker(flags)
 
 
 def _adjust_root_dir(root_dir):
-    """"Adjust input directory to use versioned common config and/or protos.
+    """Adjust input directory to use versioned common config and/or protos.
 
-    Currently the codegen has coupling with some shared configuration yaml
-    under under {googleapis repo}/gapic/[lang,packaging], causing library
-    generation to fail when a breaking change is made to such shared
-    configuration file. This delivers a poor user experience to artman
-    users, as their library generation could fail without any change at API
-    proto side.
-
-    Similarily, some common protos will be needed during protoc
-    compilation, but is not provided by users in some cases. When such shared
-    proto directories are not provided, copy and use the versioned ones.
-
-    TODO(ethanbao): Remove the config copy once
-    https://github.com/googleapis/toolkit/issues/1450 is fixed.
+    Some common protos will be needed during protoc compilation, but are not
+    provided by users in some cases. When such shared proto directories are
+    not provided, we copy and use the versioned ones.
     """
     if os.getenv(RUNNING_IN_ARTMAN_DOCKER_TOKEN):
         # Only doing this when running inside Docker container
-        common_config_dirs = [
-            'gapic/lang',
-            'gapic/packaging',
-        ]
         common_proto_dirs = [
             'google/api',
             'google/iam/v1',
@@ -115,12 +98,8 @@ def _adjust_root_dir(root_dir):
             'google/rpc',
             'google/type',
         ]
-        for src_dir in common_config_dirs:
-            # /googleapis is the root of the versioned googleapis repo
-            # inside Artman Docker image.
-            copy_tree(os.path.join('/googleapis', src_dir),
-                      os.path.join(root_dir, src_dir))
-
+        # /googleapis is the root of the versioned googleapis repo
+        # inside Artman Docker image.
         for src_dir in common_proto_dirs:
             if not os.path.exists(os.path.join(root_dir, src_dir)):
                 copy_tree(os.path.join('/googleapis', src_dir),
@@ -274,7 +253,9 @@ def normalize_flags(flags, user_config):
     # This allows the user to override the path to api-client-staging or
     # toolkit on his or her machine.
     pipeline_args['root_dir'] = root_dir
+    # TODO two args reference the same concept - clean this up
     pipeline_args['toolkit'] = user_config.local.toolkit
+    pipeline_args['toolkit_path'] = user_config.local.toolkit
 
     if flags.subcommand == 'publish' and flags.local_repo_dir:
         if not flags.dry_run:
@@ -297,26 +278,10 @@ def normalize_flags(flags, user_config):
         logger.error('Artifact config loading failed with `%s`' % ve)
         sys.exit(96)
 
-    shared_config_name = 'common.yaml'
-    if artifact_config.language in (Artifact.RUBY, Artifact.NODEJS,):
-        shared_config_name = 'doc.yaml'
-
     legacy_config_dict = converter.convert_to_legacy_config_dict(
         artifact_config, root_dir, flags.output_dir)
     logger.debug('Below is the legacy config after conversion:\n%s' %
                  pprint.pformat(legacy_config_dict))
-    tmp_legacy_config_yaml = '%s.tmp' % artman_config_path
-    with io.open(tmp_legacy_config_yaml, 'w') as outfile:
-        yaml.dump(legacy_config_dict, outfile, default_flow_style=False)
-
-    config = ','.join([
-        '{artman_config_path}',
-        '{googleapis}/gapic/lang/{shared_config_name}',
-    ]).format(
-        artman_config_path=tmp_legacy_config_yaml,
-        googleapis=root_dir,
-        shared_config_name=shared_config_name,
-    )
 
     language = Artifact.Language.Name(
         artifact_config.language).lower()
@@ -349,20 +314,8 @@ def normalize_flags(flags, user_config):
         raise ValueError('Unrecognized artifact.')
 
     # Parse out the full configuration.
-    # Note: the var replacement is still needed because they are still being
-    # used in some shared/common config yamls.
-    config_sections = ['common']
-    for config_spec in config.split(','):
-        config_args = config_util.load_config_spec(
-            config_spec=config_spec,
-            config_sections=config_sections,
-            repl_vars={
-                'GOOGLEAPIS': root_dir,
-                'DISCOVERY_ARTIFACT_MANAGER': root_dir,
-                'TOOLKIT': user_config.local.toolkit
-            },
-            language=language, )
-        pipeline_args.update(config_args)
+    config_args = config_util.load_config_spec(legacy_config_dict, language)
+    pipeline_args.update(config_args)
 
     # Setup publishing related config if needed.
     if flags.subcommand == 'generate':
@@ -400,9 +353,6 @@ def normalize_flags(flags, user_config):
             index = line.index(':')
             line = line[:index + 2] + '<< REDACTED >>'
         logger.info('  {0}'.format(line))
-
-    # Clean up the tmp legacy artman config.
-    os.remove(tmp_legacy_config_yaml)
 
     # Return the final arguments.
     return pipeline_name, pipeline_args

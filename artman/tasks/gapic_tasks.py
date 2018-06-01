@@ -106,12 +106,12 @@ class GapicCodeGenTask(task_base.TaskBase):
     default_provides = 'gapic_code_dir'
 
     def execute(self, language, toolkit_path, descriptor_set, service_yaml,
-                gapic_api_yaml, gapic_language_yaml, package_metadata_yaml,
+                gapic_api_yaml, package_metadata_yaml,
                 gapic_code_dir, api_name, api_version, organization_name):
         existing = glob.glob('%s/*' % gapic_code_dir)
         if existing:
             self.exec_command(['rm', '-r'] + existing)
-        gapic_yaml = gapic_api_yaml + gapic_language_yaml
+        gapic_yaml = gapic_api_yaml
         gapic_args = ['--gapic_yaml=' + os.path.abspath(yaml)
                       for yaml in gapic_yaml]
         service_args = ['--service_yaml=' + os.path.abspath(yaml)
@@ -120,6 +120,7 @@ class GapicCodeGenTask(task_base.TaskBase):
             '--descriptor_set=' + os.path.abspath(descriptor_set),
             '--package_yaml2=' + os.path.abspath(package_metadata_yaml),
             '--output=' + os.path.abspath(gapic_code_dir),
+            '--language=' + language,
         ] + service_args + gapic_args
 
         self.exec_command(
@@ -133,12 +134,12 @@ class DiscoGapicCodeGenTask(task_base.TaskBase):
     default_provides = 'gapic_code_dir'
 
     def execute(self, language, toolkit_path, discovery_doc,
-        gapic_api_yaml, discogapic_language_yaml, package_metadata_yaml,
+        gapic_api_yaml, package_metadata_yaml,
         gapic_code_dir, api_name, api_version, organization_name):
         existing = glob.glob('%s/*' % gapic_code_dir)
         if existing:
             self.exec_command(['rm', '-r'] + existing)
-        gapic_yaml = gapic_api_yaml + discogapic_language_yaml
+        gapic_yaml = gapic_api_yaml
         gapic_args = ['--gapic_yaml=' + os.path.abspath(yaml)
                       for yaml in gapic_yaml]
         args = [
@@ -146,6 +147,7 @@ class DiscoGapicCodeGenTask(task_base.TaskBase):
                    '--discovery_doc=' + os.path.abspath(discovery_doc),
                    '--package_yaml2=' + os.path.abspath(package_metadata_yaml),
                    '--output=' + os.path.abspath(gapic_code_dir),
+                   '--language=' + language,
                    ] + gapic_args
 
         self.exec_command(
