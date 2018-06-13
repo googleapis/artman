@@ -27,7 +27,7 @@ from artman.utils import task_utils
 
 class JavaFormatTaskTests(unittest.TestCase):
     @mock.patch.object(format_tasks.JavaFormatTask, 'exec_command')
-    @mock.patch.object(task_utils, 'get_gradle_task_output')
+    @mock.patch.object(task_utils, 'get_java_tool_path')
     @mock.patch.object(os, 'walk')
     def test_execute(self, walk, gradle_output, exec_command):
         gradle_output.return_value = '/path/to/gapic'

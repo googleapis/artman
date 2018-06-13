@@ -20,26 +20,26 @@ import subprocess
 import six
 
 
-def get_gradle_task_output(task_name, task_path):
-    task_path = os.path.realpath(os.path.expanduser(task_path))
-    output = subprocess.check_output(['./gradlew', task_name], cwd=task_path)
-    if isinstance(output, six.binary_type):
-        output = output.decode('ascii')
-
-    # It is a convention that gradle task uses 'output: ' as
-    # prefix in their output
-    prefix = 'output: '
-    for line in output.split('\n'):
-        if line.startswith(prefix):
-            return line[len(prefix):]
-    return None
+def get_java_tool_path(toolkit_path, tool_name):
+    path = os.path.join(toolkit_path, 'build', 'toolpaths', tool_name)
+    if not os.path.exists(path):
+        run_gradle_task(toolkit_path, 'createToolPaths')
+    return path
 
 
-def gradle_task(toolkit_path, task_name, task_args):
+def gapic_gen_task(toolkit_path, task_args):
+    toolkit_path = os.path.realpath(os.path.expanduser(toolkit_path))
+    gapic_jar = os.path.join(toolkit_path, 'build/libs/gapic-generator-latest-fatjar.jar')
+    if not os.path.exists(gapic_jar):
+        run_gradle_task(toolkit_path, 'fatJar')
+    return ['java', '-cp', gapic_jar, 'com.google.api.codegen.GeneratorMain'] + task_args
+
+
+def run_gradle_task(toolkit_path, task_name, task_args=()):
     """Generates a command for a gradle task."""
     toolkit_path = os.path.realpath(os.path.expanduser(toolkit_path))
-    return [os.path.join(toolkit_path, 'gradlew'), '-p', toolkit_path,
-            task_name, '-Pclargs=' + ','.join(task_args)]
+    subprocess.check_output([os.path.join(toolkit_path, 'gradlew'), '-p', toolkit_path,
+            task_name, '-Pclargs=' + ','.join(task_args)])
 
 
 def api_full_name(api_name, api_version, organization_name):

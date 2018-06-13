@@ -98,8 +98,8 @@ class ProtoPackageMetadataGenTaskBase(task_base.TaskBase):
             '--artifact_type=' + artifact_type,
             '--language=' + language,
         ] + service_args
-        self.exec_command(task_utils.gradle_task(
-            toolkit_path, 'runGrpcMetadataGen', args))
+        self.exec_command(
+            task_utils.gapic_gen_task(toolkit_path, ['LEGACY_GRPC_PACKAGE'] + args))
 
         return pkg_dir
 

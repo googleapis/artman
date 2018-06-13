@@ -42,7 +42,7 @@ class ProtoDescGenTask(task_base.TaskBase):
         header_proto_path.extend(src_proto_path)
         desc_out_file = task_utils.api_full_name(
             api_name, api_version, organization_name) + '.desc'
-        logger.info('Compiling descriptors for {0}'.format(desc_protos))
+        logger.debug('Compiling descriptors for {0}'.format(desc_protos))
         self.exec_command(['mkdir', '-p', output_dir])
         # DescGen don't use _group_by_dirname right now because
         #   - it doesn't have to

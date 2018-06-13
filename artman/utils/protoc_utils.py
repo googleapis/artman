@@ -83,11 +83,7 @@ class _JavaProtoParams(_SimpleProtoParams):
             return None
 
     def grpc_plugin_path(self, toolkit_path):
-        if self.path is None:
-            logger.info('start gradle process to locate GRPC Java plugin')
-            self.path = task_utils.get_gradle_task_output(
-                'showGrpcJavaPluginPath', toolkit_path)
-        return self.path
+        return task_utils.get_java_tool_path(toolkit_path, 'protoGenGrpcJavaExe')
 
     def grpc_out_param(self, output_dir):
         return '--grpc_out=' + self.code_root(output_dir)
@@ -342,7 +338,6 @@ def _find_protobuf_path(toolkit_path):
     """Fetch and locate protobuf source"""
     global _protobuf_path
     if not _protobuf_path:
-        logger.info('Searching for latest protobuf source')
-        _protobuf_path = task_utils.get_gradle_task_output(
-            'showProtobufPath', toolkit_path)
+        logger.debug('Searching for latest protobuf source')
+        _protobuf_path = task_utils.get_java_tool_path(toolkit_path, 'protobufJavaDir')
     return _protobuf_path

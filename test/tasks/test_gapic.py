@@ -14,6 +14,7 @@
 
 from __future__ import absolute_import
 import os
+import subprocess
 import unittest
 
 import mock
@@ -23,9 +24,19 @@ import pytest
 from artman.tasks import gapic_tasks
 
 
+def assert_calls_equal(actual_calls, expected_calls):
+    actual_call_strs = []
+    for call in actual_calls:
+        _, args, _ = call
+        cmd = ' '.join(args[0])
+        actual_call_strs.append(cmd)
+    assert expected_calls == actual_call_strs
+
+
 class GapicConfigGenTaskTests(unittest.TestCase):
+    @mock.patch.object(subprocess, 'check_output')
     @mock.patch.object(gapic_tasks.GapicConfigGenTask, 'exec_command')
-    def test_execute(self, exec_command):
+    def test_execute(self, exec_command, check_output):
         task = gapic_tasks.GapicConfigGenTask()
         result = task.execute(
             api_name='pubsub',
@@ -40,25 +51,28 @@ class GapicConfigGenTaskTests(unittest.TestCase):
             '/path/to/output/google-cloud-pubsub-v1-config-gen',
             'google-cloud-pubsub-v1_gapic.yaml',
         ))
-        expected_cmds = (
+        expected_cmds = [
             'mkdir -p %s' % os.path.dirname(result),
-            ''.join((
-                '/path/to/toolkit/gradlew -p /path/to/toolkit runConfigGen '
-                '-Pclargs=--descriptor_set=/path/to/descriptor_set,',
-                '--output=/path/to/output/google-cloud-pubsub-v1-config-gen/',
-                'google-cloud-pubsub-v1_gapic.yaml,--service_yaml=',
-                '/path/to/service.yaml',
-            )),
-        )
-        for call, expected in zip(exec_command.mock_calls, expected_cmds):
-            _, args, _ = call
-            cmd = ' '.join(args[0])
-            assert cmd == expected
+            ' '.join(['java -cp',
+                      '/path/to/toolkit/build/libs/gapic-generator-latest-fatjar.jar',
+                      'com.google.api.codegen.GeneratorMain',
+                      'GAPIC_CONFIG',
+                      '--descriptor_set=/path/to/descriptor_set',
+                      '--output=/path/to/output/google-cloud-pubsub-v1-config-gen/google-cloud-pubsub-v1_gapic.yaml',
+                      '--service_yaml=/path/to/service.yaml',
+                      ])
+        ]
+        assert_calls_equal(exec_command.mock_calls, expected_cmds)
+        expected_cmds2 = [
+            '/path/to/toolkit/gradlew -p /path/to/toolkit fatJar -Pclargs=',
+        ]
+        assert_calls_equal(check_output.mock_calls, expected_cmds2)
 
 
 class DiscoGapicConfigGenTaskTests(unittest.TestCase):
+    @mock.patch.object(subprocess, 'check_output')
     @mock.patch.object(gapic_tasks.DiscoGapicConfigGenTask, 'exec_command')
-    def test_execute(self, exec_command):
+    def test_execute(self, exec_command, check_output):
         task = gapic_tasks.DiscoGapicConfigGenTask()
         result = task.execute(
             api_name='compute',
@@ -72,21 +86,21 @@ class DiscoGapicConfigGenTaskTests(unittest.TestCase):
             '/path/to/output/google-cloud-compute-v1-config-gen',
             'google-cloud-compute-v1_gapic.yaml',
         ))
-        expected_cmds = (
+        expected_cmds = [
             'mkdir -p %s' % os.path.dirname(result),
-            ''.join((
-                '/path/to/toolkit/gradlew -p /path/to/toolkit runDiscoConfigGen '
-                '-Pclargs=',
-                '--discovery_doc=',
-                '/path/to/discovery_doc.json,'
-                '--output=/path/to/output/google-cloud-compute-v1-config-gen/',
-                'google-cloud-compute-v1_gapic.yaml',
-            )),
-        )
-        for call, expected in zip(exec_command.mock_calls, expected_cmds):
-            _, args, _ = call
-            cmd = ' '.join(args[0])
-            assert cmd == expected
+            ' '.join(['java -cp',
+                      '/path/to/toolkit/build/libs/gapic-generator-latest-fatjar.jar',
+                      'com.google.api.codegen.GeneratorMain',
+                      'DISCOGAPIC_CONFIG',
+                      '--discovery_doc=/path/to/discovery_doc.json',
+                      '--output=/path/to/output/google-cloud-compute-v1-config-gen/google-cloud-compute-v1_gapic.yaml',
+                      ])
+        ]
+        assert_calls_equal(exec_command.mock_calls, expected_cmds)
+        expected_cmds2 = [
+            '/path/to/toolkit/gradlew -p /path/to/toolkit fatJar -Pclargs='
+        ]
+        assert_calls_equal(check_output.mock_calls, expected_cmds2)
 
 
 class GapicConfigMoveTaskTests(unittest.TestCase):
@@ -95,13 +109,11 @@ class GapicConfigMoveTaskTests(unittest.TestCase):
         task = gapic_tasks.GapicConfigMoveTask()
         task.execute('/path/src', ['/path/dest'])
         assert exec_command.call_count == 2
-        expected_cmds = (
+        expected_cmds = [
             'mkdir -p /path',
             'cp /path/src /path/dest',
-        )
-        for call, expected in zip(exec_command.mock_calls, expected_cmds):
-            _, args, _ = call
-            assert ' '.join(args[0]) == expected
+        ]
+        assert_calls_equal(exec_command.mock_calls, expected_cmds)
 
     @mock.patch.object(gapic_tasks.GapicConfigMoveTask, 'exec_command')
     def test_execute_no_dest(self, exec_command):
@@ -124,14 +136,12 @@ class GapicConfigMoveTaskTests(unittest.TestCase):
         task = gapic_tasks.GapicConfigMoveTask()
         task.execute('/path/src', ['/path/exists'])
         assert exec_command.call_count == 3
-        expected_cmds = (
+        expected_cmds = [
             'mv /path/exists /path/exists.old',
             'mkdir -p /path',
             'cp /path/src /path/exists',
-        )
-        for call, expected in zip(exec_command.mock_calls, expected_cmds):
-            _, args, _ = call
-            assert ' '.join(args[0]) == expected
+        ]
+        assert_calls_equal(exec_command.mock_calls, expected_cmds)
 
     def test_validate(self):
         task = gapic_tasks.GapicConfigMoveTask()
@@ -139,47 +149,66 @@ class GapicConfigMoveTaskTests(unittest.TestCase):
 
 
 class GapicCodeGenTaskTests(unittest.TestCase):
+    @mock.patch.object(subprocess, 'check_output')
     @mock.patch.object(gapic_tasks.GapicCodeGenTask, 'exec_command')
-    def test_execute(self, exec_command):
+    def test_execute(self, exec_command, check_output):
         task = gapic_tasks.GapicCodeGenTask()
         task.execute(
             api_name='pubsub',
             api_version='v1',
             descriptor_set='/path/to/desc',
-            gapic_api_yaml='pubsub.yaml',
-            gapic_code_dir='api-client-staging/generated/python',
+            gapic_api_yaml=['/path/to/pubsub.yaml'],
+            gapic_code_dir='/path/to/output',
             language='python',
             organization_name='google-cloud',
-            package_metadata_yaml='pmy.yaml',
-            service_yaml='service.yaml',
+            package_metadata_yaml='/path/to/pmy.yaml',
+            service_yaml=['/path/to/service.yaml'],
             toolkit_path='/path/to/toolkit'
         )
-        expected_cmds = (
-            '/path/to/toolkit/gradlew -p /path/to/toolkit runCodeGen',
-        )
-        for call, expected in zip(exec_command.mock_calls, expected_cmds):
-            _, args, _ = call
-            assert expected in ' '.join(args[0])
+        expected_cmds = [
+            ' '.join(['java -cp',
+                      '/path/to/toolkit/build/libs/gapic-generator-latest-fatjar.jar',
+                      'com.google.api.codegen.GeneratorMain LEGACY_GAPIC_AND_PACKAGE',
+                      '--descriptor_set=/path/to/desc --package_yaml2=/path/to/pmy.yaml',
+                      '--output=/path/to/output --language=python',
+                      '--service_yaml=/path/to/service.yaml',
+                      '--gapic_yaml=/path/to/pubsub.yaml',
+                      ])
+        ]
+        assert_calls_equal(exec_command.mock_calls, expected_cmds)
+        expected_cmds2 = [
+            '/path/to/toolkit/gradlew -p /path/to/toolkit fatJar -Pclargs=',
+        ]
+        assert_calls_equal(check_output.mock_calls, expected_cmds2)
 
 
 class DiscoGapicCodeGenTaskTests(unittest.TestCase):
+    @mock.patch.object(subprocess, 'check_output')
     @mock.patch.object(gapic_tasks.DiscoGapicCodeGenTask, 'exec_command')
-    def test_execute(self, exec_command):
+    def test_execute(self, exec_command, check_output):
         task = gapic_tasks.DiscoGapicCodeGenTask()
         task.execute(
             api_name='compute',
             api_version='v1',
-            gapic_api_yaml='compute.yaml',
-            gapic_code_dir='api-client-staging/generated/java',
+            gapic_api_yaml=['/path/to/compute.yaml'],
+            gapic_code_dir='/path/to/output',
             language='java',
             organization_name='google-cloud',
-            package_metadata_yaml='pmy.yaml',
-            discovery_doc="compute.v1.json",
+            package_metadata_yaml='/path/to/pmy.yaml',
+            discovery_doc="/path/to/compute.v1.json",
             toolkit_path='/path/to/toolkit'
         )
-        expected_cmds = (
-            '/path/to/toolkit/gradlew -p /path/to/toolkit runDiscoCodeGen',
-        )
-        for call, expected in zip(exec_command.mock_calls, expected_cmds):
-            _, args, _ = call
-            assert expected in ' '.join(args[0])
+        expected_cmds = [
+            ' '.join(['java -cp',
+                      '/path/to/toolkit/build/libs/gapic-generator-latest-fatjar.jar',
+                      'com.google.api.codegen.GeneratorMain LEGACY_DISCOGAPIC_AND_PACKAGE',
+                      '--discovery_doc=/path/to/compute.v1.json',
+                      '--package_yaml2=/path/to/pmy.yaml --output=/path/to/output',
+                      '--language=java --gapic_yaml=/path/to/compute.yaml',
+                      ])
+        ]
+        assert_calls_equal(exec_command.mock_calls, expected_cmds)
+        expected_cmds2 = [
+            '/path/to/toolkit/gradlew -p /path/to/toolkit fatJar -Pclargs=',
+        ]
+        assert_calls_equal(check_output.mock_calls, expected_cmds2)

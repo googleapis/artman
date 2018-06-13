@@ -50,7 +50,7 @@ def make_pipeline_flow(pipeline_name, remote_mode=False, **kwargs):
 def make_pipeline(pipeline_name, remote_mode=False, **kwargs):
     for cls in _rec_subclasses(pipeline_base.PipelineBase):
         if cls.__name__ == pipeline_name:
-            logger.info("Create %s instance." % pipeline_name)
+            logger.info("Creating %s." % pipeline_name)
             return cls(remote_mode=remote_mode, **kwargs)
     raise ValueError("Invalid pipeline name: %s" % pipeline_name)
 

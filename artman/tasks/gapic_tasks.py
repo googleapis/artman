@@ -41,7 +41,7 @@ class GapicConfigGenTask(task_base.TaskBase):
             '--output=' + os.path.abspath(config_gen_path)
         ] + service_args
         self.exec_command(
-            task_utils.gradle_task(toolkit_path, 'runConfigGen', args))
+            task_utils.gapic_gen_task(toolkit_path, ['GAPIC_CONFIG'] + args))
 
         return config_gen_path
 
@@ -65,7 +65,7 @@ class DiscoGapicConfigGenTask(task_base.TaskBase):
             '--output=' + os.path.abspath(config_gen_path)
         ]
         self.exec_command(
-            task_utils.gradle_task(toolkit_path, 'runDiscoConfigGen', args))
+            task_utils.gapic_gen_task(toolkit_path, ['DISCOGAPIC_CONFIG'] + args))
 
         return config_gen_path
 
@@ -124,7 +124,7 @@ class GapicCodeGenTask(task_base.TaskBase):
         ] + service_args + gapic_args
 
         self.exec_command(
-            task_utils.gradle_task(toolkit_path, 'runCodeGen', args))
+            task_utils.gapic_gen_task(toolkit_path, ['LEGACY_GAPIC_AND_PACKAGE'] + args))
 
         return gapic_code_dir
 
@@ -151,7 +151,7 @@ class DiscoGapicCodeGenTask(task_base.TaskBase):
                    ] + gapic_args
 
         self.exec_command(
-            task_utils.gradle_task(toolkit_path, 'runDiscoCodeGen', args))
+            task_utils.gapic_gen_task(toolkit_path, ['LEGACY_DISCOGAPIC_AND_PACKAGE'] + args))
 
         return gapic_code_dir
 

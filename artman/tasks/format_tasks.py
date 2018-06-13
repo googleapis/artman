@@ -26,10 +26,9 @@ from artman.utils.logger import logger
 
 class JavaFormatTask(task_base.TaskBase):
     def execute(self, gapic_code_dir, toolkit_path):
-        logger.info('Formatting files in %s.' %
+        logger.debug('Formatting files in %s.' %
                     os.path.abspath(gapic_code_dir))
-        path = task_utils.get_gradle_task_output(
-                'showJavaFormatterPath', toolkit_path)
+        path = task_utils.get_java_tool_path(toolkit_path, 'googleJavaFormatJar')
         targetFiles = []
         for root, dirs, files in os.walk(gapic_code_dir):
             for filename in files:
@@ -45,7 +44,7 @@ class JavaFormatTask(task_base.TaskBase):
 
 class PythonFormatTask(task_base.TaskBase):
     def execute(self, gapic_code_dir):
-        logger.info('Formatting files in %s.' %
+        logger.debug('Formatting files in %s.' %
                     os.path.abspath(gapic_code_dir))
         targetFiles = []
         for root, dirs, files in os.walk(gapic_code_dir):
@@ -66,7 +65,7 @@ class PythonFormatTask(task_base.TaskBase):
 
 class GoFormatTask(task_base.TaskBase):
     def execute(self, gapic_code_dir):
-        logger.info('Formatting files in %s.' %
+        logger.debug('Formatting files in %s.' %
                     os.path.abspath(gapic_code_dir))
         self.exec_command(['gofmt', '-w', gapic_code_dir])
 
@@ -74,7 +73,7 @@ class GoFormatTask(task_base.TaskBase):
 class PhpFormatTask(task_base.TaskBase):
     def execute(self, gapic_code_dir):
         abs_code_dir = os.path.abspath(gapic_code_dir)
-        logger.info('Formatting file using php-cs-fixer in %s.' % abs_code_dir)
+        logger.debug('Formatting file using php-cs-fixer in %s.' % abs_code_dir)
         subprocess.call(['php-cs-fixer', 'fix',
                          '--rules=@Symfony,-phpdoc_annotation_without_dot',
                          gapic_code_dir])
@@ -86,7 +85,7 @@ class PhpFormatTask(task_base.TaskBase):
                          '--rules={"phpdoc_no_alias_tag" : {"replacements" : '
                          '{"var" : "type"}}}',
                          gapic_code_dir])
-        logger.info('Formatting file using phpcbf in %s.' % abs_code_dir)
+        logger.debug('Formatting file using phpcbf in %s.' % abs_code_dir)
         subprocess.call(['phpcbf', '--standard=PSR2', '--no-patch',
                          gapic_code_dir])
 
