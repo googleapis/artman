@@ -47,8 +47,9 @@ class ConverterTest(unittest.TestCase):
             expected_legacy_config_dict = yaml.load(yaml_file)
             self.assertDictEqual(
                 expected_legacy_config_dict, actual_legacy_config_dict,
-                'Actual yaml is \n%s' % yaml.dump(
-                    actual_legacy_config_dict, default_flow_style=False))
+                'Actual yaml is:\n{}\nExpected yaml is:\n{}\n'.format(
+                    yaml.dump(actual_legacy_config_dict, default_flow_style=False),
+                    yaml.dump(expected_legacy_config_dict, default_flow_style=False)))
 
 
 if __name__ == '__main__':

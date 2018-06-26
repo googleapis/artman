@@ -228,14 +228,14 @@ def protoc_desc_params(output_dir, desc_out_file):
              '-o', os.path.join(output_dir, desc_out_file)])
 
 
-def protoc_proto_params(proto_params, pkg_dir, gapic_api_yaml, with_grpc):
+def protoc_proto_params(proto_params, pkg_dir, gapic_yaml, with_grpc):
     params = []
     lang_param = proto_params.lang_out_param(pkg_dir, with_grpc)
     if lang_param:
         params += lang_param.split(' ')
     # plugin out must come after lang out
     plugin_param = proto_params.proto_plugin_path()
-    plugin_out = proto_params.plugin_out_param(pkg_dir, gapic_api_yaml)
+    plugin_out = proto_params.plugin_out_param(pkg_dir, gapic_yaml)
     if plugin_param and plugin_out:
         params.append('--plugin=protoc-gen-plgn={}'.format(plugin_param))
         params.append(plugin_out)

@@ -35,7 +35,6 @@ class PackageMetadataConfigTest(unittest.TestCase):
         task.execute(
             api_name='fake',
             api_version='v1',
-            gapic_api_yaml=[],
             language='python',
             root_dir='%s/googleapis' % repo_root,
             organization_name='google-cloud',

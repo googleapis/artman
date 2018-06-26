@@ -5,8 +5,7 @@ common:
   - /tmp/input/google/iam/v1
   excluded_proto_path:
   - /tmp/input/google/pubsub/v1/excluded
-  gapic_api_yaml:
-  - /tmp/input/google/pubsub/v1/pubsub_gapic.yaml
+  gapic_yaml: /tmp/input/google/pubsub/v1/pubsub_gapic.yaml
   import_proto_path:
   - /tmp/input
   organization_name: google-cloud
@@ -17,8 +16,7 @@ common:
   - google-iam-v1
   proto_test_deps:
   - google-iam-v1
-  service_yaml:
-  - /tmp/input/google/pubsub/pubsub.yaml
+  service_yaml: /tmp/input/google/pubsub/pubsub.yaml
   src_proto_path:
   - /tmp/input/google/pubsub/v1
 java:

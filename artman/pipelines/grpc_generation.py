@@ -108,7 +108,7 @@ class _GoGrpcTaskFactory(GrpcTaskFactoryBase):
         ]
 
     def get_validate_kwargs(self):
-        return ['gapic_api_yaml', 'gapic_code_dir'] + code_gen.COMMON_REQUIRED
+        return ['gapic_yaml', 'gapic_code_dir'] + code_gen.COMMON_REQUIRED
 
 
 class _CSharpGrpcTaskFactory(GrpcTaskFactoryBase):

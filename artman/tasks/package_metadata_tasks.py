@@ -30,7 +30,7 @@ class PackageMetadataConfigGenTask(task_base.TaskBase):
 
     def execute(self, api_name, api_version, organization_name, output_dir,
                 proto_deps, language, root_dir, src_proto_path,
-                gapic_api_yaml, artifact_type, release_level=None,
+                artifact_type, release_level=None,
                 proto_test_deps=None):
         api_full_name = task_utils.api_full_name(
             api_name, api_version, organization_name)
@@ -38,7 +38,7 @@ class PackageMetadataConfigGenTask(task_base.TaskBase):
         config = self._create_config(
             api_name, api_version, organization_name, output_dir, proto_deps,
             proto_test_deps, language, root_dir, src_proto_path,
-            gapic_api_yaml, artifact_type, release_level)
+            artifact_type, release_level)
 
         package_metadata_config = os.path.join(
             output_dir, language + '_' + api_full_name + '_package2.yaml')
@@ -48,7 +48,7 @@ class PackageMetadataConfigGenTask(task_base.TaskBase):
 
     def _create_config(self, api_name, api_version, organization_name, output_dir,
                        proto_deps, proto_test_deps, language, root_dir, src_proto_path,
-                       gapic_api_yaml, artifact_type, release_level):
+                       artifact_type, release_level):
         googleapis_dir = root_dir
         googleapis_path = os.path.commonprefix(
             [os.path.relpath(p, googleapis_dir) for p in src_proto_path])
@@ -88,8 +88,7 @@ class ProtoPackageMetadataGenTaskBase(task_base.TaskBase):
         pkg_dir = os.path.join(
             output_dir, language, proto_prefix + api_full_name)
 
-        service_args = ['--service_yaml=' + os.path.abspath(yaml)
-                        for yaml in service_yaml]
+        service_args = ['--service_yaml=' + os.path.abspath(service_yaml)]
         args = [
             '--descriptor_set=' + os.path.abspath(descriptor_set),
             '--input=' + os.path.abspath(input_dir),

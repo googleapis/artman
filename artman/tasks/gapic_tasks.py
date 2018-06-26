@@ -34,8 +34,7 @@ class GapicConfigGenTask(task_base.TaskBase):
         self.exec_command(['mkdir', '-p', config_gen_dir])
         config_gen_path = os.path.join(config_gen_dir,
                                        api_full_name + '_gapic.yaml')
-        service_args = ['--service_yaml=' + os.path.abspath(yaml)
-                        for yaml in service_yaml]
+        service_args = ['--service_yaml=' + os.path.abspath(service_yaml)]
         args = [
             '--descriptor_set=' + os.path.abspath(descriptor_set),
             '--output=' + os.path.abspath(config_gen_path)
@@ -71,19 +70,14 @@ class DiscoGapicConfigGenTask(task_base.TaskBase):
 
 
 class GapicConfigMoveTask(task_base.TaskBase):
-    """Move config file to gapic_api_yaml location"""
+    """Move config file to gapic_yaml location"""
 
-    def _move_to(self, gapic_config_path, gapic_api_yaml):
-        error_fmt = 'Could not move generated config file ' \
-                    'from "{0}" to "{1}": '.format(
-                        os.path.abspath(gapic_config_path),
-                        [os.path.abspath(c_out) for c_out in gapic_api_yaml])
-
-        if len(gapic_api_yaml) > 1:
-            raise ValueError(error_fmt + 'Multiple locations specified')
-        elif len(gapic_api_yaml) == 0:
-            raise ValueError(error_fmt + 'No location specified')
-        conf_out = os.path.abspath(gapic_api_yaml[0])
+    def _move_to(self, gapic_config_path, gapic_yaml):
+        if not gapic_yaml:
+            raise ValueError('Could not move generated config file ' \
+                'from "{0}" to destination": No location specified'.format(
+                os.path.abspath(gapic_config_path)))
+        conf_out = os.path.abspath(gapic_yaml)
         if os.path.exists(conf_out):
             # TODO (issue #80): no need to test in remote environment
             olderVersion = conf_out + '.old'
@@ -91,8 +85,8 @@ class GapicConfigMoveTask(task_base.TaskBase):
             self.exec_command(['mv', conf_out, olderVersion])
         return conf_out
 
-    def execute(self, gapic_config_path, gapic_api_yaml):
-        conf_out = self._move_to(gapic_config_path, gapic_api_yaml)
+    def execute(self, gapic_config_path, gapic_yaml):
+        conf_out = self._move_to(gapic_config_path, gapic_yaml)
         self.exec_command(['mkdir', '-p', os.path.dirname(conf_out)])
         self.exec_command(['cp', gapic_config_path, conf_out])
         return
@@ -106,16 +100,13 @@ class GapicCodeGenTask(task_base.TaskBase):
     default_provides = 'gapic_code_dir'
 
     def execute(self, language, toolkit_path, descriptor_set, service_yaml,
-                gapic_api_yaml, package_metadata_yaml,
+                gapic_yaml, package_metadata_yaml,
                 gapic_code_dir, api_name, api_version, organization_name):
         existing = glob.glob('%s/*' % gapic_code_dir)
         if existing:
             self.exec_command(['rm', '-r'] + existing)
-        gapic_yaml = gapic_api_yaml
-        gapic_args = ['--gapic_yaml=' + os.path.abspath(yaml)
-                      for yaml in gapic_yaml]
-        service_args = ['--service_yaml=' + os.path.abspath(yaml)
-                        for yaml in service_yaml]
+        gapic_args = ['--gapic_yaml=' + os.path.abspath(gapic_yaml)]
+        service_args = ['--service_yaml=' + os.path.abspath(service_yaml)]
         args = [
             '--descriptor_set=' + os.path.abspath(descriptor_set),
             '--package_yaml2=' + os.path.abspath(package_metadata_yaml),
@@ -134,14 +125,12 @@ class DiscoGapicCodeGenTask(task_base.TaskBase):
     default_provides = 'gapic_code_dir'
 
     def execute(self, language, toolkit_path, discovery_doc,
-        gapic_api_yaml, package_metadata_yaml,
+        gapic_yaml, package_metadata_yaml,
         gapic_code_dir, api_name, api_version, organization_name):
         existing = glob.glob('%s/*' % gapic_code_dir)
         if existing:
             self.exec_command(['rm', '-r'] + existing)
-        gapic_yaml = gapic_api_yaml
-        gapic_args = ['--gapic_yaml=' + os.path.abspath(yaml)
-                      for yaml in gapic_yaml]
+        gapic_args = ['--gapic_yaml=' + os.path.abspath(gapic_yaml)]
         args = [
             # TODO(andrealin): Get right absolute path for discovery_doc
                    '--discovery_doc=' + os.path.abspath(discovery_doc),
@@ -157,8 +146,8 @@ class DiscoGapicCodeGenTask(task_base.TaskBase):
 
 
 class CSharpGapicPackagingTask(task_base.TaskBase):
-    def execute(self, gapic_code_dir, grpc_code_dir, proto_code_dir, gapic_api_yaml):
-        with open(gapic_api_yaml[0]) as f:
+    def execute(self, gapic_code_dir, grpc_code_dir, proto_code_dir, gapic_yaml):
+        with open(gapic_yaml) as f:
             gapic_config = yaml.load(f, Loader=yaml.Loader)
         package_name = gapic_config.get('language_settings').get('csharp').get('package_name')
         package_root = '{0}/{1}'.format(gapic_code_dir, package_name)

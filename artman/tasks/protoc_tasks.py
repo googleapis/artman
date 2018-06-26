@@ -60,17 +60,16 @@ class ProtocCodeGenTaskBase(task_base.TaskBase):
     def _execute_proto_codegen(
             self, language, src_proto_path, import_proto_path,
             pkg_dir, api_name, api_version, organization_name,
-            toolkit_path, gapic_api_yaml, gen_proto=False, gen_grpc=False,
+            toolkit_path, gapic_yaml, gen_proto=False, gen_grpc=False,
             final_src_proto_path=None, final_import_proto_path=None,
             excluded_proto_path=[]):
-        gapic_api_yaml = gapic_api_yaml[0] if gapic_api_yaml else None
         src_proto_path = final_src_proto_path or src_proto_path
         import_proto_path = final_import_proto_path or import_proto_path
         proto_params = protoc_utils.PROTO_PARAMS_MAP[language]
 
         if gen_proto:
             protoc_proto_params = protoc_utils.protoc_proto_params(
-                proto_params, pkg_dir, gapic_api_yaml, with_grpc=True)
+                proto_params, pkg_dir, gapic_yaml, with_grpc=True)
         else:
             protoc_proto_params = []
 
@@ -112,14 +111,14 @@ class ProtoCodeGenTask(ProtocCodeGenTaskBase):
     """Generates protos"""
     def execute(self, language, src_proto_path, import_proto_path,
                 output_dir, api_name, api_version, organization_name,
-                toolkit_path, gapic_api_yaml, final_src_proto_path=None,
+                toolkit_path, gapic_yaml, final_src_proto_path=None,
                 final_import_proto_path=None, excluded_proto_path=[]):
         pkg_dir = protoc_utils.prepare_proto_pkg_dir(
             output_dir, api_name, api_version, organization_name, language)
         return self._execute_proto_codegen(
             language, src_proto_path, import_proto_path, pkg_dir,
             api_name, api_version, organization_name, toolkit_path,
-            gapic_api_yaml, gen_proto=True,
+            gapic_yaml, gen_proto=True,
             final_src_proto_path=final_src_proto_path,
             final_import_proto_path=final_import_proto_path,
             excluded_proto_path=excluded_proto_path)
@@ -131,14 +130,14 @@ class GrpcCodeGenTask(ProtocCodeGenTaskBase):
     """Generates the gRPC client library"""
     def execute(self, language, src_proto_path, import_proto_path,
                 toolkit_path, output_dir, api_name, api_version,
-                organization_name, gapic_api_yaml, final_src_proto_path=None,
+                organization_name, gapic_yaml, final_src_proto_path=None,
                 final_import_proto_path=None, excluded_proto_path=[]):
         pkg_dir = protoc_utils.prepare_grpc_pkg_dir(
             output_dir, api_name, api_version, organization_name, language)
         return self._execute_proto_codegen(
             language, src_proto_path, import_proto_path, pkg_dir,
             api_name, api_version,  organization_name, toolkit_path,
-            gapic_api_yaml, gen_grpc=True,
+            gapic_yaml, gen_grpc=True,
             final_src_proto_path=final_src_proto_path,
             final_import_proto_path=final_import_proto_path,
             excluded_proto_path=excluded_proto_path)
@@ -150,14 +149,14 @@ class ProtoAndGrpcCodeGenTask(ProtocCodeGenTaskBase):
     """Generates protos and the gRPC client library"""
     def execute(self, language, src_proto_path, import_proto_path,
                 toolkit_path, output_dir, api_name, api_version,
-                organization_name, gapic_api_yaml, final_src_proto_path=None,
+                organization_name, gapic_yaml, final_src_proto_path=None,
                 final_import_proto_path=None, excluded_proto_path=[]):
         pkg_dir = protoc_utils.prepare_grpc_pkg_dir(
             output_dir, api_name, api_version, organization_name, language)
         return self._execute_proto_codegen(
             language, src_proto_path, import_proto_path, pkg_dir,
             api_name, api_version, organization_name, toolkit_path,
-            gapic_api_yaml, gen_proto=True, gen_grpc=True,
+            gapic_yaml, gen_proto=True, gen_grpc=True,
             final_src_proto_path=final_src_proto_path,
             final_import_proto_path=final_import_proto_path,
             excluded_proto_path=excluded_proto_path)

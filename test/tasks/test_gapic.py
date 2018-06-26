@@ -44,7 +44,7 @@ class GapicConfigGenTaskTests(unittest.TestCase):
             descriptor_set='/path/to/descriptor_set',
             organization_name='google-cloud',
             output_dir='/path/to/output',
-            service_yaml=['/path/to/service.yaml'],
+            service_yaml='/path/to/service.yaml',
             toolkit_path='/path/to/toolkit',
         )
         assert result == '/'.join((
@@ -107,7 +107,7 @@ class GapicConfigMoveTaskTests(unittest.TestCase):
     @mock.patch.object(gapic_tasks.GapicConfigMoveTask, 'exec_command')
     def test_execute(self, exec_command):
         task = gapic_tasks.GapicConfigMoveTask()
-        task.execute('/path/src', ['/path/dest'])
+        task.execute('/path/src', '/path/dest')
         assert exec_command.call_count == 2
         expected_cmds = [
             'mkdir -p /path',
@@ -119,14 +119,7 @@ class GapicConfigMoveTaskTests(unittest.TestCase):
     def test_execute_no_dest(self, exec_command):
         task = gapic_tasks.GapicConfigMoveTask()
         with pytest.raises(ValueError):
-            task.execute('/path/src', [])
-        assert exec_command.call_count == 0
-
-    @mock.patch.object(gapic_tasks.GapicConfigMoveTask, 'exec_command')
-    def test_execute_multi_dest(self, exec_command):
-        task = gapic_tasks.GapicConfigMoveTask()
-        with pytest.raises(ValueError):
-            task.execute('/path/src', ['/path/one', '/path/two'])
+            task.execute('/path/src', None)
         assert exec_command.call_count == 0
 
     @mock.patch.object(gapic_tasks.GapicConfigMoveTask, 'exec_command')
@@ -134,7 +127,7 @@ class GapicConfigMoveTaskTests(unittest.TestCase):
     def test_execute_dest_exists(self, exists, exec_command):
         exists.return_value = True
         task = gapic_tasks.GapicConfigMoveTask()
-        task.execute('/path/src', ['/path/exists'])
+        task.execute('/path/src', '/path/exists')
         assert exec_command.call_count == 3
         expected_cmds = [
             'mv /path/exists /path/exists.old',
@@ -157,12 +150,12 @@ class GapicCodeGenTaskTests(unittest.TestCase):
             api_name='pubsub',
             api_version='v1',
             descriptor_set='/path/to/desc',
-            gapic_api_yaml=['/path/to/pubsub.yaml'],
+            gapic_yaml='/path/to/pubsub.yaml',
             gapic_code_dir='/path/to/output',
             language='python',
             organization_name='google-cloud',
             package_metadata_yaml='/path/to/pmy.yaml',
-            service_yaml=['/path/to/service.yaml'],
+            service_yaml='/path/to/service.yaml',
             toolkit_path='/path/to/toolkit'
         )
         expected_cmds = [
@@ -190,7 +183,7 @@ class DiscoGapicCodeGenTaskTests(unittest.TestCase):
         task.execute(
             api_name='compute',
             api_version='v1',
-            gapic_api_yaml=['/path/to/compute.yaml'],
+            gapic_yaml='/path/to/compute.yaml',
             gapic_code_dir='/path/to/output',
             language='java',
             organization_name='google-cloud',

@@ -23,9 +23,9 @@ from artman.utils import task_utils
 
 
 # kwargs required by GAPIC code gen
-_GAPIC_REQUIRED = ['service_yaml', 'gapic_api_yaml', 'language', 'publish']
+_GAPIC_REQUIRED = ['service_yaml', 'gapic_yaml', 'language', 'publish']
 
-_DISCOGAPIC_REQUIRED = ['gapic_api_yaml', 'language', 'publish']
+_DISCOGAPIC_REQUIRED = ['gapic_yaml', 'language', 'publish']
 
 
 class GapicConfigPipeline(code_gen.CodeGenerationPipelineBase):
@@ -120,7 +120,7 @@ class CSharpPackagingTaskFactory(code_gen.TaskFactoryBase):
         ]
 
     def get_validate_kwargs(self):
-        return ['gapic_code_dir', 'grpc_code_dir', 'proto_code_dir', 'gapic_api_yaml']
+        return ['gapic_code_dir', 'grpc_code_dir', 'proto_code_dir', 'gapic_yaml']
 
     def get_invalid_kwargs(self):
         return []

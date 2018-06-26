@@ -79,7 +79,7 @@ class NormalizeFlagTests(unittest.TestCase):
         name, args = main.normalize_flags(self.flags, self.user_config)
         assert name == 'GapicClientPipeline'
         assert args['desc_proto_path'][0].endswith('google/iam/v1')
-        assert args['gapic_api_yaml'][0].endswith('test_gapic.yaml')
+        assert args['gapic_yaml'].endswith('test_gapic.yaml')
         assert args['toolkit']
         assert 'github' not in args
         assert args['language'] == 'python'

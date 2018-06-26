@@ -454,8 +454,8 @@ def _change_owner(flags, pipeline_name, pipeline_kwargs):
         if (os.path.exists(local_repo_dir)):
             _change_directory_owner(local_repo_dir, user_host_id, group_host_id)
 
-    if pipeline_kwargs['gapic_api_yaml']:
-        gapic_config_path = pipeline_kwargs['gapic_api_yaml'][0]
+    if pipeline_kwargs['gapic_yaml']:
+        gapic_config_path = pipeline_kwargs['gapic_yaml']
         if (os.path.exists(gapic_config_path) and
             ('GapicConfigPipeline' == pipeline_name
                 or 'DiscoGapicConfigPipeline' == pipeline_name)):
