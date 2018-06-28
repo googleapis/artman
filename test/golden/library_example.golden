@@ -140,6 +140,7 @@
 /ruby/google-cloud-ruby/google-cloud-library_example/.gitignore
 /ruby/google-cloud-ruby/google-cloud-library_example/.rubocop.yml
 /ruby/google-cloud-ruby/google-cloud-library_example/.yardopts
+/ruby/google-cloud-ruby/google-cloud-library_example/CHANGELOG.md
 /ruby/google-cloud-ruby/google-cloud-library_example/Gemfile
 /ruby/google-cloud-ruby/google-cloud-library_example/LICENSE
 /ruby/google-cloud-ruby/google-cloud-library_example/README.md

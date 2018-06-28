@@ -31,13 +31,13 @@ class PackageMetadataConfigGenTask(task_base.TaskBase):
     def execute(self, api_name, api_version, organization_name, output_dir,
                 proto_deps, language, root_dir, src_proto_path,
                 artifact_type, release_level=None,
-                proto_test_deps=None):
+                test_proto_deps=None):
         api_full_name = task_utils.api_full_name(
             api_name, api_version, organization_name)
 
         config = self._create_config(
             api_name, api_version, organization_name, output_dir, proto_deps,
-            proto_test_deps, language, root_dir, src_proto_path,
+            test_proto_deps, language, root_dir, src_proto_path,
             artifact_type, release_level)
 
         package_metadata_config = os.path.join(
@@ -47,7 +47,7 @@ class PackageMetadataConfigGenTask(task_base.TaskBase):
         return package_metadata_config
 
     def _create_config(self, api_name, api_version, organization_name, output_dir,
-                       proto_deps, proto_test_deps, language, root_dir, src_proto_path,
+                       proto_deps, test_proto_deps, language, root_dir, src_proto_path,
                        artifact_type, release_level):
         googleapis_dir = root_dir
         googleapis_path = os.path.commonprefix(
@@ -63,8 +63,8 @@ class PackageMetadataConfigGenTask(task_base.TaskBase):
             'proto_path': googleapis_path,
         }
 
-        if proto_test_deps:
-            config['proto_test_deps'] = proto_test_deps
+        if test_proto_deps:
+            config['test_proto_deps'] = test_proto_deps
 
         return config
 

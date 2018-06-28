@@ -22,12 +22,14 @@ the new artman config. Once that is done, this converter can be removed.
 
 from __future__ import absolute_import
 import os
+from protobuf_to_dict import protobuf_to_dict
 
 from artman.config.proto.config_pb2 import Artifact
 from artman.utils.logger import logger
 
 
 def convert_to_legacy_config_dict(artifact_config, root_dir, output_dir):
+    artifact_config_dict = protobuf_to_dict(artifact_config)
     common = {}
     common['api_name'] = artifact_config.api_name
     common['api_version'] = artifact_config.api_version
@@ -35,20 +37,14 @@ def convert_to_legacy_config_dict(artifact_config, root_dir, output_dir):
     common['service_yaml'] = artifact_config.service_yaml
     common['gapic_yaml'] = artifact_config.gapic_yaml
     common['src_proto_path'], excluded_proto_path = _calculate_proto_paths(
-        _repeated_proto3_field_to_list(
-            artifact_config.src_proto_paths))
+        artifact_config_dict['src_proto_paths'])
     if excluded_proto_path:
         common['excluded_proto_path'] = excluded_proto_path
     common['import_proto_path'] = [root_dir]
     common['output_dir'] = output_dir
-
-    legacy_proto_deps, legacy_test_proto_deps, desc_proto_paths = (
-        _proto_deps_to_legacy_configs(artifact_config.proto_deps,
-                                      artifact_config.test_proto_deps,
-                                      root_dir))
-    common['proto_deps'] = legacy_proto_deps
-    common['proto_test_deps'] = legacy_test_proto_deps
-    common['desc_proto_path'] = desc_proto_paths
+    common['proto_deps'] = artifact_config_dict['proto_deps']
+    if 'test_proto_deps' in artifact_config_dict:
+        common['test_proto_deps'] = artifact_config_dict['test_proto_deps']
     common['artifact_type'] = Artifact.Type.Name(artifact_config.type)
 
     result = {}
@@ -75,32 +71,6 @@ def convert_to_legacy_config_dict(artifact_config, root_dir, output_dir):
 
     result[language] = language_config_dict
     return result
-
-
-def _repeated_proto3_field_to_list(field):
-    """Convert a proto3 repeated field to list.
-
-    Repeated fields are represented as an object that acts like a Python
-    sequence. It cannot be assigned to a list type variable. Therefore, doing
-    the conversion manually.
-    """
-    result = []
-    for item in field:
-        result.append(item)
-    return result
-
-
-def _proto_deps_to_legacy_configs(proto_deps, test_proto_deps, root_dir):
-    legacy_proto_deps, legacy_test_proto_deps, desc_proto_paths = [], [], []
-    for dep in proto_deps:
-        legacy_proto_deps.append(dep.name)
-        # TODO This is way too magical, and we need to figure out a better
-        # way.
-        if dep.name == 'google-iam-v1':
-            desc_proto_paths.append(os.path.join(root_dir, 'google/iam/v1'))
-    for test_dep in test_proto_deps:
-        legacy_test_proto_deps.append(test_dep.name)
-    return legacy_proto_deps, legacy_test_proto_deps, desc_proto_paths
 
 
 def _calculate_rel_gapic_output_dir(language, api_name, api_version):

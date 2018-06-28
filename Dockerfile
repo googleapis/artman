@@ -164,7 +164,7 @@ RUN git clone https://github.com/googleapis/googleapis \
   && rm -rf /googleapis/.git/
 RUN git clone https://github.com/googleapis/toolkit \
   && cd toolkit/ \
-  && git checkout 1d6bc86fe81d6bfa4fe6e48bf58830d1648030c6 \
+  && git checkout 91cdf7784d13332d8e87d54ab0f0375fe5986038 \
   && ./gradlew fatJar \
   && ./gradlew createToolPaths \
   && cd .. \

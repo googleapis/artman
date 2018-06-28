@@ -33,12 +33,18 @@ class ProtoDescGenTask(task_base.TaskBase):
 
     def execute(self, src_proto_path, import_proto_path, output_dir,
                 api_name, api_version, organization_name, toolkit_path,
-                desc_proto_path=None, excluded_proto_path=[]):
-        desc_proto_path = desc_proto_path or []
+                root_dir, excluded_proto_path=[], proto_deps=[]):
+        desc_proto_paths = []
+        for dep in proto_deps:
+            if 'proto_path' in dep and dep['proto_path']:
+                desc_proto_paths.append(os.path.join(root_dir, dep['proto_path']))
+            # TODO remove this once proto_path is set for google-iam-v1 everywhere
+            elif dep['name'] == 'google-iam-v1':
+                desc_proto_paths.append(os.path.join(root_dir, 'google/iam/v1'))
         desc_protos = list(
-            protoc_utils.find_protos(src_proto_path + desc_proto_path,
+            protoc_utils.find_protos(src_proto_path + desc_proto_paths,
                                      excluded_proto_path))
-        header_proto_path = import_proto_path + desc_proto_path
+        header_proto_path = import_proto_path + desc_proto_paths
         header_proto_path.extend(src_proto_path)
         desc_out_file = task_utils.api_full_name(
             api_name, api_version, organization_name) + '.desc'

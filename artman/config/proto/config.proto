@@ -163,6 +163,8 @@ message Artifact {
     // * ${INPUT_DIR}/google/type
     //
     string name = 1;
+
+    string proto_path = 2;
   }
 
   // The list of your API proto dependency.
