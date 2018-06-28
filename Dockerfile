@@ -33,22 +33,20 @@ RUN apt-get update \
     python3-pip \
   && rm -rf /var/lib/apt/lists/*
 
-# Install protoc 3.5.1.
-# Currently, the stable version is still 2.6.x, which can only handle proto2
-# syntax, so we have to download our own.
+# Install protoc 3.6.0.
 RUN mkdir -p /usr/src/protoc/ \
-  && curl --location https://github.com/google/protobuf/releases/download/v3.5.1/protoc-3.5.1-linux-x86_64.zip > /usr/src/protoc/protoc-3.5.1.zip \
+  && curl --location https://github.com/google/protobuf/releases/download/v3.6.0/protoc-3.6.0-linux-x86_64.zip > /usr/src/protoc/protoc-3.6.0.zip \
   && cd /usr/src/protoc/ \
-  && unzip protoc-3.5.1.zip \
+  && unzip protoc-3.6.0.zip \
   && ln -s /usr/src/protoc/bin/protoc /usr/local/bin/protoc
 
 # Install GRPC and Protobuf.
-RUN pip3 install --upgrade pip==9.0.3 \
-  && pip3 install \
+RUN pip3 install --upgrade pip==10.0.1 setuptools==39.2.0 \
+  && hash -r pip3 && pip3 install \
     # Ensure that grpcio matches requirements.txt
     grpcio==1.10.0 \
     grpcio-tools==1.10.0 \
-    protobuf==3.5.1
+    protobuf==3.6.0
 
 # Install grpc_csharp_plubin
 RUN curl -L https://www.nuget.org/api/v2/package/Grpc.Tools/1.3.6 -o temp.zip \
