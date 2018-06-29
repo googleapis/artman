@@ -48,7 +48,7 @@ RUN pip3 install --upgrade pip==10.0.1 setuptools==39.2.0 \
     grpcio-tools==1.10.0 \
     protobuf==3.6.0
 
-# Install grpc_csharp_plubin
+# Install grpc_csharp_plugin
 RUN curl -L https://www.nuget.org/api/v2/package/Grpc.Tools/1.3.6 -o temp.zip \
   && unzip -p temp.zip tools/linux_x64/grpc_csharp_plugin > /usr/local/bin/grpc_csharp_plugin \
   && chmod +x /usr/local/bin/grpc_csharp_plugin \
@@ -84,10 +84,13 @@ RUN apt-get update \
   && rm -rf /var/lib/apt/lists/*
 
 # Install Go.
-# This installs Go 1.6 on Ubuntu 16.04.
-RUN apt-get update \
-  && apt-get install -y golang \
-  && rm -rf /var/lib/apt/lists/*
+RUN mkdir -p /golang \
+  && cd /golang \
+  && curl https://dl.google.com/go/go1.10.3.linux-amd64.tar.gz > go.tar.gz \
+  && (echo 'fa1b0e45d3b647c252f51f5e1204aba049cde4af177ef9f2181f43004f901035 go.tar.gz' | sha256sum -c) \
+  && tar xzf go.tar.gz \
+  && cd /
+ENV PATH $PATH:/golang/go/bin
 
 # Download the go protobuf support.
 ENV GOPATH /go
@@ -109,7 +112,7 @@ RUN apt-get update \
   && git clone -b v1.7.2 https://github.com/grpc/grpc.git /temp/grpc \
   && cd /temp/grpc \
   && git submodule update --init --recursive \
-  && make grpc_php_plugin \
+  && make -j $(nproc) grpc_php_plugin \
   && mv ./bins/opt/grpc_php_plugin /usr/local/bin/ \
   && cd / \
   && rm -r /temp/grpc
