@@ -128,6 +128,8 @@
 /python/library_example-v1/google/cloud/example/library_v1/gapic/__init__.py
 /python/library_example-v1/google/cloud/example/library_v1/gapic/library_service_client.py
 /python/library_example-v1/google/cloud/example/library_v1/gapic/library_service_client_config.py
+/python/library_example-v1/google/cloud/example/library_v1/gapic/transports/__init__.py
+/python/library_example-v1/google/cloud/example/library_v1/gapic/transports/library_service_grpc_transport.py
 /python/library_example-v1/google/cloud/example/library_v1/proto/__init__.py
 /python/library_example-v1/google/cloud/example/library_v1/proto/library_pb2.py
 /python/library_example-v1/google/cloud/example/library_v1/proto/library_pb2_grpc.py
