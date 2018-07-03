@@ -42,7 +42,9 @@ def convert_to_legacy_config_dict(artifact_config, root_dir, output_dir):
         common['excluded_proto_path'] = excluded_proto_path
     common['import_proto_path'] = [root_dir]
     common['output_dir'] = output_dir
-    common['proto_deps'] = artifact_config_dict['proto_deps']
+    common['proto_deps'] = []
+    if 'proto_deps' in artifact_config_dict:
+        common['proto_deps'] = artifact_config_dict['proto_deps']
     if 'test_proto_deps' in artifact_config_dict:
         common['test_proto_deps'] = artifact_config_dict['test_proto_deps']
     common['artifact_type'] = Artifact.Type.Name(artifact_config.type)
