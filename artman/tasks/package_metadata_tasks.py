@@ -88,6 +88,7 @@ class ProtoPackageMetadataGenTaskBase(task_base.TaskBase):
         pkg_dir = os.path.join(
             output_dir, language, proto_prefix + api_full_name)
 
+        print("ProtoPackageMetadataGenTaskBase: service_yaml=" + service_yaml)
         service_args = ['--service_yaml=' + os.path.abspath(service_yaml)]
         args = [
             '--descriptor_set=' + os.path.abspath(descriptor_set),
