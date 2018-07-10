@@ -21,7 +21,6 @@ us to move to a clearer and more succinct spelling: `tasks.{domain}.{name}`
 
 from __future__ import absolute_import
 
-from artman.tasks import cleanup_tasks as cleanup
 from artman.tasks import format_tasks as format
 from artman.tasks import gapic_tasks as gapic
 from artman.tasks import io_tasks as io
@@ -32,7 +31,7 @@ from artman.tasks import python_grpc_tasks as python_grpc
 from artman.tasks.task_base import Task, EmptyTask
 
 __all__ = (
-    'cleanup', 'EmptyTask', 'format', 'gapic', 'io',
+    'EmptyTask', 'format', 'gapic', 'io',
     'package_metadata', 'protoc', 'publish', 'python_grpc',
     'Task',
 )
