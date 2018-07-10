@@ -253,8 +253,6 @@ def normalize_flags(flags, user_config):
     # This allows the user to override the path to api-client-staging or
     # toolkit on his or her machine.
     pipeline_args['root_dir'] = root_dir
-    # TODO two args reference the same concept - clean this up
-    pipeline_args['toolkit'] = user_config.local.toolkit
     pipeline_args['toolkit_path'] = user_config.local.toolkit
 
     if flags.subcommand == 'publish' and flags.local_repo_dir:

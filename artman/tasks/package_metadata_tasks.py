@@ -76,11 +76,10 @@ class PackageMetadataConfigGenTask(task_base.TaskBase):
 # Metadata gen
 
 class ProtoPackageMetadataGenTaskBase(task_base.TaskBase):
-    def _execute(self, api_name, api_version, organization_name, toolkit,
+    def _execute(self, api_name, api_version, organization_name, toolkit_path,
                 descriptor_set, src_proto_path, service_yaml,
                 input_dir, output_dir, package_metadata_yaml,
                 language, artifact_type):
-        toolkit_path = toolkit
         api_full_name = task_utils.api_full_name(
             api_name, api_version, organization_name)
         proto_prefix = self._get_proto_prefix()
@@ -109,24 +108,24 @@ class ProtoPackageMetadataGenTaskBase(task_base.TaskBase):
 class ProtoPackageMetadataGenTask(ProtoPackageMetadataGenTaskBase):
     default_provides = 'proto_pkg_dir'
 
-    def execute(self, api_name, api_version, organization_name, toolkit,
+    def execute(self, api_name, api_version, organization_name, toolkit_path,
                 descriptor_set, src_proto_path, service_yaml,
                 proto_code_dir, output_dir, package_metadata_yaml,
                 language):
         return self._execute(api_name, api_version, organization_name,
-                toolkit, descriptor_set, src_proto_path, service_yaml,
+                toolkit_path, descriptor_set, src_proto_path, service_yaml,
                 proto_code_dir, output_dir, package_metadata_yaml,
                 language, 'PROTOBUF')
 
 class GrpcPackageMetadataGenTask(ProtoPackageMetadataGenTaskBase):
     default_provides = 'grpc_pkg_dir'
 
-    def execute(self, api_name, api_version, organization_name, toolkit,
+    def execute(self, api_name, api_version, organization_name, toolkit_path,
                 descriptor_set, src_proto_path, service_yaml,
                 grpc_code_dir, output_dir, package_metadata_yaml,
                 language):
         return self._execute(api_name, api_version, organization_name,
-                toolkit, descriptor_set, src_proto_path, service_yaml,
+                toolkit_path, descriptor_set, src_proto_path, service_yaml,
                 grpc_code_dir, output_dir, package_metadata_yaml,
                 language, 'GRPC')
 
