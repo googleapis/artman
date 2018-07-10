@@ -88,8 +88,6 @@ class ProtoPackageMetadataGenTaskBase(task_base.TaskBase):
         pkg_dir = os.path.join(
             output_dir, language, proto_prefix + api_full_name)
 
-        print("ProtoPackageMetadataGenTaskBase: service_yaml=" + service_yaml)
-        service_args = ['--service_yaml=' + os.path.abspath(service_yaml)]
         args = [
             '--descriptor_set=' + os.path.abspath(descriptor_set),
             '--input=' + os.path.abspath(input_dir),
@@ -97,7 +95,10 @@ class ProtoPackageMetadataGenTaskBase(task_base.TaskBase):
             '--package_yaml2=' + os.path.abspath(package_metadata_yaml),
             '--artifact_type=' + artifact_type,
             '--language=' + language,
-        ] + service_args
+        ]
+        if service_yaml != '':
+          service_args = ['--service_yaml=' + os.path.abspath(service_yaml)]
+          args = args + service_args
         self.exec_command(
             task_utils.gapic_gen_task(toolkit_path, ['LEGACY_GRPC_PACKAGE'] + args))
 
