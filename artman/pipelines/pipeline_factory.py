@@ -30,7 +30,7 @@ __all__ = (
 )
 
 
-def make_pipeline_flow(pipeline_name, remote_mode=False, **kwargs):
+def make_pipeline_flow(pipeline_name, **kwargs):
     """Factory function to make a GAPIC pipeline.
 
     Because the GAPIC pipeline is using OpenStack Taskflow, this factory
@@ -40,18 +40,17 @@ def make_pipeline_flow(pipeline_name, remote_mode=False, **kwargs):
     instance methods). The factory function name will be saved into the
     logbook, and it will be imported and called to create the workflow objects
     (or recreate it if resumption happens).  This allows for the pipeline to be
-    recreated if and when that is needed (even on remote machines, as long as
-    the reimportable name can be located).
+    recreated if and when that is needed.
 
     """
-    return make_pipeline(pipeline_name, remote_mode, **kwargs).flow
+    return make_pipeline(pipeline_name, **kwargs).flow
 
 
-def make_pipeline(pipeline_name, remote_mode=False, **kwargs):
+def make_pipeline(pipeline_name, **kwargs):
     for cls in _rec_subclasses(pipeline_base.PipelineBase):
         if cls.__name__ == pipeline_name:
             logger.info("Creating %s." % pipeline_name)
-            return cls(remote_mode=remote_mode, **kwargs)
+            return cls(**kwargs)
     raise ValueError("Invalid pipeline name: %s" % pipeline_name)
 
 

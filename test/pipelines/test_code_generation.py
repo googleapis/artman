@@ -26,43 +26,19 @@ from artman.pipelines import code_generation
 from artman.pipelines import gapic_generation
 from artman.pipelines import pipeline_base
 from artman.tasks import io_tasks
-from artman.utils import pipeline_util
 
 
 class CodeGenerationPipelineBaseTests(unittest.TestCase):
     @mock.patch.object(pipeline_base.PipelineBase, '__init__')
-    @mock.patch.object(uuid, 'uuid4')
-    def test_constructor(self, uuid4, super_init):
-        uuid4.return_value = '00000000'
-        cgpb = code_generation.CodeGenerationPipelineBase(None,
-            remote_mode=True,
-        )
+    def test_constructor(self, super_init):
+        cgpb = code_generation.CodeGenerationPipelineBase(None)
 
         # Assert that the superclass constructor was called.
         super_init.assert_called_once()
 
         # Assert that the expected keyword arguments were sent.
         _, _, kwargs = super_init.mock_calls[0]
-        assert len(kwargs) == 5
-        assert kwargs['tarfile'] == '00000000.tar.gz'
-        assert kwargs['bucket_name'] == 'pipeline'
-        assert kwargs['src_path'] == '00000000.tar.gz'
-        assert kwargs['dest_path'].endswith('00000000.tar.gz')
-        assert kwargs['remote_mode'] is True
-
-    @mock.patch.object(pipeline_base.PipelineBase, '__init__')
-    def test_constructor_not_remote_mode(self, super_init):
-        cgpb = code_generation.CodeGenerationPipelineBase(None,
-            remote_mode=False,
-        )
-
-        # Assert that the superclass constructor was called.
-        super_init.assert_called_once()
-
-        # Assert that the expected keyword arguments were sent.
-        _, _, kwargs = super_init.mock_calls[0]
-        assert len(kwargs) == 1
-        assert kwargs['remote_mode'] is False
+        assert len(kwargs) == 0
 
     def test_do_build_flow(self):
         CGPB = code_generation.CodeGenerationPipelineBase
@@ -102,8 +78,8 @@ class CodeGenerationPipelineBaseTests(unittest.TestCase):
         assert isinstance(flow, linear_flow.Flow)
         assert len(flow) == 7
 
-    @mock.patch.object(pipeline_util, 'validate_exists')
-    @mock.patch.object(pipeline_util, 'validate_does_not_exist')
+    @mock.patch.object(code_generation, '_validate_exists')
+    @mock.patch.object(code_generation, '_validate_does_not_exist')
     def test_validation(self, does_not_exist, does_exist):
         gtf = gapic_generation.GapicTaskFactory()
         gcpb = code_generation.CodeGenerationPipelineBase(gtf,
@@ -112,27 +88,6 @@ class CodeGenerationPipelineBaseTests(unittest.TestCase):
         )
         does_exist.assert_called_once()
         does_not_exist.assert_called_once()
-
-    def test_additional_remote_tasks(self):
-        CGPB = code_generation.CodeGenerationPipelineBase
-        with mock.patch.object(CGPB, 'validate_kwargs') as validate:
-            cgpb = CGPB(
-                gapic_generation.GapicTaskFactory(),
-                language='python', publish='noop',
-            )
-            validate.assert_called_once()
-        remote_tasks = cgpb.additional_tasks_for_remote_execution()
-        assert len(remote_tasks) == 3
-
-        # Check that we got the actual tasks that we expect.
-        expected = (
-            io_tasks.PrepareUploadDirTask,
-            io_tasks.BlobUploadTask,
-            io_tasks.CleanupTempDirsTask,
-        )
-        for task, class_ in zip(remote_tasks, expected):
-            assert isinstance(task, class_)
-
 
 class TaskFactoryBaseTests(unittest.TestCase):
     def test_get_tasks_nie(self):

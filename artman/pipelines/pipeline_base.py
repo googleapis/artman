@@ -24,11 +24,11 @@ class PipelineBase(object):
     Subclasses must implement validate_kwargs and do_build_flow methods.
     """
 
-    def __init__(self, remote_mode=False, **kwargs):
+    def __init__(self, **kwargs):
         self._kwargs = kwargs
-        self._flow = self.build_flow(remote_mode, **kwargs)
+        self._flow = self.build_flow(**kwargs)
 
-    def build_flow(self, remote_mode=False, **kwargs):
+    def build_flow(self, **kwargs):
         """Make the task flow based on kwargs."""
         self.validate_kwargs(**kwargs)
 
@@ -37,9 +37,6 @@ class PipelineBase(object):
         if not isinstance(flow, Flow):
             raise TypeError('Return type must be taskflow.flow.Flow.')
 
-        # Do some post modification here.
-        if remote_mode:
-            flow.add(*self.additional_tasks_for_remote_execution(**kwargs))
         return flow
 
     def validate_kwargs(self, **kwargs):
@@ -53,11 +50,6 @@ class PipelineBase(object):
         instance.
         """
         raise NotImplementedError('Subclass must implement abstract method')
-
-    def additional_tasks_for_remote_execution(self, **kwargs):
-        """Return additional tasks needed for remote execution.
-        """
-        return []
 
     @property
     def flow(self):

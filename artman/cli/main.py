@@ -63,7 +63,7 @@ def main(*args):
 
     if flags.local:
         try:
-            pipeline = pipeline_factory.make_pipeline(pipeline_name, False,
+            pipeline = pipeline_factory.make_pipeline(pipeline_name,
                                                       **pipeline_kwargs)
             # Hardcoded to run pipeline in serial engine, though not necessarily.
             engine = engines.load(
