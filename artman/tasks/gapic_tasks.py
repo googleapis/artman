@@ -39,7 +39,7 @@ class GapicConfigGenTask(task_base.TaskBase):
             '--output=' + os.path.abspath(config_gen_path)
         ]
         if service_yaml:
-          args = args + ['--service_yaml=' + os.path.abspath(service_yaml)]
+            args = args + ['--service_yaml=' + os.path.abspath(service_yaml)]
         self.exec_command(
             task_utils.gapic_gen_task(toolkit_path, ['GAPIC_CONFIG'] + args))
 
@@ -114,7 +114,7 @@ class GapicCodeGenTask(task_base.TaskBase):
             '--language=' + language,
         ]
         if service_yaml:
-          args = args + ['--service_yaml=' + os.path.abspath(service_yaml)]
+            args = args + ['--service_yaml=' + os.path.abspath(service_yaml)]
         args = args + gapic_args
         self.exec_command(
             task_utils.gapic_gen_task(toolkit_path, ['LEGACY_GAPIC_AND_PACKAGE'] + args))

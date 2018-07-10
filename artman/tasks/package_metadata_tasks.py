@@ -97,7 +97,7 @@ class ProtoPackageMetadataGenTaskBase(task_base.TaskBase):
             '--language=' + language,
         ]
         if service_yaml:
-          args = args + ['--service_yaml=' + os.path.abspath(service_yaml)]
+            args = args + ['--service_yaml=' + os.path.abspath(service_yaml)]
         self.exec_command(
             task_utils.gapic_gen_task(toolkit_path, ['LEGACY_GRPC_PACKAGE'] + args))
 
