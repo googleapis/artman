@@ -27,7 +27,7 @@ with io.open('%s/requirements.txt' % cur_dir) as requirements_file:
 
 setuptools.setup(
     name='googleapis-artman',
-    version='0.13.1',
+    version='0.13.0',
     description='Google API artifact manager',
     author='Google LLC',
     author_email='googleapis-packages@google.com',
