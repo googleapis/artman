@@ -34,11 +34,12 @@ class GapicConfigGenTask(task_base.TaskBase):
         self.exec_command(['mkdir', '-p', config_gen_dir])
         config_gen_path = os.path.join(config_gen_dir,
                                        api_full_name + '_gapic.yaml')
-        service_args = ['--service_yaml=' + os.path.abspath(service_yaml)]
         args = [
             '--descriptor_set=' + os.path.abspath(descriptor_set),
             '--output=' + os.path.abspath(config_gen_path)
-        ] + service_args
+        ]
+        if service_yaml:
+            args = args + ['--service_yaml=' + os.path.abspath(service_yaml)]
         self.exec_command(
             task_utils.gapic_gen_task(toolkit_path, ['GAPIC_CONFIG'] + args))
 
@@ -106,14 +107,15 @@ class GapicCodeGenTask(task_base.TaskBase):
         if existing:
             self.exec_command(['rm', '-r'] + existing)
         gapic_args = ['--gapic_yaml=' + os.path.abspath(gapic_yaml)]
-        service_args = ['--service_yaml=' + os.path.abspath(service_yaml)]
         args = [
             '--descriptor_set=' + os.path.abspath(descriptor_set),
             '--package_yaml2=' + os.path.abspath(package_metadata_yaml),
             '--output=' + os.path.abspath(gapic_code_dir),
             '--language=' + language,
-        ] + service_args + gapic_args
-
+        ]
+        if service_yaml:
+            args = args + ['--service_yaml=' + os.path.abspath(service_yaml)]
+        args = args + gapic_args
         self.exec_command(
             task_utils.gapic_gen_task(toolkit_path, ['LEGACY_GAPIC_AND_PACKAGE'] + args))
 
