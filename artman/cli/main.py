@@ -109,6 +109,11 @@ def _adjust_root_dir(root_dir):
 def parse_args(*args):
     parser = argparse.ArgumentParser()
     parser.add_argument(
+        '--version',
+        action='version',
+        version='%(prog)s {0}'.format(VERSION),
+    )
+    parser.add_argument(
         '--config',
         type=str,
         default='artman.yaml',
