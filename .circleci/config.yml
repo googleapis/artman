@@ -57,21 +57,17 @@ jobs:
             docker run -it -e RUNNING_IN_ARTMAN_DOCKER=True --workdir /googleapis artman /bin/bash -c "mkdir /tmp/pubsub-ruby; artman --local --output-dir /tmp/pubsub-ruby --config=google/pubsub/artman_pubsub.yaml generate ruby_gapic" || EXIT_STATUS=$?
             docker run -it -e RUNNING_IN_ARTMAN_DOCKER=True --workdir /googleapis artman /bin/bash -c "mkdir /tmp/speech-ruby; artman --local --output-dir /tmp/speech-ruby --config=google/cloud/speech/artman_speech_v1.yaml generate ruby_gapic" || EXIT_STATUS=$?
             exit $EXIT_STATUS
-      # When build performance is a concern, consider separating this job into
-      # a workflow with multiple jobs and have the smoketest run in parallel
-      # with additional paid containers.
       - run:
           name: Conditionally run smoketests against all APIs
           command: |
-            if [ "${RUN_SMOKETEST}" ]; then
+            if [ "${CIRCLE_BRANCH}" == "master" ]; then
               docker run -it -e RUNNING_IN_ARTMAN_DOCKER=True --name smoketest artman /bin/bash -c "git clone https://github.com/googleapis/googleapis /tmp/googleapis_smoketest; python3 /artman/test/smoketest_artman.py --root-dir=/tmp/googleapis_smoketest --log=/tmp/smoketest.log" || OUT=$?
               docker cp smoketest:/tmp/smoketest.log /tmp/smoketest.log
               if [ $OUT -ne 0 ];then
                 exit $OUT
               fi
             else
-              echo "Environment variables RUN_SMOKETEST is not properly set in CircleCI project."
-              echo "Skip smoketest step."
+              echo "Skipping smoke tests in branch ${CIRCLE_BRANCH}."
             fi
       - store_artifacts:
           path: /tmp/actual_library_example.golden
