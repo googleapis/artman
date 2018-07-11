@@ -128,14 +128,13 @@ class DiscoGapicCodeGenTask(task_base.TaskBase):
 
     def execute(self, language, toolkit_path, discovery_doc,
         gapic_yaml, package_metadata_yaml,
-        gapic_code_dir, api_name, api_version, organization_name):
+        gapic_code_dir, api_name, api_version, organization_name, root_dir):
         existing = glob.glob('%s/*' % gapic_code_dir)
         if existing:
             self.exec_command(['rm', '-r'] + existing)
         gapic_args = ['--gapic_yaml=' + os.path.abspath(gapic_yaml)]
         args = [
-            # TODO(andrealin): Get right absolute path for discovery_doc
-                   '--discovery_doc=' + os.path.abspath(discovery_doc),
+                   '--discovery_doc=' + os.path.join(root_dir, discovery_doc),
                    '--package_yaml2=' + os.path.abspath(package_metadata_yaml),
                    '--output=' + os.path.abspath(gapic_code_dir),
                    '--language=' + language,

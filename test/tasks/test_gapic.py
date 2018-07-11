@@ -188,14 +188,15 @@ class DiscoGapicCodeGenTaskTests(unittest.TestCase):
             language='java',
             organization_name='google-cloud',
             package_metadata_yaml='/path/to/pmy.yaml',
-            discovery_doc="/path/to/compute.v1.json",
-            toolkit_path='/path/to/toolkit'
+            discovery_doc="compute.v1.json",
+            toolkit_path='/path/to/toolkit',
+            root_dir='root_dir'
         )
         expected_cmds = [
             ' '.join(['java -cp',
                       '/path/to/toolkit/build/libs/gapic-generator-latest-fatjar.jar',
                       'com.google.api.codegen.GeneratorMain LEGACY_DISCOGAPIC_AND_PACKAGE',
-                      '--discovery_doc=/path/to/compute.v1.json',
+                      '--discovery_doc=root_dir/compute.v1.json',
                       '--package_yaml2=/path/to/pmy.yaml --output=/path/to/output',
                       '--language=java --gapic_yaml=/path/to/compute.yaml',
                       ])
