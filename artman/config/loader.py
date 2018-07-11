@@ -37,22 +37,42 @@ INVALID_CONFIG_ERROR_MESSAGE_FORMAT = 'Artman YAML %s is invalid.'
 INVALID_USER_CONFIG_ERROR_MESSAGE_FORMAT = 'Artman user YAML %s is invalid.'
 
 
+ARTIFACT_MAPPING = {
+    'java_proto': {'language': 'JAVA', 'type': 'PROTOBUF'},
+    'java_grpc': {'language': 'JAVA', 'type': 'GRPC'},
+    'java_gapic': {'language': 'JAVA', 'type': 'GAPIC'},
+    'java_gapic_only': {'language': 'JAVA', 'type': 'GAPIC_ONLY'},
+    'python_gapic': {'language': 'PYTHON', 'type': 'GAPIC'},
+    'nodejs_gapic': {'language': 'NODEJS', 'type': 'GAPIC'},
+    'php_gapic': {'language': 'PHP', 'type': 'GAPIC'},
+    'go_gapic': {'language': 'GO', 'type': 'GAPIC'},
+    'ruby_gapic': {'language': 'RUBY', 'type': 'GAPIC'},
+    'csharp_gapic': {'language': 'CSHARP', 'type': 'GAPIC'},
+    'gapic_config': {'type': 'GAPIC_CONFIG'},
+    'php_grpc': {'language': 'JAVA', 'type': 'GRPC'},
+}
+
+
 def load_artifact_config(artman_config_path, artifact_name):
     artman_config = _read_artman_config(artman_config_path)
     artifact_config = Artifact()
     artifact_config.CopyFrom(artman_config.common)
-    valid_values = []
-    for artifact in artman_config.artifacts:
-        valid_values.append(artifact.name)
-        if artifact.name == artifact_name:
-            artifact_config.MergeFrom(artifact)
-            _validate_artifact_config(artifact_config)
-            return _normalize_artifact_config(
-                artifact_config, artman_config_path)
 
-    raise ValueError(
-        'No artifact with `%s` configured in artman yaml. Valid values are %s'
-        % (artifact_name, valid_values))
+    if artifact_name not in ARTIFACT_MAPPING:
+        raise ValueError(
+            'Artifact type `%s` not supported. Valid values are %s'
+            % (artifact_name, ARTIFACT_MAPPING.keys()))
+    loaded_artifact = Artifact(**ARTIFACT_MAPPING[artifact_name])
+
+    for artifact in artman_config.artifacts:
+        if artifact.name == artifact_name:
+            loaded_artifact.MergeFrom(artifact)
+            break
+
+    artifact_config.MergeFrom(loaded_artifact)
+    _validate_artifact_config(artifact_config)
+    return _normalize_artifact_config(
+        artifact_config, artman_config_path)
 
 
 def read_user_config(artman_user_config_path):
@@ -90,7 +110,7 @@ def _read_artman_config(artman_yaml_path):
 def _parse(artman_yaml_path):
     """Parse artman yaml config into corresponding protobuf."""
     if not os.path.exists(artman_yaml_path):
-      raise ValueError(CONFIG_NOT_FOUND_ERROR_MESSAGE_FORMAT % artman_yaml_path)
+        raise ValueError(CONFIG_NOT_FOUND_ERROR_MESSAGE_FORMAT % artman_yaml_path)
 
     try:
         with io.open(artman_yaml_path, 'r', encoding='UTF-8') as f:
@@ -131,8 +151,6 @@ def _validate_artman_config(config_pb):
 
 
 def _validate_artifact_config(artifact_config):
-    # TODO(ethanbao) Validate input files, in which we disallow ${GOOGLEAPIS}
-    # syntax and the file or folder must exist.
     if (artifact_config.language == Artifact.NODEJS and
             artifact_config.type == Artifact.GRPC):
         raise ValueError('GRPC artifact type is invalid for NodeJS.')

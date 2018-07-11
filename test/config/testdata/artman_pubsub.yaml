@@ -15,9 +15,7 @@ common:
   service_yaml: /tmp/input/google/pubsub/pubsub.yaml
   gapic_yaml: /tmp/input/google/pubsub/v1/pubsub_gapic.yaml
 artifacts:
-- name: java_gapic_library
-  type: GAPIC
-  language: JAVA
+- name: java_gapic
   release_level: BETA
   publish_targets:
   - name: google-cloud-java
@@ -35,9 +33,7 @@ artifacts:
       dest: generated/java/grpc-google-cloud-pubsub-v1
     - src: java/proto-google-cloud-pubsub-v1
       dest: generated/java/proto-google-cloud-pubsub-v1
-- name: python_gapic_library
-  type: GAPIC
-  language: PYTHON
+- name: python_gapic
   release_level: BETA
   publish_targets:
   - name: staging-github
@@ -46,9 +42,7 @@ artifacts:
     directory_mappings:
     - src: gapic-google-cloud-pubsub-v1
       dest: generated/python/gapic-google-cloud-pubsub-v1
-- name: java_proto_library
-  type: PROTOBUF
-  language: JAVA
+- name: java_proto
   release_level: BETA
   publish_targets:
   - name: staging-github

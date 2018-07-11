@@ -48,8 +48,8 @@ def test_library_example(googleapis_dir):
             if line and not line.startswith('#'):
                 expected.add(line)
 
-    for artifact in ['python', 'java', 'ruby', 'nodejs', 'php', 'go',
-                     'csharp']:
+    for artifact in ['python_gapic', 'java_gapic', 'ruby_gapic', 'nodejs_gapic',
+                     'php_gapic', 'go_gapic', 'csharp_gapic']:
         generate_gapic_library(golden_dir, googleapis_dir, output_dir,
                                artifact)
 
