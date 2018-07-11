@@ -41,6 +41,7 @@ ARTIFACT_MAPPING = {
     'java_proto': {'language': 'JAVA', 'type': 'PROTOBUF'},
     'java_grpc': {'language': 'JAVA', 'type': 'GRPC'},
     'java_gapic': {'language': 'JAVA', 'type': 'GAPIC'},
+    'java_discogapic': {'language': 'JAVA', 'type': 'DISCOGAPIC'},
     'java_gapic_only': {'language': 'JAVA', 'type': 'GAPIC_ONLY'},
     'python_gapic': {'language': 'PYTHON', 'type': 'GAPIC'},
     'nodejs_gapic': {'language': 'NODEJS', 'type': 'GAPIC'},
