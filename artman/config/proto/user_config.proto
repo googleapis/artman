@@ -41,9 +41,14 @@ message UserConfig {
 
 message LocalConfig {
   // Specify the location of local `toolkit` source code dir or binary jar.
-  // Otherwise, the toolkit shipped as part of the artman Docker image will be
+  // Otherwise, the toolkit jar shipped as part of the artman Docker image will be
   // used. This is useful for toolkit debugging. This configuration currently
   // only work when running in artman local mode.
+  //
+  // If you change your local toolkit source code and want artman to use
+  // the modified toolkit repo, make sure to run
+  // $ ./gradlew clean fatJar
+  // inside your toolkit directory to ensure the toolkit jar is refreshed.
   //
   // Note: Absolute path should be used.
   string toolkit = 1;
