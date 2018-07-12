@@ -207,12 +207,20 @@ workflows:
   version: 2
   tests:
     jobs:
-      - unit-python2.7
-      - unit-python3.4
-      - unit-python3.5
-      - unit-python3.6
-      - docs
-      - golden_and_smoke_tests
+      - unit-python2.7:
+          filters: &all_commits
+            tags:
+              only: /.*/
+      - unit-python3.4:
+          filters: *all_commits
+      - unit-python3.5:
+          filters: *all_commits
+      - unit-python3.6:
+          filters: *all_commits
+      - docs:
+          filters: *all_commits
+      - golden_and_smoke_tests:
+          filters: *all_commits
       - build_and_release_docker_image:
           requires:
             - unit-python2.7
@@ -224,11 +232,12 @@ workflows:
           filters:
             branches:
               only: master
+            tags: &releases
+              only: '/^v[\d.]+$/'
       - release:
           requires:
             - build_and_release_docker_image
           filters:
             branches:
               ignore: /.*/
-            tags:
-              only: '/^v[\d.]+$/'
+            tags: *releases
