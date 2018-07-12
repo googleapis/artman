@@ -88,7 +88,7 @@ jobs:
           name: Push Artman Docker image
           command: |
             if [ "${DOCKER_EMAIL}" == 'googleapis-publisher@google.com' ]; then
-              docker login -e $DOCKER_EMAIL -u $DOCKER_USER -p $DOCKER_PASS
+              docker login -e "${DOCKER_EMAIL}" -u "${DOCKER_USER}" -p "${DOCKER_PASS}"
               docker tag artman "googleapis/artman:AUTO_BUILD_$CIRCLE_BUILD_NUM"
               docker push "googleapis/artman:AUTO_BUILD_$CIRCLE_BUILD_NUM"
               docker tag artman "googleapis/artman:latest"
@@ -97,6 +97,46 @@ jobs:
               echo "Environment variables DOCKER_EMAIL, DOCKER_USER, DOCKER_PASS are not properly set in CircleCI project."
               echo "Skip the Artman Docker image publishing step."
             fi
+
+  release:
+    working_directory: /usr/src/artman
+    docker:
+      - image: docker:17.05.0-ce-git
+    steps:
+      - *checkout_artman
+      - setup_remote_docker
+      - *restore_artman_cache
+      - *load_build_and_save_artman_image
+      - *save_artman_cache
+      - run:
+          name: Decrypt PyPI configuration file
+          command: |
+            openssl aes-256-cbc -d -in .circleci/.pypirc.enc -out ~/.pypirc -k "${PYPIRC_ENCRYPTION_KEY}"
+      - run:
+          name: Push Artman Docker tagged image
+          command: |
+            if [ "${DOCKER_EMAIL}" == 'googleapis-publisher@google.com' ]; then
+              # extract version number from setup.py
+              ARTMAN_VERSION=`awk -F"'" '/current_version =/ { print $2; }' setup.py`
+              # release to PyPI
+              echo "Releasing artman version ${ARTMAN_VERSION} to PyPI."
+              python3 setup.py sdist upload
+              # push to docker
+              docker login -e "${DOCKER_EMAIL}" -u "${DOCKER_USER}" -p "${DOCKER_PASS}"
+              docker tag artman "googleapis/artman:AUTO_BUILD_$CIRCLE_BUILD_NUM"
+              docker push "googleapis/artman:AUTO_BUILD_$CIRCLE_BUILD_NUM"
+              docker tag artman "googleapis/artman:latest"
+              docker push "googleapis/artman:latest"
+              docker tag artman "googleapis/artman:${ARTMAN_VERSION}"
+              docker push "googleapis/artman:${ARTMAN_VERSION}"
+            else
+              echo "Environment variables DOCKER_EMAIL, DOCKER_USER, DOCKER_PASS are not properly set in CircleCI project."
+              echo "Skip the Artman Docker image publishing step."
+            fi
+      - run:
+          name: Remove PyPI configuration file
+          command: rm -f ~/.pypirc
+          when: always
 
   docs:
     docker:
@@ -173,8 +213,6 @@ workflows:
       - unit-python3.6
       - docs
       - golden_and_smoke_tests
-  build_and_release_docker_image:
-    jobs:
       - build_and_release_docker_image:
           requires:
             - unit-python2.7
@@ -186,3 +224,11 @@ workflows:
           filters:
             branches:
               only: master
+      - release:
+          requires:
+            - build_and_release_docker_image
+          filters:
+            branches:
+              ignore: /.*/
+            tags:
+              only: '/^v[\d.]+$/'

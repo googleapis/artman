@@ -1,5 +1,10 @@
 FROM ubuntu:16.04
 
+# Release parameters
+ENV GOOGLEAPIS_HASH 475d72b7405c92f06d7f2d4aba866278eb5ad8e9
+ENV GAPIC_GENERATOR_HASH 2486037b4fcf2d34a3f992e5fb031549698e4ff2
+ENV ARTMAN_VERSION 0.13.0
+
 ENV DEBIAN_FRONTEND noninteractive
 
 # Set the locale
@@ -162,12 +167,12 @@ RUN curl -SL $DOTNET_SDK_DOWNLOAD_URL --output dotnet.tar.gz \
 # Install couple of git repos
 RUN git clone https://github.com/googleapis/googleapis \
   && cd googleapis \
-  && git checkout 475d72b7405c92f06d7f2d4aba866278eb5ad8e9 \
+  && git checkout $GOOGLEAPIS_HASH \
   && cd .. \
   && rm -rf /googleapis/.git/
-RUN git clone https://github.com/googleapis/toolkit \
+RUN git clone https://github.com/googleapis/gapic-generator toolkit \
   && cd toolkit/ \
-  && git checkout 2486037b4fcf2d34a3f992e5fb031549698e4ff2 \
+  && git checkout $GAPIC_GENERATOR_HASH \
   && ./gradlew fatJar \
   && ./gradlew createToolPaths \
   && cd .. \
@@ -197,4 +202,4 @@ ADD artman-user-config-in-docker.yaml /root/.artman/config.yaml
 # Install artman.
 ADD . /artman
 ARG install_artman_from_source=false
-RUN if [ "$install_artman_from_source" = true ]; then pip3 install -e /artman; else pip3 install googleapis-artman==0.13.0; rm -r /artman; fi
+RUN if [ "$install_artman_from_source" = true ]; then pip3 install -e /artman; else pip3 install googleapis-artman==$ARTMAN_VERSION; rm -r /artman; fi

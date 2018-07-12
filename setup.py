@@ -21,13 +21,17 @@ import io
 import os
 import setuptools
 
+# The following line is parsed by CI scripts (see .circleci/config.yml)
+# and by release.py. Please keep the format.
+current_version = '0.13.0'
+
 cur_dir = os.path.realpath(os.path.dirname(__file__))
 with io.open('%s/requirements.txt' % cur_dir) as requirements_file:
     requirements = requirements_file.read().strip().split('\n')
 
 setuptools.setup(
     name='googleapis-artman',
-    version='0.13.0',
+    version=current_version,
     description='Google API artifact manager',
     author='Google LLC',
     author_email='googleapis-packages@google.com',
