@@ -6,8 +6,8 @@ jobs:
       - image: docker:17.05.0-ce-git
     steps:
       - checkout
-      - run: apt-get install openssl
-      - run: openssl
+      - setup_remote_docker
+      - run: echo test
     working_directory: /usr/src/artman/
 
 workflows:
