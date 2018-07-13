@@ -60,7 +60,7 @@ jobs:
       - run:
           name: Conditionally run smoketests against all APIs
           command: |
-            if [ "${CIRCLE_BRANCH}" == "master" ]; then
+            if [ "${CIRCLE_BRANCH}" == "master" ] || [ "${CIRCLE_TAG}" != "" ]; then
               docker run -it -e RUNNING_IN_ARTMAN_DOCKER=True --name smoketest artman /bin/bash -c "git clone https://github.com/googleapis/googleapis /tmp/googleapis_smoketest; python3 /artman/test/smoketest_artman.py --root-dir=/tmp/googleapis_smoketest --log=/tmp/smoketest.log" || OUT=$?
               docker cp smoketest:/tmp/smoketest.log /tmp/smoketest.log
               if [ $OUT -ne 0 ];then
@@ -111,16 +111,20 @@ jobs:
       - run:
           name: Decrypt PyPI configuration file
           command: |
-            openssl aes-256-cbc -d -in .circleci/.pypirc.enc -out ~/.pypirc -k "${PYPIRC_ENCRYPTION_KEY}"
+            docker run -i python:3.6 openssl aes-256-cbc -d -k "${PYPIRC_ENCRYPTION_KEY}" < /usr/src/artman/.circleci/.pypirc.enc > /root/.pypirc
+      - run:
+          name: Release to PyPI from inside Docker image
+          command: |
+            docker create --name release --workdir /root/artman python:3.6 python3 setup.py sdist upload
+            docker cp /usr/src/artman release:/root
+            docker cp /root/.pypirc release:/root/.pypirc
+            docker start --attach release
       - run:
           name: Push Artman Docker tagged image
           command: |
             if [ "${DOCKER_EMAIL}" == 'googleapis-publisher@google.com' ]; then
               # extract version number from setup.py
               ARTMAN_VERSION=`awk -F"'" '/current_version =/ { print $2; }' setup.py`
-              # release to PyPI
-              echo "Releasing artman version ${ARTMAN_VERSION} to PyPI."
-              python3 setup.py sdist upload
               # push to docker
               docker login -e "${DOCKER_EMAIL}" -u "${DOCKER_USER}" -p "${DOCKER_PASS}"
               docker tag artman "googleapis/artman:AUTO_BUILD_$CIRCLE_BUILD_NUM"
@@ -135,7 +139,9 @@ jobs:
             fi
       - run:
           name: Remove PyPI configuration file
-          command: rm -f ~/.pypirc
+          command: |
+            rm -f /root/.pypirc
+            docker rm release
           when: always
 
   docs:
