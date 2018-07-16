@@ -23,7 +23,7 @@ import setuptools
 
 # The following line is parsed by CI scripts (see .circleci/config.yml)
 # and by release.py. Please keep the format.
-current_version = '0.14.0'
+current_version = '0.14.1'
 
 cur_dir = os.path.realpath(os.path.dirname(__file__))
 with io.open('%s/requirements.txt' % cur_dir) as requirements_file:
