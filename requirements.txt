@@ -9,7 +9,7 @@ networkx == 1.11.0
 kazoo >= 2.2.1
 oslo.utils >= 3.4.0
 pbr==2.0.0
-protobuf >= 3.3.0
+protobuf >= 3.6.0
 protobuf3-to-dict == 0.1.5
 protoc-java-resource-names-plugin >= 0.0.10
 requests >= 2.10.0, < 3.0.0
