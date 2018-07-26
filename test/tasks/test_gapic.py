@@ -156,7 +156,8 @@ class GapicCodeGenTaskTests(unittest.TestCase):
             organization_name='google-cloud',
             package_metadata_yaml='/path/to/pmy.yaml',
             service_yaml='/path/to/service.yaml',
-            toolkit_path='/path/to/toolkit'
+            toolkit_path='/path/to/toolkit',
+            aspect='ALL',
         )
         expected_cmds = [
             ' '.join(['java -cp',

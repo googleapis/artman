@@ -25,17 +25,27 @@ class GrpcClientPipeline(code_gen.CodeGenerationPipelineBase):
 
     def __init__(self, **kwargs):
         super(GrpcClientPipeline, self).__init__(
-            get_grpc_task_factory(kwargs), **kwargs)
+            ProtoGenTaskFactory(gen_grpc=True, **kwargs), **kwargs)
 
 
 class ProtoClientPipeline(code_gen.CodeGenerationPipelineBase):
 
     def __init__(self, **kwargs):
         super(ProtoClientPipeline, self).__init__(
-            get_proto_task_factory(kwargs), **kwargs)
+            ProtoGenTaskFactory(gen_grpc=False, **kwargs), **kwargs)
 
 
-class GrpcTaskFactoryBase(code_gen.TaskFactoryBase):
+class ProtoGenTaskFactory(code_gen.TaskFactoryBase):
+
+    def __init__(self, gen_grpc, **kwargs):
+        if 'language' not in kwargs:
+            raise ValueError('Valid `language` argument required for gRPC codegen')
+        if 'aspect' not in kwargs:
+            raise ValueError('Valid `aspect` argument required for gRPC codegen')
+        self.language = kwargs['language']
+        self.gen_grpc = gen_grpc
+        self.gen_code = kwargs['aspect'] == 'ALL' or kwargs['aspect'] == 'CODE'
+        self.gen_pkg = kwargs['aspect'] == 'ALL' or kwargs['aspect'] == 'PACKAGE'
 
     def get_tasks(self, **kwargs):
         tasks = self.get_grpc_codegen_tasks(**kwargs)
@@ -43,138 +53,70 @@ class GrpcTaskFactoryBase(code_gen.TaskFactoryBase):
         return task_utils.instantiate_tasks(tasks, kwargs)
 
     def get_grpc_codegen_tasks(self, **kwargs):
-        return []
+        methods = {
+            'java': self._get_grpc_codegen_tasks_java,
+            'python': self._get_grpc_codegen_tasks_python,
+            'go': self._get_grpc_codegen_tasks_go,
+            'ruby': self._get_grpc_codegen_tasks_ruby,
+            'php': self._get_grpc_codegen_tasks_php,
+            'csharp': self._get_grpc_codegen_tasks_csharp,
+            'nodejs': self._get_grpc_codegen_tasks_nodejs
+        }
+        return methods[self.language](**kwargs)
 
-    def get_validate_kwargs(self):
-        return code_gen.COMMON_REQUIRED
+    def _get_grpc_codegen_tasks_java(self, **kwargs):
+        tasks = [protoc_tasks.ProtoDescGenTask]
+        if self.gen_code:
+            tasks.append(protoc_tasks.ProtoCodeGenTask)
+            if self.gen_grpc:
+                tasks.append(protoc_tasks.GrpcCodeGenTask)
+        tasks.append(package_metadata_tasks.PackageMetadataConfigGenTask)
+        if self.gen_pkg:
+            tasks.append(package_metadata_tasks.ProtoPackageMetadataGenTask)
+            if self.gen_grpc:
+                tasks.append(package_metadata_tasks.GrpcPackageMetadataGenTask)
+        tasks.append(protoc_tasks.JavaProtoCopyTask)
+        return tasks
 
-    def get_invalid_kwargs(self):
-        return []
+    def _get_grpc_codegen_tasks_python(self, **kwargs):
+        tasks = [python_grpc_tasks.PythonChangePackageTask]
+        tasks.append(protoc_tasks.ProtoDescGenTask)
+        if self.gen_code:
+            tasks.append(protoc_tasks.ProtoAndGrpcCodeGenTask)
+        if self.gen_pkg:
+            tasks.append(package_metadata_tasks.PackageMetadataConfigGenTask)
+        tasks.append(python_grpc_tasks.PythonMoveProtosTask)
+        return tasks
 
-
-class _RubyGrpcTaskFactory(GrpcTaskFactoryBase):
-
-    def get_grpc_codegen_tasks(self, **kwargs):
-        return [
-            protoc_tasks.ProtoAndGrpcCodeGenTask,
-            protoc_tasks.RubyGrpcCopyTask,
-        ]
-
-
-class _JavaGrpcTaskFactory(GrpcTaskFactoryBase):
-
-    def get_grpc_codegen_tasks(self, **kwargs):
-        return [
-            protoc_tasks.ProtoDescGenTask,
-            protoc_tasks.ProtoCodeGenTask,
-            protoc_tasks.GrpcCodeGenTask,
-            package_metadata_tasks.PackageMetadataConfigGenTask,
-            package_metadata_tasks.ProtoPackageMetadataGenTask,
-            package_metadata_tasks.GrpcPackageMetadataGenTask,
-            protoc_tasks.JavaProtoCopyTask,
-        ]
-
-class _JavaProtoTaskFactory(GrpcTaskFactoryBase):
-
-    def get_grpc_codegen_tasks(self, **kwargs):
-        return [
-            protoc_tasks.ProtoDescGenTask,
-            protoc_tasks.ProtoCodeGenTask,
-            package_metadata_tasks.PackageMetadataConfigGenTask,
-            package_metadata_tasks.ProtoPackageMetadataGenTask,
-            protoc_tasks.JavaProtoCopyTask,
-        ]
-
-
-class _PythonGrpcTaskFactory(GrpcTaskFactoryBase):
-
-    def get_grpc_codegen_tasks(self, **kwargs):
-        return [
-            python_grpc_tasks.PythonChangePackageTask,
-            protoc_tasks.ProtoDescGenTask,
-            protoc_tasks.ProtoAndGrpcCodeGenTask,
-            package_metadata_tasks.PackageMetadataConfigGenTask,
-            python_grpc_tasks.PythonMoveProtosTask,
-        ]
-
-
-class _GoGrpcTaskFactory(GrpcTaskFactoryBase):
-    """Responsible for the protobuf/gRPC flow for Go language."""
-
-    def get_grpc_codegen_tasks(self, **kwargs):
+    def _get_grpc_codegen_tasks_go(self, **kwargs):
         return [
             protoc_tasks.ProtoAndGrpcCodeGenTask,
             protoc_tasks.GoCopyTask,
         ]
 
-    def get_validate_kwargs(self):
-        return ['gapic_yaml', 'gapic_code_dir'] + code_gen.COMMON_REQUIRED
-
-
-class _CSharpGrpcTaskFactory(GrpcTaskFactoryBase):
-
-    def get_grpc_codegen_tasks(self, **kwargs):
+    def _get_grpc_codegen_tasks_ruby(self, **kwargs):
         return [
-            protoc_tasks.ProtoCodeGenTask,
-            protoc_tasks.GrpcCodeGenTask,
+            protoc_tasks.ProtoAndGrpcCodeGenTask,
+            protoc_tasks.RubyGrpcCopyTask,
         ]
 
-
-class _PhpGrpcTaskFactory(GrpcTaskFactoryBase):
-
-    def get_grpc_codegen_tasks(self, **kwargs):
+    def _get_grpc_codegen_tasks_php(self, **kwargs):
         return [
             protoc_tasks.ProtoAndGrpcCodeGenTask,
             protoc_tasks.PhpGrpcRenameTask,
             protoc_tasks.PhpGrpcMoveTask,
         ]
+    def _get_grpc_codegen_tasks_csharp(self, **kwargs):
+        return [protoc_tasks.ProtoCodeGenTask, protoc_tasks.GrpcCodeGenTask]
 
+    def _get_grpc_codegen_tasks_nodejs(self, **kwargs):
+        return [protoc_tasks.NodeJsProtoCopyTask]
 
-class _NodeJsGrpcTaskFactory(GrpcTaskFactoryBase):
+    def get_validate_kwargs(self):
+        if self.language == 'go':
+            return ['gapic_yaml', 'gapic_code_dir'] + code_gen.COMMON_REQUIRED
+        else:
+            return code_gen.COMMON_REQUIRED
 
-    def get_grpc_codegen_tasks(self, **kwargs):
-        return [
-            protoc_tasks.NodeJsProtoCopyTask,
-        ]
-
-
-GRPC_TASK_FACTORY_DICT = {
-    'java': _JavaGrpcTaskFactory,
-    'python': _PythonGrpcTaskFactory,
-    'go': _GoGrpcTaskFactory,
-    'ruby': _RubyGrpcTaskFactory,
-    'php': _PhpGrpcTaskFactory,
-    'csharp': _CSharpGrpcTaskFactory,
-    'nodejs': _NodeJsGrpcTaskFactory,
-}
-
-
-PROTO_TASK_FACTORY_DICT = {
-    'java': _JavaProtoTaskFactory,
-}
-
-
-def get_grpc_task_factory(kwargs):
-    if 'language' not in kwargs:
-        raise ValueError('Valid --language argument required for gRPC codegen')
-
-    language = kwargs['language']
-    cls = GRPC_TASK_FACTORY_DICT.get(language)
-    if cls:
-        return cls()
-    else:
-        raise ValueError('No gRPC task factory found for language: '
-                         + language)
-
-
-def get_proto_task_factory(kwargs):
-    if 'language' not in kwargs:
-        raise ValueError('Valid --language argument required for gRPC codegen')
-
-    language = kwargs['language']
-    cls = PROTO_TASK_FACTORY_DICT.get(language)
-    if cls:
-        return cls()
-    else:
-        raise ValueError('No proto task factory found for language: '
-                         + language)
+    def get_invalid_kwargs(self):
+        return []

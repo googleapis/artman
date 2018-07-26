@@ -82,21 +82,3 @@ class DiscoGapicConfigTaskFactoryTests(unittest.TestCase):
         instantiated_tasks = self._gctf.get_tasks()
         for task, class_ in zip(instantiated_tasks, expected):
             assert isinstance(task, class_)
-
-
-class GapicTaskFactoryTests(unittest.TestCase):
-    def test_grpc_codegen_java(self):
-        gtf = gapic_generation.GapicTaskFactory()
-        grpc_tf = grpc_generation.GRPC_TASK_FACTORY_DICT['java']
-        with mock.patch.object(grpc_tf, 'get_grpc_codegen_tasks') as get:
-            tasks_ = gtf._get_grpc_codegen_tasks(language='java')
-            assert tasks_ == get.return_value
-            get.assert_called_once_with(language='java')
-
-    def test_grpc_codegen_python(self):
-        gtf = gapic_generation.GapicTaskFactory()
-        grpc_tf = grpc_generation.GRPC_TASK_FACTORY_DICT['python']
-        with mock.patch.object(grpc_tf, 'get_grpc_codegen_tasks') as get:
-            tasks_ = gtf._get_grpc_codegen_tasks(language='python')
-            assert tasks_ == get.return_value
-            get.assert_called_once_with(language='python')

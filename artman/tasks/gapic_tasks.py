@@ -102,7 +102,8 @@ class GapicCodeGenTask(task_base.TaskBase):
 
     def execute(self, language, toolkit_path, descriptor_set, service_yaml,
                 gapic_yaml, package_metadata_yaml,
-                gapic_code_dir, api_name, api_version, organization_name):
+                gapic_code_dir, api_name, api_version, organization_name,
+                aspect):
         existing = glob.glob('%s/*' % gapic_code_dir)
         if existing:
             self.exec_command(['rm', '-r'] + existing)
@@ -116,8 +117,19 @@ class GapicCodeGenTask(task_base.TaskBase):
         if service_yaml:
             args = args + ['--service_yaml=' + os.path.abspath(service_yaml)]
         args = args + gapic_args
+
+        gapic_artifact = ''
+        if aspect == 'ALL':
+            gapic_artifact = 'LEGACY_GAPIC_AND_PACKAGE'
+        elif aspect == 'CODE':
+            gapic_artifact = 'GAPIC_CODE'
+        elif aspect == 'PACKAGE':
+            gapic_artifact = 'GAPIC_PACKAGE'
+        else:
+            raise ValueError('GapicCodeGenTask: no generation turned on')
+
         self.exec_command(
-            task_utils.gapic_gen_task(toolkit_path, ['LEGACY_GAPIC_AND_PACKAGE'] + args))
+            task_utils.gapic_gen_task(toolkit_path, [gapic_artifact] + args))
 
         return gapic_code_dir
 

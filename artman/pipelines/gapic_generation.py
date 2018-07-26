@@ -23,7 +23,7 @@ from artman.utils import task_utils
 
 
 # kwargs required by GAPIC code gen
-_GAPIC_REQUIRED = ['service_yaml', 'gapic_yaml', 'language', 'publish']
+_GAPIC_REQUIRED = ['service_yaml', 'gapic_yaml', 'language', 'aspect', 'publish']
 
 _DISCOGAPIC_REQUIRED = ['gapic_yaml', 'language', 'publish']
 
@@ -77,7 +77,7 @@ class GapicOnlyClientPipeline(code_gen.CodeGenerationPipelineBase):
     """
     def __init__(self, language, **kwargs):
         super(GapicOnlyClientPipeline, self).__init__(
-            GapicOnlyTaskFactory(),
+            GapicOnlyTaskFactory(**kwargs),
             language=language,
             **kwargs
         )
@@ -88,9 +88,6 @@ class GapicClientPipeline(code_gen.CodeGenerationPipelineBase):
 
     This is intended to be the only command that needs to run to generate
     a complete GAPIC.
-
-    Exception: In Java, the GrpcClientPipeline must still be
-    run explicitly.
     """
     def __init__(self, language, **kwargs):
         super(GapicClientPipeline, self).__init__(
@@ -98,6 +95,7 @@ class GapicClientPipeline(code_gen.CodeGenerationPipelineBase):
             language=language,
             **kwargs
         )
+
 
 class DiscoGapicClientPipeline(code_gen.CodeGenerationPipelineBase):
     """The pipeline for generating a complete GAPIC from a Discovery document.
@@ -191,9 +189,9 @@ class GapicTaskFactory(code_gen.TaskFactoryBase):
             list: A list of Task subclasses defined by the GRPC task factory.
         """
 
-        # Instantiate the GRPC task factory.
-        grpc_factory = grpc_gen.GRPC_TASK_FACTORY_DICT[language]()
-        return grpc_factory.get_grpc_codegen_tasks(language=language, **kw)
+        grpc_factory = grpc_gen.ProtoGenTaskFactory(gen_grpc=True,
+                                                    language=language, **kw)
+        return grpc_factory.get_grpc_codegen_tasks(**kw)
 
     def _get_packaging_tasks(self, language, **kw):
         """Return the code generation tasks for packaging
@@ -284,8 +282,8 @@ class DiscoGapicTaskFactory(code_gen.TaskFactoryBase):
 
 class GapicOnlyTaskFactory(GapicTaskFactory):
     """A task factory describing GAPIC_ONLY generation tasks."""
-    def _get_grpc_codegen_tasks(self, language, **kw):
+    def _get_grpc_codegen_tasks(self, **kw):
         return[]
 
-    def _get_packaging_tasks(self, language, **kw):
+    def _get_packaging_tasks(self, **kw):
         return []

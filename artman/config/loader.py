@@ -54,7 +54,7 @@ ARTIFACT_MAPPING = {
 }
 
 
-def load_artifact_config(artman_config_path, artifact_name):
+def load_artifact_config(artman_config_path, artifact_name, aspect=None):
     artman_config = _read_artman_config(artman_config_path)
     artifact_config = Artifact()
     artifact_config.CopyFrom(artman_config.common)
@@ -69,6 +69,9 @@ def load_artifact_config(artman_config_path, artifact_name):
         if artifact.name == artifact_name:
             loaded_artifact.MergeFrom(artifact)
             break
+
+    if aspect:
+        loaded_artifact.aspect = Artifact.Aspect.Value(aspect)
 
     artifact_config.MergeFrom(loaded_artifact)
     _validate_artifact_config(artifact_config)

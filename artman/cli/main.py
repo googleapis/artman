@@ -179,6 +179,11 @@ def parse_args(*args):
         type=str,
         help='[Required] Name of the artifact for artman to generate. Must '
         'match an artifact in the artman config yaml.')
+    parser_generate.add_argument(
+        '--aspect',
+        type=str,
+        default=None,
+        help='[Optional] Aspect of output to generate: ALL, CODE, or PACKAGE')
 
     # `publish` sub-command.
     parser_publish = subparsers.add_parser('publish', help='Publish artifact')
@@ -187,6 +192,11 @@ def parse_args(*args):
         type=str,
         help='[Required] Name of the artifact for artman to generate. Must '
         'match an artifact in the artman config yaml.')
+    parser_publish.add_argument(
+        '--aspect',
+        type=str,
+        default=None,
+        help='[Optional] Aspect of output to generate: ALL, CODE, or PACKAGE')
     parser_publish.add_argument(
         '--target',
         type=str,
@@ -276,7 +286,7 @@ def normalize_flags(flags, user_config):
 
     try:
         artifact_config = loader.load_artifact_config(
-            artman_config_path, flags.artifact_name)
+            artman_config_path, flags.artifact_name, flags.aspect)
     except ValueError as ve:
         logger.error('Artifact config loading failed with `%s`' % ve)
         sys.exit(96)
@@ -292,6 +302,7 @@ def normalize_flags(flags, user_config):
     # Set the pipeline
     artifact_type = artifact_config.type
     pipeline_args['artifact_type'] = Artifact.Type.Name(artifact_type)
+    pipeline_args['aspect'] = Artifact.Aspect.Name(artifact_config.aspect)
     if artifact_type == Artifact.GAPIC_ONLY:
         pipeline_name = 'GapicOnlyClientPipeline'
         pipeline_args['language'] = language

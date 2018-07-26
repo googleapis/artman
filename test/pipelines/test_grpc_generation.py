@@ -24,25 +24,11 @@ from artman.pipelines import code_generation
 from artman.pipelines import grpc_generation
 
 
-class GrpcClientPipelineTests(unittest.TestCase):
-    @mock.patch.object(grpc_generation, 'get_grpc_task_factory')
-    @mock.patch.object(code_generation.CodeGenerationPipelineBase, '__init__')
-    def test_constructor(self, cgpb, ggtf):
-        grpc_generation.GrpcClientPipeline(foo='bar')
-        cgpb.assert_called_once_with(ggtf(), foo='bar')
-
-
-class ProtoClientPipelineTests(unittest.TestCase):
-    @mock.patch.object(grpc_generation, 'get_proto_task_factory')
-    @mock.patch.object(code_generation.CodeGenerationPipelineBase, '__init__')
-    def test_constructor(self, cgpb, gptf):
-        grpc_generation.ProtoClientPipeline(foo='bar')
-        cgpb.assert_called_once_with(gptf(), foo='bar')
-
-
-class GrpcTaskFactoryBaseTests(unittest.TestCase):
+class ProtoGenTaskFactoryTests(unittest.TestCase):
     def setUp(self):
-        self._gtfb = grpc_generation.GrpcTaskFactoryBase()
+        self._gtfb = grpc_generation.ProtoGenTaskFactory(gen_grpc=True,
+                                                         language='java',
+                                                         aspect='ALL')
 
     def test_get_validate_kwargs(self):
         COMMON_REQUIRED = code_generation.COMMON_REQUIRED

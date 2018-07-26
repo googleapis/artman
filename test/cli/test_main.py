@@ -45,11 +45,13 @@ class ParseArgsTests(unittest.TestCase):
         assert flags.root_dir is ''
         assert flags.local is False
         assert flags.artifact_name == 'python_gapic'
+        assert flags.aspect is None
         assert flags.image == main.ARTMAN_DOCKER_IMAGE
 
         flags = main.parse_args('publish', '--target=staging', 'python_gapic')
         assert flags.config == 'artman.yaml'
         assert flags.artifact_name == 'python_gapic'
+        assert flags.aspect is None
         assert flags.github_username is None
         assert flags.github_token is None
         assert flags.target == 'staging'
@@ -65,6 +67,7 @@ class NormalizeFlagTests(unittest.TestCase):
             subcommand='generate',
             github_username='test', github_token='testtoken',
             artifact_name='python_gapic',
+            aspect=None,
             output_dir='./artman-genfiles',
             dry_run=False,
             local_repo_dir=None,

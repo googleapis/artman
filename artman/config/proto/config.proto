@@ -207,7 +207,7 @@ message Artifact {
     // This artifact type will only generate a GRPC library without GAPIC layer.
     GRPC = 2;
 
-    // This artifact type will generate a protobuf library using protobuf
+    // This artifact type will generate a protobuf library using the protobuf
     // compiler.
     PROTOBUF = 3;
 
@@ -326,4 +326,17 @@ message Artifact {
   // Discovery Document. The path can be an absolute path or a path relative
   // to the artman config yaml.
   string discovery_doc = 16;
+
+  enum Aspect {
+    // Generate both the code and packaging files for a library
+    ALL = 0;
+
+    // Generate only the code for a library
+    CODE = 1;
+
+    // Generate only the packaging files for a library
+    PACKAGE = 2;
+  }
+
+  Aspect aspect = 17;
 }
