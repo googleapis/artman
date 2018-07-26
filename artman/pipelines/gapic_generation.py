@@ -77,7 +77,7 @@ class GapicOnlyClientPipeline(code_gen.CodeGenerationPipelineBase):
     """
     def __init__(self, language, **kwargs):
         super(GapicOnlyClientPipeline, self).__init__(
-            GapicOnlyTaskFactory(**kwargs),
+            GapicOnlyTaskFactory(),
             language=language,
             **kwargs
         )
