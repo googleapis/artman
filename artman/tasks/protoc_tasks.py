@@ -38,9 +38,6 @@ class ProtoDescGenTask(task_base.TaskBase):
         for dep in proto_deps:
             if 'proto_path' in dep and dep['proto_path']:
                 desc_proto_paths.append(os.path.join(root_dir, dep['proto_path']))
-            # TODO remove this once proto_path is set for google-iam-v1 everywhere
-            elif dep['name'] == 'google-iam-v1':
-                desc_proto_paths.append(os.path.join(root_dir, 'google/iam/v1'))
         desc_protos = list(
             protoc_utils.find_protos(src_proto_path + desc_proto_paths,
                                      excluded_proto_path))
