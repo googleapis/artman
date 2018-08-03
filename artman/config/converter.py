@@ -64,8 +64,6 @@ def convert_to_legacy_config_dict(artifact_config, root_dir, output_dir):
         language, artifact_config.api_name, artifact_config.api_version)
     language_config_dict['gapic_code_dir'] = os.path.join(
         output_dir, rel_gapic_code_dir)
-    language_config_dict['git_repos'] = _calculate_git_repos_config(
-        artifact_config, output_dir)
     if artifact_config.release_level != Artifact.RELEASE_LEVEL_UNSPECIFIED:
         language_config_dict['release_level'] = (
             Artifact.ReleaseLevel.Name(
@@ -98,34 +96,6 @@ def _calculate_rel_gapic_output_dir(language, api_name, api_version):
         return 'ruby/google-cloud-ruby/google-cloud-%s' % api_name
 
     raise ValueError('Language `%s` is not currently supported.' % language)
-
-
-def _calculate_git_repos_config(artifact_config, output_dir):
-    result = {}
-    for target in artifact_config.publish_targets:
-        if not target.type == Artifact.PublishTarget.GITHUB:
-            continue
-        item = {}
-        item['location'] = target.location
-        paths = []
-        for map_entry in target.directory_mappings:
-            path = {}
-            if map_entry.src:
-                path['src'] = os.path.join(output_dir, map_entry.src)
-            if map_entry.dest:
-                path['dest'] = map_entry.dest
-            if map_entry.name:
-                path['artifact'] = map_entry.name
-            if (map_entry.name not in ['grpc', 'proto']
-                or artifact_config.language == Artifact.JAVA):
-              paths.append(path)
-            else:
-              logger.warning('"%s" publishing artifact type is only used in '
-                             'Java. Ignore that config.' % map_entry.name)
-        item['paths'] = paths
-        result[target.name] = item
-    return result
-
 
 def _calculate_proto_paths(proto_paths):
     src_proto_path, excluded_proto_path = [], []

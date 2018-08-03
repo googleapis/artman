@@ -139,17 +139,10 @@ def _validate_artman_config(config_pb):
     """
     artifacts = set()
     for artifact in config_pb.artifacts:
-        targets = set()
         if artifact.name in artifacts:
             return ('artifact `%s` has been configured twice, please rename.' %
                     artifact.name)
         artifacts.add(artifact.name)
-        for target in artifact.publish_targets:
-            if target.name in targets:
-                return ('publish target `%s` in artifact `%s` has been '
-                        'configured twice, please rename.' %
-                        (target.name, artifact.name))
-            targets.add(target.name)
 
     return None
 

@@ -13,7 +13,7 @@
 # limitations under the License.
 """The new artman CLI with the following syntax.
 
-    artman [Options] generate|publish <artifact_name>
+    artman [Options] generate <artifact_name>
 
 .. note::
     Only local execution is supported at this moment. The CLI syntax is
@@ -169,7 +169,7 @@ def parse_args(*args):
 
     # Add sub-commands.
     subparsers = parser.add_subparsers(
-        dest='subcommand', help='Support [generate|publish] sub-commands')
+        dest='subcommand', help='Support [generate] sub-commands')
 
     # `generate` sub-command.
     parser_generate = subparsers.add_parser(
@@ -184,53 +184,6 @@ def parse_args(*args):
         type=str,
         default=None,
         help='[Optional] Aspect of output to generate: ALL, CODE, or PACKAGE')
-
-    # `publish` sub-command.
-    parser_publish = subparsers.add_parser('publish', help='Publish artifact')
-    parser_publish.add_argument(
-        'artifact_name',
-        type=str,
-        help='[Required] Name of the artifact for artman to generate. Must '
-        'match an artifact in the artman config yaml.')
-    parser_publish.add_argument(
-        '--aspect',
-        type=str,
-        default=None,
-        help='[Optional] Aspect of output to generate: ALL, CODE, or PACKAGE')
-    parser_publish.add_argument(
-        '--target',
-        type=str,
-        default=None,
-        required=True,
-        help='[Required] Specify where the generated artifact should be '
-        'published to. It is defined as publishing targets in artman '
-        'config at artifact level.', )
-    parser_publish.add_argument(
-        '--github-username',
-        default=None,
-        help='[Optional] The GitHub username. Must be set if publishing the '
-        'artifact to github, but can come from the user config file.', )
-    parser_publish.add_argument(
-        '--github-token',
-        default=None,
-        help='[Optional] The GitHub personal access token. Must be set if '
-        'publishing the artifact to github, but can come from the user '
-        'config file.', )
-    parser_publish.add_argument(
-        '--dry-run',
-        dest='dry_run',
-        action='store_true',
-        help='[Optional] When specified, artman will skip the remote '
-        'publishing step.', )
-    parser_publish.add_argument(
-        '--local-repo-dir',
-        type=str,
-        default=None,
-        help='[Optional] When specified, artman will neither look up the '
-        'publishing configuration in ~/.artman.config.yaml, nor clone a new '
-        'github repo. Instead, it will use the specified directory to stage '
-        'generated result. This only works under --dry-run mode.', )
-    parser_publish.set_defaults(dry_run=False)
 
     return parser.parse_args(args=args)
 
@@ -269,14 +222,6 @@ def normalize_flags(flags, user_config):
     # toolkit on his or her machine.
     pipeline_args['root_dir'] = root_dir
     pipeline_args['toolkit_path'] = user_config.local.toolkit
-
-    if flags.subcommand == 'publish' and flags.local_repo_dir:
-        if not flags.dry_run:
-            logger.error('`--dry-run` flag must be passed when '
-                         '`--local-repo-dir` is specified')
-            sys.exit(96)
-        flags.local_repo_dir = os.path.abspath(flags.local_repo_dir)
-        pipeline_args['local_repo_dir'] = flags.local_repo_dir
 
     artman_config_path = flags.config
     if not os.path.isfile(artman_config_path):
@@ -331,29 +276,6 @@ def normalize_flags(flags, user_config):
     config_args = config_util.load_config_spec(legacy_config_dict, language)
     pipeline_args.update(config_args)
 
-    # Setup publishing related config if needed.
-    if flags.subcommand == 'generate':
-        pipeline_args['publish'] = 'noop'
-    elif flags.subcommand == 'publish':
-        publishing_config = _get_publishing_config(artifact_config,
-                                                   flags.target)
-        if publishing_config.type == Artifact.PublishTarget.GITHUB:
-            if flags.dry_run:
-                pipeline_args['publish'] = 'local'
-            else:
-                pipeline_args['publish'] = 'github'
-                pipeline_args['github'] = support.parse_github_credentials(
-                    argv_flags=flags,
-                    github_config=user_config.github)
-            repos = pipeline_args.pop('git_repos')
-            pipeline_args['git_repo'] = support.select_git_repo(
-                repos, publishing_config.name)
-        else:
-            logger.error(
-                'Publishing type `%s` is not supported yet.' %
-                Artifact.PublishTarget.Type.Name(publishing_config.type))
-            sys.exit(96)
-
     # Print out the final arguments to stdout, to help the user with
     # possible debugging.
     pipeline_args_repr = yaml.dump(
@@ -370,19 +292,6 @@ def normalize_flags(flags, user_config):
 
     # Return the final arguments.
     return pipeline_name, pipeline_args
-
-
-def _get_publishing_config(artifact_config_pb, publish_target):
-    valid_options = []
-    for target in artifact_config_pb.publish_targets:
-        valid_options.append(target.name)
-        if target.name == publish_target:
-            return target
-    logger.error('No publish target with `%s` configured in artifact `%s`. '
-                 'Valid options are %s' %
-                 (publish_target, artifact_config_pb.name, valid_options))
-    sys.exit(96)
-
 
 def _run_artman_in_docker(flags):
     """Executes artman command.
@@ -418,8 +327,6 @@ def _run_artman_in_docker(flags):
         '-v', '%s:%s' % (artman_config_dirname, artman_config_dirname),
         '-w', root_dir
     ]
-    if flags.subcommand == 'publish' and flags.local_repo_dir:
-        base_cmd.extend(['-v', '%s:%s' % (flags.local_repo_dir, flags.local_repo_dir)])
     base_cmd.extend([docker_image, '/bin/bash', '-c'])
 
     inner_artman_debug_cmd_str = inner_artman_cmd_str

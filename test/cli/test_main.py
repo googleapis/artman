@@ -48,17 +48,6 @@ class ParseArgsTests(unittest.TestCase):
         assert flags.aspect is None
         assert flags.image == main.ARTMAN_DOCKER_IMAGE
 
-        flags = main.parse_args('publish', '--target=staging', 'python_gapic')
-        assert flags.config == 'artman.yaml'
-        assert flags.artifact_name == 'python_gapic'
-        assert flags.aspect is None
-        assert flags.github_username is None
-        assert flags.github_token is None
-        assert flags.target == 'staging'
-        assert flags.verbosity is None
-        assert flags.dry_run is False
-
-
 class NormalizeFlagTests(unittest.TestCase):
     def setUp(self):
         self.flags = Namespace(
@@ -83,14 +72,4 @@ class NormalizeFlagTests(unittest.TestCase):
         assert name == 'GapicClientPipeline'
         assert args['gapic_yaml'].endswith('test_gapic.yaml')
         assert args['toolkit_path']
-        assert 'github' not in args
         assert args['language'] == 'python'
-        assert args['publish'] == 'noop'
-
-    def test_github_credentials(self):
-        self.flags.target = 'github'
-        self.flags.subcommand = 'publish'
-        name, args = main.normalize_flags(self.flags, self.user_config)
-        assert args['publish'] == 'github'
-        assert args['github']['username'] == 'test'
-        assert args['github']['token'] == 'testtoken'

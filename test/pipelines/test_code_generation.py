@@ -45,10 +45,10 @@ class CodeGenerationPipelineBaseTests(unittest.TestCase):
         with mock.patch.object(CGPB, 'validate_kwargs') as validate:
             cgpb = CGPB(
                 gapic_generation.GapicTaskFactory(),
-                language='python', publish='noop', aspect='ALL'
+                language='python', aspect='ALL'
             )
             validate.assert_called_once()
-        flow = cgpb.do_build_flow(language='python', publish='noop',
+        flow = cgpb.do_build_flow(language='python',
                                   gapic_code_dir='output', aspect='ALL')
         assert isinstance(flow, linear_flow.Flow)
         assert len(flow) == 9
@@ -58,10 +58,10 @@ class CodeGenerationPipelineBaseTests(unittest.TestCase):
         with mock.patch.object(CGPB, 'validate_kwargs') as validate:
             cgpb = CGPB(
                 gapic_generation.DiscoGapicTaskFactory(),
-                language='java', publish='noop', aspect='ALL'
+                language='java', aspect='ALL'
             )
             validate.assert_called_once()
-        flow = cgpb.do_build_flow(language='java', publish='noop',
+        flow = cgpb.do_build_flow(language='java',
                                   gapic_code_dir='output', aspect='ALL')
         assert isinstance(flow, linear_flow.Flow)
         assert len(flow) == 6
@@ -71,10 +71,10 @@ class CodeGenerationPipelineBaseTests(unittest.TestCase):
         with mock.patch.object(CGPB, 'validate_kwargs') as validate:
             cgpb = CGPB(
                 gapic_generation.GapicTaskFactory(),
-                language='python', publish='noop', aspect='ALL'
+                language='python', aspect='ALL'
             )
             validate.assert_called_once()
-        flow = cgpb.do_build_flow(language='python', publish='noop',
+        flow = cgpb.do_build_flow(language='python',
                                   aspect='ALL')
         assert isinstance(flow, linear_flow.Flow)
         assert len(flow) == 7
@@ -85,7 +85,6 @@ class CodeGenerationPipelineBaseTests(unittest.TestCase):
         gtf = gapic_generation.GapicTaskFactory()
         gcpb = code_generation.CodeGenerationPipelineBase(gtf,
             language='python',
-            publish='noop',
             aspect='ALL',
         )
         does_exist.assert_called_once()

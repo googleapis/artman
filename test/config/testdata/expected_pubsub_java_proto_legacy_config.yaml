@@ -21,10 +21,4 @@ common:
   - /tmp/input/google/pubsub/v1
 java:
   gapic_code_dir: /tmp/output/java/gapic-google-cloud-pubsub-v1
-  git_repos:
-    staging-github:
-      location: git@github.com:ethanbao/api-client-staging.git
-      paths:
-      - dest: generated/java/proto-google-cloud-pubsub-v1
-        src: /tmp/output/java/proto-google-cloud-pubsub-v1
   release_level: beta

@@ -87,23 +87,6 @@ class TaskFactoryBase(object):
         """
         raise NotImplementedError('Subclass must implement abstract method')
 
-    def _get_publish_tasks(self, publish, **kwargs):
-        """Dynamically import publisher tasks based on the selected publisher.
-
-        This will raise ImportError if the publisher does not have a module
-        in `pipeline.tasks.publish`.
-
-        Args:
-            publish (str): A string of a publisher in pipeline.tasks.publish.*.
-
-        Returns:
-            list: A list of Task subclasses defined by the publisher module.
-        """
-        module = importlib.import_module(
-            'artman.tasks.publish.{}'.format(publish),
-        )
-        return module.TASKS
-
 
 def _validate_exists(required, **kwargs):
     for arg in required:

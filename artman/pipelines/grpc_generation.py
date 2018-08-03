@@ -15,6 +15,7 @@
 """Pipelines that run gRPC codegen"""
 
 from artman.pipelines import code_generation as code_gen
+from artman.tasks import emit_success
 from artman.tasks import package_metadata_tasks
 from artman.tasks import protoc_tasks
 from artman.tasks import python_grpc_tasks
@@ -49,7 +50,7 @@ class ProtoGenTaskFactory(code_gen.TaskFactoryBase):
 
     def get_tasks(self, **kwargs):
         tasks = self.get_grpc_codegen_tasks(**kwargs)
-        tasks += self._get_publish_tasks(**kwargs)
+        tasks += emit_success.TASKS
         return task_utils.instantiate_tasks(tasks, kwargs)
 
     def get_grpc_codegen_tasks(self, **kwargs):

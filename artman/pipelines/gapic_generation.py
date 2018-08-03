@@ -18,14 +18,15 @@ from __future__ import absolute_import
 
 from artman.pipelines import code_generation as code_gen
 from artman.pipelines import grpc_generation as grpc_gen
+from artman.tasks import emit_success
 from artman import tasks
 from artman.utils import task_utils
 
 
 # kwargs required by GAPIC code gen
-_GAPIC_REQUIRED = ['service_yaml', 'gapic_yaml', 'language', 'aspect', 'publish']
+_GAPIC_REQUIRED = ['service_yaml', 'gapic_yaml', 'language', 'aspect']
 
-_DISCOGAPIC_REQUIRED = ['gapic_yaml', 'language', 'publish']
+_DISCOGAPIC_REQUIRED = ['gapic_yaml', 'language']
 
 
 class GapicConfigPipeline(code_gen.CodeGenerationPipelineBase):
@@ -158,7 +159,7 @@ class GapicTaskFactory(code_gen.TaskFactoryBase):
             if packaging_task not in answer:
                 answer.append(packaging_task)
 
-        answer += self._get_publish_tasks(**kwargs)
+        answer += emit_success.TASKS
         return task_utils.instantiate_tasks(answer, kwargs)
 
     def _get_gapic_codegen_tasks(self, language, **kwargs):
@@ -237,7 +238,7 @@ class DiscoGapicTaskFactory(code_gen.TaskFactoryBase):
             if packaging_task not in answer:
                 answer.append(packaging_task)
 
-        answer += self._get_publish_tasks(**kwargs)
+        answer += emit_success.TASKS
         return task_utils.instantiate_tasks(answer, kwargs)
 
     def _get_gapic_codegen_tasks(self, language, **kwargs):

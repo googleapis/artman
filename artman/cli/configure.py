@@ -52,7 +52,6 @@ def configure(log_level=logging.INFO):
     # Go through each step.
     # These are split out to make testing them easier.
     user_config.local.CopyFrom(_configure_local_config())
-    user_config.github.CopyFrom(_configure_github_config())
 
     try:
         config_dir = os.path.expanduser('~/.artman/')
@@ -82,26 +81,6 @@ def _configure_local_config():
             answer.toolkit = location
 
     # Done; return the answer.
-    return answer
-
-
-def _configure_github_config():
-    """Determine and return artman user GitHub config.
-
-    Returns:
-        dict: The new GitHub configuration.
-    """
-    answer = GitHubConfig()
-    logger.info('Since you intend to publish to GitHub, you need to '
-                'supply credentials.')
-    logger.info('Create an access token at: '
-                'https://github.com/settings/tokens')
-    logger.info('It needs the "repo" scope and nothing else.')
-    while not answer.username:
-        answer.username = six.moves.input('GitHub username: ')
-    while not answer.token:
-        answer.token = getpass.getpass('GitHub token (input is hidden): ')
-
     return answer
 
 

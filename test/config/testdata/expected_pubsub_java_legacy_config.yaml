@@ -21,18 +21,4 @@ common:
     proto_path: google/iam/v1
 java:
   gapic_code_dir: /tmp/output/java/gapic-google-cloud-pubsub-v1
-  git_repos:
-    google-cloud-java:
-      location: git@github.com:ethanbao/google-cloud-java.git
-      paths:
-      - dest: google-cloud-pubsub
-    staging-github:
-      location: git@github.com:ethanbao/api-client-staging.git
-      paths:
-      - artifact: gapic
-        dest: generated/java/gapic-google-cloud-pubsub-v1
-      - dest: generated/java/grpc-google-cloud-pubsub-v1
-        src: /tmp/output/java/grpc-google-cloud-pubsub-v1
-      - dest: generated/java/proto-google-cloud-pubsub-v1
-        src: /tmp/output/java/proto-google-cloud-pubsub-v1
   release_level: beta

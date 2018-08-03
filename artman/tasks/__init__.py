@@ -21,17 +21,17 @@ us to move to a clearer and more succinct spelling: `tasks.{domain}.{name}`
 
 from __future__ import absolute_import
 
+from artman.tasks import emit_success as success
 from artman.tasks import format_tasks as format
 from artman.tasks import gapic_tasks as gapic
 from artman.tasks import io_tasks as io
 from artman.tasks import package_metadata_tasks as package_metadata
 from artman.tasks import protoc_tasks as protoc
-from artman.tasks import publish
 from artman.tasks import python_grpc_tasks as python_grpc
 from artman.tasks.task_base import Task, EmptyTask
 
 __all__ = (
     'EmptyTask', 'format', 'gapic', 'io',
-    'package_metadata', 'protoc', 'publish', 'python_grpc',
+    'package_metadata', 'protoc', 'python_grpc', 'success'
     'Task',
 )

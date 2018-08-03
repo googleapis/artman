@@ -19,10 +19,10 @@ package googleapis.artman;
 // Artman config is used to generate API client artifacts. For each API, API
 // producer will write an artman config file in yaml format, fields of which
 // are defined in this proto file. With the artman yaml file in place, API
-// producer can generate and/or publish the specified artifacts with the
+// producer can generate the specified artifacts with the
 // following command syntax:
 //
-//     artman --config <artman_config_yaml> generate|publish <artifact_name>
+//     artman --config <artman_config_yaml> generate <artifact_name>
 //
 // Below is an example of an artman config yaml using
 // [library-example](https://github.com/googleapis/googleapis/tree/master/google/example/library)
@@ -49,20 +49,6 @@ package googleapis.artman;
 //    - name: python_gapic_library
 //      type: GAPIC
 //      language: PYTHON
-//      publish_targets:
-//      - name: google-cloud-python
-//        type: GITHUB
-//        location: git@github.com:googleapis/google-cloud-python.git
-//        directory_mappings:
-//        - src: gapic-google-cloud-pubsub-v1
-//          dest: generated/python/gapic-google-cloud-pubsub-v1
-//
-// With the artman config above, the following command will generate full GAPIC
-// java client library and send a PR to googleapis/google-cloud-python repo.
-//
-//    artman --config <artman_config_yaml> publish --publish-target
-//    google-cloud-python --github-username=<github username>
-//    --github-token=<github-token> python_gapic_library
 message Config {
   // All configuration in common artifact will be merged with individual
   // artifact configuration under `artifacts` field. Value in the individual
@@ -266,6 +252,7 @@ message Artifact {
   // [dependencies.yaml](https://github.com/googleapis/googleapis/blob/master/gapic/packaging/dependencies.yaml)
   PackageVersion package_version = 14;
 
+  // UNSUPPORTED.
   message PublishTarget {
     // Each publish target must have a name that is unique to the artifact, and
     // must be specified through the artman flag during publishing.
@@ -308,6 +295,8 @@ message Artifact {
     repeated DirectoryMapping directory_mappings = 4;
   }
 
+  // UNSUPPORTED.
+  //
   // One can choose to publish artifact to the specified location by listing the
   // supported publish targets in this field. `name` field is required for each
   // publish target. With `publish_targets` listed here, artman user can run the

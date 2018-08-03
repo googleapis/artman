@@ -12,16 +12,22 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Module containing all artman publishing tasks.
-
-This module provides all tasks from its submodules.
-"""
-
 from __future__ import absolute_import
+import os
+import unittest
 
-from artman.tasks.publish import github
-from artman.tasks.publish import local
-from artman.tasks.publish import maven
-from artman.tasks.publish import noop
+import mock
 
-__all__ = ('github', 'local', 'maven', 'noop')
+from artman.tasks import emit_success
+from artman.utils.logger import logger
+
+
+class EmitSuccessTests(unittest.TestCase):
+    def test_execute(self):
+        task = emit_success.EmitSuccess()
+        with mock.patch.object(logger, 'success') as success:
+            task.execute(os.path.expanduser('~/foo/bar'))
+            success.assert_called_once()
+            _, args, _ = success.mock_calls[0]
+            assert args[0].startswith('Code generated: ')
+            assert args[0].endswith('~/foo/bar')

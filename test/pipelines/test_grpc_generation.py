@@ -39,6 +39,6 @@ class ProtoGenTaskFactoryTests(unittest.TestCase):
 
     def test_get_tasks(self):
         expected = []
-        actual = self._gtfb.get_tasks(publish='noop')
+        actual = self._gtfb.get_tasks()
         for task, class_ in zip(actual, expected):
             assert isinstance(task, class_)
