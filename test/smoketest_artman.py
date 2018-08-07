@@ -39,6 +39,10 @@ from artman.config.proto import config_pb2
 # but warning. It is defined at artifact level, and one can use regex to
 # whitelist the whole API or whole folder.
 WHITELIST = [
+    # The two configs below are failing: https://github.com/googleapis/artman/issues/483
+    'python_gapic@google/devtools/containeranalysis/artman_containeranalysis_v1beta1.yaml',
+    'ruby_gapic@google/devtools/containeranalysis/artman_containeranalysis_v1beta1.yaml',
+
     'gapic_config@google/bigtable/admin/artman_bigtableadmin.yaml',
     'nodejs_gapic@google/cloud/videointelligence/artman_videointelligence_v1.yaml',
     # TODO(ethanbao): Figure out the rootcause
