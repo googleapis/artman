@@ -40,6 +40,8 @@ INVALID_USER_CONFIG_ERROR_MESSAGE_FORMAT = 'Artman user YAML %s is invalid.'
 ARTIFACT_MAPPING = {
     'java_proto': {'language': 'JAVA', 'type': 'PROTOBUF'},
     'java_grpc': {'language': 'JAVA', 'type': 'GRPC'},
+    'ruby_grpc': {'language': 'RUBY', 'type': 'GRPC'},
+    'python_grpc': {'language': 'PYTHON', 'type': 'GRPC'},
     'java_gapic': {'language': 'JAVA', 'type': 'GAPIC'},
     'java_discogapic': {'language': 'JAVA', 'type': 'DISCOGAPIC'},
     'java_gapic_only': {'language': 'JAVA', 'type': 'GAPIC_ONLY'},

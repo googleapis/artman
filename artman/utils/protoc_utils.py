@@ -185,7 +185,7 @@ class _PythonProtoParams(_SimpleProtoParams):
 
     @property
     def proto_compiler_command(self):
-        return [sys.executable, '-m', 'grpc.tools.protoc']
+        return [sys.executable, '-m', 'grpc_tools.protoc']
 
 
 PROTO_PARAMS_MAP = {
