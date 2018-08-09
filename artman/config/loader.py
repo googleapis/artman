@@ -52,6 +52,7 @@ ARTIFACT_MAPPING = {
     'ruby_gapic': {'language': 'RUBY', 'type': 'GAPIC'},
     'csharp_gapic': {'language': 'CSHARP', 'type': 'GAPIC'},
     'gapic_config': {'type': 'GAPIC_CONFIG'},
+    'discogapic_config': {'type': 'DISCOGAPIC_CONFIG'},
     'php_grpc': {'language': 'JAVA', 'type': 'GRPC'},
 }
 
