@@ -51,6 +51,9 @@ WHITELIST = [
     'php_gapic@google/cloud/dialogflow/artman_dialogflow_v2beta1.yaml',
     '.+@google/api/servicemanagement/artman_servicemanagement_v1.yaml',
     '.+@google/devtools/remoteworkers/v1test2/artman_remoteworkers.yaml',
+
+    # https://github.com/googleapis/gapic-generator/issues/2265
+    'python_gapic@google/iam/credentials/artman_iamcredentials_v1.yaml',
 ]
 
 logger = logging.getLogger('smoketest')
