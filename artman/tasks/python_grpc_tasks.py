@@ -135,6 +135,8 @@ class PythonChangePackageTask(task_base.TaskBase):
             dotted = re.sub(r'\.v([\d]+)alpha\b', r'_v\1alpha.proto', dotted)
         if re.search(r'\.v[\d]+beta\b', dotted):
             dotted = re.sub(r'\.v([\d]+)beta\b', r'_v\1beta.proto', dotted)
+        if re.search(r'\.v[\d]+eap\b', dotted):
+            dotted = re.sub(r'\.v([\d]+)eap\b', r'_v\1eap.proto', dotted)
 
         # Done; return with the appropriate separator.
         return dotted.replace('.', sep) + suffix
