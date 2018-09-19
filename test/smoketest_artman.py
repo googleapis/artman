@@ -64,7 +64,7 @@ def run_smoke_test(root_dir, log):
     log_file = _setup_logger(log)
     failure = []
     success = []
-    warning = []
+    known_fail = []
     for artman_yaml_path in glob.glob('%s/google/**/artman_*.yaml' % root_dir,
                                       recursive=True):
         artman_config = _parse(artman_yaml_path)
@@ -86,7 +86,7 @@ def run_smoke_test(root_dir, log):
                 msg = 'Failed to generate %s of %s.' % (
                     artifact.name, artman_yaml_path)
                 if _is_whitelisted(artman_yaml_path, root_dir, artifact.name):
-                    warning.append(msg)
+                    known_fail.append(msg)
                 else:
                     failure.append(msg)
             else:
@@ -98,13 +98,16 @@ def run_smoke_test(root_dir, log):
     logger.info('Success:')
     for msg in success:
         logger.info(msg)
-    logger.info('Warning:')
-    for msg in warning:
-        logger.info(msg)
-    logger.info('Failure:')
-    for msg in failure:
-        logger.error(msg)
+
+    if known_fail:
+        logger.info('Known Whitelisted Failures:')
+        for msg in known_fail:
+            logger.info(msg)
+
     if failure:
+        logger.info('Failure:')
+        for msg in failure:
+            logger.error(msg)
         sys.exit('Smoke test failed.')
 
 
