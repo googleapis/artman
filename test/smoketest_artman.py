@@ -54,6 +54,9 @@ WHITELIST = [
 
     # https://github.com/googleapis/gapic-generator/issues/2265
     'python_gapic@google/iam/credentials/artman_iamcredentials_v1.yaml',
+
+    # TODO(pongad): talk to the API owners
+    '(?:python|php)_gapic@google/api/expr/artman_cel.yaml',
 ]
 
 logger = logging.getLogger('smoketest')
