@@ -20,19 +20,14 @@ RUN apt-get update \
 
 RUN apt-get update \
   && apt-get install -y --no-install-recommends \
-    build-essential \
-    pkg-config \
-    libffi-dev \
-    libssl-dev \
     curl \
     git \
-    openssh-client \
     # runtime packages
     unzip \
     php-pear \
     python3-pip \
     # Java
-    openjdk-8-jdk \
+    openjdk-8-jdk-headless \
     # NodeJS
     # This installs Node 4 on Ubuntu 16.04.
     nodejs \
@@ -46,6 +41,8 @@ RUN apt-get update \
     libtool \
     autotools-dev \
     automake \
+    make \
+    g++ \
     # Used to create Python doc
     pandoc \
     # .NET dependencies
@@ -117,7 +114,7 @@ RUN gem install rake --no-ri --no-rdoc \
   && gem install grpc-tools --version '=1.10.0' --no-ri --no-rdoc
 
 # Install grpc_php_plugin
-RUN git clone -b v1.7.2 --recurse-submodules https://github.com/grpc/grpc.git /temp/grpc \
+RUN git clone -b v1.7.2 --recurse-submodules --depth=1 https://github.com/grpc/grpc.git /temp/grpc \
   && cd /temp/grpc \
   && make -j $(nproc) grpc_php_plugin \
   && mv ./bins/opt/grpc_php_plugin /usr/local/bin/ \
@@ -144,14 +141,14 @@ RUN curl -SL $DOTNET_SDK_DOWNLOAD_URL --output dotnet.tar.gz \
     && ln -s /usr/share/dotnet/dotnet /usr/bin/dotnet
 
 # Install googleapis.
-RUN git clone https://github.com/googleapis/googleapis --single-branch \
+RUN git clone --single-branch https://github.com/googleapis/googleapis \
   && cd googleapis \
   && git checkout $GOOGLEAPIS_HASH \
   && cd .. \
   && rm -rf /googleapis/.git/
 
 # Install toolkit.
-RUN git clone https://github.com/googleapis/gapic-generator toolkit \
+RUN git clone --single-branch https://github.com/googleapis/gapic-generator toolkit \
   && cd toolkit/ \
   && git checkout $GAPIC_GENERATOR_HASH \
   && ./gradlew fatJar createToolPaths \
