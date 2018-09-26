@@ -57,6 +57,11 @@ WHITELIST = [
 
     # TODO(pongad): talk to the API owners
     '(?:python|php)_gapic@google/api/expr/artman_cel.yaml',
+
+    # whitelisted because of
+    # java.lang.IllegalStateException: A HttpRule option must be defined.
+    # (affects only PHP that generates code for JSON over HTTP)
+    'php_gapic@google/cloud/bigquery/storage/artman_bigquerystorage_v1beta1.yaml',
 ]
 
 logger = logging.getLogger('smoketest')
