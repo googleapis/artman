@@ -30,7 +30,6 @@ from ruamel.yaml import YAML
 dockerfile_googleapis_regex = r'^(ENV GOOGLEAPIS_HASH )\S+()'
 dockerfile_gapic_generator_regex = r'^(ENV GAPIC_GENERATOR_HASH )\S+()'
 dockerfile_version_regex = r'^(ENV ARTMAN_VERSION )\S+()'
-setup_py_version_regex = r"^(current_version = ')\S+(')"
 
 github_gapic_generator_project = 'googleapis/gapic-generator'
 github_googleapis_project = 'googleapis/googleapis'
@@ -139,7 +138,6 @@ def main():
     abspath = os.path.abspath(parser.prog)
     root_dir = os.path.dirname(abspath)
     dockerfile = os.path.join(root_dir, 'Dockerfile')
-    setup_py = os.path.join(root_dir, 'setup.py')
 
     # Do what they asked
     if googleapis_sha:
@@ -153,7 +151,6 @@ def main():
 
     if args.version:
         update_file(dockerfile, dockerfile_version_regex, args.version)
-        update_file(setup_py, setup_py_version_regex, args.version)
         print('Version is now ' + args.version + '.')
 
 

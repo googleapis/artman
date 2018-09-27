@@ -19,14 +19,25 @@
 
 import io
 import os
+import re
 import setuptools
 
-# The following line is parsed by CI scripts (see .circleci/config.yml)
-# and by release.py. Please keep the format.
-current_version = '0.15.5'
-
 cur_dir = os.path.realpath(os.path.dirname(__file__))
-with io.open('%s/requirements.txt' % cur_dir) as requirements_file:
+
+# version is defined in Dockerfile: ENV ARTMAN_VERSION version
+current_version = None
+with io.open(os.path.join(cur_dir, 'Dockerfile')) as dockerfile:
+    for line in dockerfile:
+        match = re.match('^ENV ARTMAN_VERSION (\S+)$', line)
+        if match:
+            current_version = match.group(1)
+            break
+if not current_version:
+    print('Cannot determine version from Dockerfile. Exiting.')
+    exit(1)
+print('Version: %s' % current_version)
+
+with io.open(os.path.join(cur_dir, 'requirements.txt')) as requirements_file:
     requirements = requirements_file.read().strip().split('\n')
 
 setuptools.setup(
