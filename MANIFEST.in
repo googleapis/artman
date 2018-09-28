@@ -2,4 +2,6 @@ include LICENSE
 include README.rst
 include requirements.txt
 include artman/conductors/cloudtasks.json
+# Version number is stored in Dockerfile, so it needs to be in the source distribution.
+include Dockerfile
 global-exclude *.pyc
