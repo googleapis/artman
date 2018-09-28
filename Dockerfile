@@ -5,7 +5,7 @@ ENV GOOGLEAPIS_HASH 071efb9af05d831205787108e163235db6b763e4
 ENV GAPIC_GENERATOR_HASH 3fa914405f4e7a085c1e653100c264f049e665fe
 # Define version number below. The ARTMAN_VERSION line is parsed by
 # .circleci/config.yml and setup.py, please keep the format.
-ENV ARTMAN_VERSION 0.15.6
+ENV ARTMAN_VERSION 0.15.7
 
 ENV DEBIAN_FRONTEND noninteractive
 
@@ -24,6 +24,8 @@ RUN apt-get update \
   && apt-get install -y --no-install-recommends \
     curl \
     git \
+    # openssh-client is needed for CircleCI git checkout
+    openssh-client \
     # runtime packages
     unzip \
     php-pear \
