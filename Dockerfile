@@ -5,7 +5,7 @@ ENV GOOGLEAPIS_HASH b71d0c74de0b84f2f10a2c61cd66fbb48873709f
 ENV GAPIC_GENERATOR_HASH ea27c8ac15551128e52998a35471711b4c6ffd82
 # Define version number below. The ARTMAN_VERSION line is parsed by
 # .circleci/config.yml and setup.py, please keep the format.
-ENV ARTMAN_VERSION 0.15.8
+ENV ARTMAN_VERSION 0.15.9
 
 ENV DEBIAN_FRONTEND noninteractive
 

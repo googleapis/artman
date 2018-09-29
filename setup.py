@@ -35,7 +35,6 @@ with io.open(os.path.join(cur_dir, 'Dockerfile')) as dockerfile:
 if not current_version:
     print('Cannot determine version from Dockerfile. Exiting.')
     exit(1)
-print('Version: %s' % current_version)
 
 with io.open(os.path.join(cur_dir, 'requirements.txt')) as requirements_file:
     requirements = requirements_file.read().strip().split('\n')
