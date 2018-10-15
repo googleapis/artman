@@ -51,7 +51,7 @@ class CodeGenerationPipelineBaseTests(unittest.TestCase):
         flow = cgpb.do_build_flow(language='python',
                                   gapic_code_dir='output', aspect='ALL')
         assert isinstance(flow, linear_flow.Flow)
-        assert len(flow) == 9
+        assert len(flow) == 10
 
     def test_do_build_flow_disco(self):
         CGPB = code_generation.CodeGenerationPipelineBase

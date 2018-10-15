@@ -18,6 +18,7 @@
 /go/grpc-google-cloud-library_example-v1/google.golang.org/genproto/googleapis/example/library/v1/library.pb.go
 /go_google-cloud-library_example-v1_package2.yaml
 /google-cloud-library_example-v1.desc
+/google-cloud-library_example-v1_updated_py_docs.desc
 /java/build.gradle
 /java/gapic-google-cloud-library_example-v1/build.gradle
 /java/gapic-google-cloud-library_example-v1/src/main/java/com/google/cloud/example/library/v1/LibraryServiceClient.java

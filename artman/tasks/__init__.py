@@ -24,6 +24,7 @@ from __future__ import absolute_import
 from artman.tasks import emit_success as success
 from artman.tasks import format_tasks as format
 from artman.tasks import gapic_tasks as gapic
+from artman.tasks import descriptor_set_tasks as descriptor
 from artman.tasks import io_tasks as io
 from artman.tasks import package_metadata_tasks as package_metadata
 from artman.tasks import protoc_tasks as protoc

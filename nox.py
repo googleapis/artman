@@ -27,7 +27,8 @@ def unit_tests(session, python_version):
     session.interpreter = 'python{}'.format(python_version)
 
     # Install all test dependencies, then install this package in-place.
-    session.install('mock', 'pytest', 'pytest-cov', 'pyfakefs')
+    session.install('mock', 'pytest', 'pytest-cov', 'pyfakefs',
+                    'restructuredtext_lint')
     session.install('-e', '.')
 
     # Run py.test against the unit tests.

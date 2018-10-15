@@ -173,6 +173,7 @@ class GapicTaskFactory(code_gen.TaskFactoryBase):
         """
         return [
             tasks.protoc.ProtoDescGenTask,
+            tasks.descriptor.get_descriptor_set_task(language),
             tasks.package_metadata.PackageMetadataConfigGenTask,
             tasks.gapic.GapicCodeGenTask,
             tasks.format.get_format_task(language),
