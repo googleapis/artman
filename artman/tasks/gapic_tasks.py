@@ -36,7 +36,7 @@ class GapicConfigGenTask(task_base.TaskBase):
                                        api_full_name + '_gapic.yaml')
         args = [
             '--descriptor_set=' + os.path.abspath(descriptor_set),
-            '--output=' + os.path.abspath(config_gen_path)
+            '--output=' + os.path.abspath(config_gen_path),
         ]
         if service_yaml:
             args = args + ['--service_yaml=' + os.path.abspath(service_yaml)]
@@ -103,7 +103,7 @@ class GapicCodeGenTask(task_base.TaskBase):
     def execute(self, language, toolkit_path, descriptor_set, service_yaml,
                 gapic_yaml, package_metadata_yaml,
                 gapic_code_dir, api_name, api_version, organization_name,
-                aspect):
+                aspect, generator_args):
         existing = glob.glob('%s/*' % gapic_code_dir)
         if existing:
             self.exec_command(['rm', '-r'] + existing)
@@ -117,6 +117,9 @@ class GapicCodeGenTask(task_base.TaskBase):
         if service_yaml:
             args = args + ['--service_yaml=' + os.path.abspath(service_yaml)]
         args = args + gapic_args
+
+        if generator_args:
+          args = args + generator_args.split(' ')
 
         gapic_artifact = ''
         if aspect == 'ALL':

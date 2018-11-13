@@ -57,6 +57,7 @@ class NormalizeFlagTests(unittest.TestCase):
             github_username='test', github_token='testtoken',
             artifact_name='python_gapic',
             aspect=None,
+            generator_args=["--dev_samples --other"],
             output_dir='./artman-genfiles',
             dry_run=False,
             local_repo_dir=None,
@@ -73,3 +74,4 @@ class NormalizeFlagTests(unittest.TestCase):
         assert args['gapic_yaml'].endswith('test_gapic.yaml')
         assert args['toolkit_path']
         assert args['language'] == 'python'
+        assert args['generator_args'] == ['--dev_samples --other']

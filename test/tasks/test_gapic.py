@@ -158,6 +158,7 @@ class GapicCodeGenTaskTests(unittest.TestCase):
             service_yaml='/path/to/service.yaml',
             toolkit_path='/path/to/toolkit',
             aspect='ALL',
+            generator_args='--extra_args'
         )
         expected_cmds = [
             ' '.join(['java -cp',
@@ -167,6 +168,7 @@ class GapicCodeGenTaskTests(unittest.TestCase):
                       '--output=/path/to/output --language=python',
                       '--service_yaml=/path/to/service.yaml',
                       '--gapic_yaml=/path/to/pubsub.yaml',
+                      '--extra_args'
                       ])
         ]
         assert_calls_equal(exec_command.mock_calls, expected_cmds)
