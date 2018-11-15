@@ -46,22 +46,25 @@ def test_get_subdir_path_not_found():
 def test_move_protos():
     task = python_grpc_tasks.PythonMoveProtosTask()
     with mock.patch.object(task, 'exec_command') as exec_command:
-        with mock.patch.object(task, '_get_subdir_path') as _gsp:
-            _gsp.side_effect = (
-                'grpc_path/foo/bar',
-                'gapic_path/foo/bar',
-            )
-            assert task.execute('grpc_path', 'gapic_path') == {
-                'grpc_code_dir': None,
-            }
-
-            # Inspect the calls to _get_subdir_path to make sure we are looking
-            # for the paths we expect.
-            assert _gsp.call_count == 2
-            proto_call = _gsp.mock_calls[0]
-            gapic_call = _gsp.mock_calls[1]
-            assert proto_call[1] == ('grpc_path', 'proto')
-            assert gapic_call[1] == ('gapic_path/google', 'gapic')
+        with mock.patch.object(task, '_get_proto_path') as _gpp:
+            _gpp.side_effect = ('grpc_path/foo/bar/proto',)
+            with mock.patch.object(task, '_get_subdir_path') as _gsp:
+                _gsp.side_effect = (
+                    'gapic_path/foo/bar/',
+                )
+                assert task.execute('grpc_path', 'gapic_path') == {
+                    'grpc_code_dir': None,
+                }
+                # Inspect the calls to _get_proto_path to make sure we are looking
+                # for the paths we expect.
+                assert _gpp.call_count == 1
+                proto_call = _gpp.mock_calls[0]
+                assert proto_call[1] == ('grpc_path',)
+                # Inspect the calls to _get_subdir_path to make sure we are looking
+                # for the paths we expect.
+                assert _gsp.call_count == 1
+                gapic_call = _gsp.mock_calls[0]
+                assert gapic_call[1] == ('gapic_path/google', 'gapic')
 
         # Ensure that the correct commands ran.
         assert exec_command.call_count == 3
@@ -71,7 +74,7 @@ def test_move_protos():
         assert mv[1] == ([
             'mv',
             'grpc_path/foo/bar/proto',
-            'gapic_path/foo/bar',
+            'gapic_path/foo/bar/proto',
         ],)
         assert touch[1] == (['touch', 'gapic_path/foo/bar/proto/__init__.py'],)
         assert rm[1] == (['rm', '-rf', 'grpc_path'],)

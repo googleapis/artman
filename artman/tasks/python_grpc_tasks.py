@@ -194,14 +194,14 @@ class PythonMoveProtosTask(task_base.TaskBase):
         # Determine the appropriate source and target directory.
         # We can get this by drilling in to the GAPIC artifact until we get to
         # a "gapic" directory.
-        src = self._get_subdir_path(grpc_code_dir, 'proto')
+        src = self._get_proto_path(grpc_code_dir)
         target = self._get_subdir_path(
             os.path.join(gapic_code_dir, 'google'),
             'gapic',
         )
 
         # Move the contents into the GAPIC directory.
-        self.exec_command(['mv', os.path.join(src, 'proto'), target])
+        self.exec_command(['mv', src, os.path.join(target, 'proto')])
 
         # Create an __init__.py file in the proto directory.
         # This is necessary for Python 2.7 compatibility.
@@ -235,3 +235,10 @@ class PythonMoveProtosTask(task_base.TaskBase):
             if needle in dirs:
                 return path
         raise RuntimeError('Path %s not found in %s.' % (needle, haystack))
+
+    def _get_proto_path(self, grpc_path):
+        for path, dirs, files in os.walk(grpc_path):
+            for file in files:
+                if file.endswith('pb2.py'):
+                    return path
+        raise RuntimeError('Path with protobuf files not found in %s.' % grpc_path)
