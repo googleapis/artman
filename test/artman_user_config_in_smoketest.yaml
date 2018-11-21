@@ -1,5 +1,0 @@
----
-local_paths:
-  reporoot: /
-toolkit_path: /toolkit
-publish: noop

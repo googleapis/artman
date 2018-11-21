@@ -81,6 +81,7 @@ def generate_gapic_library(golden_dir, googleapis_dir, output_dir,
         '--local',
         '--root-dir', googleapis_dir,
         '--output-dir', output_dir,
+        '--user-config', "/artman/artman-user-config-in-docker.yaml",
         'generate',
         artifact_id,
     ]

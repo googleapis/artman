@@ -59,7 +59,7 @@ logger = logging.getLogger('smoketest')
 logger.setLevel(logging.INFO)
 
 
-def run_smoke_test(root_dir, log):
+def run_smoke_test(root_dir, user_config, log):
     log_file = _setup_logger(log)
     failure = []
     success = []
@@ -79,6 +79,7 @@ def run_smoke_test(root_dir, log):
             logger.info('Start artifact generation for %s of %s'
                         % (artifact.name, artman_yaml_path))
             if _generate_artifact(artman_yaml_path,
+                                  user_config,
                                   artifact.name,
                                   root_dir,
                                   log_file):
@@ -122,7 +123,7 @@ def _parse(artman_yaml_path):
     return config_pb
 
 
-def _generate_artifact(artman_config, artifact_name, root_dir, log_file):
+def _generate_artifact(artman_config, user_config, artifact_name, root_dir, log_file):
     with open(log_file, 'a') as log:
         grpc_pipeline_args = [
             'artman',
@@ -130,6 +131,7 @@ def _generate_artifact(artman_config, artifact_name, root_dir, log_file):
             '--verbose',
             '--config', artman_config,
             '--root-dir', root_dir,
+            '--user-config', user_config,
             'generate', artifact_name
         ]
         return subprocess.call(grpc_pipeline_args, stdout=log, stderr=log)
@@ -156,6 +158,11 @@ def parse_args(*args):
         default='/tmp/smoketest.log',
         type=str,
         help='Specify where smoketest log should be stored.')
+    parser.add_argument(
+        '--user-config',
+        default='/artman/artman-user-config-in-docker.yaml',
+        type=str,
+        help='Specify where artman user config is located')
     return parser.parse_args(args=args)
 
 
@@ -170,4 +177,4 @@ def _setup_logger(log_file):
 if __name__ == '__main__':
     flags = parse_args(*sys.argv[1:])
 
-    run_smoke_test(os.path.abspath(flags.root_dir), os.path.abspath(flags.log))
+    run_smoke_test(os.path.abspath(flags.root_dir), os.path.abspath(flags.user_config), os.path.abspath(flags.log))
