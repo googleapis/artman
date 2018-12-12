@@ -47,7 +47,7 @@ class ProtoDescGenTask(task_base.TaskBase):
             api_name, api_version, organization_name) + '.desc'
         logger.debug('Compiling descriptors for {0}'.format(desc_protos))
         self.exec_command(['mkdir', '-p', output_dir])
-        # DescGen don't use _group_by_dirname right now because
+        # DescGen doesn't use group protos by package right now because
         #   - it doesn't have to
         #   - and multiple invocation will overwrite the desc_out_file
         self.exec_command(
@@ -92,7 +92,7 @@ class ProtocCodeGenTaskBase(task_base.TaskBase):
         #
         # Other languages don't mind us doing this, so we just do it for
         # everyone.
-        for (dirname, protos) in protoc_utils.group_by_dirname(
+        for (dirname, protos) in protoc_utils.group_by_go_package(
                 protoc_utils.find_protos(src_proto_path, excluded_proto_path)).items():
             # It is possible to get duplicate protos. De-dupe them.
             protos = sorted(set(protos))
