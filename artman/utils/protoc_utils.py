@@ -198,36 +198,21 @@ PROTO_PARAMS_MAP = {
 }
 
 
-def group_by_go_package(proto_files):
-    """Groups the file paths by `option go_package` in the file.
-    This reflects the logic in https://github.com/google/go-genproto/blob/master/regen.go
+def group_by_dirname(protos):
+    """Groups the file paths by direct parent directory.
 
     Returns:
-        A dict mapping go_package to the list of proto files in the package.
+        A dict mapping from the directory name to the list of proto files in
+        it.
     """
-
-    def go_pkg(file):
-        prefix = 'option go_package ='
-        with open(file) as f:
-            for line in f:
-                if line.startswith(prefix):
-                    # syntax is: option go_package = "path/to/package;nickname";
-                    # the nickname is optional
-                    line = line[len(prefix):]
-                    line = line.strip().strip('";')
-                    # find the nickname
-                    semi = line.find(';')
-                    if semi >= 0:
-                        line = line[:semi]
-                    return line
-        return ""
-
-    pkgs = {}
-    for file in proto_files:
-        pkg = go_pkg(file)
-        pkgs.setdefault(pkg, []).append(file)
-
-    return pkgs
+    dirs = {}
+    for proto in protos:
+        dirname = os.path.dirname(proto)
+        if dirname not in dirs:
+            dirs[dirname] = [proto]
+        else:
+            dirs[dirname].append(proto)
+    return dirs
 
 
 def protoc_header_params(proto_path,
