@@ -74,12 +74,12 @@ RUN mkdir -p /usr/src/protoc/ \
 RUN pip3 install --upgrade pip==10.0.1 setuptools==39.2.0 \
   && hash -r pip3 && pip3 install \
     # Ensure that grpcio matches requirements.txt
-    grpcio==1.10.0 \
-    grpcio-tools==1.10.0 \
+    grpcio==1.17.1 \
+    grpcio-tools==1.17.1 \
     protobuf==3.6.0
 
 # Install grpc_csharp_plugin
-RUN curl -L https://www.nuget.org/api/v2/package/Grpc.Tools/1.3.6 -o temp.zip \
+RUN curl -L https://www.nuget.org/api/v2/package/Grpc.Tools/1.17.1 -o temp.zip \
   && unzip -p temp.zip tools/linux_x64/grpc_csharp_plugin > /usr/local/bin/grpc_csharp_plugin \
   && chmod +x /usr/local/bin/grpc_csharp_plugin \
   && rm temp.zip
@@ -115,10 +115,10 @@ RUN gem install rake --no-ri --no-rdoc \
   && gem install rubocop --version '= 0.39.0' --no-ri --no-rdoc \
   && gem install bundler --version '= 1.12.1' --no-ri --no-rdoc \
   && gem install rake --version '= 10.5.0' --no-ri --no-rdoc \
-  && gem install grpc-tools --version '=1.10.0' --no-ri --no-rdoc
+  && gem install grpc-tools --version '=1.17.1' --no-ri --no-rdoc
 
 # Install grpc_php_plugin
-RUN git clone -b v1.7.2 --recurse-submodules --depth=1 https://github.com/grpc/grpc.git /temp/grpc \
+RUN git clone -b v1.17.1 --recurse-submodules --depth=1 https://github.com/grpc/grpc.git /temp/grpc \
   && cd /temp/grpc \
   && make -j $(nproc) grpc_php_plugin \
   && mv ./bins/opt/grpc_php_plugin /usr/local/bin/ \
