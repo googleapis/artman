@@ -50,7 +50,6 @@ interfaces:
         - shelf
     required_fields:
     - shelf
-    request_object_method: false
     retry_codes_name: non_idempotent
     retry_params_name: default
     timeout_millis: 60000
@@ -61,14 +60,12 @@ interfaces:
         - name
     required_fields:
     - name
-    request_object_method: false
     retry_codes_name: idempotent
     retry_params_name: default
     field_name_patterns:
       name: shelf
     timeout_millis: 60000
   - name: ListShelves
-    request_object_method: true
     page_streaming:
       request:
         page_size_field: page_size
@@ -86,7 +83,6 @@ interfaces:
         - name
     required_fields:
     - name
-    request_object_method: false
     retry_codes_name: idempotent
     retry_params_name: default
     field_name_patterns:
@@ -101,7 +97,6 @@ interfaces:
     required_fields:
     - name
     - other_shelf_name
-    request_object_method: true
     retry_codes_name: non_idempotent
     retry_params_name: default
     field_name_patterns:
@@ -116,7 +111,6 @@ interfaces:
     required_fields:
     - name
     - book
-    request_object_method: true
     retry_codes_name: non_idempotent
     retry_params_name: default
     field_name_patterns:
@@ -129,7 +123,6 @@ interfaces:
         - name
     required_fields:
     - name
-    request_object_method: false
     retry_codes_name: idempotent
     retry_params_name: default
     field_name_patterns:
@@ -142,7 +135,6 @@ interfaces:
         - name
     required_fields:
     - name
-    request_object_method: true
     page_streaming:
       request:
         page_size_field: page_size
@@ -162,7 +154,6 @@ interfaces:
         - name
     required_fields:
     - name
-    request_object_method: false
     retry_codes_name: idempotent
     retry_params_name: default
     field_name_patterns:
@@ -175,7 +166,6 @@ interfaces:
         - book
     required_fields:
     - book
-    request_object_method: false
     retry_codes_name: idempotent
     retry_params_name: default
     field_name_patterns:
@@ -190,7 +180,6 @@ interfaces:
     required_fields:
     - name
     - other_shelf_name
-    request_object_method: true
     retry_codes_name: non_idempotent
     retry_params_name: default
     field_name_patterns:
