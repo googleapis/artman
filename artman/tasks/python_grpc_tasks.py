@@ -237,8 +237,23 @@ class PythonMoveProtosTask(task_base.TaskBase):
         raise RuntimeError('Path %s not found in %s.' % (needle, haystack))
 
     def _get_proto_path(self, grpc_path):
+        filenames = set()
         for path, dirs, files in os.walk(grpc_path):
-            for file in files:
-                if file.endswith('pb2.py'):
-                    return path
-        raise RuntimeError('Path with protobuf files not found in %s.' % grpc_path)
+            filenames = filenames.union(
+                {os.path.join(path, f) for f in files if f.endswith('_pb2.py')}
+            )
+
+        # The path to the protos is the common prefix of all of the proto
+        # files found. This ensures that if protos reside in subpackages,
+        # only the common prefix between them is used.
+        if not filenames:
+            raise RuntimeError(
+                'Path with protobuf files not found in {0}.'.format(grpc_path),
+            )
+        elif len(filenames) == 1:
+            # The common path for a single filename is, by definition,
+            # the whole filename, not the directory name.
+            return os.path.dirname(filenames.pop())
+        else:
+            return os.path.commonpath(filenames)
+
