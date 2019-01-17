@@ -255,5 +255,5 @@ class PythonMoveProtosTask(task_base.TaskBase):
             # the whole filename, not the directory name.
             return os.path.dirname(filenames.pop())
         else:
-            return os.path.commonpath(filenames)
+            return os.path.commonpath(list(filenames))
 
