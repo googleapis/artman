@@ -2,7 +2,7 @@ FROM ubuntu:16.04
 
 # Release parameters
 ENV GOOGLEAPIS_HASH ac33855ebab4995167d88e8d3975f181098fc6c6
-ENV GAPIC_GENERATOR_HASH 7886acfce6b4db524c1429220b13c8dd5e748c58
+ENV GAPIC_GENERATOR_HASH ed6d60b7f4ade5ca05f80a297adb052edb8d603b
 # Define version number below. The ARTMAN_VERSION line is parsed by
 # .circleci/config.yml and setup.py, please keep the format.
 ENV ARTMAN_VERSION 0.16.7
@@ -28,7 +28,7 @@ RUN apt-get update \
     openssh-client \
     # runtime packages
     unzip \
-    php-pear \
+    php \
     python3-pip \
     # Java
     openjdk-8-jdk-headless \
@@ -126,9 +126,11 @@ RUN git clone -b v1.17.1 --recurse-submodules --depth=1 https://github.com/grpc/
   && rm -r /temp/grpc
 
 # Install PHP formatting tools
-RUN pear install PHP_CodeSniffer-2.9.1 \
-  && curl -L https://github.com/FriendsOfPHP/PHP-CS-Fixer/releases/download/v2.2.7/php-cs-fixer.phar -o /usr/local/bin/php-cs-fixer \
+RUN curl -L https://github.com/FriendsOfPHP/PHP-CS-Fixer/releases/download/v2.9.1/php-cs-fixer.phar -o /usr/local/bin/php-cs-fixer \
   && chmod a+x /usr/local/bin/php-cs-fixer \
+  && cd /
+RUN curl -L https://squizlabs.github.io/PHP_CodeSniffer/phpcbf.phar -o /usr/local/bin/phpcbf \
+  && chmod a+x /usr/local/bin/phpcbf \
   && cd /
 
 # Used to add docstrings to the Python protoc output.

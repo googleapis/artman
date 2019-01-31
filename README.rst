@@ -27,7 +27,6 @@ metadata files.
 .. _`service configuration`: https://cloud.google.com/service-management/overview#service_configurations
 .. _`toolkit`: https://github.com/googleapis/toolkit
 
-
 Installing
 ==========
 
