@@ -120,7 +120,7 @@ def md2rst(comment):
     # Calling pypandoc.convert_text is slow, so we try to avoid it if there are
     # no special characters in the markdown.
     if any([i in comment for i in '`[]*_']):
-        comment = pypandoc.convert_text(comment, 'rst', format='md')
+        comment = pypandoc.convert_text(comment, 'rst', format='commonmark')
         # Comments are now valid restructuredtext, but there is a problem. They
         # are being inserted back into a descriptor set, and there is an
         # expectation that each line of a comment will begin with a space, to
