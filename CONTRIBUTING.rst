@@ -34,8 +34,7 @@ requests. Fork the repository, and make your changes in the forked repository.
 Include tests
 -------------
 
-Be sure to add relevant tests and run then them using :code:`nox` befor
- making the pull request.
+Be sure to add relevant tests and then run them using :code:`nox` before making the pull request.
 
 Docs will be updated automatically when we merge to `master`, but
 you should also build the docs yourself via :code:`nox -e docs`, making sure
@@ -103,7 +102,7 @@ GitHub repo, from which you can submit a pull request.
     mkvirtualenv --python=`which python3` artman
     pip install -e .
 
--   This is creates a virtualenv named `artman` that has artman installed.
+-   This creates a virtualenv named `artman` that has artman installed.
     Activate it to use artman locally, e.g, from the python prompt.
 
   .. code:: bash
