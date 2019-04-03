@@ -24,6 +24,8 @@ RUN apt-get update \
   && apt-get install -y --no-install-recommends \
     curl \
     git \
+    # debugging
+    vim \
     # openssh-client is needed for CircleCI git checkout
     openssh-client \
     # runtime packages
