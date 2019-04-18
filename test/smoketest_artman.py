@@ -55,6 +55,10 @@ WHITELIST = [
     # https://github.com/googleapis/gapic-generator/issues/2691
     'php_gapic@google/cloud/bigquery/storage/artman_bigquerystorage_v1beta1.yaml',
     'php_gapic@google/cloud/bigquery/artman_bigquery_v2.yaml',
+
+    # whitelisted because protos are missing Java annotations
+    # necessary for client library generation. CL in flight.
+    'java_gapic@google/cloud/binaryauthorization/artman_binaryauthorization_v1beta1.yaml',
 ]
 
 logger = logging.getLogger('smoketest')
