@@ -2,7 +2,7 @@ Google API Artifact Manager
 ===========================
 
 Google API Artifact Manager (``artman``) is a program used to automate the
-generaton and publishing of API client libraries.
+generation and publishing of API client libraries.
 
 In order to be consumed by artman, APIs require:
 
