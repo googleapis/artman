@@ -193,12 +193,9 @@ class PythonMoveProtosTask(task_base.TaskBase):
         """
         # Determine the appropriate source and target directory.
         # We can get this by drilling in to the GAPIC artifact until we get to
-        # a "gapic" directory.
+        # a "gapic" directory that is outside "docs" and "tests".
         src = self._get_proto_path(grpc_code_dir)
-        target = self._get_subdir_path(
-            os.path.join(gapic_code_dir, 'google'),
-            'gapic',
-        )
+        target = self._get_gapic_subdir_path(gapic_code_dir)
 
         # Move the contents into the GAPIC directory.
         self.exec_command(['mv', src, os.path.join(target, 'proto')])
@@ -216,13 +213,12 @@ class PythonMoveProtosTask(task_base.TaskBase):
         # not being a thing anymore.
         return {'grpc_code_dir': None}
 
-    def _get_subdir_path(self, haystack, needle):
-        """Return the subpath which contains the ``needle`` directory.
+    def _get_gapic_subdir_path(self, haystack):
+        """Return the subpath which contains the "gapic" directory.
 
         Args:
             haystack (str): The top-level directory in which the subdirectory
                 should appear.
-            needle (str): The directory being sought.
 
         Returns:
             str: The path, relative to ``haystack``, where the subdirectory
@@ -231,9 +227,18 @@ class PythonMoveProtosTask(task_base.TaskBase):
         Raises:
             RuntimeError: If the subdirectory is not found.
         """
-        for path, dirs, files in os.walk(haystack):
-            if needle in dirs:
-                return path
+        needle = 'gapic'
+
+        for d in os.listdir(haystack):
+            # Skip the 'docs' and 'tests' directories.
+            # These will not contain code.
+            if d == 'docs' or d == 'tests':
+                continue
+
+            for path, dirs, files in os.walk(os.path.join(haystack, d)):
+                if needle in dirs:
+                    return path
+
         raise RuntimeError('Path %s not found in %s.' % (needle, haystack))
 
     def _get_proto_path(self, grpc_path):
