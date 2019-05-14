@@ -151,7 +151,7 @@ jobs:
       - *checkout_artman
       - run:
           name: Install nox.
-          command: pip install --upgrade nox-automation
+          command: pip install --upgrade nox-automation==0.19.1
       - run:
           name: Build the docs.
           command: nox -e docs
@@ -164,7 +164,7 @@ jobs:
       - checkout
       - run:
           name: Install nox and codecov.
-          command: pip install --upgrade nox-automation codecov
+          command: pip install --upgrade nox-automation==0.19.1 codecov
       - run:
           name: Run unit tests.
           command: nox -e "unit_tests(python_version='2.7')"
@@ -177,7 +177,7 @@ jobs:
       - *checkout_artman
       - run:
           name: Install nox and codecov.
-          command: pip install --upgrade nox-automation codecov
+          command: pip install --upgrade nox-automation==0.19.1 codecov
       - run:
           name: Run unit tests.
           command: nox -e "unit_tests(python_version='3.4')"
@@ -190,7 +190,7 @@ jobs:
       - *checkout_artman
       - run:
           name: Install nox and codecov.
-          command: pip install --upgrade nox-automation codecov
+          command: pip install --upgrade nox-automation==0.19.1 codecov
       - run:
           name: Run unit tests.
           command: nox -e "unit_tests(python_version='3.5')"
@@ -203,7 +203,7 @@ jobs:
       - checkout
       - run:
           name: Install nox and codecov.
-          command: pip install --upgrade nox-automation codecov
+          command: pip install --upgrade nox-automation==0.19.1 codecov
       - run:
           name: Run unit tests.
           command: nox -e "unit_tests(python_version='3.6')"
