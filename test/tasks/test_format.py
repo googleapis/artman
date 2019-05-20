@@ -44,31 +44,6 @@ class JavaFormatTaskTests(unittest.TestCase):
         assert task.validate() == []
 
 
-class PythonFormatTaskTests(unittest.TestCase):
-    @mock.patch.object(os, 'walk')
-    @mock.patch.object(subprocess, 'call')
-    def test_execute(self, call, walk):
-        call.return_value = 2
-        walk.return_value = (['/p', (), ('f1.py', 'f2.py', 'f3.js')],)
-        task = format_tasks.PythonFormatTask()
-        task.execute('/path/to/gapic')
-        call.assert_called_once_with(['yapf', '-i', '/p/f1.py', '/p/f2.py'])
-
-    @mock.patch.object(os, 'walk')
-    @mock.patch.object(subprocess, 'call')
-    def test_yapf_failure(self, call, walk):
-        call.return_value = 1
-        walk.return_value = (['/p', (), ('f1.py', 'f2.py', 'f3.js')],)
-        task = format_tasks.PythonFormatTask()
-        with pytest.raises(subprocess.CalledProcessError):
-            task.execute('/path/to/gapic')
-        call.assert_called_once_with(['yapf', '-i', '/p/f1.py', '/p/f2.py'])
-
-    def test_validate(self):
-        task = format_tasks.PythonFormatTask()
-        assert task.validate() == []
-
-
 class GoFormatTaskTests(unittest.TestCase):
     @mock.patch.object(format_tasks.GoFormatTask, 'exec_command')
     def test_execute(self, exec_command):

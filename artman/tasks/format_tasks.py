@@ -42,27 +42,6 @@ class JavaFormatTask(task_base.TaskBase):
         return []
 
 
-class PythonFormatTask(task_base.TaskBase):
-    def execute(self, gapic_code_dir):
-        logger.debug('Formatting files in %s.' %
-                    os.path.abspath(gapic_code_dir))
-        targetFiles = []
-        for root, dirs, files in os.walk(gapic_code_dir):
-            for filename in files:
-                if filename.endswith('.py'):
-                    targetFile = os.path.abspath(os.path.join(root, filename))
-                    targetFiles.append(targetFile)
-        # yapf returns code 2 when it formats, so we can't use `check_call`.
-        exit_code = subprocess.call(['yapf', '-i'] + targetFiles)
-        if exit_code not in [0, 2]:
-            raise subprocess.CalledProcessError(exit_code, 'yapf')
-
-    # yapf is installed by tox for the entire pipeline project's virtualenv,
-    # so we shouldn't need a separate validation task.
-    def validate(self):
-        return []
-
-
 class GoFormatTask(task_base.TaskBase):
     def execute(self, gapic_code_dir):
         logger.debug('Formatting files in %s.' %
@@ -92,7 +71,6 @@ class PhpFormatTask(task_base.TaskBase):
 
 _FORMAT_TASK_DICT = {
     'java': JavaFormatTask,
-    'python': PythonFormatTask,
     'go': GoFormatTask,
     'php': PhpFormatTask,
 }
