@@ -64,9 +64,9 @@ RUN apt-get update \
     zlib1g \
   && rm -rf /var/lib/apt/lists/*
 
-# Install protoc 3.7.1.
+# Install protoc 3.8.0.
 RUN mkdir -p /usr/src/protoc/ \
-  && curl --location https://github.com/google/protobuf/releases/download/v3.7.1/protoc-3.7.1-linux-x86_64.zip > /usr/src/protoc/protoc.zip \
+  && curl --location https://github.com/google/protobuf/releases/download/v3.8.0/protoc-3.8.0-linux-x86_64.zip > /usr/src/protoc/protoc.zip \
   && cd /usr/src/protoc/ \
   && unzip protoc.zip \
   && rm protoc.zip \
@@ -78,7 +78,7 @@ RUN pip3 install --upgrade pip==10.0.1 setuptools==39.2.0 \
     # Ensure that grpcio matches requirements.txt
     grpcio==1.17.1 \
     grpcio-tools==1.17.1 \
-    protobuf==3.7.1
+    protobuf==3.8.0
 
 # Install grpc_csharp_plugin
 RUN curl -L https://www.nuget.org/api/v2/package/Grpc.Tools/1.17.1 -o temp.zip \
