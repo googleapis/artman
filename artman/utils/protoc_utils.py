@@ -269,7 +269,7 @@ def protoc_grpc_params(proto_params, pkg_dir, toolkit_path):
 
 
 def find_google_dir_index(src_proto_path):
-    matches = list(re.finditer('(?:\\A|[/\\\\])(google)(?=\\Z|[/\\\\])',
+    matches = list(re.finditer('(?:\\A|[/\\\\])(google|grafeas)(?=\\Z|[/\\\\])',
                                src_proto_path))
     if len(matches) == 0:
         raise ValueError('src_proto_path did not contain "google" '
