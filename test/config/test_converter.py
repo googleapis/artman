@@ -37,6 +37,10 @@ class ConverterTest(unittest.TestCase):
         self._test('artman_pubsub.yaml', 'python_gapic',
                    'expected_pubsub_python_legacy_config.yaml')
 
+    def test_library(self):
+        self._test('artman_library.yaml', 'java_gapic',
+                   'expected_library_config.yaml')
+
     def _test(self, artman_yaml, artifact_name, expected_legacy_config):
         artifact_config = loader.load_artifact_config(os.path.join(
             self.TESTDATA, artman_yaml), artifact_name)

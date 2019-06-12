@@ -28,7 +28,7 @@ from taskflow.patterns import linear_flow
 # kwargs required by multiple pipelines
 COMMON_REQUIRED = ['src_proto_path', 'import_proto_path', 'toolkit_path', 'root_dir',
                    'output_dir', 'api_name', 'api_version',
-                   'organization_name']
+                   'organization_name', 'proto_package']
 
 COMMON_DISCO_REQUIRED = ['discovery_doc', 'toolkit_path', 'root_dir', 'output_dir',
                          'api_name', 'api_version', 'organization_name']

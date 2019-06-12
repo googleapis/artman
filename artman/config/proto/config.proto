@@ -178,6 +178,11 @@ message Artifact {
   // for a full GAPIC config spec.
   string gapic_yaml = 10;
 
+  // The proto package of the proto files to generate a client for,
+  // e.g. "google.example.library.v1".
+  // If a gRPC client is to be generated, either a gapic_yaml or a proto_package must be given.
+  string proto_package = 18;
+
   reserved 11;
   reserved "import_proto_path";
 

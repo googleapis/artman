@@ -101,13 +101,17 @@ class GapicCodeGenTask(task_base.TaskBase):
     default_provides = 'gapic_code_dir'
 
     def execute(self, language, toolkit_path, descriptor_set, service_yaml,
-                gapic_yaml, package_metadata_yaml,
+                gapic_yaml, package_metadata_yaml, proto_package,
                 gapic_code_dir, api_name, api_version, organization_name,
                 aspect, generator_args):
         existing = glob.glob('%s/*' % gapic_code_dir)
         if existing:
             self.exec_command(['rm', '-r'] + existing)
-        gapic_args = ['--gapic_yaml=' + os.path.abspath(gapic_yaml)]
+        gapic_args = []
+        if proto_package:
+            gapic_args.append('--package=' + proto_package)
+        if gapic_yaml:
+            gapic_args.append('--gapic_yaml=' + os.path.abspath(gapic_yaml))
         args = [
             '--descriptor_set=' + os.path.abspath(descriptor_set),
             '--package_yaml2=' + os.path.abspath(package_metadata_yaml),

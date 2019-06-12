@@ -158,7 +158,8 @@ class GapicCodeGenTaskTests(unittest.TestCase):
             service_yaml='/path/to/service.yaml',
             toolkit_path='/path/to/toolkit',
             aspect='ALL',
-            generator_args='--extra_args'
+            generator_args='--extra_args',
+            proto_package=''
         )
         expected_cmds = [
             ' '.join(['java -cp',
