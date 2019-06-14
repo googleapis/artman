@@ -33,7 +33,7 @@ class ProtoDescGenTask(task_base.TaskBase):
 
     def execute(self, src_proto_path, import_proto_path, output_dir,
                 api_name, api_version, organization_name, toolkit_path,
-                root_dir, excluded_proto_path=[], proto_deps=[]):
+                root_dir, excluded_proto_path=[], proto_deps=[], language='python'):
         desc_proto_paths = []
         for dep in proto_deps:
             if 'proto_path' in dep and dep['proto_path']:
@@ -47,11 +47,13 @@ class ProtoDescGenTask(task_base.TaskBase):
             api_name, api_version, organization_name) + '.desc'
         logger.debug('Compiling descriptors for {0}'.format(desc_protos))
         self.exec_command(['mkdir', '-p', output_dir])
+
+        proto_params = protoc_utils.PROTO_PARAMS_MAP[language]
         # DescGen doesn't use group protos by package right now because
         #   - it doesn't have to
         #   - and multiple invocation will overwrite the desc_out_file
         self.exec_command(
-            ['protoc'] +
+            proto_params.proto_compiler_command +
             protoc_utils.protoc_header_params(header_proto_path, toolkit_path) +
             protoc_utils.protoc_desc_params(output_dir, desc_out_file) +
             desc_protos)

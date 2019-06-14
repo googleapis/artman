@@ -28,7 +28,7 @@ cur_dir = os.path.realpath(os.path.dirname(__file__))
 current_version = None
 with io.open(os.path.join(cur_dir, 'Dockerfile')) as dockerfile:
     for line in dockerfile:
-        match = re.match('^ENV ARTMAN_VERSION (\S+)$', line)
+        match = re.match(r'^ENV ARTMAN_VERSION (\S+)$', line)
         if match:
             current_version = match.group(1)
             break

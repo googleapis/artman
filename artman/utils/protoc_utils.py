@@ -15,6 +15,7 @@
 """Utilities for protoc tasks"""
 
 import collections
+import io
 import os
 import re
 import subprocess
@@ -59,7 +60,7 @@ class _SimpleProtoParams(object):
 
     @property
     def proto_compiler_command(self):
-        return ['protoc']
+        return [protoc_binary_name(self.language)]
 
 
 class _JavaProtoParams(_SimpleProtoParams):
@@ -90,7 +91,7 @@ class _JavaProtoParams(_SimpleProtoParams):
 
     @property
     def proto_compiler_command(self):
-        return ['protoc']
+        return [protoc_binary_name('java')]
 
 
 class _GoProtoParams(_SimpleProtoParams):
@@ -118,7 +119,7 @@ class _GoProtoParams(_SimpleProtoParams):
 
     @property
     def proto_compiler_command(self):
-        return ['protoc']
+        return [protoc_binary_name('go')]
 
 
 class _PhpProtoParams(_SimpleProtoParams):
@@ -139,7 +140,7 @@ class _PhpProtoParams(_SimpleProtoParams):
 
     @property
     def proto_compiler_command(self):
-        return ['protoc']
+        return [protoc_binary_name('php')]
 
 
 class _RubyProtoParams(_SimpleProtoParams):
@@ -188,13 +189,30 @@ class _PythonProtoParams(_SimpleProtoParams):
         return [sys.executable, '-m', 'grpc_tools.protoc']
 
 
+def protoc_binary_name(language):
+    language = language.lower()
+    top_dir = os.path.realpath(os.path.dirname(__file__ + "/../../../"))
+    protoc_install_path = os.path.join(top_dir, 'install_protoc.sh')
+
+    with io.open(protoc_install_path) as protoc_install_file:
+        for line in protoc_install_file:
+            match = re.match('^protobuf_versions\[' + language.lower() + r'\]=(\S+)$', line)
+            if match:
+                current_version = match.group(1)
+                break
+    if not current_version:
+        raise IOError('Cannot determine version from Dockerfile. Using default version %s.' % current_version)
+    return 'protoc-' + current_version
+
+
 PROTO_PARAMS_MAP = {
     'ruby': _RubyProtoParams(),
     'java': _JavaProtoParams(),
     'go': _GoProtoParams(),
     'csharp': _SimpleProtoParams('csharp'),
     'php': _PhpProtoParams(),
-    'python': _PythonProtoParams()
+    'python': _PythonProtoParams(),
+    'nodejs': _SimpleProtoParams('nodejs'),
 }
 
 
@@ -334,7 +352,7 @@ def list_files_recursive(path):
 
 
 _php_replacements = [
-    ('\Google\Protobuf\Empty', '\Google\Protobuf\GPBEmpty'),
+    ('\\Google\\Protobuf\\Empty', '\\Google\\Protobuf\\GPBEmpty'),
 ]
 def php_proto_rename(contents):
     for src, target in _php_replacements:
