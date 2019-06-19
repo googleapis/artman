@@ -2,7 +2,7 @@ FROM ubuntu:16.04
 
 # Release parameters
 ENV GOOGLEAPIS_HASH ab437f2bb2100360f8d119530b0a020228baa4cc
-ENV GAPIC_GENERATOR_HASH 356530c12da03b5434a33e3510bae7020a28b64b
+ENV GAPIC_GENERATOR_HASH 4c2bc4396eed69826456ab3bc2fe47c71c235bb5
 # Define version number below. The ARTMAN_VERSION line is parsed by
 # .circleci/config.yml and setup.py, please keep the format.
 ENV ARTMAN_VERSION 0.28.0
