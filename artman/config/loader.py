@@ -96,7 +96,7 @@ def read_user_config(artman_user_config_path):
         with io.open(artman_user_config_path, 'r', encoding='UTF-8') as f:
             # Convert yaml into json file as protobuf python load support
             # parsing of protobuf in json or text format, not yaml.
-            json_string = json.dumps(yaml.load(f))
+            json_string = json.dumps(yaml.load(f, Loader=yaml.FullLoader))
         json_format.Parse(json_string, config_pb)
     except (json_format.ParseError, yaml.parser.ParserError):
         logger.error(INVALID_USER_CONFIG_ERROR_MESSAGE_FORMAT % artman_user_config_path)
@@ -123,7 +123,7 @@ def _parse(artman_yaml_path):
         with io.open(artman_yaml_path, 'r', encoding='UTF-8') as f:
             # Convert yaml into json file as protobuf python load support paring of
             # protobuf in json or text format, not yaml.
-            artman_config_json_string = json.dumps(yaml.load(f))
+            artman_config_json_string = json.dumps(yaml.load(f, Loader=yaml.FullLoader))
         config_pb = Config()
         json_format.Parse(artman_config_json_string, config_pb)
     except (json_format.ParseError, yaml.parser.ParserError):
