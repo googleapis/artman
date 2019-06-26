@@ -49,6 +49,9 @@ class ProtoDescGenTask(task_base.TaskBase):
         self.exec_command(['mkdir', '-p', output_dir])
 
         proto_params = protoc_utils.PROTO_PARAMS_MAP[language]
+
+        proto_compiler_command = proto_params.proto_compiler_command
+        logger.debug('Using protoc command: {0}'.format(proto_compiler_command))
         # DescGen doesn't use group protos by package right now because
         #   - it doesn't have to
         #   - and multiple invocation will overwrite the desc_out_file
