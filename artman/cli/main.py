@@ -315,7 +315,7 @@ def _run_artman_in_docker(flags):
     artman_config_dirname = os.path.dirname(flags.config)
     docker_image = flags.image
 
-    inner_artman_cmd_str = ' '.join(sys.argv[1:])
+    inner_artman_cmd_str = ' '.join(["'" + arg + "'" for arg in sys.argv[1:]])
     # Because artman now supports setting root dir in either command line or
     # user config, make sure `--root-dir` flag gets explicitly passed to the
     # artman command running inside Artman Docker container.
