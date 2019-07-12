@@ -74,6 +74,33 @@ jobs:
       - store_artifacts:
           path: /tmp/smoketest.log
 
+  samplegen_smoke_test:
+    working_directory: /usr/src/artman
+    docker:
+      - image: docker:17.05.0-ce-git
+    steps:
+      - *checkout_artman
+      - setup_remote_docker
+      - *restore_artman_cache
+      - *load_build_and_save_artman_image
+      - *save_artman_cache
+      - run:
+          name: Check samples are generated for selected APIs
+          command: |
+            EXIT_STATUS=0
+            docker run -it --rm -d --name samplegen --workdir /tmp -e RUNNING_IN_ARTMAN_DOCKER=True artman
+            docker exec samplegen mkdir /tmp/language-python
+            docker exec samplegen artman --local --output-dir /tmp/language-python --config=google/cloud/language/artman_language_v1.yaml --root-dir=/googleapis --generator-args='--dev_samples' generate python_gapic || EXIT_STATUS=$?
+            docker exec samplegen find /tmp/language-python/python/language-v1/samples/v1 -mindepth 1 | read || EXIT_STATUS=$?
+            docker exec samplegen mkdir /tmp/talent-php
+            docker exec samplegen artman --local --output-dir /tmp/talent-php --config=google/cloud/talent/artman_talent_v4beta1.yaml --root-dir=/googleapis --generator-args='--dev_samples' generate php_gapic || EXIT_STATUS=$?
+            docker exec samplegen find /tmp/talent-php/php/google-cloud-talent-v4beta1/samples/V4beta1 -mindepth 1 | read || EXIT_STATUS=$?
+            docker exec samplegen mkdir /tmp/speech-nodejs
+            docker exec samplegen artman --local --output-dir /tmp/speech-nodejs --config=google/cloud/speech/artman_speech_v1p1beta1.yaml --root-dir=/googleapis --generator-args='--dev_samples' generate nodejs_gapic || EXIT_STATUS=$?
+            docker exec samplegen find /tmp/speech-nodejs/js/speech-v1p1beta1/samples/v1p1beta1 -mindepth 1 | read || EXIT_STATUS=$?
+            docker stop samplegen
+            exit $EXIT_STATUS
+
   build_and_release_docker_image:
     working_directory: /usr/src/artman
     docker:
@@ -212,6 +239,8 @@ workflows:
           filters: *all_commits
       - golden_and_smoke_tests:
           filters: *all_commits
+      - samplegen_smoke_test:
+          filters: *all_commits
       - build_and_release_docker_image:
           requires:
             - unit-python2.7
@@ -219,6 +248,7 @@ workflows:
             - unit-python3.6
             - docs
             - golden_and_smoke_tests
+            - samplegen_smoke_test
           filters:
             branches:
               only: master
