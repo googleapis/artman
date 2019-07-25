@@ -286,8 +286,8 @@ def normalize_flags(flags, user_config):
 
     # Parse out the full configuration.
     config_args = config_util.load_config_spec(legacy_config_dict, language)
-    pipeline_args.update(config_args)
-
+    config_args.update(pipeline_args)
+    pipeline_args = config_args
     # Print out the final arguments to stdout, to help the user with
     # possible debugging.
     pipeline_args_repr = yaml.dump(
