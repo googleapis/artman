@@ -69,7 +69,7 @@ RUN mkdir -p /opt \
 ENV PATH /opt/node-v10.16.0-linux-x64/bin:$PATH
 
 # Install google-gax for Node.js
-RUN npm install -g google-gax
+RUN npm install -g google-gax@^1.2.1
 # Run the compileProtos script for the first time to download runtime dependencies; ignore exit code
 RUN compileProtos || true
 
