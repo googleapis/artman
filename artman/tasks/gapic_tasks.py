@@ -103,7 +103,7 @@ class GapicCodeGenTask(task_base.TaskBase):
     def execute(self, language, toolkit_path, descriptor_set, service_yaml,
                 gapic_yaml, package_metadata_yaml, proto_package,
                 gapic_code_dir, api_name, api_version, organization_name,
-                aspect, generator_args):
+                aspect, gapic_samples, generator_args):
         existing = glob.glob('%s/*' % gapic_code_dir)
         if existing:
             self.exec_command(['rm', '-r'] + existing)
@@ -112,6 +112,13 @@ class GapicCodeGenTask(task_base.TaskBase):
             gapic_args.append('--package=' + proto_package)
         if gapic_yaml:
             gapic_args.append('--gapic_yaml=' + os.path.abspath(gapic_yaml))
+        if gapic_samples:
+            sample_yamls = self._get_sample_yamls(gapic_samples)
+            if sample_yamls:
+                gapic_args.append('--sample_yamls')
+                for sample_yaml in sample_yamls:
+                    gapic_args.append(sample_yaml)
+
         args = [
             '--descriptor_set=' + os.path.abspath(descriptor_set),
             '--package_yaml2=' + os.path.abspath(package_metadata_yaml),
@@ -140,6 +147,19 @@ class GapicCodeGenTask(task_base.TaskBase):
 
         return gapic_code_dir
 
+    def _get_sample_yamls(self, path):
+        sample_path = os.path.abspath(path)
+        if os.path.isfile(sample_path):
+            return [sample_path]
+        elif os.path.isdir(sample_path):
+            sample_paths = []
+            for root, dirnames, filenames in os.walk(sample_path):
+                for filename in filenames:
+                    if filename.endswith('.yaml'):
+                        sample_paths.append(os.path.join(root, filename))
+            return sample_paths
+        else:
+            raise ValueError('GapicCodeGenTask: `--samples` directory or file does not exist.')
 
 class DiscoGapicCodeGenTask(task_base.TaskBase):
     """Generates GAPIC wrappers from a Discovery document"""

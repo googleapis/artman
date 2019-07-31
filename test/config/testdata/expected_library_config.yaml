@@ -14,6 +14,7 @@ common:
   - name: google-iam-v1
     proto_path: google/iam/v1
   proto_package: google.example.library.v1
+  gapic_samples: ''
   service_yaml: /tmp/input/google/example/library/library.yaml
   src_proto_path:
   - /tmp/input/google/example/library/v1

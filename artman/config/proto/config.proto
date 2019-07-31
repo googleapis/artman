@@ -183,6 +183,12 @@ message Artifact {
   // If a gRPC client is to be generated, either a gapic_yaml or a proto_package must be given.
   string proto_package = 18;
 
+  // The path to sample config yaml(s). It can be an absolute path or a path
+  // relative to the artman config yaml. It can also be either a directory or 
+  // a file. When it is a directory, artman will consume all the sample config
+  // yamls recursively in this directory.
+  string gapic_samples = 19;
+
   reserved 11;
   reserved "import_proto_path";
 
