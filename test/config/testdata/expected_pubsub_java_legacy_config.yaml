@@ -12,6 +12,7 @@ common:
   - name: google-iam-v1
     proto_path: google/iam/v1
   proto_package: ''
+  gapic_samples: /path/to/the/samples
   service_yaml: /tmp/input/google/pubsub/pubsub.yaml
   src_proto_path:
   - /tmp/input/google/pubsub/v1

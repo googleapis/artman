@@ -158,6 +158,7 @@ class GapicCodeGenTaskTests(unittest.TestCase):
             service_yaml='/path/to/service.yaml',
             toolkit_path='/path/to/toolkit',
             aspect='ALL',
+            gapic_samples='',
             generator_args='--extra_args',
             proto_package=''
         )
@@ -173,6 +174,109 @@ class GapicCodeGenTaskTests(unittest.TestCase):
                       ])
         ]
         assert_calls_equal(exec_command.mock_calls, expected_cmds)
+        expected_cmds2 = [
+            '/path/to/toolkit/gradlew -p /path/to/toolkit fatJar -Pclargs=',
+        ]
+        assert_calls_equal(check_output.mock_calls, expected_cmds2)
+
+class GapicCodeGenTaskSamplesTests(unittest.TestCase):
+    def mock_isdir(*args):
+        return args[0] == '/path/to/samples'
+
+    def mock_isfile(*args):
+        return args[0] == '/path/to/samples/fakedir/fakesample.yaml'
+
+    def mock_walk(*args):
+        return [
+            ('/path', ('to'), []),
+            ('/path/to', ('samples'), []),
+            ('/path/to/samples', ('fakedir', 'another_fakedir'), []),
+            ('/path/to/samples/fakedir', (), ['fakesample.yaml']),
+            ('/path/to/samples/another_fakedir', (), ['another_fake_sample.yaml'])
+        ]
+
+    @mock.patch.object(gapic_tasks.GapicCodeGenTask, 'exec_command')
+    @mock.patch.object(subprocess, 'check_output')
+    @mock.patch.object(os, 'walk', side_effect=mock_walk)
+    @mock.patch.object(os.path, 'isdir', side_effect=mock_isdir)
+    @mock.patch.object(os.path, 'isfile', side_effect=mock_isfile)
+    def test_execute(self, isfile, isdir, listdir, check_output, exec_command):
+        task = gapic_tasks.GapicCodeGenTask()
+        task.execute(
+            api_name='pubsub',
+            api_version='v1',
+            descriptor_set='/path/to/desc',
+            gapic_yaml='/path/to/pubsub.yaml',
+            gapic_code_dir='/path/to/output',
+            language='python',
+            organization_name='google-cloud',
+            package_metadata_yaml='/path/to/pmy.yaml',
+            service_yaml='/path/to/service.yaml',
+            toolkit_path='/path/to/toolkit',
+            aspect='ALL',
+            gapic_samples='/path/to/samples',
+            generator_args='--extra_args',
+            proto_package=''
+        )
+        expected_cmds = [
+            ' '.join(['java -cp',
+                      '/path/to/toolkit/build/libs/gapic-generator-latest-fatjar.jar',
+                      'com.google.api.codegen.GeneratorMain LEGACY_GAPIC_AND_PACKAGE',
+                      '--descriptor_set=/path/to/desc --package_yaml2=/path/to/pmy.yaml',
+                      '--output=/path/to/output --language=python',
+                      '--service_yaml=/path/to/service.yaml',
+                      '--gapic_yaml=/path/to/pubsub.yaml',
+                      '--sample_yamls',
+                      '/path/to/samples/fakedir/fakesample.yaml',
+                      '/path/to/samples/another_fakedir/another_fake_sample.yaml',
+                      '--extra_args'
+                      ])
+        ]
+        assert_calls_equal(exec_command.mock_calls, expected_cmds)
+
+        expected_cmds2 = [
+            '/path/to/toolkit/gradlew -p /path/to/toolkit fatJar -Pclargs=',
+        ]
+        assert_calls_equal(check_output.mock_calls, expected_cmds2)
+
+    @mock.patch.object(gapic_tasks.GapicCodeGenTask, 'exec_command')
+    @mock.patch.object(subprocess, 'check_output')
+    @mock.patch.object(os, 'walk', side_effect=mock_walk)
+    @mock.patch.object(os.path, 'isdir', side_effect=mock_isdir)
+    @mock.patch.object(os.path, 'isfile', side_effect=mock_isfile)
+    def test_execute2(self, isfile, isdir, listdir, check_output, exec_command):
+        task = gapic_tasks.GapicCodeGenTask()
+        task.execute(
+            api_name='pubsub',
+            api_version='v1',
+            descriptor_set='/path/to/desc',
+            gapic_yaml='/path/to/pubsub.yaml',
+            gapic_code_dir='/path/to/output',
+            language='python',
+            organization_name='google-cloud',
+            package_metadata_yaml='/path/to/pmy.yaml',
+            service_yaml='/path/to/service.yaml',
+            toolkit_path='/path/to/toolkit',
+            aspect='ALL',
+            gapic_samples='/path/to/samples/fakedir/fakesample.yaml',
+            generator_args='--extra_args',
+            proto_package=''
+        )
+        expected_cmds = [
+            ' '.join(['java -cp',
+                      '/path/to/toolkit/build/libs/gapic-generator-latest-fatjar.jar',
+                      'com.google.api.codegen.GeneratorMain LEGACY_GAPIC_AND_PACKAGE',
+                      '--descriptor_set=/path/to/desc --package_yaml2=/path/to/pmy.yaml',
+                      '--output=/path/to/output --language=python',
+                      '--service_yaml=/path/to/service.yaml',
+                      '--gapic_yaml=/path/to/pubsub.yaml',
+                      '--sample_yamls',
+                      '/path/to/samples/fakedir/fakesample.yaml',
+                      '--extra_args'
+                      ])
+        ]
+        assert_calls_equal(exec_command.mock_calls, expected_cmds)
+
         expected_cmds2 = [
             '/path/to/toolkit/gradlew -p /path/to/toolkit fatJar -Pclargs=',
         ]
