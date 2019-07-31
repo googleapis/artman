@@ -81,7 +81,9 @@
 /js/library_example-v1/README.md
 /js/library_example-v1/package.json
 /js/library_example-v1/protos/google/example/library/v1/library.proto
+/js/library_example-v1/protos/protos.json
 /js/library_example-v1/src/index.js
+/js/library_example-v1/src/service_proto_list.json
 /js/library_example-v1/src/v1/doc/google/example/library/v1/doc_library.js
 /js/library_example-v1/src/v1/doc/google/protobuf/doc_empty.js
 /js/library_example-v1/src/v1/index.js
