@@ -59,6 +59,10 @@ WHITELIST = [
     # whitelisted because protos are missing Java annotations
     # necessary for client library generation. CL in flight.
     'java_gapic@google/cloud/binaryauthorization/artman_binaryauthorization_v1beta1.yaml',
+    
+    # TODO(hzyi): whitelisted to unblock artman release. CL coming.
+    'csharp_gapic@google/firestore/artman_firestore_v1.yaml',
+    'csharp_gapic@google/firestore/artman_firestore.yaml',
 ]
 
 logger = logging.getLogger('smoketest')
