@@ -4,7 +4,7 @@ jobs:
   golden_and_smoke_tests:
     working_directory: /usr/src/artman
     docker:
-      - image: docker:17.05.0-ce-git
+      - image: docker:17.12.1-ce-git
     steps:
       - &checkout_artman
         checkout:
@@ -77,7 +77,7 @@ jobs:
   samplegen_smoke_test:
     working_directory: /usr/src/artman
     docker:
-      - image: docker:17.05.0-ce-git
+      - image: docker:17.12.1-ce-git
     steps:
       - *checkout_artman
       - setup_remote_docker
@@ -104,7 +104,7 @@ jobs:
   build_and_release_docker_image:
     working_directory: /usr/src/artman
     docker:
-      - image: docker:17.05.0-ce-git
+      - image: docker:17.12.1-ce-git
     steps:
       - *checkout_artman
       - setup_remote_docker
@@ -128,7 +128,7 @@ jobs:
   release:
     working_directory: /usr/src/artman
     docker:
-      - image: docker:17.05.0-ce-git
+      - image: docker:17.12.1-ce-git
     steps:
       - *checkout_artman
       - setup_remote_docker
