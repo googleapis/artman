@@ -1,5 +1,5 @@
 babel==2.3.4
-colorlog==2.10.0
+colorlog==4.0.2
 google-apitools
 gcloud==0.18.3
 github3.py==1.3.0
