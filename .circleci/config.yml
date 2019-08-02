@@ -58,6 +58,22 @@ jobs:
             docker run -it -e RUNNING_IN_ARTMAN_DOCKER=True --workdir /googleapis artman /bin/bash -c "mkdir /tmp/speech-ruby; artman --local --output-dir /tmp/speech-ruby --config=google/cloud/speech/artman_speech_v1.yaml generate ruby_gapic" || EXIT_STATUS=$?
             exit $EXIT_STATUS
       - run:
+          name: Check samples are generated for selected APIs
+          command: |
+            EXIT_STATUS=0
+            docker run -it --rm -d --name samplegen --workdir /tmp -e RUNNING_IN_ARTMAN_DOCKER=True artman
+            docker exec samplegen mkdir /tmp/language-python
+            docker exec samplegen artman --local --output-dir /tmp/language-python --config=google/cloud/language/artman_language_v1.yaml --root-dir=/googleapis --generator-args='--dev_samples' generate python_gapic || EXIT_STATUS=$?
+            docker exec samplegen find /tmp/language-python/python/language-v1/samples/v1 -mindepth 1 | read || EXIT_STATUS=$?
+            docker exec samplegen mkdir /tmp/talent-php
+            docker exec samplegen artman --local --output-dir /tmp/talent-php --config=google/cloud/talent/artman_talent_v4beta1.yaml --root-dir=/googleapis --generator-args='--dev_samples' generate php_gapic || EXIT_STATUS=$?
+            docker exec samplegen find /tmp/talent-php/php/google-cloud-talent-v4beta1/samples/V4beta1 -mindepth 1 | read || EXIT_STATUS=$?
+            docker exec samplegen mkdir /tmp/speech-nodejs
+            docker exec samplegen artman --local --output-dir /tmp/speech-nodejs --config=google/cloud/speech/artman_speech_v1p1beta1.yaml --root-dir=/googleapis --generator-args='--dev_samples' generate nodejs_gapic || EXIT_STATUS=$?
+            docker exec samplegen find /tmp/speech-nodejs/js/speech-v1p1beta1/samples/v1p1beta1 -mindepth 1 | read || EXIT_STATUS=$?
+            docker stop samplegen
+            exit $EXIT_STATUS
+      - run:
           name: Conditionally run smoketests against all APIs
           command: |
             if [ "${CIRCLE_BRANCH}" == "master" ] || [ "${CIRCLE_TAG}" != "" ]; then
@@ -74,33 +90,6 @@ jobs:
       - store_artifacts:
           path: /tmp/smoketest.log
 
-  samplegen_smoke_test:
-    working_directory: /usr/src/artman
-    docker:
-      - image: docker:17.12.1-ce-git
-    steps:
-      - *checkout_artman
-      - setup_remote_docker
-      - *restore_artman_cache
-      - *load_build_and_save_artman_image
-      - *save_artman_cache
-      - run:
-          name: Check samples are generated for selected APIs
-          command: |
-            EXIT_STATUS=0
-            docker run -it --rm -d --name samplegen --workdir /tmp -e RUNNING_IN_ARTMAN_DOCKER=True artman
-            docker exec samplegen mkdir /tmp/language-python
-            docker exec samplegen artman --local --output-dir /tmp/language-python --config=google/cloud/language/artman_language_v1.yaml --root-dir=/googleapis --generator-args='--dev_samples' generate python_gapic || EXIT_STATUS=$?
-            docker exec samplegen find /tmp/language-python/python/language-v1/samples/v1 -mindepth 1 | read || EXIT_STATUS=$?
-            docker exec samplegen mkdir /tmp/talent-php
-            docker exec samplegen artman --local --output-dir /tmp/talent-php --config=google/cloud/talent/artman_talent_v4beta1.yaml --root-dir=/googleapis --generator-args='--dev_samples' generate php_gapic || EXIT_STATUS=$?
-            docker exec samplegen find /tmp/talent-php/php/google-cloud-talent-v4beta1/samples/V4beta1 -mindepth 1 | read || EXIT_STATUS=$?
-            docker exec samplegen mkdir /tmp/speech-nodejs
-            docker exec samplegen artman --local --output-dir /tmp/speech-nodejs --config=google/cloud/speech/artman_speech_v1p1beta1.yaml --root-dir=/googleapis --generator-args='--dev_samples' generate nodejs_gapic || EXIT_STATUS=$?
-            docker exec samplegen find /tmp/speech-nodejs/js/speech-v1p1beta1/samples/v1p1beta1 -mindepth 1 | read || EXIT_STATUS=$?
-            docker stop samplegen
-            exit $EXIT_STATUS
-
   build_and_release_docker_image:
     working_directory: /usr/src/artman
     docker:
@@ -110,20 +99,15 @@ jobs:
       - setup_remote_docker
       - *restore_artman_cache
       - *load_build_and_save_artman_image
-      - *save_artman_cache
       - deploy:
           name: Push Artman Docker image
           command: |
-            if [ "${DOCKER_EMAIL}" == 'googleapis-publisher@google.com' ]; then
-              docker login -e "${DOCKER_EMAIL}" -u "${DOCKER_USER}" -p "${DOCKER_PASS}"
-              docker tag artman "googleapis/artman:AUTO_BUILD_$CIRCLE_BUILD_NUM"
-              docker push "googleapis/artman:AUTO_BUILD_$CIRCLE_BUILD_NUM"
-              docker tag artman "googleapis/artman:head"
-              docker push "googleapis/artman:head"
-            else
-              echo "Environment variables DOCKER_EMAIL, DOCKER_USER, DOCKER_PASS are not properly set in CircleCI project."
-              echo "Skip the Artman Docker image publishing step."
-            fi
+            echo "Logging in to docker as ${DOCKER_USER} (change this in CircleCI environment if needed)"
+            docker login -u "${DOCKER_USER}" -p "${DOCKER_PASS}"
+            docker tag artman "googleapis/artman:AUTO_BUILD_$CIRCLE_BUILD_NUM"
+            docker push "googleapis/artman:AUTO_BUILD_$CIRCLE_BUILD_NUM"
+            docker tag artman "googleapis/artman:head"
+            docker push "googleapis/artman:head"
 
   release:
     working_directory: /usr/src/artman
@@ -134,7 +118,6 @@ jobs:
       - setup_remote_docker
       - *restore_artman_cache
       - *load_build_and_save_artman_image
-      - *save_artman_cache
       - run:
           name: Decrypt PyPI configuration file
           command: |
@@ -149,21 +132,17 @@ jobs:
       - run:
           name: Push Artman Docker tagged image
           command: |
-            if [ "${DOCKER_EMAIL}" == 'googleapis-publisher@google.com' ]; then
-              # extract version number from setup.py
-              ARTMAN_VERSION=`awk '/ENV ARTMAN_VERSION/ { print $3; }' Dockerfile`
-              # push to docker
-              docker login -e "${DOCKER_EMAIL}" -u "${DOCKER_USER}" -p "${DOCKER_PASS}"
-              docker tag artman "googleapis/artman:AUTO_BUILD_$CIRCLE_BUILD_NUM"
-              docker push "googleapis/artman:AUTO_BUILD_$CIRCLE_BUILD_NUM"
-              docker tag artman "googleapis/artman:latest"
-              docker push "googleapis/artman:latest"
-              docker tag artman "googleapis/artman:${ARTMAN_VERSION}"
-              docker push "googleapis/artman:${ARTMAN_VERSION}"
-            else
-              echo "Environment variables DOCKER_EMAIL, DOCKER_USER, DOCKER_PASS are not properly set in CircleCI project."
-              echo "Skip the Artman Docker image publishing step."
-            fi
+            echo "Logging in to docker as ${DOCKER_USER} (change this in CircleCI environment if needed)"
+            # extract version number from setup.py
+            ARTMAN_VERSION=`awk '/ENV ARTMAN_VERSION/ { print $3; }' Dockerfile`
+            # push to docker
+            docker login -u "${DOCKER_USER}" -p "${DOCKER_PASS}"
+            docker tag artman "googleapis/artman:AUTO_BUILD_$CIRCLE_BUILD_NUM"
+            docker push "googleapis/artman:AUTO_BUILD_$CIRCLE_BUILD_NUM"
+            docker tag artman "googleapis/artman:latest"
+            docker push "googleapis/artman:latest"
+            docker tag artman "googleapis/artman:${ARTMAN_VERSION}"
+            docker push "googleapis/artman:${ARTMAN_VERSION}"
       - run:
           name: Remove PyPI configuration file
           command: |
@@ -239,8 +218,6 @@ workflows:
           filters: *all_commits
       - golden_and_smoke_tests:
           filters: *all_commits
-      - samplegen_smoke_test:
-          filters: *all_commits
       - build_and_release_docker_image:
           requires:
             - unit-python2.7
@@ -248,7 +225,6 @@ workflows:
             - unit-python3.6
             - docs
             - golden_and_smoke_tests
-            - samplegen_smoke_test
           filters:
             branches:
               only: master
