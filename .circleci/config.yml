@@ -136,7 +136,7 @@ jobs:
             # extract version number from setup.py
             ARTMAN_VERSION=`awk '/ENV ARTMAN_VERSION/ { print $3; }' Dockerfile`
             # push to docker
-            docker login -e "${DOCKER_EMAIL}" -u "${DOCKER_USER}" -p "${DOCKER_PASS}"
+            docker login -u "${DOCKER_USER}" -p "${DOCKER_PASS}"
             docker tag artman "googleapis/artman:AUTO_BUILD_$CIRCLE_BUILD_NUM"
             docker push "googleapis/artman:AUTO_BUILD_$CIRCLE_BUILD_NUM"
             docker tag artman "googleapis/artman:latest"
