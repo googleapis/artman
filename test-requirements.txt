@@ -1,4 +1,4 @@
-configparser==3.5.0
+configparser==3.7.4
 flake8==3.2.1
 mccabe==0.5.3
 mock==3.0.5
