@@ -1,6 +1,6 @@
 configparser==3.7.4
 flake8==3.7.8
-mccabe==0.5.3
+mccabe==0.6.1
 mock==3.0.5
 pycodestyle==2.2.0
 pyfakefs==3.6
