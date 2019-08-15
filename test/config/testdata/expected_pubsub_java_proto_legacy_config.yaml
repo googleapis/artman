@@ -14,7 +14,7 @@ common:
   - name: google-iam-v1
     proto_path: google/iam/v1
   proto_package: ''
-  gapic_samples: /path/to/the/samples
+  samples: /path/to/the/samples
   test_proto_deps:
   - name: google-iam-v1
     proto_path: google/iam/v1

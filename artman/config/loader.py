@@ -174,9 +174,9 @@ def _normalize_artifact_config(artifact_config, artman_config_path):
         artifact_config.gapic_yaml = _normalize_path(
             artifact_config.gapic_yaml, artman_config_path, 'gapic_yaml')
 
-    if artifact_config.gapic_samples:
-        artifact_config.gapic_samples = _normalize_path(
-            artifact_config.gapic_samples, artman_config_path, 'gapic_samples')
+    if artifact_config.samples:
+        artifact_config.samples = _normalize_path(
+            artifact_config.samples, artman_config_path, 'samples')
 
     normalized_src_proto_paths = []
     for src_proto_path in artifact_config.src_proto_paths:

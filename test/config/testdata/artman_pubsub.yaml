@@ -14,7 +14,7 @@ common:
     proto_path: google/iam/v1
   service_yaml: /tmp/input/google/pubsub/pubsub.yaml
   gapic_yaml: /tmp/input/google/pubsub/v1/pubsub_gapic.yaml
-  gapic_samples: /path/to/the/samples
+  samples: /path/to/the/samples
 artifacts:
 - name: java_gapic
   release_level: BETA

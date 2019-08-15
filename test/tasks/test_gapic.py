@@ -158,7 +158,7 @@ class GapicCodeGenTaskTests(unittest.TestCase):
             service_yaml='/path/to/service.yaml',
             toolkit_path='/path/to/toolkit',
             aspect='ALL',
-            gapic_samples='',
+            samples='',
             generator_args='--extra_args',
             proto_package=''
         )
@@ -214,7 +214,7 @@ class GapicCodeGenTaskSamplesTests(unittest.TestCase):
             service_yaml='/path/to/service.yaml',
             toolkit_path='/path/to/toolkit',
             aspect='ALL',
-            gapic_samples='/path/to/samples',
+            samples='/path/to/samples',
             generator_args='--extra_args',
             proto_package=''
         )
@@ -258,7 +258,7 @@ class GapicCodeGenTaskSamplesTests(unittest.TestCase):
             service_yaml='/path/to/service.yaml',
             toolkit_path='/path/to/toolkit',
             aspect='ALL',
-            gapic_samples='/path/to/samples/fakedir/fakesample.yaml',
+            samples='/path/to/samples/fakedir/fakesample.yaml',
             generator_args='--extra_args',
             proto_package=''
         )

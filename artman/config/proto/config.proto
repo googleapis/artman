@@ -187,7 +187,7 @@ message Artifact {
   // relative to the artman config yaml. It can also be either a directory or 
   // a file. When it is a directory, artman will consume all the sample config
   // yamls recursively in this directory.
-  string gapic_samples = 19;
+  string samples = 19;
 
   reserved 11;
   reserved "import_proto_path";
