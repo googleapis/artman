@@ -16,6 +16,6 @@ requests >= 2.22.0, < 3.0.0
 ruamel.yaml >= 0.16.0, < 0.17.0
 six >= 1.12.0, < 2.0.0
 stringcase >= 1.2.0, < 2.0.0
-taskflow==3.7.0
+taskflow==3.7.1
 networkx==1.11
 pypandoc >= 1.4, < 2.0
