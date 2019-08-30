@@ -270,18 +270,6 @@ class NodeJsProtoCopyTask(task_base.TaskBase):
                 if not os.path.exists(dst_proto_dir):
                     self.exec_command(['mkdir', '-p', dst_proto_dir])
                 self.exec_command(['cp', src_proto_file, dst_proto_file])
-        # Making transition to JSON protos simple:
-        # If this library has the list of protos for us, use it.
-        # Otherwise, just do its job and build this list.
-        # When all libraries start generating list of protos, the following code
-        # (up to the compileProtos execution) will be removed.
-        source_files = protoc_utils.list_files_recursive(src_dir)
-        proto_json_files = [filename for filename in source_files if re.match('_proto_list\\.json$', filename)]
-        if len(proto_json_files) == 0:
-            proto_list_file = os.path.join(src_dir, 'service_proto_list.json')
-            proto_files_relative = ['../protos/' + filename for filename in proto_files]
-            with open(proto_list_file, 'w') as pf:
-                pf.write(json.dumps(proto_files_relative))
         # Execute compileProtos from Docker image (a part of from google-gax)
         cwd = os.getcwd()
         os.chdir(gapic_code_dir)
