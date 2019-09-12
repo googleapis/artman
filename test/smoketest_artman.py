@@ -126,7 +126,7 @@ def _parse(artman_yaml_path):
     with open(artman_yaml_path, 'r') as f:
         # Convert yaml into json file as protobuf python load support parsing
         # of protobuf in json or text format, not yaml.
-        artman_config_json_string = json.dumps(yaml.load(f))
+        artman_config_json_string = json.dumps(yaml.load(f, Loader=yaml.FullLoader))
     config_pb = config_pb2.Config()
     json_format.Parse(artman_config_json_string, config_pb)
 
