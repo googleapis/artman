@@ -56,11 +56,16 @@ class ProtoDescGenTask(task_base.TaskBase):
         # DescGen doesn't use group protos by package right now because
         #   - it doesn't have to
         #   - and multiple invocation will overwrite the desc_out_file
-        self.exec_command(
-            proto_params.proto_compiler_command +
-            protoc_utils.protoc_header_params(header_proto_path, toolkit_path) +
-            protoc_utils.protoc_desc_params(output_dir, desc_out_file) +
-            desc_protos)
+        (common_resources_includes, common_resources_paths) = \
+            protoc_utils.protoc_common_resources_params(root_dir)
+        params = proto_params.proto_compiler_command + \
+            common_resources_includes + \
+            protoc_utils.protoc_header_params(header_proto_path, toolkit_path) + \
+            protoc_utils.protoc_desc_params(output_dir, desc_out_file) + \
+            common_resources_paths + \
+            desc_protos
+
+        self.exec_command(params)
         return os.path.join(output_dir, desc_out_file)
 
 
@@ -69,7 +74,8 @@ class ProtocCodeGenTaskBase(task_base.TaskBase):
     def _execute_proto_codegen(
             self, language, src_proto_path, import_proto_path,
             pkg_dir, api_name, api_version, organization_name,
-            toolkit_path, gapic_yaml, gen_proto=False, gen_grpc=False,
+            toolkit_path, gapic_yaml, root_dir,
+            gen_proto=False, gen_grpc=False, gen_common_resources=False,
             final_src_proto_path=None, final_import_proto_path=None,
             excluded_proto_path=[]):
         src_proto_path = final_src_proto_path or src_proto_path
@@ -88,6 +94,16 @@ class ProtocCodeGenTaskBase(task_base.TaskBase):
         else:
             protoc_grpc_params = []
 
+        if gen_common_resources:
+            (common_resources_includes, common_resources_paths) = \
+                protoc_utils.protoc_common_resources_params(root_dir)
+            protoc_plugin_params = protoc_utils.protoc_plugin_params(
+                proto_params,  pkg_dir, gapic_yaml)
+        else:
+            (common_resources_includes, common_resources_paths) = ([], [])
+            protoc_plugin_params = []
+
+
         # protoc-gen-go has some peculiarities:
         # It can only compile one package per invocation. So, we need to split
         # proto files by packages.
@@ -103,13 +119,18 @@ class ProtocCodeGenTaskBase(task_base.TaskBase):
             # It is possible to get duplicate protos. De-dupe them.
             protos = sorted(set(protos))
 
-            # Execute protoc.
-            self.exec_command(proto_params.proto_compiler_command +
+            command_params = proto_params.proto_compiler_command + \
+                common_resources_includes + \
                 protoc_utils.protoc_header_params(
-                    import_proto_path + src_proto_path, toolkit_path) +
-                protoc_proto_params +
-                protoc_grpc_params +
-                protos)
+                    import_proto_path + src_proto_path, toolkit_path) + \
+                protoc_proto_params + \
+                protoc_grpc_params + \
+                protoc_plugin_params + \
+                common_resources_paths + \
+                protos
+
+            # Execute protoc.
+            self.exec_command(command_params)
 
         return pkg_dir
 
@@ -120,18 +141,35 @@ class ProtoCodeGenTask(ProtocCodeGenTaskBase):
     """Generates protos"""
     def execute(self, language, src_proto_path, import_proto_path,
                 output_dir, api_name, api_version, organization_name,
-                toolkit_path, gapic_yaml, final_src_proto_path=None,
+                toolkit_path, gapic_yaml, root_dir, final_src_proto_path=None,
                 final_import_proto_path=None, excluded_proto_path=[]):
         pkg_dir = protoc_utils.prepare_proto_pkg_dir(
             output_dir, api_name, api_version, organization_name, language)
         return self._execute_proto_codegen(
             language, src_proto_path, import_proto_path, pkg_dir,
             api_name, api_version, organization_name, toolkit_path,
-            gapic_yaml, gen_proto=True,
+            gapic_yaml, root_dir, gen_proto=True,
             final_src_proto_path=final_src_proto_path,
             final_import_proto_path=final_import_proto_path,
             excluded_proto_path=excluded_proto_path)
 
+class ResourceNameGenTask(ProtocCodeGenTaskBase):
+    default_provides = 'proto_code_dir'
+
+    """Generates protos"""
+    def execute(self, language, src_proto_path, import_proto_path,
+                output_dir, api_name, api_version, organization_name,
+                toolkit_path, gapic_yaml, root_dir, final_src_proto_path=None,
+                final_import_proto_path=None, excluded_proto_path=[]):
+        pkg_dir = protoc_utils.prepare_proto_pkg_dir(
+            output_dir, api_name, api_version, organization_name, language)
+        return self._execute_proto_codegen(
+            language, src_proto_path, import_proto_path, pkg_dir,
+            api_name, api_version, organization_name, toolkit_path,
+            gapic_yaml, root_dir, gen_common_resources=True,
+            final_src_proto_path=final_src_proto_path,
+            final_import_proto_path=final_import_proto_path,
+            excluded_proto_path=excluded_proto_path)
 
 class GrpcCodeGenTask(ProtocCodeGenTaskBase):
     default_provides = 'grpc_code_dir'
@@ -139,14 +177,14 @@ class GrpcCodeGenTask(ProtocCodeGenTaskBase):
     """Generates the gRPC client library"""
     def execute(self, language, src_proto_path, import_proto_path,
                 toolkit_path, output_dir, api_name, api_version,
-                organization_name, gapic_yaml, final_src_proto_path=None,
+                organization_name, gapic_yaml, root_dir, final_src_proto_path=None,
                 final_import_proto_path=None, excluded_proto_path=[]):
         pkg_dir = protoc_utils.prepare_grpc_pkg_dir(
             output_dir, api_name, api_version, organization_name, language)
         return self._execute_proto_codegen(
             language, src_proto_path, import_proto_path, pkg_dir,
             api_name, api_version,  organization_name, toolkit_path,
-            gapic_yaml, gen_grpc=True,
+            gapic_yaml, root_dir, gen_grpc=True,
             final_src_proto_path=final_src_proto_path,
             final_import_proto_path=final_import_proto_path,
             excluded_proto_path=excluded_proto_path)
@@ -158,14 +196,14 @@ class ProtoAndGrpcCodeGenTask(ProtocCodeGenTaskBase):
     """Generates protos and the gRPC client library"""
     def execute(self, language, src_proto_path, import_proto_path,
                 toolkit_path, output_dir, api_name, api_version,
-                organization_name, gapic_yaml, final_src_proto_path=None,
+                organization_name, gapic_yaml, root_dir, final_src_proto_path=None,
                 final_import_proto_path=None, excluded_proto_path=[]):
         pkg_dir = protoc_utils.prepare_grpc_pkg_dir(
             output_dir, api_name, api_version, organization_name, language)
         return self._execute_proto_codegen(
             language, src_proto_path, import_proto_path, pkg_dir,
             api_name, api_version, organization_name, toolkit_path,
-            gapic_yaml, gen_proto=True, gen_grpc=True,
+            gapic_yaml, root_dir, gen_proto=True, gen_grpc=True,
             final_src_proto_path=final_src_proto_path,
             final_import_proto_path=final_import_proto_path,
             excluded_proto_path=excluded_proto_path)

@@ -70,6 +70,7 @@ class _JavaCoreTaskFactory(CoreTaskFactoryBase):
     def _get_core_codegen_tasks(self, **kwargs):
         return [protoc_tasks.ProtoDescGenTask,
                 protoc_tasks.ProtoCodeGenTask,
+                protoc_tasks.ResourceNameGenTask,
                 package_metadata_tasks.PackageMetadataConfigGenTask,
                 package_metadata_tasks.ProtoPackageMetadataGenTask,
                 protoc_tasks.JavaProtoCopyTask]

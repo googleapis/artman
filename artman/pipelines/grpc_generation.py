@@ -69,6 +69,7 @@ class ProtoGenTaskFactory(code_gen.TaskFactoryBase):
         tasks = [protoc_tasks.ProtoDescGenTask]
         if self.gen_code:
             tasks.append(protoc_tasks.ProtoCodeGenTask)
+            tasks.append(protoc_tasks.ResourceNameGenTask)
             if self.gen_grpc:
                 tasks.append(protoc_tasks.GrpcCodeGenTask)
         tasks.append(package_metadata_tasks.PackageMetadataConfigGenTask)

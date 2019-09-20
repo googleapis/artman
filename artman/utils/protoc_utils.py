@@ -270,12 +270,6 @@ def protoc_proto_params(proto_params, pkg_dir, gapic_yaml, with_grpc):
     lang_param = proto_params.lang_out_param(pkg_dir, with_grpc)
     if lang_param:
         params += lang_param.split(' ')
-    # plugin out must come after lang out
-    plugin_param = proto_params.proto_plugin_path()
-    plugin_out = proto_params.plugin_out_param(pkg_dir, gapic_yaml)
-    if plugin_param and plugin_out:
-        params.append('--plugin=protoc-gen-plgn={}'.format(plugin_param))
-        params.append(plugin_out)
     return params
 
 
@@ -288,6 +282,34 @@ def protoc_grpc_params(proto_params, pkg_dir, toolkit_path):
     if grpc_param:
         params.append(grpc_param)
     return params
+
+
+def protoc_plugin_params(proto_params, pkg_dir, gapic_yaml):
+    params = []
+    plugin_param = proto_params.proto_plugin_path()
+    plugin_out = proto_params.plugin_out_param(pkg_dir, gapic_yaml)
+    if plugin_param and plugin_out:
+        params.append('--plugin=protoc-gen-plgn={}'.format(plugin_param))
+        params.append(plugin_out)
+    return params
+
+
+def protoc_common_resources_params(root_dir, common_resources=None):
+    resources = common_resources
+    if resources is None:
+        default = os.path.join("google", "cloud", "common_resources.proto")
+        resources = [default]
+
+    common_resources_includes = []
+    common_resources_paths = []
+    for res in resources:
+        path = os.path.join(root_dir, res)
+        if os.path.exists(path):
+            common_resources_paths.append(path)
+            common_resources_includes.append("-I{}={}".format(res, path))
+        else:
+            logger.warn("Could not find resources file at: {}".format(path))
+    return (common_resources_includes, common_resources_paths)
 
 
 def find_google_dir_index(src_proto_path):
