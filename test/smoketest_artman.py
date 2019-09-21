@@ -63,6 +63,12 @@ WHITELIST = [
     # TODO(hzyi): whitelisted to unblock artman release. CL coming.
     'csharp_gapic@google/firestore/artman_firestore_v1.yaml',
     'csharp_gapic@google/firestore/artman_firestore.yaml',
+
+    # whitelisted four weird configs
+    'java_grpc@google/artman_core.yaml',
+    'java_grpc@google/artman_logging_external_types.yaml',
+    'java_grpc@google/appengine/artman_appengine.yaml',
+    'java_gapic@google/cloud/dialogflow/v2beta1/artman_dialogflow_v2beta1_java.yaml',
 ]
 
 logger = logging.getLogger('smoketest')
