@@ -69,6 +69,9 @@ WHITELIST = [
     'java_grpc@google/artman_logging_external_types.yaml',
     'java_grpc@google/appengine/artman_appengine.yaml',
     'java_gapic@google/cloud/dialogflow/v2beta1/artman_dialogflow_v2beta1_java.yaml',
+
+    # whitelisted for no HTTP annotations
+    'php_gapic@google/devtools/cloudbuild/artman_cloudbuild',
 ]
 
 logger = logging.getLogger('smoketest')
