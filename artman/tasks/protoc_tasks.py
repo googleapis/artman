@@ -103,6 +103,10 @@ class ProtocCodeGenTaskBase(task_base.TaskBase):
             (common_resources_includes, common_resources_paths) = ([], [])
             protoc_plugin_params = []
 
+        if not protoc_proto_params \
+                and not protoc_grpc_params \
+                and not protoc_plugin_params:
+            return pkg_dir
 
         # protoc-gen-go has some peculiarities:
         # It can only compile one package per invocation. So, we need to split
