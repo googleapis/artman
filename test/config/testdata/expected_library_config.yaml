@@ -5,6 +5,7 @@ common:
   excluded_proto_path:
   - /tmp/input/google/example/library/v1/excluded
   gapic_yaml: ''
+  grpc_service_config: /tmp/input/google/example/library/v1/library_grpc_service_config.json
   import_proto_path:
   - /tmp/input
   organization_name: google-cloud

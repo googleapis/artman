@@ -178,6 +178,10 @@ def _normalize_artifact_config(artifact_config, artman_config_path):
         artifact_config.samples = _normalize_path(
             artifact_config.samples, artman_config_path, 'samples')
 
+    if artifact_config.grpc_service_config:
+        artifact_config.grpc_service_config = _normalize_path(
+            artifact_config.grpc_service_config, artman_config_path, 'grpc_service_config')
+
     normalized_src_proto_paths = []
     for src_proto_path in artifact_config.src_proto_paths:
         if src_proto_path.startswith('-'):

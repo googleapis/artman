@@ -189,6 +189,11 @@ message Artifact {
   // yamls recursively in this directory.
   string samples = 19;
 
+  // Path to a gRPC ServiceConfig JSON file. This config is only used by
+  // gapic-generator if the protos are configured with annotations. It can
+  // be an absolute path or a path relative to the artman config yaml.
+  string grpc_service_config = 20;
+
   reserved 11;
   reserved "import_proto_path";
 

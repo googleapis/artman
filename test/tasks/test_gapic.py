@@ -160,7 +160,8 @@ class GapicCodeGenTaskTests(unittest.TestCase):
             aspect='ALL',
             samples='',
             generator_args='--extra_args',
-            proto_package=''
+            proto_package='',
+            grpc_service_config='/path/to/my_grpc_service_config.json'
         )
         expected_cmds = [
             ' '.join(['java -cp',
@@ -170,6 +171,7 @@ class GapicCodeGenTaskTests(unittest.TestCase):
                       '--output=/path/to/output --language=python',
                       '--service_yaml=/path/to/service.yaml',
                       '--gapic_yaml=/path/to/pubsub.yaml',
+                      '--grpc_service_config=/path/to/my_grpc_service_config.json',
                       '--extra_args'
                       ])
         ]

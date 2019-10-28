@@ -37,6 +37,8 @@ def convert_to_legacy_config_dict(artifact_config, root_dir, output_dir):
     common['service_yaml'] = artifact_config.service_yaml
     common['gapic_yaml'] = artifact_config.gapic_yaml
     common['proto_package'] = artifact_config.proto_package
+    if 'grpc_service_config' in artifact_config_dict:
+        common['grpc_service_config'] = artifact_config_dict['grpc_service_config']
     common['samples'] = artifact_config.samples
     src_proto_paths = artifact_config_dict.get('src_proto_paths', [])
     common['src_proto_path'], excluded_proto_path = _calculate_proto_paths(src_proto_paths)

@@ -103,7 +103,7 @@ class GapicCodeGenTask(task_base.TaskBase):
     def execute(self, language, toolkit_path, descriptor_set, service_yaml,
                 gapic_yaml, package_metadata_yaml, proto_package,
                 gapic_code_dir, api_name, api_version, organization_name,
-                aspect, samples, generator_args):
+                aspect, samples, generator_args, grpc_service_config=''):
         existing = glob.glob('%s/*' % gapic_code_dir)
         if existing:
             self.exec_command(['rm', '-r'] + existing)
@@ -118,6 +118,8 @@ class GapicCodeGenTask(task_base.TaskBase):
                 gapic_args.append('--sample_yamls')
                 for sample_yaml in sample_yamls:
                     gapic_args.append(sample_yaml)
+        if grpc_service_config:
+            gapic_args.append('--grpc_service_config=' + os.path.abspath(grpc_service_config))
 
         args = [
             '--descriptor_set=' + os.path.abspath(descriptor_set),
