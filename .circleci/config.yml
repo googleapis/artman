@@ -4,7 +4,7 @@ jobs:
   golden_and_smoke_tests:
     working_directory: /usr/src/artman
     docker:
-      - image: docker:17.12.1-ce-git
+      - image: docker:19-git
     steps:
       - &checkout_artman
         checkout:
@@ -33,7 +33,7 @@ jobs:
       - run:
           name: Run golden tests
           command: |
-            docker run -it -e RUNNING_IN_ARTMAN_DOCKER=True --name golden artman /bin/bash -c "pip install pytest; git clone https://github.com/googleapis/googleapis /artman/test/golden/googleapis; py.test -vv /artman/test/golden/artman_golden_test.py --googleapis-dir=/artman/test/golden/googleapis" || OUT=$?
+            docker run -it -e RUNNING_IN_ARTMAN_DOCKER=True --name golden artman /bin/bash -c "pip install --upgrade pip; pip install --upgrade setuptools; pip install pytest; git clone https://github.com/googleapis/googleapis /artman/test/golden/googleapis; py.test -vv /artman/test/golden/artman_golden_test.py --googleapis-dir=/artman/test/golden/googleapis" || OUT=$?
             docker cp golden:/artman/test/golden/actual_library_example.golden /tmp/actual_library_example.golden
             if [ $OUT -ne 0 ];then
               exit $OUT

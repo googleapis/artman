@@ -171,6 +171,10 @@ RUN git config --global user.email googleapis-publisher@google.com \
 RUN mkdir -p /root/
 ADD artman-user-config-in-docker.yaml /root/.artman/config.yaml
 
+# Fix the setuptools version incompatibility with google-auth v1.7.0
+RUN pip install --upgrade pip
+RUN pip install --upgrade setuptools
+
 # Install artman.
 ADD . /artman
 ARG install_artman_from_source=false
