@@ -106,8 +106,6 @@ jobs:
             docker login -u "${DOCKER_USER}" -p "${DOCKER_PASS}"
             docker tag artman "googleapis/artman:AUTO_BUILD_$CIRCLE_BUILD_NUM"
             docker push "googleapis/artman:AUTO_BUILD_$CIRCLE_BUILD_NUM"
-            docker tag artman "googleapis/artman:head"
-            docker push "googleapis/artman:head"
 
   release:
     working_directory: /usr/src/artman
@@ -225,15 +223,4 @@ workflows:
             - unit-python3.6
             - docs
             - golden_and_smoke_tests
-          filters:
-            branches:
-              only: master
-            tags: &releases
-              only: '/^v[\d.]+$/'
-      - release:
-          requires:
-            - build_and_release_docker_image
-          filters:
-            branches:
-              ignore: /.*/
-            tags: *releases
+          filters: *all_commits
