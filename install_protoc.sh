@@ -20,7 +20,7 @@ protobuf_versions[csharp]=3.8.0
 protobuf_versions[java]=3.7.1
 
 # RC1 url has no logic: compare rc1 in the folder name with rc-1 in the filename
-override_download_location[master-20191115]=https://storage.googleapis.com/artman/protoc-20191115
+override_download_location[master-20191115]=https://storage.googleapis.com/artman/protoc-20191115.zip
 
 # Install each unique protobuf version.
 for i in "${protobuf_versions[@]}"
@@ -29,11 +29,13 @@ do
   if [ "${override_download_location[$i]}" != "" ]; then
     location=${override_download_location[$i]}
   fi
+  echo "$i $location"
   mkdir -p /usr/src/protoc-${i}/ \
       && curl --location $location > /usr/src/protoc-${i}/protoc.zip \
       && cd /usr/src/protoc-${i}/ \
       && unzip protoc.zip \
       && rm protoc.zip \
+      && chmod +x /usr/src/protoc-${i}/bin/protoc \
       && ln -s /usr/src/protoc-${i}/bin/protoc /usr/local/bin/protoc-${i}
 done
 
