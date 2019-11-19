@@ -73,6 +73,10 @@ WHITELIST = [
     # whitelisted for no HTTP annotations
     'php_gapic@google/devtools/cloudbuild/artman_cloudbuild',
     'php_gapic@google/cloud/osconfig/agentendpoint/v1beta/artman_osconfig_v1beta',
+
+    # whitelisted because of broken GAPIC config
+    # TODO(fenster): to fix that
+    '.*@google/monitoring/v3/artman_monitoring.yaml',
 ]
 
 logger = logging.getLogger('smoketest')
