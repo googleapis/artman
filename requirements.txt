@@ -19,3 +19,4 @@ stringcase >= 1.2.0, < 2.0.0
 taskflow==3.7.1
 networkx==1.11
 pypandoc >= 1.4, < 2.0
+ply >= 3.8
