@@ -157,23 +157,10 @@ jobs:
       - *checkout_artman
       - run:
           name: Install nox.
-          command: pip install --upgrade nox-automation==0.19.1
+          command: pip install --upgrade nox-automation
       - run:
           name: Build the docs.
-          command: nox -e docs
-    working_directory: /usr/src/artman/
-
-  unit-python2.7:
-    docker:
-      - image: python:2.7
-    steps:
-      - checkout
-      - run:
-          name: Install nox and codecov.
-          command: pip install --upgrade nox-automation==0.19.1 codecov
-      - run:
-          name: Run unit tests.
-          command: nox -e "unit_tests(python_version='2.7')"
+          command: nox --session docs
     working_directory: /usr/src/artman/
 
   unit-python3.5:
@@ -183,10 +170,10 @@ jobs:
       - *checkout_artman
       - run:
           name: Install nox and codecov.
-          command: pip install --upgrade nox-automation==0.19.1 codecov
+          command: pip install --upgrade nox-automation codecov
       - run:
           name: Run unit tests.
-          command: nox -e "unit_tests(python_version='3.5')"
+          command: nox --session unit_tests-3.5
     working_directory: /usr/src/artman/
 
   unit-python3.6:
@@ -196,17 +183,30 @@ jobs:
       - checkout
       - run:
           name: Install nox and codecov.
-          command: pip install --upgrade nox-automation==0.19.1 codecov
+          command: pip install --upgrade nox-automation codecov
       - run:
           name: Run unit tests.
-          command: nox -e "unit_tests(python_version='3.6')"
+          command: nox --session unit_tests-3.6
+    working_directory: /usr/src/artman/
+
+  unit-python3.7:
+    docker:
+      - image: python:3.7
+    steps:
+      - checkout
+      - run:
+          name: Install nox and codecov.
+          command: pip install --upgrade nox-automation codecov
+      - run:
+          name: Run unit tests.
+          command: nox --session unit_tests-3.7
     working_directory: /usr/src/artman/
 
 workflows:
   version: 2
   tests:
     jobs:
-      - unit-python2.7:
+      - unit-python3.7:
           filters: &all_commits
             tags:
               only: /.*/
@@ -220,7 +220,6 @@ workflows:
           filters: *all_commits
       - build_and_release_docker_image:
           requires:
-            - unit-python2.7
             - unit-python3.5
             - unit-python3.6
             - docs

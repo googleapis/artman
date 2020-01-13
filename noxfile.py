@@ -18,13 +18,9 @@ import nox
 import os
 
 
-@nox.session
-@nox.parametrize('python_version', ['2.7', '3.4', '3.5', '3.6'])
-def unit_tests(session, python_version):
+@nox.session(python=['3.4', '3.5', '3.6', '3.7'])
+def unit_tests(session):
     """Run the unit test suite."""
-
-    # Run unit tests against all supported versions of Python.
-    session.interpreter = 'python{}'.format(python_version)
 
     # Install all test dependencies, then install this package in-place.
     session.install('mock', 'pytest', 'pytest-cov', 'pyfakefs',
@@ -35,19 +31,17 @@ def unit_tests(session, python_version):
     session.run('py.test', '-rxs', '--cov', '--cov-append', '--cov-report=')
 
 
-@nox.session
+@nox.session(python='3.6')
 def lint(session):
     """Run the linter."""
-    session.interpreter = 'python3.6'
     session.install('flake8')
     session.run('flake8', '--max-complexity=8', 'artman',
                 '--exclude=test/output', 'test')
 
 
-@nox.session
+@nox.session(python='3.6')
 def coverage(session):
     """Provide a coverage report."""
-    session.interpreter = 'python3.6'
     session.install('coverage')
     try:
         # session.run('coverage', 'report')
@@ -56,12 +50,9 @@ def coverage(session):
         session.run('coverage', 'erase')
 
 
-@nox.session
+@nox.session(python='3.6')
 def docs(session):
     """Build the docs."""
-
-    # Set the virtualenv dirname.
-    session.virtualenv_dirname = 'docs'
 
     # Install Sphinx and also all of the google-cloud-* packages.
     session.chdir(os.path.realpath(os.path.dirname(__file__)))

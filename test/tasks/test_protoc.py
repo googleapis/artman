@@ -77,6 +77,38 @@ class PhpGrpcRenameTaskTests(unittest.TestCase):
         finally:
             os.remove(moved_file)
 
+class ProtoCodeGenTaskTests(unittest.TestCase):
+    # For go, it's important to make one protoc invocation per go package.
+    # For php, it's important to have just one protoc invocation.
+    # Other languages don't care at all.
+
+    @mock.patch.object(protoc_tasks.ProtoCodeGenTask, 'exec_command')
+    @mock.patch('artman.utils.protoc_utils.protoc_header_params')
+    def test_execute_go(self, exec_command, protoc_header_params):
+        protoc_header_params.return_value = ['protoc_header_params']
+        src_proto_path = ['test/tasks/data/googleapis/google/go_package_example/v1']
+        task = protoc_tasks.ProtoCodeGenTask()
+
+        # oh, that's a lot of parameters, none of them are needed now!
+        task.execute('go', src_proto_path, [], 'output_dir', 'api_name', 'v1', 
+                'org_name', 'toolkit_path', 'gapic_yaml', 'root_dir')
+
+        assert exec_command.call_count == 2
+
+
+    @mock.patch.object(protoc_tasks.ProtoCodeGenTask, 'exec_command')
+    @mock.patch('artman.utils.protoc_utils.protoc_header_params')
+    def test_execute_php(self, exec_command, protoc_header_params):
+        protoc_header_params.return_value = ['protoc_header_params']
+        src_proto_path = ['test/tasks/data/googleapis/google/go_package_example/v1']
+        task = protoc_tasks.ProtoCodeGenTask()
+
+        # oh, that's a lot of parameters, none of them are needed now!
+        task.execute('php', src_proto_path, [], 'output_dir', 'api_name', 'v1', 
+                'org_name', 'toolkit_path', 'gapic_yaml', 'root_dir')
+
+        assert exec_command.call_count == 1
+
 
 def test_find_google_dir_index():
     expected = [
