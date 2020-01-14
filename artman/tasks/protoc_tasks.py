@@ -115,11 +115,16 @@ class ProtocCodeGenTaskBase(task_base.TaskBase):
         # The order of the input files affects comments and internal variables.
         # While this doesn't affect the correctness of the result, we sort
         # proto files for reproducibility.
-        #
-        # Other languages don't mind us doing this, so we just do it for
-        # everyone.
-        for (dirname, protos) in protoc_utils.group_by_go_package(
-                protoc_utils.find_protos(src_proto_path, excluded_proto_path)).items():
+
+        # For other languages, we'll pass all proto files into the same protoc
+        # invocation (PHP especially needs that).
+        all_protos = protoc_utils.find_protos(src_proto_path, excluded_proto_path)
+        if language == "go":
+            protos_map = protoc_utils.group_by_go_package(all_protos)
+        else:
+            protos_map = { "": all_protos }
+
+        for (dirname, protos) in protos_map.items():
             # It is possible to get duplicate protos. De-dupe them.
             protos = sorted(set(protos))
 

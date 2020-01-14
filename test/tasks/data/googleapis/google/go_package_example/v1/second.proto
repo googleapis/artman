@@ -1,0 +1,1 @@
+option go_package = "google.golang.org/genproto/googleapis/package2/v1;package2";
