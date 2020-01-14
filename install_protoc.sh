@@ -10,17 +10,15 @@ declare -A protobuf_versions
 declare -A override_download_location
 
 # Please adhere to this format, as artman parses these lines for the protobuf versions.
-protobuf_versions[nodejs]=3.8.0
-protobuf_versions[go]=3.8.0
-protobuf_versions[python]=3.8.0
-protobuf_versions[ruby]=3.8.0
-protobuf_versions[php]=3.9.0-rc1
-protobuf_versions[csharp]=3.8.0
+protobuf_versions[nodejs]=3.11.2
+protobuf_versions[go]=3.11.2
+protobuf_versions[python]=3.11.2
+protobuf_versions[ruby]=3.11.2
+protobuf_versions[php]=3.11.2
+protobuf_versions[csharp]=3.11.2
 # Protobuf Java dependency must match grpc-java's protobuf dep.
-protobuf_versions[java]=3.10.0
-
-# RC1 url has no logic: compare rc1 in the folder name with rc-1 in the filename
-override_download_location[3.9.0-rc1]=https://github.com/protocolbuffers/protobuf/releases/download/v3.9.0-rc1/protoc-3.9.0-rc-1-linux-x86_64.zip
+# https://github.com/grpc/grpc-java/blob/18e099d9d37163905fc61febd2aee983e298a066/build.gradle#L51
+protobuf_versions[java]=3.11.0
 
 # Install each unique protobuf version.
 for i in "${protobuf_versions[@]}"
