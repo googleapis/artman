@@ -48,7 +48,7 @@ class PythonChangePackageTask(task_base.TaskBase):
 
     # E.g., `import "google/foo/bar";`
     _IMPORT_REGEX = re.compile(_BASE_PROTO_REGEX.format(
-        prefix='^import "',
+        prefix='^import (?:public )?"',
         separator='/',
         package_suffix='\\.proto',
         suffix='";'))
