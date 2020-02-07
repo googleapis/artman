@@ -77,6 +77,9 @@ WHITELIST = [
     # whitelisted because of broken GAPIC config
     # TODO(fenster): to fix that
     '.*@google/monitoring/v3/artman_monitoring.yaml',
+    
+    # securitycenter C# does not use gapic-generator
+    'csharp_gapic@google/cloud/securitycenter/artman_securitycenter_v1p1beta1.yaml',
 ]
 
 logger = logging.getLogger('smoketest')
