@@ -81,9 +81,6 @@ WHITELIST = [
     # securitycenter C# does not use gapic-generator
     'csharp_gapic@google/cloud/securitycenter/artman_securitycenter_v1p1beta1.yaml',
 
-    # whitelisted because ruby grpc can't generate a proto2 descriptor
-    # which this API depends on in protobuf.proto
-    'ruby_gapic@google/cloud/bigquery/artman_bigquerystorage_v1alpha2.yaml',
 ]
 
 logger = logging.getLogger('smoketest')
