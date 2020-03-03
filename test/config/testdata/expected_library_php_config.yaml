@@ -8,6 +8,7 @@ common:
   grpc_service_config: /tmp/input/google/example/library/v1/library_grpc_service_config.json
   import_proto_path:
   - /tmp/input
+  language_out_override: key=value:{root}
   organization_name: google-cloud
   output_dir: /tmp/output
   proto_deps:
@@ -22,6 +23,6 @@ common:
   test_proto_deps:
   - name: google-iam-v1
     proto_path: google/iam/v1
-java:
-  gapic_code_dir: /tmp/output/java/gapic-google-cloud-library-v1
+php:
+  gapic_code_dir: /tmp/output/php/google-cloud-library-v1
   release_level: ga

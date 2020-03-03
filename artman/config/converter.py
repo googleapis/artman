@@ -52,6 +52,7 @@ def convert_to_legacy_config_dict(artifact_config, root_dir, output_dir):
     if 'test_proto_deps' in artifact_config_dict:
         common['test_proto_deps'] = artifact_config_dict['test_proto_deps']
     common['artifact_type'] = Artifact.Type.Name(artifact_config.type)
+    common['language_out_override'] = artifact_config.language_out_override
 
     result = {}
     result['common'] = common

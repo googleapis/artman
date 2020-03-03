@@ -77,14 +77,17 @@ class ProtocCodeGenTaskBase(task_base.TaskBase):
             toolkit_path, gapic_yaml, root_dir,
             gen_proto=False, gen_grpc=False, gen_common_resources=False,
             final_src_proto_path=None, final_import_proto_path=None,
-            excluded_proto_path=[]):
+            excluded_proto_path=[], language_out_override=None):
+        # Adding 17th parameter is a sin that I commit here just because
+        # refactoring of this code will never happen.
         src_proto_path = final_src_proto_path or src_proto_path
         import_proto_path = final_import_proto_path or import_proto_path
         proto_params = protoc_utils.PROTO_PARAMS_MAP[language]
 
         if gen_proto:
             protoc_proto_params = protoc_utils.protoc_proto_params(
-                proto_params, pkg_dir, gapic_yaml, with_grpc=True)
+                proto_params, pkg_dir, gapic_yaml, with_grpc=True, 
+                language_out_override=language_out_override)
         else:
             protoc_proto_params = []
 
@@ -151,7 +154,8 @@ class ProtoCodeGenTask(ProtocCodeGenTaskBase):
     def execute(self, language, src_proto_path, import_proto_path,
                 output_dir, api_name, api_version, organization_name,
                 toolkit_path, gapic_yaml, root_dir, final_src_proto_path=None,
-                final_import_proto_path=None, excluded_proto_path=[]):
+                final_import_proto_path=None, excluded_proto_path=[],
+                language_out_override=None):
         pkg_dir = protoc_utils.prepare_proto_pkg_dir(
             output_dir, api_name, api_version, organization_name, language)
         return self._execute_proto_codegen(
@@ -160,7 +164,8 @@ class ProtoCodeGenTask(ProtocCodeGenTaskBase):
             gapic_yaml, root_dir, gen_proto=True,
             final_src_proto_path=final_src_proto_path,
             final_import_proto_path=final_import_proto_path,
-            excluded_proto_path=excluded_proto_path)
+            excluded_proto_path=excluded_proto_path,
+            language_out_override=language_out_override)
 
 class ResourceNameGenTask(ProtocCodeGenTaskBase):
     default_provides = 'proto_code_dir'
@@ -169,7 +174,8 @@ class ResourceNameGenTask(ProtocCodeGenTaskBase):
     def execute(self, language, src_proto_path, import_proto_path,
                 output_dir, api_name, api_version, organization_name,
                 toolkit_path, gapic_yaml, root_dir, final_src_proto_path=None,
-                final_import_proto_path=None, excluded_proto_path=[]):
+                final_import_proto_path=None, excluded_proto_path=[],
+                language_out_override=None):
         pkg_dir = protoc_utils.prepare_proto_pkg_dir(
             output_dir, api_name, api_version, organization_name, language)
         return self._execute_proto_codegen(
@@ -178,7 +184,8 @@ class ResourceNameGenTask(ProtocCodeGenTaskBase):
             gapic_yaml, root_dir, gen_common_resources=True,
             final_src_proto_path=final_src_proto_path,
             final_import_proto_path=final_import_proto_path,
-            excluded_proto_path=excluded_proto_path)
+            excluded_proto_path=excluded_proto_path,
+            language_out_override=language_out_override)
 
 class GrpcCodeGenTask(ProtocCodeGenTaskBase):
     default_provides = 'grpc_code_dir'
@@ -187,7 +194,8 @@ class GrpcCodeGenTask(ProtocCodeGenTaskBase):
     def execute(self, language, src_proto_path, import_proto_path,
                 toolkit_path, output_dir, api_name, api_version,
                 organization_name, gapic_yaml, root_dir, final_src_proto_path=None,
-                final_import_proto_path=None, excluded_proto_path=[]):
+                final_import_proto_path=None, excluded_proto_path=[],
+                language_out_override=None):
         pkg_dir = protoc_utils.prepare_grpc_pkg_dir(
             output_dir, api_name, api_version, organization_name, language)
         return self._execute_proto_codegen(
@@ -196,7 +204,8 @@ class GrpcCodeGenTask(ProtocCodeGenTaskBase):
             gapic_yaml, root_dir, gen_grpc=True,
             final_src_proto_path=final_src_proto_path,
             final_import_proto_path=final_import_proto_path,
-            excluded_proto_path=excluded_proto_path)
+            excluded_proto_path=excluded_proto_path,
+            language_out_override=language_out_override)
 
 
 class ProtoAndGrpcCodeGenTask(ProtocCodeGenTaskBase):
@@ -206,7 +215,8 @@ class ProtoAndGrpcCodeGenTask(ProtocCodeGenTaskBase):
     def execute(self, language, src_proto_path, import_proto_path,
                 toolkit_path, output_dir, api_name, api_version,
                 organization_name, gapic_yaml, root_dir, final_src_proto_path=None,
-                final_import_proto_path=None, excluded_proto_path=[]):
+                final_import_proto_path=None, excluded_proto_path=[],
+                language_out_override=None):
         pkg_dir = protoc_utils.prepare_grpc_pkg_dir(
             output_dir, api_name, api_version, organization_name, language)
         return self._execute_proto_codegen(
@@ -215,7 +225,8 @@ class ProtoAndGrpcCodeGenTask(ProtocCodeGenTaskBase):
             gapic_yaml, root_dir, gen_proto=True, gen_grpc=True,
             final_src_proto_path=final_src_proto_path,
             final_import_proto_path=final_import_proto_path,
-            excluded_proto_path=excluded_proto_path)
+            excluded_proto_path=excluded_proto_path,
+            language_out_override=language_out_override)
 
 
 class GoCopyTask(task_base.TaskBase):

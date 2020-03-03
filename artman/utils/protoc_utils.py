@@ -14,7 +14,7 @@
 
 """Utilities for protoc tasks"""
 
-import collections
+import collections.abc
 import io
 import os
 import re
@@ -44,8 +44,14 @@ class _SimpleProtoParams(object):
     def plugin_out_param(self, output_dir, plugin_args=None):
         return None
 
-    def lang_out_param(self, output_dir, with_grpc):
-        return '--{}_out={}'.format(self.language, self.code_root(output_dir))
+    def default_lang_out_value(self, with_grpc):
+        return '{root}'
+
+    def lang_out_param(self, output_dir, with_grpc, language_out_override):
+        parameter_key = '--{language}_out'.format(language=self.language)
+        parameter_value_template = language_out_override or self.default_lang_out_value(with_grpc)
+        parameter_value = parameter_value_template.format(root=self.code_root(output_dir))
+        return '{}={}'.format(parameter_key, parameter_value)
 
     def grpc_plugin_path(self, dummy_toolkit_path):
         if self.path is None:
@@ -101,11 +107,11 @@ class _GoProtoParams(_SimpleProtoParams):
     def code_root(self, output_dir):
         return self.params.code_root(output_dir)
 
-    def lang_out_param(self, output_dir, with_grpc):
-        param = '--go_out='
+    def default_lang_out_value(self, with_grpc):
+        value = '{root}'
         if with_grpc:
-            param += 'plugins=grpc:'
-        return param + self.code_root(output_dir)
+            value = 'plugins=grpc:' + value
+        return value
 
     def grpc_plugin_path(self, toolkit_path):
         # Go gRPC code is generated through --go_out=plugin=grpc, no grpc
@@ -129,9 +135,6 @@ class _PhpProtoParams(_SimpleProtoParams):
     def code_root(self, output_dir):
         return self.params.code_root(output_dir)
 
-    def lang_out_param(self, output_dir, with_grpc):
-        return '--php_out={}'.format(self.code_root(output_dir))
-
     def grpc_out_param(self, output_dir):
         return '--grpc_out={}:{}'.format(
             'class_suffix=GrpcClient',
@@ -149,9 +152,6 @@ class _RubyProtoParams(_SimpleProtoParams):
 
     def code_root(self, output_dir):
         return self.params.code_root(output_dir)
-
-    def lang_out_param(self, output_dir, with_grpc):
-        return '--ruby_out={}'.format(self.code_root(output_dir))
 
     def grpc_plugin_path(self, dummy_toolkit_path):
         # No plugin for grpc_toos_ruby_protoc
@@ -172,10 +172,14 @@ class _PythonProtoParams(_SimpleProtoParams):
     def code_root(self, output_dir):
         return self.params.code_root(output_dir)
 
-    def lang_out_param(self, output_dir, with_grpc):
-        return '--python_out={root} --pydocstring_out={root}'.format(
-            root=self.code_root(output_dir),
-        )
+    def lang_out_param(self, output_dir, with_grpc, language_out_override):
+        parameter_key = '--{language}_out'.format(language=self.language)
+        parameter_value_template = language_out_override or self.default_lang_out_value(with_grpc)
+        parameter_value = parameter_value_template.format(root=self.code_root(output_dir))
+        # appending --pydocstring_out here is ugly, but it's not a good time to refactor now
+        # since this tool is going to be discontinued really soon.
+        append_value = '--pydocstring_out={root}'.format(root=self.code_root(output_dir))
+        return '{}={} {}'.format(parameter_key, parameter_value, append_value)
 
     def grpc_plugin_path(self, dummy_toolkit_path):
         # No plugin for grpc.tools
@@ -200,7 +204,7 @@ def protoc_binary_name(language):
 
     with io.open(protoc_install_path) as protoc_install_file:
         for line in protoc_install_file:
-            match = re.match('^protobuf_versions\[' + language.lower() + r'\]=(\S+)$', line)
+            match = re.match(r'^protobuf_versions\[' + language.lower() + r'\]=(\S+)$', line)
             if match:
                 current_version = match.group(1)
                 break
@@ -265,9 +269,9 @@ def protoc_desc_params(output_dir, desc_out_file):
              '-o', os.path.join(output_dir, desc_out_file)])
 
 
-def protoc_proto_params(proto_params, pkg_dir, gapic_yaml, with_grpc):
+def protoc_proto_params(proto_params, pkg_dir, gapic_yaml, with_grpc, language_out_override):
     params = []
-    lang_param = proto_params.lang_out_param(pkg_dir, with_grpc)
+    lang_param = proto_params.lang_out_param(pkg_dir, with_grpc, language_out_override)
     if lang_param:
         params += lang_param.split(' ')
     return params
@@ -357,7 +361,7 @@ def prepare_pkg_dir(output_dir, api_name, api_version, organization_name,
 def find_protos(proto_paths, excluded_proto_path):
     """Searches along `proto_paths` for .proto files and returns a generator of
     paths"""
-    if not isinstance(proto_paths, (types.GeneratorType, collections.MutableSequence)):
+    if not isinstance(proto_paths, (types.GeneratorType, collections.abc.MutableSequence)):
         raise ValueError("proto_paths must be a list")
     for path in proto_paths:
         if os.path.isdir(path):

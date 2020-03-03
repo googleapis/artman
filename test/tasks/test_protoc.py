@@ -83,9 +83,9 @@ class ProtoCodeGenTaskTests(unittest.TestCase):
     # Other languages don't care at all.
 
     @mock.patch.object(protoc_tasks.ProtoCodeGenTask, 'exec_command')
-    @mock.patch('artman.utils.protoc_utils.protoc_header_params')
-    def test_execute_go(self, exec_command, protoc_header_params):
-        protoc_header_params.return_value = ['protoc_header_params']
+    @mock.patch('artman.utils.protoc_utils.protoc_header_params', 
+                mock.MagicMock(return_value=['protoc_header_params']))
+    def test_execute_go(self, exec_command):
         src_proto_path = ['test/tasks/data/googleapis/google/go_package_example/v1']
         task = protoc_tasks.ProtoCodeGenTask()
 
@@ -97,9 +97,85 @@ class ProtoCodeGenTaskTests(unittest.TestCase):
 
 
     @mock.patch.object(protoc_tasks.ProtoCodeGenTask, 'exec_command')
-    @mock.patch('artman.utils.protoc_utils.protoc_header_params')
-    def test_execute_php(self, exec_command, protoc_header_params):
-        protoc_header_params.return_value = ['protoc_header_params']
+    @mock.patch('artman.utils.protoc_utils.protoc_header_params', 
+                mock.MagicMock(return_value=['protoc_header_params']))
+    def test_execute_language_out_override(self, exec_command):
+        src_proto_path = ['test/tasks/data/googleapis/google/example/v1']
+        language_out_override = 'testkey=testvalue:{root}'
+        expected_php_out = '--php_out=testkey=testvalue:output_dir/php/proto-org_name-api_name-v1/src'
+        task = protoc_tasks.ProtoCodeGenTask()
+
+        # oh, that's a lot of parameters, none of them are needed now!
+        task.execute('php', src_proto_path, [], 'output_dir', 'api_name', 'v1', 
+                'org_name', 'toolkit_path', 'gapic_yaml', 'root_dir',
+                language_out_override=language_out_override)
+
+        assert exec_command.call_count == 1
+        assert expected_php_out in exec_command.call_args.args[0]
+
+
+    @mock.patch.object(protoc_tasks.ProtoCodeGenTask, 'exec_command')
+    @mock.patch('artman.utils.protoc_utils.protoc_header_params', 
+                mock.MagicMock(return_value=['protoc_header_params']))
+    def test_execute_language_out_default(self, exec_command):
+        src_proto_path = ['test/tasks/data/googleapis/google/pexample/v1']
+        language_out_override = '' # it comes as an empty string if unset
+        expected_php_out = '--php_out=output_dir/php/proto-org_name-api_name-v1/src'
+        task = protoc_tasks.ProtoCodeGenTask()
+
+        # oh, that's a lot of parameters, none of them are needed now!
+        task.execute('php', src_proto_path, [], 'output_dir', 'api_name', 'v1', 
+                'org_name', 'toolkit_path', 'gapic_yaml', 'root_dir',
+                language_out_override=language_out_override)
+
+        assert exec_command.call_count == 1
+        assert expected_php_out in exec_command.call_args.args[0]
+
+
+    @mock.patch.object(protoc_tasks.ProtoCodeGenTask, 'exec_command')
+    @mock.patch('artman.utils.protoc_utils.protoc_header_params', 
+                mock.MagicMock(return_value=['protoc_header_params']))
+    def test_execute_python_docstring(self, exec_command):
+        src_proto_path = ['test/tasks/data/googleapis/google/pexample/v1']
+        language_out_override = '' # it comes as an empty string if unset
+        expected_python_out = '--python_out=output_dir/python/proto-org_name-api_name-v1'
+        expected_pydocstring_out = '--pydocstring_out=output_dir/python/proto-org_name-api_name-v1'
+        task = protoc_tasks.ProtoCodeGenTask()
+
+        # oh, that's a lot of parameters, none of them are needed now!
+        task.execute('python', src_proto_path, [], 'output_dir', 'api_name', 'v1', 
+                'org_name', 'toolkit_path', 'gapic_yaml', 'root_dir',
+                language_out_override=language_out_override)
+
+        assert exec_command.call_count == 1
+        assert expected_python_out in exec_command.call_args.args[0]
+        assert expected_pydocstring_out in exec_command.call_args.args[0]
+
+
+    @mock.patch.object(protoc_tasks.ProtoCodeGenTask, 'exec_command')
+    @mock.patch('artman.utils.protoc_utils.protoc_header_params', 
+                mock.MagicMock(return_value=['protoc_header_params']))
+    def test_execute_python_language_out_override(self, exec_command):
+        src_proto_path = ['test/tasks/data/googleapis/google/pexample/v1']
+        language_out_override = 'key=value:{root}'
+        expected_python_out = '--python_out=key=value:output_dir/python/proto-org_name-api_name-v1'
+        expected_pydocstring_out = '--pydocstring_out=output_dir/python/proto-org_name-api_name-v1'
+        task = protoc_tasks.ProtoCodeGenTask()
+
+        # oh, that's a lot of parameters, none of them are needed now!
+        task.execute('python', src_proto_path, [], 'output_dir', 'api_name', 'v1', 
+                'org_name', 'toolkit_path', 'gapic_yaml', 'root_dir',
+                language_out_override=language_out_override)
+
+        assert exec_command.call_count == 1
+        assert expected_python_out in exec_command.call_args.args[0]
+        assert expected_pydocstring_out in exec_command.call_args.args[0]
+
+
+    @mock.patch.object(protoc_tasks.ProtoCodeGenTask, 'exec_command')
+    @mock.patch('artman.utils.protoc_utils.protoc_header_params', 
+                mock.MagicMock(return_value=['protoc_header_params']))
+    def test_execute_php(self, exec_command):
         src_proto_path = ['test/tasks/data/googleapis/google/go_package_example/v1']
         task = protoc_tasks.ProtoCodeGenTask()
 

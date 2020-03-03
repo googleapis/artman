@@ -1,0 +1,28 @@
+common:
+  api_name: library
+  api_version: v1
+  artifact_type: GAPIC
+  excluded_proto_path:
+  - /tmp/input/google/example/library/v1/excluded
+  gapic_yaml: ''
+  grpc_service_config: /tmp/input/google/example/library/v1/library_grpc_service_config.json
+  import_proto_path:
+  - /tmp/input
+  language_out_override: ''
+  organization_name: google-cloud
+  output_dir: /tmp/output
+  proto_deps:
+  - name: google-common-protos
+  - name: google-iam-v1
+    proto_path: google/iam/v1
+  proto_package: google.example.library.v1
+  samples: ''
+  service_yaml: /tmp/input/google/example/library/library.yaml
+  src_proto_path:
+  - /tmp/input/google/example/library/v1
+  test_proto_deps:
+  - name: google-iam-v1
+    proto_path: google/iam/v1
+java:
+  gapic_code_dir: /tmp/output/java/gapic-google-cloud-library-v1
+  release_level: ga

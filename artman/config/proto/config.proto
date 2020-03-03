@@ -344,4 +344,12 @@ message Artifact {
   }
 
   Aspect aspect = 17;
+
+  // Override the --language_out= protoc parameter (for the given language).
+  // In the override string, use {root} for the output directory path.
+  // Examples:
+  //    "{root}"    - equals to the default value, no override
+  //    "key=value:{root}" - passes an extra key-value pair to the protoc plugin
+  //                         (some language plugins accept that)
+  string language_out_override = 21;
 }

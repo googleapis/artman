@@ -4,6 +4,7 @@ common:
   gapic_yaml: /tmp/input/google/pubsub/v1/pubsub_gapic.yaml
   import_proto_path:
   - /tmp/input
+  language_out_override: ''
   organization_name: google-cloud
   output_dir: /tmp/output
   artifact_type: GAPIC

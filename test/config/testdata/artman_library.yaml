@@ -19,3 +19,6 @@ common:
 artifacts:
 - name: java_gapic
   release_level: GA
+- name: php_gapic
+  release_level: GA
+  language_out_override: "key=value:{root}"

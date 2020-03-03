@@ -37,9 +37,13 @@ class ConverterTest(unittest.TestCase):
         self._test('artman_pubsub.yaml', 'python_gapic',
                    'expected_pubsub_python_legacy_config.yaml')
 
-    def test_library(self):
+    def test_library_java(self):
         self._test('artman_library.yaml', 'java_gapic',
-                   'expected_library_config.yaml')
+                   'expected_library_java_config.yaml')
+
+    def test_library_php(self):
+        self._test('artman_library.yaml', 'php_gapic',
+                   'expected_library_php_config.yaml')
 
     def _test(self, artman_yaml, artifact_name, expected_legacy_config):
         artifact_config = loader.load_artifact_config(os.path.join(
@@ -48,7 +52,7 @@ class ConverterTest(unittest.TestCase):
             artifact_config, '/tmp/input', '/tmp/output')
         with io.open(os.path.join(
                 self.TESTDATA, expected_legacy_config), 'r') as yaml_file:
-            expected_legacy_config_dict = yaml.load(yaml_file)
+            expected_legacy_config_dict = yaml.load(yaml_file, Loader=yaml.Loader)
             self.assertDictEqual(
                 expected_legacy_config_dict, actual_legacy_config_dict,
                 'Actual yaml is:\n{}\nExpected yaml is:\n{}\n'.format(
