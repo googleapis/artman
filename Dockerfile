@@ -129,7 +129,7 @@ RUN curl -L https://squizlabs.github.io/PHP_CodeSniffer/phpcbf.phar -o /usr/loca
   && cd /
 
 # Used to add docstrings to the Python protoc output.
-RUN pip3 install protoc-docs-plugin==0.6.0
+RUN pip3 install protoc-docs-plugin==0.6.1
 
 # Install .NET Core SDK
 ENV DOTNET_SDK_VERSION 1.0.4

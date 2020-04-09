@@ -37,7 +37,7 @@ done
 
 
 # Install GRPC and Protobuf.
-pip3 install --upgrade pip==10.0.1 setuptools==39.2.0 \
+pip3 install --upgrade pip==20.0.2 setuptools==39.2.0 \
   && hash -r pip3 && pip3 install grpcio>=1.21.1 \
     grpcio-tools==1.21.1 \
     protobuf==${protobuf_versions[python]}
