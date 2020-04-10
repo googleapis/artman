@@ -81,6 +81,14 @@ WHITELIST = [
     # securitycenter C# does not use gapic-generator
     'csharp_gapic@google/cloud/securitycenter/artman_securitycenter_v1p1beta1.yaml',
 
+    # to be removed after artman 1.3 is released
+    'java_gapic@google/cloud/asset/artman_cloudasset_v1.yaml,
+    'ruby_gapic@google/cloud/asset/artman_cloudasset_v1.yaml,
+    'go_gapic@google/cloud/asset/artman_cloudasset_v1.yaml,
+    'csharp_gapic@google/cloud/asset/artman_cloudasset_v1.yaml,
+    'nodejs_gapic@google/cloud/asset/artman_cloudasset_v1.yaml,
+    'php_gapic@google/cloud/asset/artman_cloudasset_v1.yaml,
+    'python_gapic@google/cloud/asset/artman_cloudasset_v1.yaml,
 ]
 
 logger = logging.getLogger('smoketest')

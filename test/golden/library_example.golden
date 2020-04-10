@@ -141,7 +141,7 @@
 /python/library_example-v1/google/cloud/example/library_v1/proto/library_pb2.py
 /python/library_example-v1/google/cloud/example/library_v1/proto/library_pb2_grpc.py
 /python/library_example-v1/google/cloud/example/library_v1/types.py
-/python/library_example-v1/nox.py
+/python/library_example-v1/noxfile.py
 /python/library_example-v1/setup.cfg
 /python/library_example-v1/setup.py
 /python/library_example-v1/tests/unit/gapic/v1/test_library_service_client_v1.py

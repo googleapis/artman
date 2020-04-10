@@ -11,7 +11,7 @@ oslo.utils>=3.41.0, <4.2.0
 pbr >= 5.4.2, < 6.0.0
 protobuf >= 3.9.0, < 4.0.0
 protobuf3-to-dict==0.1.5
-protoc-java-resource-names-plugin >= 0.0.24, < 0.1.0
+protoc-java-resource-names-plugin >= 0.0.25, < 0.1.0
 requests >= 2.22.0, < 3.0.0
 ruamel.yaml >= 0.16.0, < 0.17.0
 six >= 1.12.0, < 2.0.0
