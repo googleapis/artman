@@ -31,6 +31,7 @@ import subprocess
 import sys
 import tempfile
 import traceback
+import warnings
 
 import pkg_resources
 from ruamel import yaml
@@ -251,6 +252,12 @@ def normalize_flags(flags, user_config):
 
     language = Artifact.Language.Name(
         artifact_config.language).lower()
+
+    # 2020-05-26 @alexander-fenster
+    # We only use Artman for generating Ruby libraries, others use Bazel.
+    # Print a proper deprecation message.
+    if language != Artifact.RUBY:
+        warnings.warn("*** WARNING: *** Artman is deprecated for all languages other than Ruby", DeprecationWarning)
 
     # Set the pipeline
     artifact_type = artifact_config.type

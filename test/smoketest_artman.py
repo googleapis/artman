@@ -102,6 +102,11 @@ def run_smoke_test(root_dir, user_config, log):
             artman_config.artifacts,
             key=lambda a: config_pb2.Artifact.GAPIC_CONFIG == a.type)
 
+        # 2020/05/26 @alexander-fenster
+        # All builds other than Ruby now run on bazel.
+        # We only need to run smoke tests for Ruby builds.
+        artifacts = [a for a in artifacts if a.language == config_pb2.Artifact.RUBY]
+
         for artifact in artifacts:
             logger.info('Start artifact generation for %s of %s'
                         % (artifact.name, artman_yaml_path))

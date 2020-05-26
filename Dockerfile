@@ -102,7 +102,8 @@ ENV GOPATH /go
 ENV PATH $GOPATH/bin:$PATH
 RUN mkdir -p "$GOPATH/src" "$GOPATH/bin" "$GOPATH/pkg" \
   && chmod -R 777 "$GOPATH" \
-  && go get -u github.com/golang/protobuf/protoc-gen-go \
+  && go mod init . \
+  && go get -d -u github.com/golang/protobuf/protoc-gen-go@v1.3.5 \
   && go clean -cache -testcache -modcache
 
 # Setup tools for codegen of Ruby
