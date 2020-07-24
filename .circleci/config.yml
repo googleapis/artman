@@ -43,35 +43,19 @@ jobs:
           command: |
             EXIT_STATUS=0
             docker run -it -e RUNNING_IN_ARTMAN_DOCKER=True --workdir /tmp artman /bin/bash -c "artman --local --config=google/pubsub/artman_pubsub.yaml --root-dir=/googleapis generate csharp_gapic" || EXIT_STATUS=$?
-            docker run -it -e RUNNING_IN_ARTMAN_DOCKER=True --workdir /tmp artman /bin/bash -c "artman --local --config=google/cloud/speech/artman_speech_v1.yaml --root-dir=/googleapis generate csharp_gapic" || EXIT_STATUS=$?
+            docker run -it -e RUNNING_IN_ARTMAN_DOCKER=True --workdir /tmp artman /bin/bash -c "artman --local --config=google/spanner/artman_spanner.yaml --root-dir=/googleapis generate csharp_gapic" || EXIT_STATUS=$?
             docker run -it -e RUNNING_IN_ARTMAN_DOCKER=True --workdir /googleapis artman /bin/bash -c "mkdir /tmp/pubsub-go; artman --local --output-dir /tmp/pubsub-go --config=google/pubsub/artman_pubsub.yaml generate go_gapic" || EXIT_STATUS=$?
-            docker run -it -e RUNNING_IN_ARTMAN_DOCKER=True --workdir /googleapis artman /bin/bash -c "mkdir /tmp/speech-go; artman --local --output-dir /tmp/speech-go --config=google/cloud/speech/artman_speech_v1.yaml generate go_gapic" || EXIT_STATUS=$?
+            docker run -it -e RUNNING_IN_ARTMAN_DOCKER=True --workdir /googleapis artman /bin/bash -c "mkdir /tmp/spanner-go; artman --local --output-dir /tmp/spanner-go --config=google/spanner/artman_spanner.yaml generate go_gapic" || EXIT_STATUS=$?
             docker run -it -e RUNNING_IN_ARTMAN_DOCKER=True --workdir /googleapis artman /bin/bash -c "mkdir /tmp/pubsub-java; artman --local --output-dir /tmp/pubsub-java --config=google/pubsub/artman_pubsub.yaml generate java_gapic" || EXIT_STATUS=$?
-            docker run -it -e RUNNING_IN_ARTMAN_DOCKER=True --workdir /googleapis artman /bin/bash -c "mkdir /tmp/speech-java; artman --local --output-dir /tmp/speech-java --config=google/cloud/speech/artman_speech_v1.yaml generate java_gapic" || EXIT_STATUS=$?
+            docker run -it -e RUNNING_IN_ARTMAN_DOCKER=True --workdir /googleapis artman /bin/bash -c "mkdir /tmp/spanner-java; artman --local --output-dir /tmp/spanner-java --config=google/spanner/artman_spanner.yaml generate java_gapic" || EXIT_STATUS=$?
             docker run -it -e RUNNING_IN_ARTMAN_DOCKER=True --workdir /googleapis artman /bin/bash -c "mkdir /tmp/pubsub-node;artman --local --output-dir /tmp/pubsub-node --config=google/pubsub/artman_pubsub.yaml generate nodejs_gapic" || EXIT_STATUS=$?
-            docker run -it -e RUNNING_IN_ARTMAN_DOCKER=True --workdir /googleapis artman /bin/bash -c "mkdir /tmp/speech-node;artman --local --output-dir speech-node --config=google/cloud/speech/artman_speech_v1.yaml generate nodejs_gapic" || EXIT_STATUS=$?
+            docker run -it -e RUNNING_IN_ARTMAN_DOCKER=True --workdir /googleapis artman /bin/bash -c "mkdir /tmp/spanner-node;artman --local --output-dir /tmp/spanner-node --config=google/spanner/artman_spanner.yaml generate nodejs_gapic" || EXIT_STATUS=$?
             docker run -it -e RUNNING_IN_ARTMAN_DOCKER=True --workdir /googleapis artman /bin/bash -c "mkdir /tmp/pubsub-php; artman --local --output-dir /tmp/pubsub-php --config=google/pubsub/artman_pubsub.yaml generate php_gapic" || EXIT_STATUS=$?
-            docker run -it -e RUNNING_IN_ARTMAN_DOCKER=True --workdir /googleapis artman /bin/bash -c "mkdir /tmp/speech-php; artman --local --output-dir /tmp/speech-php --config=google/cloud/speech/artman_speech_v1.yaml generate php_gapic" || EXIT_STATUS=$?
+            docker run -it -e RUNNING_IN_ARTMAN_DOCKER=True --workdir /googleapis artman /bin/bash -c "mkdir /tmp/spanner-php; artman --local --output-dir /tmp/spanner-php --config=google/spanner/artman_spanner.yaml generate php_gapic" || EXIT_STATUS=$?
             docker run -it -e RUNNING_IN_ARTMAN_DOCKER=True --workdir /googleapis artman /bin/bash -c "mkdir /tmp/pubsub-python; artman --local --output-dir /tmp/pubsub-python --config=google/pubsub/artman_pubsub.yaml generate python_gapic" || EXIT_STATUS=$?
-            docker run -it -e RUNNING_IN_ARTMAN_DOCKER=True --workdir /googleapis artman /bin/bash -c "mkdir /tmp/speech-python; artman --local --output-dir /tmp/speech-python --config=google/cloud/speech/artman_speech_v1.yaml generate python_gapic" || EXIT_STATUS=$?
+            docker run -it -e RUNNING_IN_ARTMAN_DOCKER=True --workdir /googleapis artman /bin/bash -c "mkdir /tmp/spanner-python; artman --local --output-dir /tmp/spanner-python --config=google/spanner/artman_spanner.yaml generate python_gapic" || EXIT_STATUS=$?
             docker run -it -e RUNNING_IN_ARTMAN_DOCKER=True --workdir /googleapis artman /bin/bash -c "mkdir /tmp/pubsub-ruby; artman --local --output-dir /tmp/pubsub-ruby --config=google/pubsub/artman_pubsub.yaml generate ruby_gapic" || EXIT_STATUS=$?
-            docker run -it -e RUNNING_IN_ARTMAN_DOCKER=True --workdir /googleapis artman /bin/bash -c "mkdir /tmp/speech-ruby; artman --local --output-dir /tmp/speech-ruby --config=google/cloud/speech/artman_speech_v1.yaml generate ruby_gapic" || EXIT_STATUS=$?
-            exit $EXIT_STATUS
-      - run:
-          name: Check samples are generated for selected APIs
-          command: |
-            EXIT_STATUS=0
-            docker run -it --rm -d --name samplegen --workdir /tmp -e RUNNING_IN_ARTMAN_DOCKER=True artman
-            docker exec samplegen mkdir /tmp/language-python
-            docker exec samplegen artman --local --output-dir /tmp/language-python --config=google/cloud/language/artman_language_v1.yaml --root-dir=/googleapis --generator-args='--dev_samples' generate python_gapic || EXIT_STATUS=$?
-            docker exec samplegen find /tmp/language-python/python/language-v1/samples/v1 -mindepth 1 | read || EXIT_STATUS=$?
-            docker exec samplegen mkdir /tmp/talent-php
-            docker exec samplegen artman --local --output-dir /tmp/talent-php --config=google/cloud/talent/artman_talent_v4beta1.yaml --root-dir=/googleapis --generator-args='--dev_samples' generate php_gapic || EXIT_STATUS=$?
-            docker exec samplegen find /tmp/talent-php/php/google-cloud-talent-v4beta1/samples/V4beta1 -mindepth 1 | read || EXIT_STATUS=$?
-            docker exec samplegen mkdir /tmp/speech-nodejs
-            docker exec samplegen artman --local --output-dir /tmp/speech-nodejs --config=google/cloud/speech/artman_speech_v1p1beta1.yaml --root-dir=/googleapis --generator-args='--dev_samples' generate nodejs_gapic || EXIT_STATUS=$?
-            docker exec samplegen find /tmp/speech-nodejs/js/speech-v1p1beta1/samples/v1p1beta1 -mindepth 1 | read || EXIT_STATUS=$?
-            docker stop samplegen
+            docker run -it -e RUNNING_IN_ARTMAN_DOCKER=True --workdir /googleapis artman /bin/bash -c "mkdir /tmp/spanner-ruby; artman --local --output-dir /tmp/spanner-ruby --config=google/spanner/artman_spanner.yaml generate ruby_gapic" || EXIT_STATUS=$?
             exit $EXIT_STATUS
       - run:
           name: Conditionally run smoketests against all APIs

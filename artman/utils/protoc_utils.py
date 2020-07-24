@@ -260,7 +260,7 @@ def protoc_header_params(proto_path,
                           toolkit_path):
     proto_path = proto_path[:]
     proto_path.append(_find_protobuf_path(toolkit_path))
-    return (['--proto_path=' + path for path in proto_path])
+    return (['--experimental_allow_proto3_optional'] + ['--proto_path=' + path for path in proto_path])
 
 
 def protoc_desc_params(output_dir, desc_out_file):

@@ -1,11 +1,11 @@
 FROM ubuntu:16.04
 
 # Release parameters
-ENV GOOGLEAPIS_HASH e47fdd266542386e5e7346697f90476e96dc7ee8
-ENV GAPIC_GENERATOR_HASH 8d53d31494bebc1e1da4ed0d1352f1f35441d439
+ENV GOOGLEAPIS_HASH e26e1839a45445d13cd45b1be3b1523defb72fee
+ENV GAPIC_GENERATOR_HASH v2.4.3
 # Define version number below. The ARTMAN_VERSION line is parsed by
 # .circleci/config.yml and setup.py, please keep the format.
-ENV ARTMAN_VERSION 2.0.0
+ENV ARTMAN_VERSION 2.4.3
 
 ENV DEBIAN_FRONTEND noninteractive
 
@@ -90,8 +90,8 @@ RUN export JAVA_HOME
 # Install Go.
 RUN mkdir -p /golang \
   && cd /golang \
-  && curl https://dl.google.com/go/go1.11.linux-amd64.tar.gz > go.tar.gz \
-  && (echo 'b3fcf280ff86558e0559e185b601c9eade0fd24c900b4c63cd14d1d38613e499 go.tar.gz' | sha256sum -c) \
+  && curl -L https://golang.org/dl/go1.14.6.linux-amd64.tar.gz > go.tar.gz \
+  && (echo '5c566ddc2e0bcfc25c26a5dc44a440fcc0177f7350c1f01952b34d5989a0d287 go.tar.gz' | sha256sum -c) \
   && tar xzf go.tar.gz \
   && rm go.tar.gz \
   && cd /
@@ -110,7 +110,7 @@ RUN gem install rake --no-ri --no-rdoc \
   && gem install rubocop --version '= 0.39.0' --no-ri --no-rdoc \
   && gem install bundler --version '= 1.12.1' --no-ri --no-rdoc \
   && gem install rake --version '= 10.5.0' --no-ri --no-rdoc \
-  && gem install grpc-tools --version '=1.17.1' --no-ri --no-rdoc
+  && gem install grpc-tools --version '= 1.30.2' --no-ri --no-rdoc
 
 # Install grpc_php_plugin
 RUN git clone -b v1.17.1 --recurse-submodules --depth=1 https://github.com/grpc/grpc.git /temp/grpc \
