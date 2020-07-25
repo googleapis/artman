@@ -2,10 +2,10 @@ FROM ubuntu:16.04
 
 # Release parameters
 ENV GOOGLEAPIS_HASH e26e1839a45445d13cd45b1be3b1523defb72fee
-ENV GAPIC_GENERATOR_HASH v2.4.3
+ENV GAPIC_GENERATOR_HASH v2.4.4
 # Define version number below. The ARTMAN_VERSION line is parsed by
 # .circleci/config.yml and setup.py, please keep the format.
-ENV ARTMAN_VERSION 2.4.3
+ENV ARTMAN_VERSION 2.4.4
 
 ENV DEBIAN_FRONTEND noninteractive
 
@@ -129,7 +129,7 @@ RUN curl -L https://squizlabs.github.io/PHP_CodeSniffer/phpcbf.phar -o /usr/loca
   && cd /
 
 # Used to add docstrings to the Python protoc output.
-RUN pip3 install protoc-docs-plugin==0.6.1
+RUN pip3 install git+https://github.com/googleapis/protoc-docs-plugin.git@proto3-optional#egg=protoc-docs-plugin
 
 # Install .NET Core SDK
 ENV DOTNET_SDK_VERSION 1.0.4
@@ -178,4 +178,6 @@ RUN pip install --upgrade setuptools
 # Install artman.
 ADD . /artman
 ARG install_artman_from_source=false
+# installing master version of plugin
+RUN pip3 install git+https://github.com/googleapis/protoc-java-resource-names-plugin.git#egg=protoc-java-resource-names-plugin
 RUN if [ "$install_artman_from_source" = true ]; then pip3 install -e /artman; else pip3 install googleapis-artman==$ARTMAN_VERSION; rm -r /artman; fi
