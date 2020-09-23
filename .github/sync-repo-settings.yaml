@@ -1,0 +1,19 @@
+rebaseMergeAllowed: true
+squashMergeAllowed: true
+mergeCommitAllowed: false
+branchProtectionRules:
+- pattern: master
+  isAdminEnforced: true
+  requiredStatusCheckContexts:
+    - 'ci/circleci: docs'
+    - 'ci/circleci: golden_and_smoke_tests'
+    - 'ci/circleci: unit-python3.5'
+    - 'ci/circleci: unit-python3.6'
+    - 'ci/circleci: unit-python3.7'
+    - 'cla/google'
+  requiredApprovingReviewCount: 1
+  requiresCodeOwnerReviews: true
+  requiresStrictStatusChecks: true
+permissionRules:
+  - team: actools
+    permission: admin
