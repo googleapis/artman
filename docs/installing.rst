@@ -43,7 +43,7 @@ Installation
 
 1. Install Armin Ronacher's `pipsi`_. This is a tool for installing scripts
    on your machine without touching system Python and without having to worry
-   about the script's virutal environment. In other words, it is the correct
+   about the script's virtual environment. In other words, it is the correct
    tool for exactly this problem.
 
    .. code-block:: bash
